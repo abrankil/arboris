@@ -1,0 +1,47 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local editor state
+.idea/
+*.swp
+*.swo
+*~
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Generated build output and caches
+build/
+dist/
+coverage/
+*.log
+
+# Android local/generated files
+.gradle/
+.cxx/
+.externalNativeBuild/
+local.properties
+*.apk
+*.aab
+
+# Apple local/generated files
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.ipa
+*.dSYM/
+
+# Local signing credentials
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+
+# Add framework-specific rules after a framework is selected.
+# Keep dependency manifests, lockfiles, and shared project settings tracked.
+node_modules

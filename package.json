@@ -1,0 +1,35 @@
+{
+  "name": "arboris",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "expo": "~57.0.22",
+    "expo-constants": "~57.0.18",
+    "expo-crypto": "~57.0.3",
+    "expo-file-system": "~57.0.7",
+    "expo-image-picker": "~57.0.17",
+    "expo-linking": "~57.0.10",
+    "expo-router": "~57.0.21",
+    "expo-sqlite": "~57.0.3",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "@types/react": "~19.2.2"
+  },
+  "engines": {
+    "node": ">=24.0.0 <25"
+  }
+}
