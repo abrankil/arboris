@@ -1,0 +1,46 @@
+{
+    "id":  "SP006",
+    "commonName":  null,
+    "scientificName":  "Quillaja saponaria",
+    "family":  null,
+    "habit":  null,
+    "origin":  null,
+    "endemicToChile":  null,
+    "photos":  [
+                   {
+                       "individualId":  "QS001",
+                       "file":  "SP006_QS001_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "QS001",
+                       "file":  "SP006_QS001_hojas_02.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "QS001",
+                       "file":  "SP006_QS001_ramilla_01.jpg",
+                       "structure":  "ramilla"
+                   },
+                   {
+                       "individualId":  "QS002",
+                       "file":  "SP006_QS002_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "QS002",
+                       "file":  "SP006_QS002_hojas_02.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "QS002",
+                       "file":  "SP006_QS002_hojas_03.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "QS002",
+                       "file":  "SP006_QS002_ramilla_hojas_01.jpg",
+                       "structure":  "ramilla hojas"
+                   }
+               ]
+}

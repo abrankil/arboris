@@ -1,0 +1,77 @@
+{
+    "id":  "SP002",
+    "commonName":  "Litre",
+    "scientificName":  "Lithraea caustica",
+    "family":  "Anacardiaceae",
+    "habit":  "Árbol",
+    "origin":  "Nativa",
+    "endemicToChile":  true,
+    "photos":  [
+                   {
+                       "id":  "PH-004",
+                       "individualId":  "LC001",
+                       "file":  "SP002_LC001_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "id":  "PH-005",
+                       "individualId":  "LC001",
+                       "file":  "SP002_LC001_hojas_02.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "id":  "PH-006",
+                       "individualId":  "LC001",
+                       "file":  "SP002_LC001_ramilla_01.jpg",
+                       "structure":  "ramilla"
+                   },
+                   {
+                       "id":  "PH-007",
+                       "individualId":  "LC001",
+                       "file":  "SP002_LC001_estructuras_reproductivas_01.jpg",
+                       "structure":  "estructuras reproductivas"
+                   },
+                   {
+                       "id":  "PH-008",
+                       "individualId":  "LC001",
+                       "file":  "SP002_LC001_estructuras_reproductivas_02.jpg",
+                       "structure":  "estructuras reproductivas"
+                   },
+                   {
+                       "id":  "PH-009",
+                       "individualId":  "LC002",
+                       "file":  "SP002_LC002_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "LC003",
+                       "file":  "SP002_LC003_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "LC003",
+                       "file":  "SP002_LC003_hojas_02.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "LC004",
+                       "file":  "SP002_LC004_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "LC004",
+                       "file":  "SP002_LC004_hojas_02.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "LC004",
+                       "file":  "SP002_LC004_hojas_03.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "LC004",
+                       "file":  "SP002_LC004_ramilla_01.jpg",
+                       "structure":  "ramilla"
+                   }
+               ]
+}

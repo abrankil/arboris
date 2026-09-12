@@ -1,0 +1,34 @@
+{
+    "id":  "SP001",
+    "commonName":  "Peumo",
+    "scientificName":  "Cryptocarya alba",
+    "family":  "Lauraceae",
+    "habit":  "Árbol",
+    "origin":  "Nativa",
+    "endemicToChile":  true,
+    "photos":  [
+                   {
+                       "id":  "PH-001",
+                       "individualId":  "CA001",
+                       "file":  "SP001_CA001_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "id":  "PH-002",
+                       "individualId":  "CA001",
+                       "file":  "SP001_CA001_hojas_02.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "id":  "PH-003",
+                       "individualId":  "CA001",
+                       "file":  "SP001_CA001_ramilla_apical_01.jpg",
+                       "structure":  "ramilla apical"
+                   },
+                   {
+                       "individualId":  "CA002",
+                       "file":  "SP001_CA002_hojas_01.jpg",
+                       "structure":  "hojas"
+                   }
+               ]
+}

@@ -1,0 +1,46 @@
+{
+    "id":  "SP003",
+    "commonName":  null,
+    "scientificName":  "Kageneckia oblonga",
+    "family":  null,
+    "habit":  null,
+    "origin":  null,
+    "endemicToChile":  null,
+    "photos":  [
+                   {
+                       "individualId":  "KO001",
+                       "file":  "SP003_KO001_fruto_01.jpg",
+                       "structure":  "fruto"
+                   },
+                   {
+                       "individualId":  "KO001",
+                       "file":  "SP003_KO001_fruto_02.jpg",
+                       "structure":  "fruto"
+                   },
+                   {
+                       "individualId":  "KO001",
+                       "file":  "SP003_KO001_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "KO001",
+                       "file":  "SP003_KO001_hojas_fruto_01.jpg",
+                       "structure":  "hojas fruto"
+                   },
+                   {
+                       "individualId":  "KO002",
+                       "file":  "SP003_KO002_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "KO003",
+                       "file":  "SP003_KO003_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "KO003",
+                       "file":  "SP003_KO003_hojas_02.jpg",
+                       "structure":  "hojas"
+                   }
+               ]
+}

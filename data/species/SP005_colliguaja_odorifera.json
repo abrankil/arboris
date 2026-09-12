@@ -1,0 +1,46 @@
+{
+    "id":  "SP005",
+    "commonName":  null,
+    "scientificName":  "Colliguaja odorifera",
+    "family":  null,
+    "habit":  null,
+    "origin":  null,
+    "endemicToChile":  null,
+    "photos":  [
+                   {
+                       "individualId":  "CO001",
+                       "file":  "SP005_CO001_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "CO001",
+                       "file":  "SP005_CO001_hojas_02.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "CO001",
+                       "file":  "SP005_CO001_inflorescencia_fruto_01.jpg",
+                       "structure":  "inflorescencia fruto"
+                   },
+                   {
+                       "individualId":  "CO001",
+                       "file":  "SP005_CO001_inflorescencia_masculina_01.jpg",
+                       "structure":  "inflorescencia masculina"
+                   },
+                   {
+                       "individualId":  "CO001",
+                       "file":  "SP005_CO001_inflorescencia_masculina_02.jpg",
+                       "structure":  "inflorescencia masculina"
+                   },
+                   {
+                       "individualId":  "CO002",
+                       "file":  "SP005_CO002_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "CO002",
+                       "file":  "SP005_CO002_ramilla_hojas_01.jpg",
+                       "structure":  "ramilla hojas"
+                   }
+               ]
+}

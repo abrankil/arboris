@@ -1,0 +1,51 @@
+{
+    "id":  "SP004",
+    "commonName":  null,
+    "scientificName":  "Podanthus mitiqui",
+    "family":  null,
+    "habit":  null,
+    "origin":  null,
+    "endemicToChile":  null,
+    "photos":  [
+                   {
+                       "individualId":  "PM001",
+                       "file":  "SP004_PM001_capitulo_amarillo_01.jpg",
+                       "structure":  "capitulo amarillo"
+                   },
+                   {
+                       "individualId":  "PM001",
+                       "file":  "SP004_PM001_capitulo_inmaduro_01.jpg",
+                       "structure":  "capitulo inmaduro"
+                   },
+                   {
+                       "individualId":  "PM001",
+                       "file":  "SP004_PM001_ramilla_hojas_01.jpg",
+                       "structure":  "ramilla hojas"
+                   },
+                   {
+                       "individualId":  "PM001",
+                       "file":  "SP004_PM001_ramilla_hojas_02.jpg",
+                       "structure":  "ramilla hojas"
+                   },
+                   {
+                       "individualId":  "PM002",
+                       "file":  "SP004_PM002_capitulo_01.jpg",
+                       "structure":  "capitulo"
+                   },
+                   {
+                       "individualId":  "PM002",
+                       "file":  "SP004_PM002_capitulo_02.jpg",
+                       "structure":  "capitulo"
+                   },
+                   {
+                       "individualId":  "PM002",
+                       "file":  "SP004_PM002_hojas_01.jpg",
+                       "structure":  "hojas"
+                   },
+                   {
+                       "individualId":  "PM002",
+                       "file":  "SP004_PM002_ramilla_capitulo_01.jpg",
+                       "structure":  "ramilla capitulo"
+                   }
+               ]
+}
