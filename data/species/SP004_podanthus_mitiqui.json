@@ -1,11 +1,11 @@
 {
     "id":  "SP004",
-    "commonName":  null,
+    "commonName":  "Mitique",
     "scientificName":  "Podanthus mitiqui",
-    "family":  null,
-    "habit":  null,
-    "origin":  null,
-    "endemicToChile":  null,
+    "family":  "Asteraceae",
+    "habit":  "Arbusto",
+    "origin":  "Nativa",
+    "endemicToChile":  true,
     "photos":  [
                    {
                        "individualId":  "PM001",

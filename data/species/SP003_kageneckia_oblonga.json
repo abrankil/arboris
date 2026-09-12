@@ -1,11 +1,11 @@
 {
     "id":  "SP003",
-    "commonName":  null,
+    "commonName":  "Bollén",
     "scientificName":  "Kageneckia oblonga",
-    "family":  null,
-    "habit":  null,
-    "origin":  null,
-    "endemicToChile":  null,
+    "family":  "Rosaceae",
+    "habit":  "Árbol/arbusto",
+    "origin":  "Nativa",
+    "endemicToChile":  true,
     "photos":  [
                    {
                        "individualId":  "KO001",

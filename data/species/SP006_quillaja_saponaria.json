@@ -1,11 +1,11 @@
 {
     "id":  "SP006",
-    "commonName":  null,
+    "commonName":  "Quillay",
     "scientificName":  "Quillaja saponaria",
-    "family":  null,
-    "habit":  null,
-    "origin":  null,
-    "endemicToChile":  null,
+    "family":  "Quillajaceae",
+    "habit":  "Árbol",
+    "origin":  "Nativa",
+    "endemicToChile":  true,
     "photos":  [
                    {
                        "individualId":  "QS001",

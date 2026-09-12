@@ -1,11 +1,11 @@
 {
     "id":  "SP005",
-    "commonName":  null,
+    "commonName":  "Colliguay",
     "scientificName":  "Colliguaja odorifera",
-    "family":  null,
-    "habit":  null,
-    "origin":  null,
-    "endemicToChile":  null,
+    "family":  "Euphorbiaceae",
+    "habit":  "Arbusto",
+    "origin":  "Nativa",
+    "endemicToChile":  true,
     "photos":  [
                    {
                        "individualId":  "CO001",
