@@ -1,0 +1,29 @@
+{
+  "id": "CHAR_SP002",
+  "speciesId": "SP002",
+  "name": "Litrini",
+  "displayName": "El Litre",
+  "status": "concepto actualizado",
+  "visualIdentity": {
+    "body": "Una hoja verde vertical y ovalada es el cuerpo principal; no es un humanoide vestido de hoja.",
+    "face": "Dos ojos oscuros, pequeños y expresivos, cerca de la base de la hoja.",
+    "stem": "Tallo leñoso marrón, delgado y curvado, usado como soporte y cola/cuerpo inferior.",
+    "companions": {
+      "count": 2,
+      "description": "Dos frutos redondos blancos, cada uno con una pequeña hoja verde y ojos propios, acompañan lateralmente al personaje."
+    },
+    "diagnosticLeafVeins": "Las nervaduras secundarias se separan en dos al aproximarse al borde de la hoja, formando bifurcaciones visibles. Esta es la característica visual distintiva prioritaria del Litre.",
+    "palette": ["verde hoja", "verde oscuro", "amarillo dorado", "marrón tallo", "blanco fruto", "verde hoja auxiliar"],
+    "style": "Pixel art retro de 16 bits, contornos oscuros nítidos, sombreado compacto y silueta legible."
+  },
+  "animationReference": {
+    "frameCount": 12,
+    "asset": "assets/litrini-12-frames.png",
+    "singleFrameReference": "assets/litrini-reference.jpg",
+    "notes": "La plancha muestra variaciones de reposo, giro y desplazamiento; mantener constantes la bifurcación de nervaduras, los dos frutos blancos y la hoja auxiliar de cada fruto."
+  },
+  "provenance": {
+    "source": "Archivos entregados por el usuario el 2026-09-13",
+    "previousDesign": "output/litre/litre-sprite-sheet.png"
+  }
+}
