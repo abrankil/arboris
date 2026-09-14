@@ -1,0 +1,54 @@
+{
+  "id": "CHAR_SP006",
+  "speciesId": "SP006",
+  "name": "Quillai",
+  "displayName": "El Quillay",
+  "status": "diseño vigente — prototipo unificado v1",
+  "visualIdentity": {
+    "characterBasis": "Personaje basado en las hojas del Quillay; sus cápsulas y otras estructuras reproductivas funcionan como mascota, accesorio o arma narrativa.",
+    "body": "Una sola hoja de quillay como cuerpo principal, sin tronco ni ramilla.",
+    "locomotion": "Flota de manera independiente, sin piernas ni contacto con el suelo.",
+    "leaves": "Hojas verdes, anchas y ovaladas, de superficie brillante y nervadura central visible. El margen es mayormente entero, con solo dos dientes suaves por lado y una ondulación moderada. La parte superior termina en un ápice acunatado con forma de corazón, la 'coronilla' del personaje.",
+    "reproductiveStructure": "Cápsula seca de aspecto estrellado, formada por segmentos leñosos abiertos; puede funcionar como emblema o accesorio distintivo.",
+    "diagnosticFeatures": [
+      "Hojas anchas con margen mayormente entero, dos dientes suaves por lado y ondulación moderada.",
+      "Ápice superior acunatado con forma de corazón, usado como coronilla.",
+      "Cápsula seca estrellada como elemento reproductivo reconocible."
+    ],
+    "palette": ["verde hoja medio", "verde claro", "verde grisáceo", "amarillo verdoso", "marrón corteza", "marrón cápsula"],
+    "face": "Dos ojos pequeños y expresivos integrados discretamente en la hoja o cerca de su base; comparten el lenguaje facial común con Litrini y la ubicación puede adaptarse a la morfología de la hoja.",
+    "style": "HD-2D pixel art 1:1 adaptado a la referencia de Litrini: píxeles grandes y cuadrados, contorno oscuro consistente, sombreado por clusters, rampas de color limitadas y sin antialiasing.",
+    "creativeReference": "Tono de criatura vegetal extraño, amable y orgánico inspirado en Botanicula, sin copiar diseños concretos."
+  },
+  "creativeDirection": {
+    "role": "Por definir.",
+    "personality": "Por definir.",
+    "possibleMotif": "La cápsula estrellada y las propiedades espumantes asociadas al quillay pueden inspirar una identidad de protección, limpieza o alquimia; esto es una propuesta creativa, no un atributo definido."
+  },
+  "prototype": {
+    "isFirstPrototype": true,
+    "referenceAsset": "SP006_quillay/assets/quillai-layer-125x125.png",
+    "sharedStyleWith": ["CHAR_SP002"]
+  },
+  "selectedDesign": {
+    "version": "manual-cleanup-v2",
+    "asset": "SP006_quillay/assets/quillai-layer-125x125.png",
+    "dimensions": "125x125",
+    "isCanonical": true
+  },
+  "references": {
+    "speciesPhotos": [
+      "species/SP006_quillaja_saponaria/photos/SP006_QS001_hojas_01.jpg",
+      "species/SP006_quillaja_saponaria/photos/SP006_QS001_hojas_02.jpg",
+      "species/SP006_quillaja_saponaria/photos/SP006_QS001_ramilla_01.jpg",
+      "species/SP006_quillaja_saponaria/photos/SP006_QS002_ramilla_hojas_01.jpg"
+    ],
+    "notes": "Sprite limpiado manualmente por el usuario. Referencias de assets relativas a data/characters. Conservar la hoja única, dos dientes suaves por lado, coronilla y ojos pequeños."
+  },
+  "provenance": {
+    "speciesData": "data/species/SP006_quillaja_saponaria.json",
+    "source": "Material fotográfico existente de Árboris",
+    "artStyleGuide": "docs/ART_STYLE_GUIDE.md",
+    "spriteSource": "Archivo quillai-layer-125x125.png entregado por el usuario; copiado sin modificar sus píxeles."
+  }
+}

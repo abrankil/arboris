@@ -1,0 +1,36 @@
+{
+  "id": "CHAR_SP001",
+  "speciesId": "SP001",
+  "name": "Peumito",
+  "displayName": "El Peumo",
+  "status": "diseño vigente — sprite limpiado manualmente v2",
+  "visualIdentity": {
+    "characterBasis": "Una sola hoja de Peumo es el cuerpo principal; su fruto funciona como mascota o accesorio.",
+    "leaf": "Hoja ancha y ovalada, de haz verde azulado grisáceo, mate a ligeramente brillante y coriáceo, según las fotografías de la base de datos. Tiene nervadura central clara, margen mayormente entero y suavemente ondulado, con un ápice ligeramente más agudo.",
+    "petiole": "No visible en el diseño; la hoja termina directamente en su base inferior.",
+    "face": "Dos ojos pequeños, simples y expresivos, ubicados en la zona inferior de la hoja, siguiendo el lenguaje facial de Litrini y Quillai.",
+    "fruitCompanion": "Una drupa ovalada rosada a roja, lisa y separada de la hoja, con rostro mínimo propio.",
+    "locomotion": "Flota independientemente; no tiene piernas, pies, raíces, pecíolo visible ni contacto obligatorio con el suelo.",
+    "style": "HD-2D pixel art 1:1 de Arboris, con píxeles grandes y cuadrados, contorno oscuro, paleta limitada y sombreado por clusters. Usar como color principal del personaje el tono verde azulado grisáceo observado en el haz de las fotografías.",
+    "creativeReference": "Tono orgánico, extraño y amable inspirado en Botanicula, sin copiar diseños concretos."
+  },
+  "selectedDesign": {
+    "version": "manual-cleanup-v2",
+    "asset": "SP001_peumo/assets/peumito-layer-125x125.png",
+    "dimensions": "125x125",
+    "isCanonical": true,
+    "notes": "Sprite limpiado manualmente por el usuario, copiado sin modificar sus píxeles. PNG 125x125 con transparencia. Ruta relativa a data/characters. Conserva el ápice agudo, la ausencia de pecíolo visible y el fruto acompañante."
+  },
+  "references": {
+    "speciesPhotos": [
+      "species/SP001_cryptocarya_alba/photos/SP001_CA001_hojas_01.jpg",
+      "species/SP001_cryptocarya_alba/photos/SP001_CA001_hojas_02.jpg",
+      "species/SP001_cryptocarya_alba/photos/SP001_CA001_ramilla_apical_01.jpg"
+    ],
+    "sources": [
+      "CONAF, ficha de Peumo (Cryptocarya alba)",
+      "Ministerio del Medio Ambiente, guía de campo de bosques",
+      "Ficha científica Arboris SP001"
+    ]
+  }
+}

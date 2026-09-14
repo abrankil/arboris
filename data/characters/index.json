@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "activeDesignSet": "unified-125x125-v1",
+  "characters": [
+    "SP002_litre.json",
+    "SP006_quillay.json",
+    "SP001_peumo.json",
+    "SP004_mitique.json"
+  ],
+  "sharedAssets": {
+    "animationPolicy": {
+      "status": "pendiente de nueva animación",
+      "minimumPresentationSize": "500x500",
+      "scaling": "nearest-neighbor, múltiplos enteros",
+      "notes": "125x125 es insuficiente para el GIF promocional. 500x500 es el punto de partida de producción; ampliar no añade detalle al original."
+    },
+    "approvedVisualReferences": [
+      "shared/promotional/arboris-tres-personajes-125x125.png"
+    ],
+    "scenes": [],
+    "animationLayers": {
+      "canvas": "125x125",
+      "usage": "capas fuente; no es la resolución de entrega del GIF",
+      "characters": [
+        "SP002_litre/assets/litrini-layer-125x125.png",
+        "SP006_quillay/assets/quillai-layer-125x125.png",
+        "SP001_peumo/assets/peumito-layer-125x125.png",
+        "SP004_mitique/assets/mitique-pixelorama-125x125.png"
+      ],
+      "compositingOrder": ["background", "litrini", "quillai", "peumito", "mitique"]
+    },
+    "promotional": [
+      "shared/promotional/arboris-tres-personajes-125x125.png"
+    ],
+    "discardedProposals": []
+  }
+}
