@@ -1,0 +1,140 @@
+{
+  "speciesId": "SP005",
+  "reviewedAt": "2026-09-14",
+  "reviewType": "revisión visual para diseño; no validación botánica",
+  "pathsRelativeTo": "repositoryRoot",
+  "sourceWorkbook": "data/source/Fichas_especies_arboris.xlsx",
+  "sourceWorkbookSha256": "3196cb570a40ec97382c19fb4683c6f6527e2a2eb84bfc0cc148fd3be6ec376c",
+  "authority": {
+    "artDirector": "Alvaro",
+    "projectFounderAndDirector": "Alejandra",
+    "leafInstruction": "Forma aovada, ápice redondeado, puntas del margen cafés y nervadura casi imperceptible."
+  },
+  "photos": [
+    {
+      "file": "species/SP005_colliguaja_odorifera/photos/colliguay.jpg",
+      "photoId": null,
+      "individualId": null,
+      "sourceStructure": null,
+      "catalogStatus": "referencia_local_complementaria",
+      "botanicalReviewStatus": "procedencia_pendiente",
+      "visualReviewStatus": "inspeccionada_para_arte",
+      "dimensions": "1536x1184",
+      "sha256": "3c058c3c00f86e41d40596a5d6fdcf97bfd9c3879d36701e4af4076ab2a2f7ad",
+      "usage": "Ápice redondeado de la hoja izquierda; nervaduras secundarias poco visibles.",
+      "limitations": "Referencia complementaria local. Procedencia, individuo y madurez sin confirmar."
+    },
+    {
+      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_hojas_01.jpg",
+      "photoId": "PH-021",
+      "individualId": "CO001",
+      "sourceStructure": "hojas",
+      "catalogStatus": "registrada_en_conjunto",
+      "botanicalReviewStatus": "pendiente_revision",
+      "visualReviewStatus": "inspeccionada_para_arte",
+      "dimensions": "1800x4000",
+      "sha256": "61749092ccc9ae122052340be25b550abaa8d01584c1f86886d1ff83de5de991",
+      "usage": "Matices gris verdosos, borde fino, variación de forma.",
+      "limitations": "La foto no prueba madurez ni color calibrado."
+    },
+    {
+      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_hojas_02.jpg",
+      "photoId": "PH-022",
+      "individualId": "CO001",
+      "sourceStructure": "hojas",
+      "catalogStatus": "registrada_en_conjunto",
+      "botanicalReviewStatus": "pendiente_revision",
+      "visualReviewStatus": "inspeccionada_para_arte",
+      "dimensions": "1800x4000",
+      "sha256": "b5830c11177dedce6f988c8d95fa886f4737291e447c771c039c392993866c3f",
+      "usage": "Dientes pequeños y variación de brillo.",
+      "limitations": "Los reflejos intensos no definen por sí solos la paleta."
+    },
+    {
+      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_fruto_01.jpg",
+      "photoId": "PH-023",
+      "individualId": "CO001",
+      "sourceStructure": "inflorescencia fruto",
+      "catalogStatus": "registrada_en_conjunto",
+      "botanicalReviewStatus": "pendiente_revision",
+      "visualReviewStatus": "inspeccionada_para_arte",
+      "dimensions": "1800x4000",
+      "sha256": "4d80bf231aa1e3eed2e82e4935ed0a40758185f0f3e8fa87e6361f9b659c898b",
+      "usage": "Contexto, estructuras pardas abultadas y hojas.",
+      "limitations": "La etiqueta no identifica todas las estructuras visibles."
+    },
+    {
+      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_masculina_01.jpg",
+      "photoId": "PH-019",
+      "individualId": "CO001",
+      "sourceStructure": "inflorescencia masculina",
+      "catalogStatus": "registrada_en_conjunto",
+      "botanicalReviewStatus": "pendiente_revision",
+      "visualReviewStatus": "inspeccionada_para_arte",
+      "dimensions": "1800x4000",
+      "sha256": "46e52cfffe1fd03f49c932d424c1a571c8414d080d1bff7eb9a08dd64913abc3",
+      "usage": "Amentos alargados amarillos con detalles rojizos.",
+      "limitations": "Referencia documental; acompañante sin aprobar."
+    },
+    {
+      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_masculina_02.jpg",
+      "photoId": "PH-020",
+      "individualId": "CO001",
+      "sourceStructure": "inflorescencia masculina",
+      "catalogStatus": "registrada_en_conjunto",
+      "botanicalReviewStatus": "pendiente_revision",
+      "visualReviewStatus": "inspeccionada_para_arte",
+      "dimensions": "1800x4000",
+      "sha256": "f0e22bdeb69f187becd7bb262a6a558116d1d7e79203f853c06d1232c1e6ce1b",
+      "usage": "Hoja central: margen con puntas café y textura fina.",
+      "limitations": "Elegida para margen/superficie, no para copiar el ápice."
+    },
+    {
+      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO002_hojas_01.jpg",
+      "photoId": "PH-040",
+      "individualId": "CO002",
+      "sourceStructure": "hojas",
+      "catalogStatus": "registrada_en_conjunto",
+      "botanicalReviewStatus": "pendiente_revision",
+      "visualReviewStatus": "inspeccionada_para_arte",
+      "dimensions": "1800x4000",
+      "sha256": "9db65be9d1c468c8126495d3febce50224f16ae8caa7a353e3245b01ca44e528",
+      "usage": "Destaca una estructura parda abultada.",
+      "limitations": "Identidad de la estructura pendiente; nota de contenido sin recategorización."
+    },
+    {
+      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO002_ramilla_hojas_01.jpg",
+      "photoId": "PH-041",
+      "individualId": "CO002",
+      "sourceStructure": "ramilla hojas",
+      "catalogStatus": "registrada_en_conjunto",
+      "botanicalReviewStatus": "pendiente_revision",
+      "visualReviewStatus": "inspeccionada_para_arte",
+      "dimensions": "1800x4000",
+      "sha256": "d4946895444d7fedf740d06167cb14801de7da74048260efc3dcabf06ff8b3ac",
+      "usage": "Destaca una estructura verde engrosada con detalles rojizos y amarillos.",
+      "limitations": "Naturaleza/normalidad sin confirmar; no se etiqueta como fruto, flor o patología."
+    }
+  ],
+  "nextComposition": "Una sola hoja; los elementos reproductivos no forman parte de esta nueva propuesta.",
+  "currentSelection": {
+    "base": "../output/colliguay/colliguay-base-elegida.png",
+    "selectedBy": "Alvaro",
+    "sha256": "44ee4907d94905e358fd0471fecd6e97aeced1128cb4f8bc44e1291fcc95d856",
+    "choice": "Conservar la proporción de las puntas; cambiar solo a rojizo.",
+    "supersedes": "Recomendación del asistente sobre A/B y ensayos anteriores."
+  },
+  "additionalReferences": [
+    {
+      "file": "../output/colliguay/colliguay-referencia-rojizos.webp",
+      "sha256": "8adcd7bea5d39890352b91584ac299c2df21500286dfe38b75aa44be8abe732e",
+      "source": "Adjunto del usuario",
+      "role": "Referencia de rojizos aprobada por Alejandra",
+      "individualId": null,
+      "observationId": null,
+      "photographer": null,
+      "captureDate": null,
+      "limitations": "Referencia cromática para estilización. No establece que el color reproductivo sea un carácter literal del margen foliar ni valida taxonomía por sí sola."
+    }
+  ]
+}

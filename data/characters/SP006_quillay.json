@@ -3,7 +3,7 @@
   "speciesId": "SP006",
   "name": "Quillai",
   "displayName": "El Quillay",
-  "status": "diseño vigente — prototipo unificado v1",
+  "status": "diseño vigente — sprite limpiado manualmente v2",
   "visualIdentity": {
     "characterBasis": "Personaje basado en las hojas del Quillay; sus cápsulas y otras estructuras reproductivas funcionan como mascota, accesorio o arma narrativa.",
     "body": "Una sola hoja de quillay como cuerpo principal, sin tronco ni ramilla.",
@@ -26,6 +26,7 @@
     "possibleMotif": "La cápsula estrellada y las propiedades espumantes asociadas al quillay pueden inspirar una identidad de protección, limpieza o alquimia; esto es una propuesta creativa, no un atributo definido."
   },
   "prototype": {
+    "notes": "Referencia histórica del prototipo; el estado vigente lo define selectedDesign (manual-cleanup-v2).",
     "isFirstPrototype": true,
     "referenceAsset": "SP006_quillay/assets/quillai-layer-125x125.png",
     "sharedStyleWith": ["CHAR_SP002"]

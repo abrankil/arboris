@@ -5,7 +5,9 @@
     "SP002_litre.json",
     "SP006_quillay.json",
     "SP001_peumo.json",
-    "SP004_mitique.json"
+    "SP004_mitique.json",
+    "SP003_bollen.json",
+    "SP005_colliguay.json"
   ],
   "sharedAssets": {
     "animationPolicy": {
@@ -25,9 +27,11 @@
         "SP002_litre/assets/litrini-layer-125x125.png",
         "SP006_quillay/assets/quillai-layer-125x125.png",
         "SP001_peumo/assets/peumito-layer-125x125.png",
-        "SP004_mitique/assets/mitique-pixelorama-125x125.png"
+        "SP004_mitique/assets/mitique-pixelorama-125x125.png",
+        "SP003_bollen/assets/bollen-pixelorama-125x125.png",
+        "SP005_colliguay/assets/colliguay-pixelorama-125x125.png"
       ],
-      "compositingOrder": ["background", "litrini", "quillai", "peumito", "mitique"]
+      "compositingOrder": ["background", "litrini", "quillai", "peumito", "mitique", "bollen", "colliguay"]
     },
     "promotional": [
       "shared/promotional/arboris-tres-personajes-125x125.png"

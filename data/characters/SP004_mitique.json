@@ -3,7 +3,7 @@
   "speciesId": "SP004",
   "name": "Mitiqui",
   "displayName": "El Mitique",
-  "status": "diseño vigente — limpieza manual v1",
+  "status": "diseño vigente — limpieza técnica v2",
   "visualIdentity": {
     "characterBasis": "Personaje basado únicamente en la hoja adulta del Mitique.",
     "body": "Una hoja verde ancha en su zona media, con margen de dientes suaves y un ápice largo, delgado y agudo.",
@@ -14,10 +14,18 @@
     "style": "HD-2D pixel art 1:1 con píxeles cuadrados, contorno oscuro, sombreado por clusters y paleta limitada."
   },
   "selectedDesign": {
-    "version": "manual-cleanup-v1",
+    "version": "technical-cleanup-v2",
     "asset": "SP004_mitique/assets/mitique-pixelorama-125x125.png",
-    "source": "output/mitique/mitique-pixelorama-125x125.png.pxo",
+    "source": "../../../output/mitique/mitique-pixelorama-125x125.png.pxo",
+    "sourceNotes": "Ruta relativa a data/characters. Se verificó la capa RGBA interna del archivo Pixelorama y se sincronizó con el PNG oficial; ambos conservan lienzo 125x125 y alpha binario.",
     "dimensions": "125x125",
-    "isCanonical": true
+    "isCanonical": true,
+    "format": "PNG RGBA",
+    "alpha": "binario: 0 o 255"
+  },
+  "provenance": {
+    "source": "Fuente Pixelorama entregada por el usuario: output/mitique/mitique-pixelorama-125x125.png.pxo, con PNG exportado en la misma carpeta.",
+    "designDecision": "Se normalizó exclusivamente el canal alpha del sprite aprobado: los 3.140 valores intermedios se convirtieron a alpha binario, sin cambios en RGB, paleta, silueta, ojos ni nervadura. Se actualizó también la capa interna del PXO y su preview.",
+    "sha256": "d753efa0f28601382024e1bfc228e4243d0814eccb252442f2e7dc2fef477f35"
   }
 }

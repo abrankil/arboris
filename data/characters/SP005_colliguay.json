@@ -1,0 +1,147 @@
+{
+  "id": "CHAR_SP005",
+  "speciesId": "SP005",
+  "name": "Colliguay",
+  "displayName": "El Colliguay",
+  "status": "diseño vigente — limpieza manual v1",
+  "discardedProposals": [
+    {
+      "version": "proposal-v1",
+      "asset": "SP005_colliguay/archive/colliguay-propuesta-v1-125x125.png",
+      "preview": "../../../output/colliguay/archive/colliguay-propuesta-v1-500x500.png",
+      "dimensions": "125x125",
+      "isCanonical": false,
+      "reason": "Descartada explícitamente por Alvaro; no se declaró una causa individual.",
+      "sha256": "31dd67460b48e13fbb6b713a6ba87c35e285c2293f426c2db46d4b5fe151eed9"
+    },
+    {
+      "version": "proposal-v2",
+      "asset": "SP005_colliguay/archive/colliguay-propuesta-v2-125x125.png",
+      "preview": "../../../output/colliguay/archive/colliguay-propuesta-v2-500x500.png",
+      "dimensions": "125x125",
+      "isCanonical": false,
+      "reason": "Descartada explícitamente por Alvaro; no se declaró una causa individual.",
+      "sha256": "086c916747017c0bbb11035b8ff8be1429a6cd9d0789aff15915cbab0fd56154"
+    }
+  ],
+  "nextReview": {
+    "status": "Sprite oficial integrado; no hay revisión técnica pendiente.",
+    "editableStatus": "PNG 125x125 limpiado manualmente e integrado por copia exacta. No se ha creado ni recibido un archivo PXO de Colliguay.",
+    "openDataQuestions": [
+      "Procedencia de colliguay.jpg.",
+      "Identidad de estructuras abultadas de CO002; sin recategorización automática."
+    ]
+  },
+  "provenance": {
+    "source": "PNG limpiado manualmente entregado por Alvaro: output/colliguay/colliguay-pixelorama-125x125.png, relativo al espacio de trabajo Proyectos.",
+    "sha256": "a09076ef4d80a15449499734894e3c6dca0e66bbc87d2ea1dd8f73b339ea9cf5",
+    "sources": [
+      "data/species/SP005_colliguaja_odorifera.json",
+      "data/source/Fichas_especies_arboris.xlsx — hoja Colliguay y relaciones SP-005",
+      "species/SP005_colliguaja_odorifera/photos/colliguay.jpg",
+      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_hojas_01.jpg",
+      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_hojas_02.jpg",
+      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_fruto_01.jpg",
+      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_masculina_01.jpg",
+      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_masculina_02.jpg",
+      "species/SP005_colliguaja_odorifera/photos/SP005_CO002_hojas_01.jpg",
+      "species/SP005_colliguaja_odorifera/photos/SP005_CO002_ramilla_hojas_01.jpg",
+      "docs/ART_STYLE_GUIDE.md",
+      "docs/GRAPHIC_DIRECTION.md",
+      "../output/colliguay/colliguay-base-elegida.png (ruta relativa al repositorio)",
+      "../output/colliguay/colliguay-referencia-rojizos.webp (ruta relativa al repositorio)"
+    ],
+    "designDecision": "La selección explícita posterior de Alvaro prevalece sobre la recomendación A/B del asistente. Tras la aprobación visual y la limpieza manual, el PNG entregado por Alvaro se integra como copia exacta, sin reescalado, cuantización ni cambios adicionales de paleta o píxeles.",
+    "verification": {
+      "changedTipPixels": 8444,
+      "changedPixelsOutsideTips": 0,
+      "changedAlphaPixels": 0,
+      "report": "../../../output/colliguay/archive/verificacion-puntas-rojizas.json"
+    }
+  },
+  "designBrief": {
+    "status": "Limpieza manual completada e integrada",
+    "directionSource": "Selección explícita de Alvaro y referencia fotográfica aprobada por Alejandra",
+    "body": "Conservar exactamente la silueta, ápice, tamaño y distribución de dientes de la base elegida.",
+    "veins": "Conservar las nervaduras tenues de la base elegida.",
+    "surface": "Conservar los verdes, sombreado y textura de la base elegida.",
+    "face": "Conservar ambos ojos y sus brillos.",
+    "margin": "Cambiar solo el color de las puntas cafés existentes a rojizo, sin aumentar su tamaño ni cantidad.",
+    "composition": "Una hoja y pecíolo corto; sin acompañante.",
+    "deliveryTarget": "PNG 125x125 real, alpha binario y preview 500x500 por nearest-neighbor; la copia manual aceptada gobierna el sprite oficial.",
+    "referenceReview": "SP005_colliguay/reference-review.json"
+  },
+  "historicalComparisons": [
+    {
+      "A": {
+        "asset": "../../../output/colliguay/archive/colliguay-prototipo-A-referencia.png",
+        "source": "Imagen adjuntada por Alvaro, considerada adecuada por Alejandra.",
+        "dimensions": "1254x1254",
+        "sha256": "8828d2b9e16574fe7df87ca1db37137da9c24435a1712a62b1b50bc1848a7772",
+        "role": "referencia humana seleccionada; recomendada para continuar",
+        "isCanonical": false
+      },
+      "B": {
+        "asset": "../../../output/colliguay/archive/colliguay-prototipo-B-puntas.png",
+        "source": "Edición con image_gen del archivo adjunto: refuerzo de puntas cafés.",
+        "dimensions": "1254x1254",
+        "sha256": "167edf01d7201a0e982d1caa1718c8514069ed850753bcba0a68f5a92aac7328",
+        "role": "alternativa comparada; no recomendada por el asistente",
+        "isCanonical": false,
+        "technicalIssue": "Cuadriculado pintado; no acredita transparencia real."
+      },
+      "recommendation": {
+        "prototype": "A",
+        "author": "asistente",
+        "reason": "Conserva mejor la morfología de la referencia aceptada y el lenguaje del canon. B exagera las puntas hasta parecer espinas y añade una sobre el ápice.",
+        "humanFinalApproval": false
+      },
+      "report": "../../../output/colliguay/archive/COMPARACION_PROTOTIPOS.md",
+      "status": "superada por la selección explícita posterior de Alvaro"
+    }
+  ],
+  "selectedReference": {
+    "asset": "../../../output/colliguay/colliguay-base-elegida.png",
+    "sha256": "44ee4907d94905e358fd0471fecd6e97aeced1128cb4f8bc44e1291fcc95d856",
+    "dimensions": "1254x1254",
+    "selectedBy": "Alvaro",
+    "instruction": "Usar esta versión, conservar la proporción de las puntas y hacerlas rojizas.",
+    "colorReference": "../../../output/colliguay/colliguay-referencia-rojizos.webp",
+    "colorReferenceSha256": "8adcd7bea5d39890352b91584ac299c2df21500286dfe38b75aa44be8abe732e",
+    "colorReferenceApprovedBy": "Alejandra",
+    "sourceNotes": "Ambos adjuntos preservados sin cambios. La referencia cromática no se incorpora como observación de campo."
+  },
+  "designApproval": {
+    "approved": true,
+    "approvedBy": "Alvaro",
+    "approvedAt": "2026-09-14",
+    "decision": "El diseño seleccionado queda aprobado para convertirse en el sprite de trabajo del Colliguay.",
+    "scope": "Aprobación visual del diseño, de las puntas rojizas y de la limpieza manual entregada; el asset ya fue oficializado en el índice canónico.",
+    "reviewAsset": "SP005_colliguay/assets/colliguay-pixelorama-125x125.png",
+    "reviewAssetSha256": "e98687fd9f437805334c764a9c991f058cfdb6b1ecabf342265fca8ee861b58d"
+  },
+  "selectedDesign": {
+    "version": "manual-cleanup-v1",
+    "asset": "SP005_colliguay/assets/colliguay-pixelorama-125x125.png",
+    "sourceNotes": "PNG limpiado manualmente entregado por Alvaro; el asset canónico es una copia exacta, sin reescalado ni cambios de paleta, píxeles o transparencia.",
+    "dimensions": "125x125",
+    "isCanonical": true,
+    "format": "PNG RGBA",
+    "alpha": "binario: 0 o 255"
+  },
+  "preCleanupDesign": {
+    "version": "approved-red-tips-v1",
+    "asset": "../../../output/colliguay/archive/colliguay-puntas-rojizas-125x125.png",
+    "workingCopy": "../../../output/colliguay/archive/colliguay-puntas-rojizas-125x125.png",
+    "concept": "../../../output/colliguay/archive/colliguay-puntas-rojizas-concepto.png",
+    "preview": "../../../output/colliguay/archive/colliguay-puntas-rojizas-500x500.png",
+    "dimensions": "125x125",
+    "conceptDimensions": "1254x1254",
+    "isCanonical": false,
+    "alpha": "0 o 255 en el derivado 125x125; alpha original conservado íntegro en el concepto",
+    "editableStatus": "Derivado previo a la limpieza manual; archivado como antecedente de producción.",
+    "sha256": "e98687fd9f437805334c764a9c991f058cfdb6b1ecabf342265fca8ee861b58d",
+    "conceptSha256": "ba9a6e71095d3387883daae00bf2b116f4e1b6e515ba449f467198c3fceb9909",
+    "previewSha256": "c411545d7ee19e45ff0d60523ecf437cbf5d32640945c98fa2fe2f0a1df30854"
+  }
+}
