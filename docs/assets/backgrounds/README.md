@@ -7,7 +7,7 @@ Estas capas forman el primer escenario ambiental reutilizable de Arboris. Todas 
 1. `parallax/00-sky.png` — cielo base opaco con franjas horizontales.
 2. `parallax/01-background.png` — cordillera, nubes y valle lejano.
 3. `parallax/02-midground.png` — ladera, ciudad, sendero y vegetación intermedia.
-4. `parallax/03-foreground.png` — rocas, flores, pastos y chaguales cercanos. Los chaguales usan hojas finas, caídas y floración azul-turquesa en racimos terminales tipo “cola de zorro”.
+4. `parallax/03-foreground.png` — rocas, flores, pastos y chaguales cercanos. Los chaguales usan hojas finas, caídas y una inflorescencia terminal mayormente leñosa; sus pétalos azul-turquesa aparecen solo como pequeños acentos en un racimo tipo “cola de zorro”.
 
 ## Prueba de desplazamiento
 

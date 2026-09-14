@@ -20,7 +20,7 @@ El lenguaje facial base usa dos ojos pequeños, simples y expresivos, inspirado 
 
 La expresividad debe surgir de la inclinación de la hoja, el movimiento del tallo, la posición de los ojos y la interacción con sus frutos o flores.
 
-En los chaguales (Puya), las hojas deben ser largas, muy delgadas, espinosas y caídas. La floración se representa en la punta de un escapo alto como un racimo compacto azul-turquesa, afinado y alargado, con silueta de “cola de zorro”; no usar espigas blancas genéricas.
+En los chaguales (Puya), las hojas deben ser largas, muy delgadas, espinosas y caídas. La floración se representa en la punta de un escapo alto como un racimo afinado y alargado, de estructura mayormente leñosa y silueta de “cola de zorro”; los pétalos azul-turquesa deben ser pequeños acentos, nunca una masa cian dominante. No usar espigas blancas genéricas.
 
 ## Movimiento y flotación
 
