@@ -42,7 +42,25 @@ xcuserdata/
 *.p12
 *.mobileprovision
 
-# Add framework-specific rules after a framework is selected.
-# Keep dependency manifests, lockfiles, and shared project settings tracked.
-node_modules
+# Dependencies and local Python environment
+node_modules/
 .venv/
+
+# Python local/generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Árboris BioCLIP - local benchmark image dataset
+# Keep the downloaded iNaturalist images only on the local computer.
+# metadata.csv remains versioned so the dataset can be reconstructed.
+vision_v04_bioclip/inaturalist_dataset/*
+!vision_v04_bioclip/inaturalist_dataset/metadata.csv
+
+# Local ML model weights/checkpoints
+*.pt
+*.pth
+*.ckpt
+*.safetensors
