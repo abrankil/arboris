@@ -45,3 +45,4 @@ xcuserdata/
 # Add framework-specific rules after a framework is selected.
 # Keep dependency manifests, lockfiles, and shared project settings tracked.
 node_modules
+.venv/

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173f35"><title>Árboris · Observa y descubre</title>
+<link rel="stylesheet" href="/style.css"><script src="/validation.js" defer></script></head>
+<body><a class="skip-link" href="#main">Ir al contenido</a>
+<header class="site-header"><div class="brand"><svg aria-hidden="true" viewBox="0 0 40 40"><path d="M9 31C4 13 19 6 33 7c1 15-6 29-22 23M10 31 26 15M17 24l-1-8M21 20l8 1"/></svg><div><h1>Árboris</h1><p>Explora · Observa · Descubre</p></div></div>
+<div class="progress-wrap"><p id="status" role="status"></p><progress id="progress" value="0" max="15" aria-label="Plantas exploradas"></progress></div></header>
+<main id="main"><p id="error" role="alert"></p>
+<section id="welcome" class="welcome card"><span class="eyebrow">Una mirada más cerca</span><h2>Conoce el bosque,<br>hoja por hoja.</h2><p>Explora las fotografías de una planta y observa sus detalles. Si algo no se ve, está bien: cada mirada nos ayuda a aprender.</p></section>
+<section id="assessment" hidden aria-label="Observación de una planta">
+<div class="assessment-grid"><section class="photo-card card" aria-label="Fotografías de la planta">
+<div class="photo-heading"><span class="eyebrow">Tu planta por descubrir</span><span id="view-label"></span></div>
+<button id="enlarge" class="main-photo-button" aria-label="Ampliar fotografía"><img id="main-photo" alt="Vista de la planta"><span class="enlarge-hint">⤢ Ampliar fotografía</span></button>
+<div id="thumbnails" class="thumbnails" aria-label="Elegir fotografía"></div>
+<p class="photo-tip">Mira todas las vistas. Un detalle puede aparecer en otra fotografía.</p></section>
+<section class="question-card card" aria-labelledby="question-title"><div class="question-top"><span class="eyebrow">Observa con calma</span><span id="step-label"></span></div>
+<div id="question-content"><h2 id="question-title" tabindex="-1"></h2><p id="question"></p><div id="answers" class="answers"></div></div>
+<p id="evidence-message" class="evidence-message" aria-live="polite"></p>
+<button id="undo" class="text-button">← Volver a la pregunta anterior</button>
+<div class="finish-area"><button id="finish" class="primary">Conocer especie <span aria-hidden="true">↗</span></button><p id="finish-hint"></p></div>
+</section></div></section>
+<section id="reveal" class="result-card card" hidden aria-labelledby="common-name"><span class="eyebrow">Esta planta es</span><h2 id="common-name" tabindex="-1"></h2><p id="scientific-name" class="scientific-name"></p>
+<div class="result-verdict"><h3 id="consistency"></h3><p id="explanation"></p><p id="evidence-explanation"></p></div>
+<div class="reached"><h3>El recorrido de la clave llegó a</h3><ul id="predictions"></ul></div>
+<p class="saved-message">Evaluación guardada. Cada observación ayuda a mejorar la clave.</p>
+<details id="technical"><summary>Ver detalles técnicos</summary><p id="technical-steps"></p><pre id="result"></pre></details></section>
+<div class="next-area"><button id="start" class="primary" hidden>Explorar una planta <span aria-hidden="true">→</span></button><p id="complete" hidden>Ya exploraste todas las plantas disponibles. Gracias por observar con atención.</p></div>
+<footer><span>Una exploración del bosque nativo</span><details id="research"><summary>Ver resumen de investigación</summary><pre id="summary"></pre></details></footer>
+</main>
+<dialog id="photo-dialog" aria-label="Fotografía ampliada"><div class="dialog-toolbar"><span>Observa los detalles</span><button id="close-photo" class="secondary">Cerrar <span aria-hidden="true">×</span></button></div><img id="expanded-photo" alt="Vista ampliada de la planta"><a id="original-photo" target="_blank" rel="noopener">Abrir a tamaño original en otra pestaña ↗</a></dialog>
+</body></html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173f35"><title>Árboris · ¿Qué planta encontraste?</title>
+<link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head>
+<body><a class="skip-link" href="#main">Ir al contenido</a>
+<header class="site-header"><div class="brand"><svg aria-hidden="true" viewBox="0 0 40 40"><path d="M9 31C4 13 19 6 33 7c1 15-6 29-22 23M10 31 26 15M17 24l-1-8M21 20l8 1"/></svg><div><h1>Árboris</h1><p>Explora · Observa · Descubre</p></div></div><span class="eyebrow">El bosque en tus manos</span></header>
+<main id="main"><p id="error" role="alert"></p>
+<input id="photo-input" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" hidden>
+<section id="welcome" class="welcome card"><span class="eyebrow">Una mirada más cerca</span><h2>¿Qué planta encontraste?</h2><p>Una fotografía y tu mirada nos ayudarán a conocerla.</p><button id="upload" class="primary upload-action">Subir fotografía <span aria-hidden="true">↗</span></button><p class="photo-tip">JPG, JPEG, PNG o WEBP · Hasta 20 MB</p></section>
+<section id="observation" hidden aria-label="Tu planta"><div class="assessment-grid">
+<section class="photo-card card" aria-label="Fotografías de tu planta"><div class="photo-heading"><span class="eyebrow">Tu encuentro</span><span id="view-label"></span></div>
+<button id="enlarge" class="main-photo-button" aria-label="Ampliar fotografía"><img id="main-photo" alt="Tu planta"><span class="enlarge-hint">⤢ Ampliar fotografía</span></button>
+<div id="thumbnails" class="thumbnails" aria-label="Elegir fotografía"></div><button id="replace" class="text-button">Cambiar fotografía y empezar de nuevo</button>
+<p class="photo-tip">Tú observas los caracteres; Árboris te guía. No analizamos la imagen automáticamente.</p></section>
+<section class="question-card card"><span class="eyebrow">Observa con calma</span><div id="question-content"><h2 id="question-title" tabindex="-1"></h2><p id="question"></p><div id="answers" class="answers"></div></div>
+<p id="step-message" class="evidence-message" aria-live="polite"></p><button id="undo" class="text-button">← Volver a la pregunta anterior</button>
+<div class="finish-area"><button id="finish" class="primary">Conocer especie <span aria-hidden="true">↗</span></button><p>Puedes continuar o descubrir qué sabemos hasta aquí, sin adivinar.</p></div></section>
+</div></section>
+<section id="result-card" class="result-card card" hidden><span class="eyebrow">Lo que nos cuentan las hojas</span><h2 id="result-title" tabindex="-1"></h2><p id="scientific-name" class="scientific-name"></p><p id="result-message"></p><p id="result-caution"></p><ul id="species-options" class="species-options"></ul><div class="reached"><h3>Lo que observaste</h3><ul id="evidence"></ul></div><button id="continue" class="secondary">Seguir observando</button><button id="new-photo" class="text-button">Conocer otra planta</button></section>
+<section id="comparison" class="card comparison" hidden aria-labelledby="comparison-title"><h2 id="comparison-title" tabindex="-1">Compara tu planta</h2><p>¿Cuál se parece más a la que encontraste?</p>
+<img id="comparison-user" class="comparison-user" alt="Tu fotografía para comparar">
+<div id="reference-cards" class="reference-cards"></div><div class="answers"><button id="choose-a" class="answer">Se parece más a la opción A</button><button id="choose-b" class="answer">Se parece más a la opción B</button><button id="choose-none" class="answer">Ninguna de las dos</button></div><button id="skip-comparison" class="text-button">No logro distinguirlas · continuar sin elegir</button></section>
+<section id="additional" class="additional-card card" hidden><h3>Otra mirada puede ayudar</h3><p id="photo-request"></p><p class="photo-tip">Es opcional. Añade solo fotografías de la misma planta.</p><button id="add-photo" class="secondary">Agregar otra foto</button></section>
+<footer><span>Tus fotografías permanecen en este navegador durante la sesión.</span><span>Seis especies del bosque nativo · Una identificación siempre revisable</span></footer>
+</main><dialog id="photo-dialog" aria-label="Fotografía ampliada"><div class="dialog-toolbar"><span>Observa los detalles</span><button id="close-photo" class="secondary">Cerrar ×</button></div><img id="expanded-photo" alt="Tu planta ampliada"><a id="original-photo" target="_blank" rel="noopener">Abrir a tamaño original ↗</a></dialog></body></html>
