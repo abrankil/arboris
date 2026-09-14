@@ -1,0 +1,8 @@
+﻿group,n,top1,top2,top3,mean_true_rank
+TOTAL,300,0.83,0.9333333333333333,0.9766666666666667,1.2666666666666666
+Colliguaja odorifera,50,0.92,0.98,1.0,1.1
+Cryptocarya alba,50,0.92,0.98,0.98,1.12
+Kageneckia oblonga,50,0.86,0.98,1.0,1.16
+Lithraea caustica,50,0.96,1.0,1.0,1.04
+Podanthus mitiqui,50,1.0,1.0,1.0,1.0
+Quillaja saponaria,50,0.32,0.66,0.88,2.18

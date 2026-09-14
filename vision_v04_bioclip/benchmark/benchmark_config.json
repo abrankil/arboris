@@ -1,0 +1,91 @@
+{
+  "benchmark_name": "BioCLIP iNaturalist - Arboris Pilot v0.1",
+  "project": "Arboris",
+  "date": "2026-09-14",
+  "purpose": "Evaluate BioCLIP as a visual candidate generator for the six-species Arboris pilot.",
+  "model": {
+    "package": "pybioclip",
+    "package_version": "2.1.6",
+    "model_family": "BioCLIP",
+    "model": "BioCLIP 2",
+    "inference_device": "cpu",
+    "classification_mode": "closed-set zero-shot custom labels"
+  },
+  "candidate_species": [
+    {
+      "id": "SP001",
+      "common_name": "Peumo",
+      "scientific_name": "Cryptocarya alba"
+    },
+    {
+      "id": "SP002",
+      "common_name": "Litre",
+      "scientific_name": "Lithraea caustica"
+    },
+    {
+      "id": "SP003",
+      "common_name": "Bollen",
+      "scientific_name": "Kageneckia oblonga"
+    },
+    {
+      "id": "SP004",
+      "common_name": "Mitique",
+      "scientific_name": "Podanthus mitiqui"
+    },
+    {
+      "id": "SP005",
+      "common_name": "Colliguay",
+      "scientific_name": "Colliguaja odorifera"
+    },
+    {
+      "id": "SP006",
+      "common_name": "Quillay",
+      "scientific_name": "Quillaja saponaria"
+    }
+  ],
+  "dataset": {
+    "source": "iNaturalist",
+    "quality_grade": "research",
+    "observations_per_species": 50,
+    "number_of_species": 6,
+    "expected_total_images": 300,
+    "photos_per_observation": 1,
+    "allowed_photo_licenses": [
+      "CC0",
+      "CC-BY",
+      "CC-BY-NC"
+    ],
+    "selection_note": "First photo from each returned research-grade observation. Dataset is a pilot benchmark and is not a randomized or geographically stratified sample."
+  },
+  "evaluation": {
+    "labels": "scientific names only",
+    "metrics": [
+      "Top-1 accuracy",
+      "Top-2 accuracy",
+      "Top-3 accuracy",
+      "per-species Top-1 accuracy",
+      "confusion matrix",
+      "true-species rank"
+    ]
+  },
+  "results": {
+    "images_evaluated": 300,
+    "top1_accuracy": 0.83,
+    "top2_accuracy": 0.933,
+    "top3_accuracy": 0.977,
+    "per_species_top1": {
+      "Cryptocarya alba": 0.92,
+      "Lithraea caustica": 0.96,
+      "Kageneckia oblonga": 0.86,
+      "Podanthus mitiqui": 1.0,
+      "Colliguaja odorifera": 0.92,
+      "Quillaja saponaria": 0.32
+    }
+  },
+  "interpretation": {
+    "scores_are_calibrated_probabilities": false,
+    "intended_role_in_arboris": "Visual candidate generator, not final species identifier.",
+    "main_observed_limitation": "Quillaja saponaria showed strong systematic confusion, especially with Cryptocarya alba and Lithraea caustica.",
+    "architectural_conclusion": "BioCLIP candidates should be combined with botanical characters, adaptive key logic, context and explicit uncertainty."
+  }
+}

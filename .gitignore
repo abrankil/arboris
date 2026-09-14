@@ -46,10 +46,3 @@ xcuserdata/
 # Keep dependency manifests, lockfiles, and shared project settings tracked.
 node_modules
 .venv/
-
-# Python local/generated files
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
