@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <image href="../backgrounds/arboris-santiago-valle-1920x1080.png" width="1920" height="1080" preserveAspectRatio="xMidYMid slice"/>
+  <rect x="1190" y="70" width="650" height="940" fill="#12251ccc" stroke="#e1d36b" stroke-width="6"/>
+  <rect x="1210" y="90" width="610" height="900" fill="none" stroke="#3c5a3e" stroke-width="4" stroke-dasharray="12 12"/>
+  <text x="1515" y="210" text-anchor="middle" fill="#e1d36b" font-family="monospace" font-size="104" font-weight="bold" letter-spacing="14">ARBORIS</text>
+  <text x="1515" y="265" text-anchor="middle" fill="#f5e9b2" font-family="monospace" font-size="24" letter-spacing="3">EXPLORA LA FLORA NATIVA DE CHILE</text>
+  <line x1="1300" y1="315" x2="1730" y2="315" stroke="#e1d36b" stroke-width="4"/>
+  <g font-family="monospace" font-size="40" font-weight="bold" letter-spacing="4">
+    <rect x="1290" y="370" width="450" height="90" fill="#b87924" stroke="#fff0a8" stroke-width="6"/>
+    <polygon points="1250,415 1280,390 1280,440" fill="#e1d36b"/>
+    <text x="1515" y="428" text-anchor="middle" fill="#fff8d4">EXPLORAR</text>
+    <rect x="1290" y="500" width="450" height="90" fill="#1c2a1e" stroke="#9eb17b" stroke-width="4"/>
+    <text x="1515" y="558" text-anchor="middle" fill="#e1d36b">COLECCIÓN</text>
+    <rect x="1290" y="630" width="450" height="90" fill="#1c2a1e" stroke="#9eb17b" stroke-width="4"/>
+    <text x="1515" y="688" text-anchor="middle" fill="#e1d36b">OBSERVACIONES</text>
+    <rect x="1290" y="760" width="450" height="90" fill="#1c2a1e" stroke="#9eb17b" stroke-width="4"/>
+    <text x="1515" y="818" text-anchor="middle" fill="#e1d36b">AJUSTES</text>
+  </g>
+  <text x="1515" y="940" text-anchor="middle" fill="#f5e9b2" font-family="monospace" font-size="23" letter-spacing="3">PULSA PARA COMENZAR</text>
+</svg>
