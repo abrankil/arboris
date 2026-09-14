@@ -1,46 +1,450 @@
 {
-    "id":  "SP003",
-    "commonName":  "Bollén",
-    "scientificName":  "Kageneckia oblonga",
-    "family":  "Rosaceae",
-    "habit":  "Árbol/arbusto",
-    "origin":  "Nativa",
-    "endemicToChile":  true,
-    "photos":  [
-                   {
-                       "individualId":  "KO001",
-                       "file":  "SP003_KO001_fruto_01.jpg",
-                       "structure":  "fruto"
-                   },
-                   {
-                       "individualId":  "KO001",
-                       "file":  "SP003_KO001_fruto_02.jpg",
-                       "structure":  "fruto"
-                   },
-                   {
-                       "individualId":  "KO001",
-                       "file":  "SP003_KO001_hojas_01.jpg",
-                       "structure":  "hojas"
-                   },
-                   {
-                       "individualId":  "KO001",
-                       "file":  "SP003_KO001_hojas_fruto_01.jpg",
-                       "structure":  "hojas fruto"
-                   },
-                   {
-                       "individualId":  "KO002",
-                       "file":  "SP003_KO002_hojas_01.jpg",
-                       "structure":  "hojas"
-                   },
-                   {
-                       "individualId":  "KO003",
-                       "file":  "SP003_KO003_hojas_01.jpg",
-                       "structure":  "hojas"
-                   },
-                   {
-                       "individualId":  "KO003",
-                       "file":  "SP003_KO003_hojas_02.jpg",
-                       "structure":  "hojas"
-                   }
-               ]
+  "id": "SP003",
+  "commonName": "Bollén",
+  "scientificName": "Kageneckia oblonga",
+  "family": "Rosaceae",
+  "habit": "Árbol/arbusto",
+  "origin": "Nativa",
+  "endemicToChile": true,
+  "photos": [
+    {
+      "individualId": "KO001",
+      "file": "SP003_KO001_fruto_01.jpg",
+      "structure": "fruto"
+    },
+    {
+      "individualId": "KO001",
+      "file": "SP003_KO001_fruto_02.jpg",
+      "structure": "fruto"
+    },
+    {
+      "individualId": "KO001",
+      "file": "SP003_KO001_hojas_01.jpg",
+      "structure": "hojas"
+    },
+    {
+      "individualId": "KO001",
+      "file": "SP003_KO001_hojas_fruto_01.jpg",
+      "structure": "hojas fruto"
+    },
+    {
+      "individualId": "KO002",
+      "file": "SP003_KO002_hojas_01.jpg",
+      "structure": "hojas"
+    },
+    {
+      "individualId": "KO003",
+      "file": "SP003_KO003_hojas_01.jpg",
+      "structure": "hojas"
+    },
+    {
+      "individualId": "KO003",
+      "file": "SP003_KO003_hojas_02.jpg",
+      "structure": "hojas"
+    }
+  ],
+  "order": "Rosales",
+  "endemicChile": true,
+  "pilotStatus": "Activa",
+  "botanicalNotes": "Incluye al menos dos individuos con variación foliar marcada.",
+  "botanicalCharacters": [
+    {
+      "characterId": "CH-001",
+      "group": "Hoja",
+      "name": "Tipo de hoja",
+      "dataType": "categorico",
+      "expectedStates": [
+        "simple"
+      ],
+      "allowedStates": [
+        "simple",
+        "compuesta"
+      ],
+      "variability": "baja",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "bajo",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": null,
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-002",
+      "group": "Hoja",
+      "name": "Disposición foliar",
+      "dataType": "categorico",
+      "expectedStates": [
+        "alterna"
+      ],
+      "allowedStates": [
+        "alterna",
+        "subopuesta",
+        "opuesta",
+        "verticilada",
+        "no_observable"
+      ],
+      "variability": "baja",
+      "imageObservability": "Parcial",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": null,
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-003",
+      "group": "Hoja",
+      "name": "Margen foliar",
+      "dataType": "categorico",
+      "expectedStates": [
+        "serrado"
+      ],
+      "allowedStates": [
+        "entero",
+        "ondulado",
+        "finamente_serrado",
+        "serrado",
+        "dentado",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "media",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio-alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": null,
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-011",
+      "group": "Hoja",
+      "name": "Forma foliar predominante",
+      "dataType": "categorico",
+      "expectedStates": [
+        "eliptica",
+        "obovada",
+        "variable"
+      ],
+      "allowedStates": [
+        "ovada",
+        "eliptica",
+        "oblonga",
+        "lanceolada",
+        "obovada",
+        "orbicular",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "alta",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "bajo",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "KO-001 y KO-002 muestran variación importante.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-013",
+      "group": "Reproductivo",
+      "name": "Tipo de fruto diagnóstico",
+      "dataType": "texto",
+      "expectedStates": [
+        "pentafoliculo_estrellado"
+      ],
+      "allowedStates": [
+        "texto libre"
+      ],
+      "variability": "baja",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "Disponible solo en etapa reproductiva/fructificación.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-004",
+      "group": "Hoja",
+      "name": "Consistencia",
+      "dataType": "categorico",
+      "expectedStates": [
+        "coriacea"
+      ],
+      "allowedStates": [
+        "blanda",
+        "flexible",
+        "firme",
+        "coriacea",
+        "no_se"
+      ],
+      "variability": "media",
+      "imageObservability": "Probable",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "Flora Arbórea describe hojas coriáceas.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-005",
+      "group": "Hoja",
+      "name": "Color relativo del envés",
+      "dataType": "categorico",
+      "expectedStates": [
+        "mas_palido"
+      ],
+      "allowedStates": [
+        "similar",
+        "mas_palido",
+        "glauco",
+        "no_observable"
+      ],
+      "variability": "media",
+      "imageObservability": "Parcial",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "Cara superior verde clara e inferior blanquecina.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-012",
+      "group": "Hoja",
+      "name": "Ápice foliar",
+      "dataType": "categorico",
+      "expectedStates": [
+        "obtuso",
+        "acuminado",
+        "variable"
+      ],
+      "allowedStates": [
+        "agudo",
+        "acuminado",
+        "obtuso",
+        "redondeado",
+        "emarginado",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "alta",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "Ápice obtuso o acuminado; no forzar un único estado.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-017",
+      "group": "Hoja",
+      "name": "Dientes con pequeñas glándulas",
+      "dataType": "categorico",
+      "expectedStates": [
+        "si"
+      ],
+      "allowedStates": [
+        "si",
+        "no",
+        "no_se"
+      ],
+      "variability": "alta",
+      "imageObservability": "Parcial",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio-alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "Dientes provistos de pequeñas glándulas. La propia fuente advierte que los dientes son muy variables, incluso entre ramas de un mismo ejemplar; usar como apoyo, no como carácter exclusivo.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-018",
+      "group": "Yema",
+      "name": "Yema foliar resinosa",
+      "dataType": "categorico",
+      "expectedStates": [
+        "si"
+      ],
+      "allowedStates": [
+        "si",
+        "no",
+        "no_se"
+      ],
+      "variability": "desconocida",
+      "imageObservability": "Parcial",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "Yemas foliares cubiertas por una sustancia resinosa.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-014",
+      "group": "Reproductivo",
+      "name": "Tipo de inflorescencia/flor diagnóstica",
+      "dataType": "texto",
+      "expectedStates": [
+        "flores_dioicas_masculinas_en_corimbos_femeninas_solitarias"
+      ],
+      "allowedStates": [
+        "texto libre"
+      ],
+      "variability": "baja",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "Especie dioica; flores masculinas en corimbos y femeninas solitarias. Carácter fenológico.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-011",
+      "group": "Hoja",
+      "name": "Forma foliar predominante",
+      "dataType": "categorico",
+      "expectedStates": [
+        "eliptica",
+        "obovada",
+        "variable"
+      ],
+      "allowedStates": [
+        "ovada",
+        "eliptica",
+        "oblonga",
+        "lanceolada",
+        "obovada",
+        "orbicular",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "alta",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "Flora Arbórea: hojas elípticas u obovadas. KO-001 y KO-002 muestran variación foliar marcada en terreno.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-003",
+      "group": "Hoja",
+      "name": "Margen foliar",
+      "dataType": "categorico",
+      "expectedStates": [
+        "serrado"
+      ],
+      "allowedStates": [
+        "entero",
+        "ondulado",
+        "finamente_serrado",
+        "serrado",
+        "dentado",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "alta",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio-alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-009",
+      "source": null,
+      "notes": "Margen aserrado. La fuente señala que la morfología de los dientes es muy variable incluso en ramas del mismo individuo; no usar la forma del diente como criterio específico aislado.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    }
+  ],
+  "botanicalData": {
+    "version": "pilot-master-v0.1",
+    "source": "data/source/Base_botanica_Pokedex_flora_Master.xlsx",
+    "masterSpeciesId": "SP-003",
+    "validationWarnings": 0
+  }
 }

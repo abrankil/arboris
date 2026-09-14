@@ -64,3 +64,11 @@ vision_v04_bioclip/inaturalist_dataset/*
 *.pth
 *.ckpt
 *.safetensors
+# Árboris botanical data - local working artifacts
+tools/botanical-data/backups/
+tools/botanical-data/compare_output/
+tools/botanical-data/merge_output/
+
+# Temporary validation reports
+quillay_validation.txt
+validacion_piloto.txt

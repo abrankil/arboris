@@ -1,51 +1,343 @@
 {
-    "id":  "SP004",
-    "commonName":  "Mitique",
-    "scientificName":  "Podanthus mitiqui",
-    "family":  "Asteraceae",
-    "habit":  "Arbusto",
-    "origin":  "Nativa",
-    "endemicToChile":  true,
-    "photos":  [
-                   {
-                       "individualId":  "PM001",
-                       "file":  "SP004_PM001_capitulo_amarillo_01.jpg",
-                       "structure":  "capitulo amarillo"
-                   },
-                   {
-                       "individualId":  "PM001",
-                       "file":  "SP004_PM001_capitulo_inmaduro_01.jpg",
-                       "structure":  "capitulo inmaduro"
-                   },
-                   {
-                       "individualId":  "PM001",
-                       "file":  "SP004_PM001_ramilla_hojas_01.jpg",
-                       "structure":  "ramilla hojas"
-                   },
-                   {
-                       "individualId":  "PM001",
-                       "file":  "SP004_PM001_ramilla_hojas_02.jpg",
-                       "structure":  "ramilla hojas"
-                   },
-                   {
-                       "individualId":  "PM002",
-                       "file":  "SP004_PM002_capitulo_01.jpg",
-                       "structure":  "capitulo"
-                   },
-                   {
-                       "individualId":  "PM002",
-                       "file":  "SP004_PM002_capitulo_02.jpg",
-                       "structure":  "capitulo"
-                   },
-                   {
-                       "individualId":  "PM002",
-                       "file":  "SP004_PM002_hojas_01.jpg",
-                       "structure":  "hojas"
-                   },
-                   {
-                       "individualId":  "PM002",
-                       "file":  "SP004_PM002_ramilla_capitulo_01.jpg",
-                       "structure":  "ramilla capitulo"
-                   }
-               ]
+  "id": "SP004",
+  "commonName": "Mitique",
+  "scientificName": "Podanthus mitiqui",
+  "family": "Asteraceae",
+  "habit": "Arbusto",
+  "origin": "Nativa",
+  "endemicToChile": true,
+  "photos": [
+    {
+      "individualId": "PM001",
+      "file": "SP004_PM001_capitulo_amarillo_01.jpg",
+      "structure": "capitulo amarillo"
+    },
+    {
+      "individualId": "PM001",
+      "file": "SP004_PM001_capitulo_inmaduro_01.jpg",
+      "structure": "capitulo inmaduro"
+    },
+    {
+      "individualId": "PM001",
+      "file": "SP004_PM001_ramilla_hojas_01.jpg",
+      "structure": "ramilla hojas"
+    },
+    {
+      "individualId": "PM001",
+      "file": "SP004_PM001_ramilla_hojas_02.jpg",
+      "structure": "ramilla hojas"
+    },
+    {
+      "individualId": "PM002",
+      "file": "SP004_PM002_capitulo_01.jpg",
+      "structure": "capitulo"
+    },
+    {
+      "individualId": "PM002",
+      "file": "SP004_PM002_capitulo_02.jpg",
+      "structure": "capitulo"
+    },
+    {
+      "individualId": "PM002",
+      "file": "SP004_PM002_hojas_01.jpg",
+      "structure": "hojas"
+    },
+    {
+      "individualId": "PM002",
+      "file": "SP004_PM002_ramilla_capitulo_01.jpg",
+      "structure": "ramilla capitulo"
+    }
+  ],
+  "order": "Asterales",
+  "endemicChile": true,
+  "pilotStatus": "Activa",
+  "botanicalNotes": "Ficha avanzada: respaldo taxonómico UdeC y morfológico SAG/Fundación Philippi; capítulos amarillos globosos como evidencia reproductiva fuerte.",
+  "botanicalCharacters": [
+    {
+      "characterId": "CH-001",
+      "group": "Hoja",
+      "name": "Tipo de hoja",
+      "dataType": "categorico",
+      "expectedStates": [
+        "simple"
+      ],
+      "allowedStates": [
+        "simple",
+        "compuesta"
+      ],
+      "variability": "baja",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "bajo",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-012",
+      "source": {
+        "tipo": "Guía botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Podanthus mitiqui.",
+        "uso_prioritario": "Morfología foliar, sexualidad, flores, fruto y ecología",
+        "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+        "notas": "Hojas opuesto-decusadas, simples, ovado-lanceoladas a lanceoladas, envés áspero-glanduloso; planta dioica; cabezuelas esféricas amarillas; aquenio sin vilano; asociada al matorral y bosque esclerófilos."
+      },
+      "notes": "Fundación Philippi describe hojas simples.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-002",
+      "group": "Hoja",
+      "name": "Disposición foliar",
+      "dataType": "categorico",
+      "expectedStates": [
+        "opuesta"
+      ],
+      "allowedStates": [
+        "alterna",
+        "subopuesta",
+        "opuesta",
+        "verticilada",
+        "no_observable"
+      ],
+      "variability": "baja",
+      "imageObservability": "Parcial",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-012",
+      "source": {
+        "tipo": "Guía botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Podanthus mitiqui.",
+        "uso_prioritario": "Morfología foliar, sexualidad, flores, fruto y ecología",
+        "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+        "notas": "Hojas opuesto-decusadas, simples, ovado-lanceoladas a lanceoladas, envés áspero-glanduloso; planta dioica; cabezuelas esféricas amarillas; aquenio sin vilano; asociada al matorral y bosque esclerófilos."
+      },
+      "notes": "SAG indica hojas opuestas; Fundación Philippi precisa disposición opuesto-decusada.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-003",
+      "group": "Hoja",
+      "name": "Margen foliar",
+      "dataType": "categorico",
+      "expectedStates": [
+        "serrado"
+      ],
+      "allowedStates": [
+        "entero",
+        "ondulado",
+        "finamente_serrado",
+        "serrado",
+        "dentado",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "media",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio-alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-011",
+      "source": {
+        "tipo": "Guía oficial / SAG",
+        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Podanthus mitiqui.",
+        "uso_prioritario": "Hábito, hojas, capítulos y fenología",
+        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+        "notas": "Arbusto hasta 2,5 m; hojas opuestas, aserradas y ásperas; capítulos globosos solitarios amarillos; floración primaveral."
+      },
+      "notes": "SAG describe borde aserrado.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-011",
+      "group": "Hoja",
+      "name": "Forma foliar predominante",
+      "dataType": "categorico",
+      "expectedStates": [
+        "lanceolada"
+      ],
+      "allowedStates": [
+        "ovada",
+        "eliptica",
+        "oblonga",
+        "lanceolada",
+        "obovada",
+        "orbicular",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "media",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-012",
+      "source": {
+        "tipo": "Guía botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Podanthus mitiqui.",
+        "uso_prioritario": "Morfología foliar, sexualidad, flores, fruto y ecología",
+        "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+        "notas": "Hojas opuesto-decusadas, simples, ovado-lanceoladas a lanceoladas, envés áspero-glanduloso; planta dioica; cabezuelas esféricas amarillas; aquenio sin vilano; asociada al matorral y bosque esclerófilos."
+      },
+      "notes": "Láminas ovado-lanceoladas a lanceoladas.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-019",
+      "group": "Superficie foliar áspera",
+      "name": "Hoja",
+      "dataType": "categórico",
+      "expectedStates": [
+        "aspera"
+      ],
+      "allowedStates": [
+        "aspera",
+        "lisa",
+        "no_se"
+      ],
+      "variability": "media",
+      "imageObservability": "Probable",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio-alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-011",
+      "source": {
+        "tipo": "Guía oficial / SAG",
+        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Podanthus mitiqui.",
+        "uso_prioritario": "Hábito, hojas, capítulos y fenología",
+        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+        "notas": "Arbusto hasta 2,5 m; hojas opuestas, aserradas y ásperas; capítulos globosos solitarios amarillos; floración primaveral."
+      },
+      "notes": "SAG: hojas ásperas al tacto; Fundación Philippi: envés áspero-glanduloso.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-014",
+      "group": "Reproductivo",
+      "name": "Tipo de inflorescencia/flor diagnóstica",
+      "dataType": "texto",
+      "expectedStates": [
+        "capitulo_globoso_solitario_amarillo"
+      ],
+      "allowedStates": [
+        "texto libre"
+      ],
+      "variability": "baja",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-011",
+      "source": {
+        "tipo": "Guía oficial / SAG",
+        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Podanthus mitiqui.",
+        "uso_prioritario": "Hábito, hojas, capítulos y fenología",
+        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+        "notas": "Arbusto hasta 2,5 m; hojas opuestas, aserradas y ásperas; capítulos globosos solitarios amarillos; floración primaveral."
+      },
+      "notes": "Capítulos globosos, solitarios y amarillos; evidencia reproductiva fuerte.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-020",
+      "group": "Tipo de fruto Asteraceae",
+      "name": "Reproductivo",
+      "dataType": "categórico",
+      "expectedStates": [
+        "aquenio_sin_vilano"
+      ],
+      "allowedStates": [
+        "aquenio_sin_vilano",
+        "otro",
+        "no_se"
+      ],
+      "variability": "baja",
+      "imageObservability": "Parcial",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-012",
+      "source": {
+        "tipo": "Guía botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Podanthus mitiqui.",
+        "uso_prioritario": "Morfología foliar, sexualidad, flores, fruto y ecología",
+        "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+        "notas": "Hojas opuesto-decusadas, simples, ovado-lanceoladas a lanceoladas, envés áspero-glanduloso; planta dioica; cabezuelas esféricas amarillas; aquenio sin vilano; asociada al matorral y bosque esclerófilos."
+      },
+      "notes": "Fundación Philippi describe fruto como aquenio sin vilano.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-021",
+      "group": "Caducidad estival",
+      "name": "Fenología",
+      "dataType": "categórico",
+      "expectedStates": [
+        "caducifolio_verano"
+      ],
+      "allowedStates": [
+        "caducifolio_verano",
+        "persistente",
+        "no_se"
+      ],
+      "variability": "desconocida",
+      "imageObservability": "No",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "bajo",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "media",
+      "sourceId": "F-012",
+      "source": {
+        "tipo": "Guía botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Podanthus mitiqui.",
+        "uso_prioritario": "Morfología foliar, sexualidad, flores, fruto y ecología",
+        "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+        "notas": "Hojas opuesto-decusadas, simples, ovado-lanceoladas a lanceoladas, envés áspero-glanduloso; planta dioica; cabezuelas esféricas amarillas; aquenio sin vilano; asociada al matorral y bosque esclerófilos."
+      },
+      "notes": "Fuente lo describe como caducifolio en verano; tratar como carácter fenológico/contextual, no como rasgo obligatorio.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    }
+  ],
+  "botanicalData": {
+    "version": "pilot-master-v0.1",
+    "source": "data/source/Base_botanica_Pokedex_flora_Master.xlsx",
+    "masterSpeciesId": "SP-004",
+    "validationWarnings": 0
+  }
 }
