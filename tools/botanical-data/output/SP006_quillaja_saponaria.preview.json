@@ -1,0 +1,415 @@
+{
+  "dataVersion": "pilot-master-v0.1",
+  "source": "data/source/Base_botanica_Pokedex_flora_Master.xlsx",
+  "species": {
+    "id": "SP006",
+    "masterId": "SP-006",
+    "scientificName": "Quillaja saponaria",
+    "commonName": "Quillay",
+    "family": "Quillajaceae",
+    "order": "Fabales",
+    "habit": "Árbol",
+    "origin": "Endémica",
+    "endemicChile": "Sí",
+    "pilotStatus": "Activa",
+    "notes": "Ficha avanzada: respaldo UdeC, CONAF e INFOR. Caso piloto conserva identificación probable porque las fotos disponibles son solo vegetativas."
+  },
+  "characters": [
+    {
+      "characterId": "CH-001",
+      "group": "Hoja",
+      "name": "Tipo de hoja",
+      "dataType": "categorico",
+      "expectedStates": [
+        "simple"
+      ],
+      "allowedStates": [
+        "simple",
+        "compuesta"
+      ],
+      "variability": "baja",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "bajo",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-017",
+      "source": {
+        "tipo": "Guía oficial / CONAF",
+        "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+        "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+        "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+      },
+      "notes": "CONAF describe hojas simples.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-002",
+      "group": "Hoja",
+      "name": "Disposición foliar",
+      "dataType": "categorico",
+      "expectedStates": [
+        "alterna"
+      ],
+      "allowedStates": [
+        "alterna",
+        "subopuesta",
+        "opuesta",
+        "verticilada",
+        "no_observable"
+      ],
+      "variability": "baja",
+      "imageObservability": "Parcial",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-018",
+      "source": {
+        "tipo": "Monografía técnica / INFOR-CONAF",
+        "referencia": "Monografía de Quillay, Quillaja saponaria. INFOR/CONAF.",
+        "uso_prioritario": "Morfología, hábito y variación foliar",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2018/11/004_2011-DOCUMENTOS_MONOGRAFIA_QUILLAY.pdf",
+        "notas": "Siempreverde; hojas esclerófilas, alternas, perennes, coriáceas, oblongas y de borde casi liso; frutos polifolículos estrellados que permanecen secos y abiertos en el árbol."
+      },
+      "notes": "Monografía y ficha CONAF coinciden en disposición alterna.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-003",
+      "group": "Hoja",
+      "name": "Margen foliar",
+      "dataType": "categorico",
+      "expectedStates": [
+        "entero",
+        "dentado",
+        "variable"
+      ],
+      "allowedStates": [
+        "entero",
+        "ondulado",
+        "finamente_serrado",
+        "serrado",
+        "dentado",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "alta",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-017",
+      "source": {
+        "tipo": "Guía oficial / CONAF",
+        "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+        "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+        "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+      },
+      "notes": "Margen entero u oscuramente dentado; no usar grado de dentado como criterio exclusivo.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-004",
+      "group": "Hoja",
+      "name": "Consistencia",
+      "dataType": "categorico",
+      "expectedStates": [
+        "coriacea"
+      ],
+      "allowedStates": [
+        "blanda",
+        "flexible",
+        "firme",
+        "coriacea",
+        "no_se"
+      ],
+      "variability": "media",
+      "imageObservability": "Probable",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-018",
+      "source": {
+        "tipo": "Monografía técnica / INFOR-CONAF",
+        "referencia": "Monografía de Quillay, Quillaja saponaria. INFOR/CONAF.",
+        "uso_prioritario": "Morfología, hábito y variación foliar",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2018/11/004_2011-DOCUMENTOS_MONOGRAFIA_QUILLAY.pdf",
+        "notas": "Siempreverde; hojas esclerófilas, alternas, perennes, coriáceas, oblongas y de borde casi liso; frutos polifolículos estrellados que permanecen secos y abiertos en el árbol."
+      },
+      "notes": "Hojas esclerófilas/coriáceas y duras.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-006",
+      "group": "Hoja",
+      "name": "Pubescencia del envés",
+      "dataType": "categorico",
+      "expectedStates": [
+        "glabro"
+      ],
+      "allowedStates": [
+        "glabro",
+        "pubescente",
+        "no_se"
+      ],
+      "variability": "baja",
+      "imageObservability": "Parcial",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-017",
+      "source": {
+        "tipo": "Guía oficial / CONAF",
+        "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+        "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+        "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+      },
+      "notes": "Hojas glabras.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-011",
+      "group": "Hoja",
+      "name": "Forma foliar predominante",
+      "dataType": "categorico",
+      "expectedStates": [
+        "eliptica",
+        "oblonga",
+        "variable"
+      ],
+      "allowedStates": [
+        "ovada",
+        "eliptica",
+        "oblonga",
+        "lanceolada",
+        "obovada",
+        "orbicular",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "alta",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-017",
+      "source": {
+        "tipo": "Guía oficial / CONAF",
+        "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+        "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+        "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+      },
+      "notes": "CONAF: generalmente elíptica; monografía: oblonga. Conservar variación entre fuentes y ejemplares.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-012",
+      "group": "Hoja",
+      "name": "Ápice foliar",
+      "dataType": "categorico",
+      "expectedStates": [
+        "obtuso",
+        "agudo",
+        "variable"
+      ],
+      "allowedStates": [
+        "agudo",
+        "acuminado",
+        "obtuso",
+        "redondeado",
+        "emarginado",
+        "variable",
+        "no_observable"
+      ],
+      "variability": "media",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-017",
+      "source": {
+        "tipo": "Guía oficial / CONAF",
+        "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+        "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+        "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+      },
+      "notes": "Ápice obtuso o poco agudo.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-014",
+      "group": "Reproductivo",
+      "name": "Tipo de inflorescencia/flor diagnóstica",
+      "dataType": "texto",
+      "expectedStates": [
+        "panicula_corta_axilar_flor_blanco_amarillenta_estrellada"
+      ],
+      "allowedStates": [
+        "texto libre"
+      ],
+      "variability": "baja",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-017",
+      "source": {
+        "tipo": "Guía oficial / CONAF",
+        "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+        "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+        "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+      },
+      "notes": "Panículas cortas axilares; flores blanquecinas/blanco-amarillentas.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-013",
+      "group": "Reproductivo",
+      "name": "Tipo de fruto diagnóstico",
+      "dataType": "texto",
+      "expectedStates": [
+        "pentafoliculo_estrellado_cinco_secciones"
+      ],
+      "allowedStates": [
+        "texto libre"
+      ],
+      "variability": "baja",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-017",
+      "source": {
+        "tipo": "Guía oficial / CONAF",
+        "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+        "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+        "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+      },
+      "notes": "Fruto pentafolículo de forma estrellada.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-026",
+      "group": "Pubescencia del fruto",
+      "name": "Reproductivo",
+      "dataType": "categórico",
+      "expectedStates": [
+        "tomentoso"
+      ],
+      "allowedStates": [
+        "tomentoso",
+        "glabro",
+        "no_se"
+      ],
+      "variability": "baja",
+      "imageObservability": "Sí",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio-alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-017",
+      "source": {
+        "tipo": "Guía oficial / CONAF",
+        "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+        "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+        "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+      },
+      "notes": "Fruto marrón oscuro y tomentoso.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    },
+    {
+      "characterId": "CH-027",
+      "group": "Semillas aladas",
+      "name": "Reproductivo",
+      "dataType": "categórico",
+      "expectedStates": [
+        "si"
+      ],
+      "allowedStates": [
+        "si",
+        "no",
+        "no_se"
+      ],
+      "variability": "baja",
+      "imageObservability": "Parcial",
+      "fieldObservability": "Sí",
+      "diagnosticPower": "medio-alto",
+      "interactionSafety": "seguro",
+      "observationCost": "bajo",
+      "confidence": "alta",
+      "sourceId": "F-019",
+      "source": {
+        "tipo": "Ficha oficial / CONAF",
+        "referencia": "CONAF Programa de Arborización. Ficha Quillay, Quillaja saponaria.",
+        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
+        "url": "https://oficinavirtual.conaf.cl/recursos/man_tec_otros/Fichas%20de%20especies/Quillay.pdf",
+        "notas": "Árbol siempreverde; hojas simples alternas duras; flores estrelladas blanco-amarillentas; fruto de cinco secciones con semillas aladas; floración octubre-enero."
+      },
+      "notes": "Fruto contiene numerosas semillas aladas.",
+      "validation": {
+        "valid": true,
+        "invalidStates": []
+      }
+    }
+  ],
+  "validation": {
+    "warningCount": 0,
+    "warnings": []
+  }
+}

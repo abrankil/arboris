@@ -1,0 +1,152 @@
+{
+  "dataVersion": "pilot-master-v0.1",
+  "source": "Base_botanica_Pokedex_flora_Master.xlsx",
+  "sheet": "Fuentes",
+  "recordCount": 18,
+  "records": [
+    {
+      "fuente_id": "F-001",
+      "tipo": "Catálogo taxonómico",
+      "referencia": "Rodríguez et al. (2018). Catálogo de las plantas vasculares de Chile. Gayana Botánica 75(1):1-430.",
+      "uso_prioritario": "Taxonomía, nombre aceptado, distribución, origen",
+      "url": "https://catalogoplantas.udec.cl/",
+      "notas": "Autoridad taxonómica principal del proyecto."
+    },
+    {
+      "fuente_id": "F-002",
+      "tipo": "Flora/clave",
+      "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+      "uso_prioritario": "Morfología y claves de árboles",
+      "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+      "notas": "Fuente morfológica prioritaria para especies arbóreas."
+    },
+    {
+      "fuente_id": "F-003",
+      "tipo": "Flora/clave",
+      "referencia": "Marticorena & Rodríguez (eds.). Flora de Chile; tratamientos de familias.",
+      "uso_prioritario": "Claves y tratamientos taxonómicos",
+      "url": null,
+      "notas": "Completar volumen/páginas por carácter cuando se incorporen las claves físicas."
+    },
+    {
+      "fuente_id": "F-004",
+      "tipo": "Registro de terreno",
+      "referencia": "Observaciones y validación humana del piloto.",
+      "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+      "url": null,
+      "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+    },
+    {
+      "fuente_id": "F-005",
+      "tipo": "Monografía técnica",
+      "referencia": "Benedetti, S. (ed.) (2012). Monografía de Peumo, Cryptocarya alba. Instituto Forestal (INFOR).",
+      "uso_prioritario": "Variación foliar, anatomía y ecología del peumo",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2018/11/004_2011-DOCUMENTOS_MONOGRAFIA_PEUMO.pdf",
+      "notas": "Compila Rodríguez et al. (1983) y antecedentes sobre hojas de luz/sombra y sequía."
+    },
+    {
+      "fuente_id": "F-006",
+      "tipo": "Descripción dendrológica complementaria",
+      "referencia": "Trees and Shrubs Online. Cryptocarya alba.",
+      "uso_prioritario": "Venación y superficies foliares como apoyo, no autoridad taxonómica",
+      "url": "https://www.treesandshrubsonline.org/articles/cryptocarya/cryptocarya-alba/",
+      "notas": "Usar para hipótesis de caracteres que luego deben contrastarse con fuente botánica primaria."
+    },
+    {
+      "fuente_id": "F-007",
+      "tipo": "Guía oficial / CONAF",
+      "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
+      "uso_prioritario": "Morfología foliar y reproductiva de litre",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+      "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+    },
+    {
+      "fuente_id": "F-008",
+      "tipo": "Informe técnico / CONAF",
+      "referencia": "CONAF. Ficha Litre (Lithrea caustica), citando García y Ormazábal (2008).",
+      "uso_prioritario": "Rasgo visual de nervadura y morfología general",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2025/11/IF-FIBN-0042018.pdf",
+      "notas": "Destaca el contraste característico entre nervadura amarilla y lámina verde; usar como apoyo visual."
+    },
+    {
+      "fuente_id": "F-010",
+      "tipo": "Catálogo taxonómico",
+      "referencia": "Rodríguez et al. (2018). Catálogo de las plantas vasculares de Chile. Ficha Podanthus mitiqui Lindl.",
+      "uso_prioritario": "Taxonomía, endemismo, distribución y altitud",
+      "url": "https://catalogoplantas.udec.cl/?q=node%2F2459",
+      "notas": "Asteraceae; arbusto endémico; COQ, VAL, RME, LBO, MAU, NUB; 0–2000 m; nombres comunes mitique y mitriu."
+    },
+    {
+      "fuente_id": "F-011",
+      "tipo": "Guía oficial / SAG",
+      "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Podanthus mitiqui.",
+      "uso_prioritario": "Hábito, hojas, capítulos y fenología",
+      "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+      "notas": "Arbusto hasta 2,5 m; hojas opuestas, aserradas y ásperas; capítulos globosos solitarios amarillos; floración primaveral."
+    },
+    {
+      "fuente_id": "F-012",
+      "tipo": "Guía botánica / Fundación Philippi",
+      "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Podanthus mitiqui.",
+      "uso_prioritario": "Morfología foliar, sexualidad, flores, fruto y ecología",
+      "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+      "notas": "Hojas opuesto-decusadas, simples, ovado-lanceoladas a lanceoladas, envés áspero-glanduloso; planta dioica; cabezuelas esféricas amarillas; aquenio sin vilano; asociada al matorral y bosque esclerófilos."
+    },
+    {
+      "fuente_id": "F-013",
+      "tipo": "Catálogo taxonómico",
+      "referencia": "Rodríguez et al. (2018). Catálogo de las plantas vasculares de Chile. Ficha Colliguaja odorifera Molina.",
+      "uso_prioritario": "Taxonomía, endemismo, distribución y altitud",
+      "url": "https://catalogoplantas.udec.cl/?q=node%2F3775",
+      "notas": "Arbusto endémico; ANT, ATA, COQ, VAL, RME, LBO, MAU, BIO; 0–1300 m; nombre común Colliguay."
+    },
+    {
+      "fuente_id": "F-014",
+      "tipo": "Guía oficial / SAG",
+      "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
+      "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
+      "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+      "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
+    },
+    {
+      "fuente_id": "F-015",
+      "tipo": "Ficha botánica / Fundación Philippi",
+      "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
+      "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
+      "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
+      "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
+    },
+    {
+      "fuente_id": "F-016",
+      "tipo": "Catálogo taxonómico",
+      "referencia": "Rodríguez et al. (2018). Catálogo de las plantas vasculares de Chile. Ficha Quillaja saponaria Molina.",
+      "uso_prioritario": "Taxonomía, endemismo, distribución y altitud",
+      "url": "https://catalogoplantas.udec.cl/?q=node%2F5045",
+      "notas": "Quillajaceae; árbol endémico; COQ, VAL, RME, LBO, MAU, NUB, BIO, ARA; 10–2000 m; nombre común Quillay."
+    },
+    {
+      "fuente_id": "F-017",
+      "tipo": "Guía oficial / CONAF",
+      "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+      "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+      "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+    },
+    {
+      "fuente_id": "F-018",
+      "tipo": "Monografía técnica / INFOR-CONAF",
+      "referencia": "Monografía de Quillay, Quillaja saponaria. INFOR/CONAF.",
+      "uso_prioritario": "Morfología, hábito y variación foliar",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2018/11/004_2011-DOCUMENTOS_MONOGRAFIA_QUILLAY.pdf",
+      "notas": "Siempreverde; hojas esclerófilas, alternas, perennes, coriáceas, oblongas y de borde casi liso; frutos polifolículos estrellados que permanecen secos y abiertos en el árbol."
+    },
+    {
+      "fuente_id": "F-019",
+      "tipo": "Ficha oficial / CONAF",
+      "referencia": "CONAF Programa de Arborización. Ficha Quillay, Quillaja saponaria.",
+      "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
+      "url": "https://oficinavirtual.conaf.cl/recursos/man_tec_otros/Fichas%20de%20especies/Quillay.pdf",
+      "notas": "Árbol siempreverde; hojas simples alternas duras; flores estrelladas blanco-amarillentas; fruto de cinco secciones con semillas aladas; floración octubre-enero."
+    }
+  ]
+}
