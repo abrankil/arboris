@@ -1,0 +1,53 @@
+{
+  "id": "CHAR_SP007",
+  "speciesId": "SP007",
+  "name": "Boldo",
+  "displayName": "El Boldo",
+  "status": "diseño vigente — limpieza manual v1; sujeto a cambios posteriores",
+  "visualIdentity": {
+    "characterBasis": "Personaje basado en la hoja coriácea de Boldo (Peumus boldus).",
+    "body": "Hoja oblonga y ancha, de verde bosque oliva oscuro, con superficie mate y textura agrupada.",
+    "face": "Dos ojos pequeños y expresivos integrados en la zona inferior de la hoja.",
+    "companions": [
+      "Fruto pequeño de color burgundy-púrpura, separado de la hoja.",
+      "Flor clara compacta, separada del fruto y del pecíolo."
+    ],
+    "petiole": "Pecíolo estrecho y corto, claramente conectado a la base de la hoja.",
+    "locomotion": "Flota de manera independiente, sin piernas ni contacto con el suelo.",
+    "style": "HD-2D pixel art 1:1, píxeles cuadrados, contorno escalonado, clusters legibles y paleta limitada de Arboris."
+  },
+  "designBrief": {
+    "directionSource": "Diseño previo revisado y unificado con el canon de Arboris; paleta oscura ajustada a referencias fotográficas de Boldo.",
+    "body": "Conservar la silueta oblonga inclinada y la textura coriácea oscura.",
+    "face": "Conservar dos ojos pequeños con brillos mínimos.",
+    "companions": "Mantener fruto y flor como elementos secundarios, con separación visible para lectura y edición.",
+    "deliveryTarget": "PNG RGBA 125x125 real, alfa binario y proyecto PXO asociado.",
+    "futureChanges": "Todos los rasgos visuales, la paleta, los acompañantes y la ficha quedan sujetos a cambios posteriores mediante una nueva versión documentada."
+  },
+  "selectedDesign": {
+    "version": "manual-cleanup-v1",
+    "asset": "SP007_boldo/assets/boldo-pixelorama-125x125.png",
+    "source": "SP007_boldo/assets/boldo-pixelorama-125x125.png.pxo",
+    "dimensions": "125x125",
+    "isCanonical": true,
+    "format": "PNG RGBA",
+    "alpha": "binario: 0 o 255"
+  },
+  "designApproval": {
+    "approved": true,
+    "approvedBy": "Alvaro",
+    "approvedAt": "2026-09-15",
+    "scope": "Integración del Boldo como personaje botánico canon; aprobación revisable en versiones posteriores."
+  },
+  "provenance": {
+    "source": "PNG limpiado manualmente entregado por el usuario desde output/boldo/boldo-pixelorama-revision-v1.png.",
+    "sha256": "2cf3f4fba8153a372d24894b665004d00b9c95b82d99c4c7d3e70b56433e630a",
+    "editableSha256": "9ca4beec351000a5e64a27e8174a4d97b406431313ce8bb811d6e1a2a46a0773",
+    "sources": [
+      "docs/ART_STYLE_GUIDE.md",
+      "docs/GRAPHIC_DIRECTION.md",
+      "Referencia fotográfica consultada: Peumus boldus, haz verde oscuro y hoja coriácea."
+    ],
+    "designDecision": "Boldo se incorpora como personaje botánico canon adicional, sin fijar un número total de personajes para Arboris."
+  }
+}
