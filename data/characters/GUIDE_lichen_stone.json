@@ -1,0 +1,31 @@
+{
+  "id": "CHAR_GUIDE_LICHEN_STONE",
+  "category": "support-guide",
+  "name": "Piedra-guía",
+  "displayName": "La Piedra-guía de líquen",
+  "status": "diseño vigente — limpieza manual v1",
+  "role": "Guía y asistencia durante la exploración, observación y navegación del juego.",
+  "botanicalEntity": false,
+  "visualIdentity": {
+    "characterBasis": "Piedra redondeada cubierta parcialmente por líquen; personaje auxiliar no asociado a una especie botánica del catálogo.",
+    "body": "Roca compacta, baja y ligeramente irregular, con planos minerales legibles en tonos gris cálido, taupe y café grisáceo.",
+    "lichen": "Manto de líquen verde salvia y chartreuse pálido, asimétrico, sobre la zona superior izquierda; funciona como rasgo distintivo.",
+    "face": "Dos ojos pequeños y oscuros con brillos discretos, más una boca mínima y amable.",
+    "locomotion": "Personaje auxiliar flotante o anclado según la escena; el sprite base no incluye suelo, sombra ni escenario.",
+    "style": "HD-2D pixel art 1:1, píxeles cuadrados, contorno escalonado, clusters legibles, paleta limitada y transparencia real."
+  },
+  "selectedDesign": {
+    "version": "manual-cleanup-v1",
+    "asset": "shared/guides/piedra-guia-pixelorama-125x125.png",
+    "dimensions": "125x125",
+    "isCanonical": true,
+    "format": "PNG RGBA",
+    "alpha": "binario: 0 o 255"
+  },
+  "provenance": {
+    "source": "PNG limpiado manualmente entregado por Alvaro: output/piedra-guia/piedra-guia-pixelorama-125x125.png, relativo al espacio de trabajo Proyectos.",
+    "sha256": "e27466cbd693267fb63354675a631f42cbf8eb09b8ff16bb00f35ab8e1232660",
+    "designDecision": "La propuesta aprobada por Alejandra se integra como personaje auxiliar de guía y asistencia. Se conserva la roca con líquen, el rostro y la paleta de la limpieza manual; el archivo no representa una especie ni amplía el catálogo botánico por sí mismo.",
+    "reference": "Piedra liquen.jpg, referencia visual entregada por el usuario; se usó para forma y cobertura de líquen, no para copiar fondo, suelo o elementos vegetales."
+  }
+}

@@ -8,15 +8,15 @@ Esta es la fuente técnica común para personajes, escenarios, animaciones y rec
 
 Arboris representa flora nativa real de Chile. La estilización conserva los rasgos que permiten reconocer cada especie: forma, margen y nervaduras de hojas; porte y follaje ambiental; estructuras reproductivas y contexto ecológico. Revisar fotografías y ficha antes de proponer. Registrar las correcciones del usuario y Alejandra como decisiones de diseño atribuidas, sin convertirlas automáticamente en reglas botánicas universales.
 
-Los personajes usan la hoja como cuerpo principal. Frutos, flores y cápsulas pueden ser mascotas, accesorios, herramientas, armas o elementos expresivos cuando el diseño de esa especie lo contemple. Su presencia no es obligatoria ni aprueba una mecánica de juego. En Mitique se acordó una hoja única sin anexos.
+Los personajes de colección usan la hoja como cuerpo principal. Frutos, flores y cápsulas pueden ser mascotas, accesorios, herramientas, armas o elementos expresivos cuando el diseño de esa especie lo contemple. Su presencia no es obligatoria ni aprueba una mecánica de juego. En Mitique se acordó una hoja única sin anexos. Arboris también puede incorporar personajes auxiliares no botánicos, como la Piedra-guía de líquen, que deben conservar el lenguaje técnico común sin fingir pertenecer a una especie del catálogo.
 
 ## Lenguaje común de personajes
 
-Litrini establece la referencia técnica: pixel art HD-2D de inspiración 16-bit, píxeles cuadrados legibles, contorno oscuro consistente, bordes escalonados y sombreado por clusters. La unidad procede de la técnica, no de imponer la misma paleta o proporción de hoja.
+Litrini establece la referencia técnica: pixel art HD-2D de inspiración 16-bit, píxeles cuadrados legibles, contorno oscuro consistente, bordes escalonados y sombreado por clusters. La unidad procede de la técnica, no de imponer la misma paleta o proporción de hoja ni de exigir que todo personaje tenga forma vegetal.
 
 El rostro usa dos ojos pequeños, simples y expresivos; su ubicación se adapta a la morfología. La inclinación, el tallo cuando exista y la interacción con el compañero aportan expresividad.
 
-Todos flotan de manera independiente, sin piernas. Un pecíolo, tallo o ramilla puede ser cola, soporte visual o elemento expresivo, sin contacto obligatorio con el suelo. La extrañeza amable y el humor orgánico de *Botanicula* son referencias de tono, sin copiar diseños concretos.
+Los personajes de colección flotan de manera independiente, sin piernas. Los personajes auxiliares pueden adoptar otra lógica de presencia si el diseño y la escena lo requieren; su sprite base debe declarar esa excepción. Un pecíolo, tallo o ramilla puede ser cola, soporte visual o elemento expresivo, sin contacto obligatorio con el suelo. La extrañeza amable y el humor orgánico de *Botanicula* son referencias de tono, sin copiar diseños concretos.
 
 Conservar las decisiones de las [fichas vigentes](../data/characters/index.json): nervaduras bifurcadas de Litrini; ausencia de pecíolo y verde azulado grisáceo de Peumito; ápice acunatado con forma de corazón o coronilla, ondulación moderada y dos dientes suaves por lado de Quillai; hoja única, ápice prolongado y nervadura fina de Mitique; margen aserrado continuo y fruto oscuro de Bollén. Las cápsulas sugeridas en la ficha de Quillai no obligan a agregarlas al PNG aprobado.
 
@@ -30,6 +30,10 @@ Conservar las decisiones de las [fichas vigentes](../data/characters/index.json)
 | Ampliación de presentación | Derivado a múltiplo entero mediante nearest-neighbor | 125×125 a 4× produce 500×500; no añade detalle ni reemplaza el editable. |
 
 Toda entrega editable debe incluir el PNG base con transparencia real donde no hay personaje, sin patrón cuadriculado pintado. Para nuevos sprites sólidos, usar píxeles opacos y fondo transparente, sin antialiasing, suavizado ni semitransparencias accidentales. Una excepción expresiva se documenta y revisa por separado.
+
+### Decisión de trabajo confirmada
+
+El lienzo común sigue siendo 125×125 px y se edita en Pixelorama a relación 1:1. La unidad de dibujo de los personajes oficiales es un píxel real de 1×1 px, usando pincel de 1 px. El área efectiva del personaje puede ser menor y variar según la especie; el espacio transparente conserva el encuadre y la alineación común. No usar pinceles de 2 px o 4 px ni convertir automáticamente los sprites aprobados a bloques mayores.
 
 Conservar el `.pxo` si el usuario lo entrega y registrar su ubicación. No inventarlo ni afirmar que coincide con el PNG solo por nombre, tamaño o fecha. Abrir un PNG en Pixelorama permite editarlo, pero no recupera capas que no fueron entregadas.
 

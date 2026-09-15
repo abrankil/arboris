@@ -21,7 +21,7 @@ La dirección del proyecto corresponde a Alejandra; la dirección artística y l
 
 ## Graphic development
 
-Start with the [graphic direction and working method](docs/GRAPHIC_DIRECTION.md), then apply the [unified art guide](docs/ART_STYLE_GUIDE.md). The initial six-character collection is summarized in the [final character collection](docs/CHARACTER_COLLECTION_FINAL.md). Current resources are tracked in the [character status](docs/CHARACTER_DESIGN_STATUS.md), [character index](data/characters/index.json), and [environment catalogue](docs/assets/backgrounds/README.md).
+Start with the [graphic direction and working method](docs/GRAPHIC_DIRECTION.md), then apply the [unified art guide](docs/ART_STYLE_GUIDE.md). The first completed six-character collection is summarized in the [final character collection](docs/CHARACTER_COLLECTION_FINAL.md); this does not define the future size of the cast. Current resources are tracked in the [character status](docs/CHARACTER_DESIGN_STATUS.md), [character index](data/characters/index.json), and [environment catalogue](docs/assets/backgrounds/README.md).
 
 For Android, Steam/PC and web environment assets, use the [environment production specification](docs/ENVIRONMENT_PRODUCTION_SPEC.md).
 

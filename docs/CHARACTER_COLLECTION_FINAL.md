@@ -1,6 +1,6 @@
 # Arboris — colección gráfica inicial finalizada
 
-Estado de consolidación: 2026-09-14. Los seis personajes principales tienen un diseño gráfico aprobado, un sprite canónico y una entrega en PNG RGBA de 125×125 píxeles reales para Pixelorama. La copia ubicada en `data/characters/*/assets/` es la fuente operativa del repositorio; `data/characters/index.json` define el conjunto activo.
+Estado de consolidación: 2026-09-14. La primera colección gráfica completada comprende seis personajes con diseño aprobado, sprite canónico y entrega en PNG RGBA de 125×125 píxeles reales para Pixelorama. Esta lista no fija el número total ni definitivo de personajes de Arboris. La copia ubicada en `data/characters/*/assets/` es la fuente operativa del repositorio; `data/characters/index.json` define el conjunto activo.
 
 ## Sprites canónicos
 
@@ -26,4 +26,8 @@ Estado de consolidación: 2026-09-14. Los seis personajes principales tienen un 
 
 Las propuestas y derivaciones superadas no participan del índice activo. Los estudios de producción se conservan en `output/archive/characters/` o en el archivo histórico propio de cada personaje. Las referencias fotográficas y bases de decisión se mantienen separadas de los sprites canónicos.
 
-La aprobación de diseño corresponde a Alvaro como director de arte. Los aportes botánicos y de dirección de proyecto de Alejandra se conservan atribuidos en las fichas individuales. La consolidación de estos seis personajes no cierra todavía los fondos, animaciones, UI ni los sprites específicos de gameplay.
+La aprobación de diseño corresponde a Alvaro como director de arte. Los aportes botánicos y de dirección de proyecto de Alejandra se conservan atribuidos en las fichas individuales. La consolidación de esta primera colección de seis personajes no cierra todavía los fondos, animaciones, UI ni los sprites específicos de gameplay, y no limita futuras incorporaciones al elenco.
+
+## Personaje auxiliar integrado
+
+La [Piedra-guía de líquen](../data/characters/GUIDE_lichen_stone.json) queda integrada como personaje auxiliar de guía y asistencia. Su PNG canónico está en `data/characters/shared/guides/piedra-guia-pixelorama-125x125.png`. No representa una especie botánica, no altera la colección inicial de seis y confirma que Arboris no tiene un número predeterminado de personajes.

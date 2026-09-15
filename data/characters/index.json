@@ -9,6 +9,9 @@
     "SP003_bollen.json",
     "SP005_colliguay.json"
   ],
+  "supportCharacters": [
+    "GUIDE_lichen_stone.json"
+  ],
   "sharedAssets": {
     "animationPolicy": {
       "status": "pendiente de nueva animación",
@@ -35,6 +38,9 @@
     },
     "promotional": [
       "shared/promotional/arboris-tres-personajes-125x125.png"
+    ],
+    "guides": [
+      "shared/guides/piedra-guia-pixelorama-125x125.png"
     ],
     "discardedProposals": []
   }

@@ -6,7 +6,7 @@ En Arboris, explorar la flora nativa chilena permite convertir la curiosidad en 
 
 Este marco conecta la [visión del producto](PRODUCT_VISION.md), los [principios permanentes](PRODUCT_PRINCIPLES.md) y los [requerimientos funcionales](FUNCTIONAL_REQUIREMENTS.md), especialmente RF-09, RF-14, RF-15 y RF-22. Organiza las decisiones gráficas; no define nuevos poderes, combates, antagonistas, reglas de desbloqueo ni una trama cerrada.
 
-El jugador observa y descubre. Los personajes representan especies conocidas. Los escenarios sitúan esos encuentros en un ecosistema. La interfaz ayuda a distinguir evidencia, dudas, descubrimientos y progreso. El tono compartido es curioso, orgánico, amable y de humor discreto.
+El jugador observa y descubre. Los personajes de colección representan especies conocidas; los personajes auxiliares pueden orientar, asistir o conectar sistemas sin representar una especie. Los escenarios sitúan esos encuentros en un ecosistema. La interfaz ayuda a distinguir evidencia, dudas, descubrimientos y progreso. El tono compartido es curioso, orgánico, amable y de humor discreto.
 
 ## Responsables y ámbitos de decisión
 
@@ -63,6 +63,7 @@ Estas son identidades gráficas, no personalidades ni habilidades narrativas asi
 | Mitique · SP004 | Hoja única ancha en la zona media, ápice alargado, hasta tres dientes suaves por lado y nervadura fina blanquecina | Ninguno |
 | Quillay / Quillai · SP006 | Hoja con dos dientes suaves por lado y coronilla característica | Sin accesorio separado en el PNG vigente; las posibilidades de la ficha no equivalen a un asset aprobado |
 | Colliguay · SP005 | Diseño y limpieza manual aprobados por Alvaro; puntas rojizas con proporción conservada, según foto cromática aprobada por Alejandra. PNG 125×125 1:1 canónico | Hoja única con pecíolo corto; sin acompañante en la versión elegida |
+| Piedra-guía de líquen · auxiliar | Diseño y limpieza manual aprobados; personaje de asistencia no botánico, PNG 125×125 1:1 canónico | Roca compacta con manto de líquen y rostro amable; sin suelo ni escenario en el sprite |
 
 ## Flujo de una tarea
 
