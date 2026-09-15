@@ -1,6 +1,6 @@
 # Arboris — colección gráfica inicial finalizada
 
-Estado de consolidación: 2026-09-14. La primera colección gráfica completada comprende seis personajes con diseño aprobado, sprite canónico y entrega en PNG RGBA de 125×125 píxeles reales para Pixelorama. Esta lista no fija el número total ni definitivo de personajes de Arboris. La copia ubicada en `data/characters/*/assets/` es la fuente operativa del repositorio; `data/characters/index.json` define el conjunto activo.
+Estado de consolidación: 2026-09-15. La colección gráfica inicial de seis personajes se amplía con Boldo como personaje botánico canon adicional. Esta lista no fija el número total ni definitivo de personajes de Arboris y todos los diseños permanecen sujetos a cambios posteriores. La copia ubicada en `data/characters/*/assets/` es la fuente operativa del repositorio; `data/characters/index.json` define el conjunto activo.
 
 ## Sprites canónicos
 
@@ -12,6 +12,7 @@ Estado de consolidación: 2026-09-14. La primera colección gráfica completada 
 | SP004 | Mitique / Mitiqui | technical-cleanup-v2 | `SP004_mitique/assets/mitique-pixelorama-125x125.png` | `d753efa0f28601382024e1bfc228e4243d0814eccb252442f2e7dc2fef477f35` | Hoja ancha, ápice alargado, dientes suaves y nervadura blanquecina fina. |
 | SP005 | Colliguay | manual-cleanup-v1 | `SP005_colliguay/assets/colliguay-pixelorama-125x125.png` | `a09076ef4d80a15449499734894e3c6dca0e66bbc87d2ea1dd8f73b339ea9cf5` | Hoja aovada de ápice redondeado con puntas rojizas y nervaduras discretas. |
 | SP006 | Quillay / Quillai | manual-cleanup-v2 | `SP006_quillay/assets/quillai-layer-125x125.png` | `1f8ef89847702e51c7593bbea17b81182bdee2cf5d2a9cf9af39909a8845a877` | Hoja ancha con margen mayormente entero, dientes suaves y coronilla característica. |
+| SP007 | Boldo | manual-cleanup-v1 | `SP007_boldo/assets/boldo-pixelorama-125x125.png` | `2cf3f4fba8153a372d24894b665004d00b9c95b82d99c4c7d3e70b56433e630a` | Hoja oblonga verde bosque oliva oscuro, con textura coriácea, fruto burgundy y flor clara separados. |
 
 ## Contrato común verificado
 
@@ -26,7 +27,7 @@ Estado de consolidación: 2026-09-14. La primera colección gráfica completada 
 
 Las propuestas y derivaciones superadas no participan del índice activo. Los estudios de producción se conservan en `output/archive/characters/` o en el archivo histórico propio de cada personaje. Las referencias fotográficas y bases de decisión se mantienen separadas de los sprites canónicos.
 
-La aprobación de diseño corresponde a Alvaro como director de arte. Los aportes botánicos y de dirección de proyecto de Alejandra se conservan atribuidos en las fichas individuales. La consolidación de esta primera colección de seis personajes no cierra todavía los fondos, animaciones, UI ni los sprites específicos de gameplay, y no limita futuras incorporaciones al elenco.
+La aprobación de diseño corresponde a Alvaro como director de arte. Los aportes botánicos y de dirección de proyecto de Alejandra se conservan atribuidos en las fichas individuales. La consolidación de esta colección no cierra todavía los fondos, animaciones, UI ni los sprites específicos de gameplay, y no limita futuras incorporaciones ni cambios posteriores del elenco.
 
 ## Personaje auxiliar integrado
 

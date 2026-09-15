@@ -7,7 +7,8 @@
     "SP001_peumo.json",
     "SP004_mitique.json",
     "SP003_bollen.json",
-    "SP005_colliguay.json"
+    "SP005_colliguay.json",
+    "SP007_boldo.json"
   ],
   "supportCharacters": [
     "GUIDE_lichen_stone.json"
@@ -32,9 +33,10 @@
         "SP001_peumo/assets/peumito-layer-125x125.png",
         "SP004_mitique/assets/mitique-pixelorama-125x125.png",
         "SP003_bollen/assets/bollen-pixelorama-125x125.png",
-        "SP005_colliguay/assets/colliguay-pixelorama-125x125.png"
+        "SP005_colliguay/assets/colliguay-pixelorama-125x125.png",
+        "SP007_boldo/assets/boldo-pixelorama-125x125.png"
       ],
-      "compositingOrder": ["background", "litrini", "quillai", "peumito", "mitique", "bollen", "colliguay"]
+      "compositingOrder": ["background", "litrini", "quillai", "peumito", "mitique", "bollen", "colliguay", "boldo"]
     },
     "promotional": [
       "shared/promotional/arboris-tres-personajes-125x125.png"

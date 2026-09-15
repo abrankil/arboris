@@ -14,6 +14,7 @@ El argumento y el método de trabajo están en [GRAPHIC_DIRECTION.md](GRAPHIC_DI
 - **Mitiqui / Mitique** — `SP004`, sprite con limpieza técnica v2, 125×125 px y alpha binario.
 - **Bollén** — `SP003`, sprite limpiado manualmente v1, 125×125 px, PNG RGBA con transparencia binaria. La limpieza manual reemplaza la propuesta previa.
 - **Colliguay** — `SP005`, sprite limpiado manualmente v1, 125×125 px, PNG RGBA con transparencia binaria. La limpieza manual reemplaza la propuesta previa.
+- **Boldo** — `SP007`, sprite limpiado manualmente v1, 125×125 px, PNG RGBA con transparencia binaria y proyecto `.pxo` asociado. Personaje botánico canon adicional, sujeto a cambios posteriores.
 
 Los personajes canónicos actuales comparten hojas como cuerpo, ojos pequeños, flotación independiente y dirección HD-2D. Frutos, flores o cápsulas pueden actuar como mascotas, accesorios o armas según cada diseño. El formato y la transparencia se verifican aparte de la aprobación visual; ver pendientes técnicos más abajo. Esta colección inicial no fija el número total de personajes de Arboris.
 
@@ -37,6 +38,7 @@ La decisión vigente mantiene la edición 1:1 en Pixelorama con pincel de 1 px. 
 - Bollén vigente: `data/characters/SP003_bollen/assets/bollen-pixelorama-125x125.png`, copia exacta del PNG limpiado por el usuario. Se conserva la entrega de trabajo en `../output/bollen/bollen-pixelorama-125x125.png` respecto de la raíz de Arboris.
 - Mitique vigente: `data/characters/SP004_mitique/assets/mitique-pixelorama-125x125.png`, sincronizado con la capa RGBA de `../output/mitique/mitique-pixelorama-125x125.png.pxo` respecto de la raíz de Arboris.
 - Colliguay vigente: `data/characters/SP005_colliguay/assets/colliguay-pixelorama-125x125.png`, copia exacta del PNG limpiado por el usuario. Las propuestas y registros de exploración están en `../output/colliguay/archive/` respecto de la raíz de Arboris.
+- Boldo vigente: `data/characters/SP007_boldo/assets/boldo-pixelorama-125x125.png`, copia exacta del PNG limpiado por el usuario. Su fuente editable asociada es `data/characters/SP007_boldo/assets/boldo-pixelorama-125x125.png.pxo`.
 
 El antiguo fondo `background-125x125.png` y el GIF de 125×125 fueron eliminados por resolución insuficiente. Los fondos ambientales se mantienen fuera de la galería de personajes y se versionan en `docs/assets/backgrounds/`, con variantes panorámicas y cuadradas HD-2D. La primera composición ya está separada en cuatro capas de parallax reutilizables.
 

@@ -18,6 +18,14 @@ El rostro usa dos ojos pequeños, simples y expresivos; su ubicación se adapta 
 
 Los personajes de colección flotan de manera independiente, sin piernas. Los personajes auxiliares pueden adoptar otra lógica de presencia si el diseño y la escena lo requieren; su sprite base debe declarar esa excepción. Un pecíolo, tallo o ramilla puede ser cola, soporte visual o elemento expresivo, sin contacto obligatorio con el suelo. La extrañeza amable y el humor orgánico de *Botanicula* son referencias de tono, sin copiar diseños concretos.
 
+### Pauta para personajes auxiliares de guía
+
+La Piedra-guía de líquen establece el primer caso de personaje auxiliar no botánico. Su función es orientar y asistir durante la exploración, observación y navegación, pero sus capacidades concretas, diálogos y estados de interacción permanecen abiertos hasta definir el diseño de juego. Debe distinguirse visualmente de los personajes-especie sin romper el lenguaje común: silueta compacta, contorno escalonado, sombreado por clusters, rostro pequeño y paleta deliberadamente limitada.
+
+Para una piedra cubierta de líquen, conservar como rasgos de identidad la masa rocosa baja y redondeada, los planos minerales en grises cálidos y taupe, y un manto de líquen asimétrico en verde salvia o chartreuse pálido. El líquen debe leerse como cobertura orgánica sobre la roca, no como una segunda criatura ni como follaje ambiental. El sprite base no incluye suelo, sombra proyectada, partículas ni escenario; esos elementos pertenecen a la composición de la escena.
+
+La locomoción puede declararse flotante o anclada según la escena. Esta excepción no modifica la regla de que los personajes de colección flotan de manera independiente. Los accesorios, efectos de ayuda y poses de interacción se producirán como derivados separados, sin alterar el sprite base aprobado.
+
 Conservar las decisiones de las [fichas vigentes](../data/characters/index.json): nervaduras bifurcadas de Litrini; ausencia de pecíolo y verde azulado grisáceo de Peumito; ápice acunatado con forma de corazón o coronilla, ondulación moderada y dos dientes suaves por lado de Quillai; hoja única, ápice prolongado y nervadura fina de Mitique; margen aserrado continuo y fruto oscuro de Bollén. Las cápsulas sugeridas en la ficha de Quillai no obligan a agregarlas al PNG aprobado.
 
 ## Contrato para Pixelorama
@@ -35,9 +43,35 @@ Toda entrega editable debe incluir el PNG base con transparencia real donde no h
 
 El lienzo común sigue siendo 125×125 px y se edita en Pixelorama a relación 1:1. La unidad de dibujo de los personajes oficiales es un píxel real de 1×1 px, usando pincel de 1 px. El área efectiva del personaje puede ser menor y variar según la especie; el espacio transparente conserva el encuadre y la alineación común. No usar pinceles de 2 px o 4 px ni convertir automáticamente los sprites aprobados a bloques mayores.
 
+### Regla obligatoria para una revisión en Pixelorama
+
+Una entrega para limpieza debe cumplir simultáneamente estas condiciones:
+
+1. El archivo es un PNG RGBA de 125×125 px, no una imagen grande presentada dentro de un cuadrado ni un recorte con proporción aproximada.
+2. Cada píxel visible corresponde a una celda nativa del lienzo objetivo; no se acepta declarar “1:1” solo por tener dimensiones cuadradas o por haber reducido una imagen generada.
+3. La reducción, si fue necesaria para preparar la referencia, se considera un paso intermedio: el archivo debe revisarse a zoom entero en Pixelorama y redibujarse o corregirse sobre la cuadrícula de 125×125 antes de llamarlo editable 1:1.
+4. El fondo debe ser transparencia real. No se acepta una cuadrícula dibujada, un fondo blanco, semitransparencias accidentales ni bordes suavizados como sustitutos del alfa.
+5. La composición debe dejar margen suficiente para editar contorno, pecíolo, rostro y accesorios sin que elementos separados queden fusionados; el área ocupada no tiene que llenar el lienzo y se compara visualmente con los sprites aprobados.
+
+El estado correcto de una imagen recién generada o reducida es “referencia para limpieza 125×125”, no “sprite Pixelorama verificado”. Solo después de la revisión visual y la limpieza manual puede pasar al estado “editable verificado”.
+
 Conservar el `.pxo` si el usuario lo entrega y registrar su ubicación. No inventarlo ni afirmar que coincide con el PNG solo por nombre, tamaño o fecha. Abrir un PNG en Pixelorama permite editarlo, pero no recupera capas que no fueron entregadas.
 
 Una generación de alta resolución es una propuesta o referencia. Pedir “125×125” al generador no garantiza dimensiones ni cuadrícula nativa. Una reducción automática tampoco completa la adaptación artística: requiere revisión y, si procede, limpieza sobre la cuadrícula objetivo antes de declararse entrega 1:1. Reducir el número de colores no corrige por sí solo el píxel.
+
+### Protocolo de generación: salida limpia para revisión
+
+La experiencia de Boldo confirma que la mejor salida para iniciar la limpieza es un PNG ya depurado, aunque todavía sea una referencia para redibujado nativo. Toda generación nueva debe seguir esta secuencia:
+
+1. Generar desde la ficha botánica, el modelo aprobado y las referencias de estilo, separando explícitamente qué rasgos se conservan y qué se modifica.
+2. Eliminar el fondo simulado y conservar únicamente transparencia real; nunca interpretar una cuadrícula dibujada como alfa.
+3. Preparar un PNG cuadrado de 125×125 px mediante vecino más cercano, sin interpolación, blur ni antialiasing.
+4. Auditar los bordes a zoom entero: retirar píxeles fantasmas, píxeles aislados, restos del fondo, halos claros y protuberancias que no pertenezcan a la silueta. Revisar especialmente pecíolos, puntas, ojos y accesorios separados.
+5. Mantener una separación visible entre elementos independientes —por ejemplo, fruto, flor y hoja— para que puedan limpiarse sin fusionarse accidentalmente.
+6. Verificar dimensiones, modo RGBA y alfa binario. Si la imagen proviene de una generación o reducción, etiquetarla como `revision` hasta que haya sido corregida manualmente en Pixelorama.
+7. Conservar la versión previa y guardar el `.pxo` únicamente desde Pixelorama; el PNG y el `.pxo` se entregan como pareja cuando la limpieza manual haya terminado.
+
+El criterio de calidad de esta etapa no es producir más detalle, sino reducir el trabajo correctivo: la salida debe llegar con pocos píxeles agregados y una silueta clara, estable y fácil de editar.
 
 ## Paleta y conservación
 
@@ -73,9 +107,19 @@ Su escapo alto termina en un conjunto compacto, alargado y afinado, mayormente l
 
 La zonificación trabajada reserva chaguales para cotas bajas o medias del escenario esclerófilo y transiciona a vegetación andina rala en altura; no ubicar *Puya chilensis* en alta cordillera desnuda. Incorporar cactus donde la referencia de ladera seca y soleada lo justifique, sin desplazar los árboles nativos.
 
-Las flores amarillas y naranjas dominan la composición ambiental trabajada; violetas y blancas son acentos menores, al igual que el turquesa específico del chagual. Esta pauta compositiva no autoriza a cambiar los colores reales de una flor o fruto de personaje.
+Las flores forman parte del paisaje esclerófilo, pero deben aparecer de manera escasa, irregular y subordinada al sendero, las rocas y la vegetación estructural. Amarillos, naranjas, violetas, blancos y rosados pueden aparecer en pequeños grupos según la estación y el contexto; no convertir las flores en un tapiz ornamental ni eliminarlas por completo. El turquesa específico del chagual sigue siendo un acento pequeño. Esta pauta compositiva no autoriza a cambiar los colores reales de una flor o fruto de personaje.
 
 ## Interfaz, animación y presentación
+
+### Tipografía confirmada
+
+La combinación tipográfica vigente para la interfaz es **Pixelify Sans + Nunito Sans**, decisión comunicada por Alejandra y adoptada para la identidad de Arboris. El logotipo se diseña y gestiona aparte: no adopta Pixelify Sans, Nunito Sans ni las alternativas experimentales.
+
+- **Pixelify Sans:** títulos, nombres de especies, encabezados, acciones destacadas y mensajes de descubrimiento.
+- **Nunito Sans:** textos corridos, descripciones, navegación, botones secundarios, etiquetas y metadatos.
+- **Jersey 10:** alternativa experimental conservada para futuras pruebas puntuales, pero no fuente vigente.
+
+Usar tamaños y pesos que mantengan lectura en Android, Steam y web. Revisar acentos y caracteres del español, contraste, espaciado y reducción a tamaños pequeños. El mockup tipográfico es referencia de dirección y no sustituye una implementación real ni una revisión de licencia.
 
 Los menús mantienen continuidad de paleta, profundidad y píxel, con espacio negativo y una zona calma para texto y botones. No colocar detalle intenso detrás de controles. El contrato de sprites de 125×125 no impone esa resolución a pantallas, textos ni mapas. El mapa de observaciones conserva su función geográfica; un diorama no demuestra localización real de especies.
 
@@ -90,3 +134,9 @@ La imagen promocional de tres personajes es una referencia histórica de composi
 Declarar uso; referencia de diseño; fotos botánicas y referencias de estilo con roles separados; silueta, ápice, margen, nervaduras y paleta; rostro; compañeros; encuadre; transparencia y formato objetivo. Para corregir, precisar qué cambia y qué conserva la referencia. Revisar antes de promover a canon.
 
 Para escenarios, añadir ecosistema, estratos, flora, cuadrícula nativa prevista, relación de aspecto, zona jugable y espacio para UI. El criterio de calidad es identidad botánica, lectura y consistencia del píxel, no cantidad de detalle ni tamaño del archivo.
+
+### Prompts y generación asistida
+
+Los prompts son herramientas de exploración y no sustituyen la guía ni una aprobación de diseño. Una petición de análisis, corrección o redacción de prompt no implica ejecutar un modelo de imagen. Solo se genera una imagen cuando el encargo lo indica explícitamente. Antes de producir, confirmar objetivo, referencia, formato, número de variantes y destino; generar una sola variante por defecto y conservar la salida como `referencia` hasta su revisión.
+
+En escenas esclerófilas, describir las flores como presencia moderada y representativa: pequeños grupos dispersos, colores contenidos y distribución irregular. Evitar tanto la saturación ornamental como la ausencia absoluta. No usar una imagen generada como prueba de cuadrícula nativa, alpha limpio, exactitud botánica o asset Pixelorama verificado.

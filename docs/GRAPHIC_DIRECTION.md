@@ -63,7 +63,21 @@ Estas son identidades gráficas, no personalidades ni habilidades narrativas asi
 | Mitique · SP004 | Hoja única ancha en la zona media, ápice alargado, hasta tres dientes suaves por lado y nervadura fina blanquecina | Ninguno |
 | Quillay / Quillai · SP006 | Hoja con dos dientes suaves por lado y coronilla característica | Sin accesorio separado en el PNG vigente; las posibilidades de la ficha no equivalen a un asset aprobado |
 | Colliguay · SP005 | Diseño y limpieza manual aprobados por Alvaro; puntas rojizas con proporción conservada, según foto cromática aprobada por Alejandra. PNG 125×125 1:1 canónico | Hoja única con pecíolo corto; sin acompañante en la versión elegida |
+| Boldo · SP007 | Hoja oblonga de verde bosque oliva oscuro, superficie coriácea y textura agrupada. Diseño y limpieza manual integrados; sujeto a cambios posteriores | Fruto burgundy y flor clara separados de la hoja y del pecíolo |
 | Piedra-guía de líquen · auxiliar | Diseño y limpieza manual aprobados; personaje de asistencia no botánico, PNG 125×125 1:1 canónico | Roca compacta con manto de líquen y rostro amable; sin suelo ni escenario en el sprite |
+
+La Piedra-guía queda documentada como referencia de producción para futuros auxiliares: puede apartarse de la anatomía foliar, pero debe conservar la resolución, transparencia, lectura facial, contorno escalonado y sombreado por clusters del sistema Arboris. Su función narrativa es orientar y asistir; no se deben inferir poderes, diálogos o mecánicas definitivas desde el sprite.
+
+## Tipografía de interfaz confirmada
+
+Decisión de dirección de proyecto comunicada por Alejandra y adoptada para Arboris: **Pixelify Sans + Nunito Sans**. Esta decisión gobierna la interfaz, los mockups y las futuras piezas de comunicación, sin modificar los sprites ni convertir una tipografía en evidencia botánica. El logotipo se mantiene como un diseño independiente y no adopta estas fuentes.
+
+| Familia | Uso principal | Criterio |
+| --- | --- | --- |
+| **Pixelify Sans** | Títulos, nombres de especies, encabezados, acciones destacadas y mensajes de descubrimiento | Conserva el carácter pixelado/JRPG y la jerarquía visual de Arboris. |
+| **Nunito Sans** | Cuerpo de texto, descripciones, botones secundarios, navegación, etiquetas y metadatos | Aporta legibilidad, calidez y una lectura accesible en pantallas pequeñas. |
+
+Jersey 10 queda registrado como alternativa experimental para etiquetas o recompensas, no como combinación tipográfica vigente. DotGothic16 y Silkscreen quedan fuera de la opción elegida. Las licencias y archivos de fuente deben verificarse antes de empaquetar una entrega comercial.
 
 ## Flujo de una tarea
 
@@ -72,8 +86,23 @@ Estas son identidades gráficas, no personalidades ni habilidades narrativas asi
 3. **Definir la propuesta.** Elegir silueta, paleta y estructura secundaria a partir de esas referencias. Indicar lo pendiente sin bloquear los aspectos ya resueltos.
 4. **Revisar en contexto.** Comparar con el elenco, el fondo o la interfaz donde se utilizará. Evaluar legibilidad al tamaño real y con zoom entero.
 5. **Preparar el editable.** Aplicar el contrato de la guía. Un concepto generado o reducido todavía puede requerir limpieza y revisión sobre la cuadrícula.
-6. **Validar y registrar.** Registrar la aprobación de diseño de Alvaro, como director de arte, y la verificación técnica por separado. Atribuir a Alejandra las decisiones de dirección de proyecto y los aportes que realice. Incorporar la limpieza manual sin alterar píxeles; actualizar ficha e índice solo si corresponde.
-7. **Entregar y ordenar.** Identificar el archivo vigente, distinguir fuentes de previews y reportar pendientes reales. Retirar únicamente duplicados obsoletos cuya procedencia y referencias se hayan comprobado.
+6. **Auditar la salida.** Antes de enviarla a Pixelorama, revisar transparencia, halos, píxeles fantasmas y separación entre accesorios. La prioridad es entregar un PNG fácil de limpiar, no añadir detalle innecesario.
+7. **Validar y registrar.** Registrar la aprobación de diseño de Alvaro, como director de arte, y la verificación técnica por separado. Atribuir a Alejandra las decisiones de dirección de proyecto y los aportes que realice. Incorporar la limpieza manual sin alterar píxeles; actualizar ficha e índice solo si corresponde.
+8. **Entregar y ordenar.** Identificar el archivo vigente, distinguir fuentes de previews y reportar pendientes reales. Retirar únicamente duplicados obsoletos cuya procedencia y referencias se hayan comprobado.
+
+## Control de prompts y modelos de imagen
+
+La biblioteca de prompts es un registro experimental separado de los assets canónicos. Sirve para repetir pruebas, comparar modelos y documentar correcciones, pero no convierte una salida generada en decisión de arte.
+
+- “Analiza”, “corrige” y “genera un prompt” producen únicamente análisis o texto.
+- “Genera la imagen”, “crea una variante” o una instrucción equivalente autoriza la ejecución de un modelo de imagen.
+- Si la intención es ambigua, entregar el prompt sin ejecutar el modelo.
+- Usar una sola variante por defecto y conservar tokens evitando iteraciones automáticas.
+- Registrar modelo, fecha, referencia, resolución, prompt, prompt negativo, salida y observaciones.
+- Separar referencia, propuesta, diseño aprobado, editable verificado y limpieza manual integrada.
+- Revisar visualmente la salida antes de promoverla y ejecutar la validación técnica cuando corresponda.
+
+Las referencias externas (*Sea of Stars*, *Chained Echoes*, *Alabaster Dawn* y *Octopath Traveler*) solo aportan principios comparativos de composición, profundidad, iluminación y legibilidad. No autorizan copiar personajes, interfaces, paletas, escenarios ni composiciones.
 
 Estados de trabajo: **referencia → propuesta → diseño aprobado → editable verificado → limpieza manual integrada**. Una revisión técnica puede detectar un pendiente en un diseño aprobado; esto no autoriza a redibujarlo automáticamente. Los fondos y ensayos no heredan por asociación el estado de producción de los sprites.
 
