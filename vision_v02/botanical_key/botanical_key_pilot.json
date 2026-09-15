@@ -1,0 +1,110 @@
+{
+  "version": "1.0",
+  "scope": "Árboris pilot — six species only",
+  "species": [
+    {
+      "id": "SP-001",
+      "common_name": "Peumo",
+      "scientific_name": "Cryptocarya alba"
+    },
+    {
+      "id": "SP-002",
+      "common_name": "Litre",
+      "scientific_name": "Lithraea caustica"
+    },
+    {
+      "id": "SP-003",
+      "common_name": "Bollén",
+      "scientific_name": "Kageneckia oblonga"
+    },
+    {
+      "id": "SP-004",
+      "common_name": "Mitique",
+      "scientific_name": "Podanthus mitiqui"
+    },
+    {
+      "id": "SP-005",
+      "common_name": "Colliguay",
+      "scientific_name": "Colliguaja odorifera"
+    },
+    {
+      "id": "SP-006",
+      "common_name": "Quillay",
+      "scientific_name": "Quillaja saponaria"
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "character": "leaf_arrangement",
+      "prompt": "¿Las hojas son opuestas o claramente opuesto-decusadas?",
+      "yes": [
+        "Mitique",
+        "Colliguay"
+      ],
+      "no": [
+        "Peumo",
+        "Litre",
+        "Bollén",
+        "Quillay"
+      ],
+      "notes": "Si la disposición es dudosa o variable, no usarla sola para excluir Peumo."
+    },
+    {
+      "id": "Q2",
+      "character": "mitique_vs_colliguay",
+      "prompt": "¿Las hojas son ovado-lanceoladas a lanceoladas, ásperas y con margen serrado?",
+      "yes": [
+        "Mitique"
+      ],
+      "no": [
+        "Colliguay"
+      ],
+      "notes": "Capítulos amarillos de Mitique y cápsula tricoca de Colliguay son confirmatorios."
+    },
+    {
+      "id": "Q3",
+      "character": "bollen_combination",
+      "prompt": "¿Hay margen claramente aserrado con dientes glandulares y yemas resinosas?",
+      "yes": [
+        "Bollén"
+      ],
+      "no": [
+        "Peumo",
+        "Litre",
+        "Quillay"
+      ],
+      "notes": "No enviar Quillay a Bollén sólo por presentar dientes foliares."
+    },
+    {
+      "id": "Q4",
+      "character": "litre_venation",
+      "prompt": "¿El margen es entero a ondulado y la nervadura es clara o amarillenta, nítida y marcadamente prominente?",
+      "yes": [
+        "Litre"
+      ],
+      "no": [
+        "Peumo",
+        "Quillay"
+      ],
+      "notes": "No solicitar frotar, triturar ni oler hojas mientras Litre sea candidato."
+    },
+    {
+      "id": "Q5",
+      "character": "abaxial_contrast",
+      "prompt": "¿El envés es notoriamente más claro que el haz, blanquecino a glauco?",
+      "yes": [
+        "Peumo"
+      ],
+      "no": [
+        "Quillay"
+      ],
+      "notes": "Contraste haz–envés como carácter decisorio Peumo–Quillay."
+    }
+  ],
+  "rules": {
+    "unknown_answer": "No sé / no puedo observarlo conserva todos los candidatos actuales.",
+    "non_destructive": true,
+    "flowers_fruits": "Principalmente evidencia confirmatoria, no requisito general."
+  }
+}
