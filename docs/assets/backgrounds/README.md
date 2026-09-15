@@ -2,6 +2,8 @@
 
 Aplicar la [guía de arte unificada](../../ART_STYLE_GUIDE.md) y la [dirección argumental](../../GRAPHIC_DIRECTION.md). Los escenarios sitúan la exploración y dejan espacio a personajes e interfaz; la presencia de una planta dibujada no constituye un registro geográfico real.
 
+Las referencias vegetales canónicas de Alejandra están registradas en el [catálogo de referencias vegetales](../vegetation/README.md). Se consultan para construir los módulos de escena, pero no sustituyen las capas ambientales ni se consideran assets de producción hasta su limpieza y validación.
+
 Los nuevos escenarios deben seguir la [especificación de producción](../../ENVIRONMENT_PRODUCTION_SPEC.md). Las imágenes listadas aquí son referencias y ensayos anteriores a ese contrato.
 
 ## Referencias visuales vigentes
