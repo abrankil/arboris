@@ -63,8 +63,10 @@ No completar campos botánicos para personajes auxiliares.
 - lectura general:
 - paleta:
 - gesto base:
-- inclinación/pecíolo/tallo:
+- orientación/estructura de soporte:
 - relación con el elenco:
+
+Para personajes-especie, `orientación/estructura de soporte` puede describir pecíolo, tallo u otra estructura pertinente. Para auxiliares, usar la referencia material/visual correspondiente.
 
 ## Rostro
 
@@ -75,13 +77,13 @@ No completar campos botánicos para personajes auxiliares.
 
 ## Elementos secundarios
 
-- `botanicalStructure`:
+- `botanicalStructure`: completar solo para `characterType: species`; usar `N/A` para `support`
 - `visualRepresentation`:
 - relación espacial:
 - prioridad visual:
 - `gameplayRole`: `open | none | approved`
 
-La representación gráfica de una estructura no define automáticamente una mecánica.
+La representación gráfica de una estructura o elemento no define automáticamente una mecánica.
 
 ## Restricciones
 
