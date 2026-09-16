@@ -21,8 +21,10 @@ La dirección del proyecto corresponde a Alejandra; la dirección artística y l
 
 ## Graphic development
 
-Start with the [graphic direction and working method](docs/GRAPHIC_DIRECTION.md), then apply the [unified art guide](docs/ART_STYLE_GUIDE.md). The first completed six-character collection is summarized in the [final character collection](docs/CHARACTER_COLLECTION_FINAL.md); this does not define the future size of the cast. Current resources are tracked in the [character status](docs/CHARACTER_DESIGN_STATUS.md), [character index](data/characters/index.json), and [environment catalogue](docs/assets/backgrounds/README.md).
+Start with the [graphic direction and working method](docs/GRAPHIC_DIRECTION.md), then apply the [unified art guide](docs/ART_STYLE_GUIDE.md). For character work, use the [character creation workflow](docs/CHARACTER_CREATION_WORKFLOW.md), [character template](docs/CHARACTER_TEMPLATE.md), [current character status](docs/CHARACTER_DESIGN_STATUS.md), and [character index](data/characters/index.json).
 
-For Android, Steam/PC and web environment assets, use the [environment production specification](docs/ENVIRONMENT_PRODUCTION_SPEC.md).
+The historical character consolidation from 2026-09-15 is preserved in the [dated character canon snapshot](docs/CHARACTER_CANON_SNAPSHOT_2026-09-15.md). It is a historical record, not the current source of truth. The former [final character collection](docs/CHARACTER_COLLECTION_FINAL.md) remains temporarily as a deprecated compatibility pointer.
+
+Environment resources are tracked in the [environment catalogue](docs/assets/backgrounds/README.md). For Android, Steam/PC and web environment assets, use the [environment production specification](docs/ENVIRONMENT_PRODUCTION_SPEC.md).
 
 On Windows, run `pwsh -File tools/validate-graphic-assets.ps1` for a read-only check of graphics metadata, referenced files, image dimensions and transparency. It does not replace visual review or Pixelorama verification.
