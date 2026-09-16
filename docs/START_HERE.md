@@ -31,14 +31,35 @@ Orden recomendado:
 
 1. `README.md` — visión general del producto.
 2. `docs/GRAPHIC_DIRECTION.md` — autoridad, método y flujo gráfico.
-3. `data/species/` — ficha completa de cada una de las seis especies piloto.
-4. `species/<especie>/photos/` — fotografías reales disponibles.
-5. `data/characters/` — canon gráfico/jugable y assets de personajes.
-6. `docs/ART_STYLE_GUIDE.md` — contrato visual y técnico.
+3. `docs/ART_DIRECTION_AUDIT_2026-09-16.md` — estado del departamento, decisiones concretas y siguiente ejecución.
+4. `data/species/` — ficha completa de cada una de las seis especies piloto.
+5. `species/<especie>/photos/` — fotografías reales disponibles.
+6. `data/characters/` — canon gráfico/jugable y assets de personajes.
+7. `docs/ART_STYLE_GUIDE.md` — contrato visual y técnico.
+
+Modelo simple de trabajo:
+
+```text
+qué es real → qué se ve → qué decido como arte → qué produzco → qué valido
+```
 
 Para una decisión morfológica, consultar primero la ficha de `data/species/` y las fotografías reales. Si se necesita detalle de fuentes, estados o trazabilidad, revisar `data/botanical/`.
 
 Una decisión artística no modifica la botánica. Un sprite tampoco constituye evidencia científica.
+
+Estado operativo actual de Dirección de Arte:
+
+- personajes base: canon operativo cerrado;
+- derivados de personajes: pendientes;
+- escenarios: marco definido, evidencia `core` pendiente;
+- topología de mapas: sistema definido, pruebas de blockout pendientes;
+- `PILOT-ENV-006`: abierto; los conteos ponderan presencia, la colocación exige observaciones territorializadas.
+
+La siguiente ejecución recomendada es una prueba acotada:
+
+```text
+primer derivado de personaje + TEST-MAP-01 corridor ambiental
+```
 
 ## 3. Si eres otra IA / desarrollo
 
