@@ -11,6 +11,36 @@ import {
 
 let dataset;
 
+function findExplicitConflict(dataset) {
+  for (const character of dataset.characters) {
+    const related = dataset.species
+      .map(species => ({
+        speciesId: species.speciesId,
+        relation: getRelation(dataset, species.speciesId, character.characterId),
+      }))
+      .filter(item => item.relation?.expectedStates?.length);
+
+    for (let i = 0; i < related.length; i += 1) {
+      for (let j = i + 1; j < related.length; j += 1) {
+        const left = related[i];
+        const right = related[j];
+        const overlaps = left.relation.expectedStates
+          .some(state => right.relation.expectedStates.includes(state));
+
+        if (!overlaps) {
+          return {
+            character,
+            left,
+            right,
+          };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 test('loads the Master 2.0 canonical identification dataset', async () => {
   dataset = await loadCanonicalDataset();
 
@@ -35,32 +65,20 @@ test('compatibility preserves uncertainty and only rejects explicit conflicts', 
 test('filtering eliminates only candidates with explicit state conflicts', async () => {
   dataset ??= await loadCanonicalDataset();
 
-  const discriminating = dataset.characters.find(character => {
-    const stateSets = dataset.species.map(species => {
-      const relation = getRelation(dataset, species.speciesId, character.characterId);
-      return relation?.expectedStates?.join('|') ?? '';
-    });
-    return new Set(stateSets.filter(Boolean)).size >= 2;
-  });
+  const conflict = findExplicitConflict(dataset);
 
-  assert.ok(discriminating, 'expected at least one discriminating active character');
+  assert.ok(conflict, 'expected at least one explicit conflict in the canonical matrix');
 
-  const pairs = dataset.species.map(species => ({
-    speciesId: species.speciesId,
-    relation: getRelation(dataset, species.speciesId, discriminating.characterId),
-  })).filter(item => item.relation?.expectedStates?.length);
-
-  const first = pairs[0];
-  const conflicting = pairs.find(item => !item.relation.expectedStates.some(state => first.relation.expectedStates.includes(state)));
-
-  assert.ok(conflicting, 'expected at least one explicit conflict in the canonical matrix');
+  const observedState = conflict.left.relation.expectedStates[0];
 
   const result = filterCandidates(dataset, {
-    [discriminating.characterId]: first.relation.expectedStates[0],
-  }, [first.speciesId, conflicting.speciesId]);
+    [conflict.character.characterId]: observedState,
+  }, [conflict.left.speciesId, conflict.right.speciesId]);
 
-  assert.deepEqual(result.remaining, [first.speciesId]);
-  assert.equal(result.eliminated[0].speciesId, conflicting.speciesId);
+  assert.deepEqual(result.remaining, [conflict.left.speciesId]);
+  assert.equal(result.eliminated.length, 1);
+  assert.equal(result.eliminated[0].speciesId, conflict.right.speciesId);
+  assert.equal(result.eliminated[0].characterId, conflict.character.characterId);
 });
 
 test('unknown evidence never removes candidates', async () => {
