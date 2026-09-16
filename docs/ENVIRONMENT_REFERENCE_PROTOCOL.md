@@ -2,336 +2,167 @@
 
 ## Objetivo
 
-Definir cómo capturar, localizar, catalogar y usar referencias fotográficas para escenarios y assets de entorno sin confundir observación real, interpretación ecológica y estilización artística.
+Definir cómo capturar, localizar, catalogar y usar referencias ambientales para escenarios de Árboris sin confundir observación, interpretación ecológica y decisión artística.
 
-El sistema debe permitir construir un manual de dirección de arte territorialmente coherente para la precordillera de Santiago y el bosque esclerófilo, manteniendo explícitos los límites geográficos, altitudinales y estacionales de cada referencia.
+Para el primer piloto, el territorio núcleo es el Fundo Los Nogales. La fuente botánica maestra es `data/source/Base_botanica_Pokedex_flora_Master.xlsx`. Mientras Alejandra mejora esa planilla, este flujo solo registra su vínculo territorial y no modifica ni reinterpreta su contenido.
 
-Para el primer piloto, existe además un anclaje territorial explícito en Los Nogales. La fuente botánica maestra se encuentra en `data/source/Base_botanica_Pokedex_flora_Master.xlsx` y corresponde al levantamiento de flora nativa del Fundo Los Nogales. Mientras esa planilla está siendo mejorada por Alejandra, este protocolo solo registra su función y su vínculo territorial; no modifica ni reinterpreta su contenido.
-
-## 1. Fuentes aceptadas
-
-### Fotografías de campo
-
-Preferidas cuando el proyecto puede registrar contexto directamente. Pueden provenir de Alejandra, Álvaro u otra persona identificada del equipo.
-
-Registrar, cuando se conozca:
-
-- fecha;
-- lugar y área protegida o sector de referencia;
-- coordenadas y precisión de ubicación;
-- altitud aproximada;
-- estación;
-- hora del día;
-- rumbo de cámara;
-- exposición de la ladera (`slopeAspect`), cuando pueda establecerse;
-- tipo de ambiente y forma del terreno;
-- estructura de vegetación;
-- sustrato, roca, suelo e hidrología visibles;
-- especies visibles y nivel de evidencia de su identificación;
-- observaciones de terreno.
-
-No completar datos por inferencia si no fueron observados, medidos o respaldados por una fuente. Los campos desconocidos pueden quedar vacíos o marcarse como `unknown`.
-
-### Referencias web
-
-ChatGPT puede ayudar a localizar material público útil, pero la selección debe conservar siempre su procedencia. Registrar URL, fuente o autor cuando esté disponible, fecha de consulta, titular de derechos y licencia si puede verificarse.
-
-Una imagen encontrada en Internet es una referencia externa. No debe copiarse al repositorio ni reutilizarse como asset de producción salvo que su licencia lo permita explícitamente.
-
-### Fuentes institucionales o científicas
-
-Pueden utilizarse para reforzar contexto ecológico, distribución, geomorfología, estructura de vegetación, rango altitudinal o clasificación ecosistémica. La imagen y la interpretación científica deben mantenerse diferenciadas.
-
-Cuando exista una clasificación oficial aplicable, registrar `ecosystemId`, `ecosystemName` y `ecosystemSource` en vez de usar únicamente etiquetas amplias como “bosque esclerófilo”.
-
-### Fuente botánica maestra del piloto
-
-`data/source/Base_botanica_Pokedex_flora_Master.xlsx` se reconoce como fuente botánica maestra del primer piloto y como vínculo documental con el levantamiento de flora nativa del Fundo Los Nogales.
-
-Su función en este sistema es aportar trazabilidad territorial y botánica. No sustituye una referencia ambiental ni una fotografía de terreno.
-
-Las referencias del manifest pueden vincularse a esta fuente mediante `botanicalSourceRef`.
-
-Mientras la planilla maestra esté en proceso de mejora:
-
-- no modificarla desde el flujo ambiental;
-- no inferir datos ambientales que la planilla no declare explícitamente;
-- no copiar campos no verificados desde versiones intermedias;
-- conservar su ruta como referencia estable hasta que el equipo confirme una nueva versión o estructura.
-
-### Referencias artísticas
-
-Se usan para estudiar composición, atmósfera, profundidad, iluminación o lenguaje visual. Deben marcarse como `sourceType=art` y no respaldan afirmaciones ecológicas.
-
-## 2. Unidad básica: registro de referencia
+## 1. Unidad básica
 
 Cada referencia recibe un `referenceId` único y una fila en `docs/references/environments/manifest.csv`.
 
-El manifest distingue seis grupos de información.
+El sistema usa seis clasificaciones distintas. No son redundantes:
 
-### A. Identidad y procedencia
+| Campo | Pregunta que responde | Ejemplo |
+| --- | --- | --- |
+| `sourceType` | ¿De dónde viene? | `field`, `web`, `institutional`, `scientific`, `art` |
+| `referenceKind` | ¿Qué tipo de objeto es? | `photograph`, `institutionalPage`, `managementPlan` |
+| `evidenceRole` | ¿Qué puede respaldar? | `visual`, `ecological`, `geomorphological`, `atmospheric`, `artistic` |
+| `pilotRelevance` | ¿Qué tan pertinente es para el primer piloto? | `core`, `contextual`, `comparative` |
+| `status` | ¿En qué etapa está? | `collected`, `reviewed`, `selected`, `rejected`, `archived` |
+| `reviewConfidence` | ¿Qué tan segura es la revisión? | `low`, `medium`, `high` |
+
+## 2. Campos mínimos y ampliados
+
+Para registrar una referencia nueva, completar primero solo los campos mínimos:
 
 - `referenceId`;
-- `seriesId`;
+- `seriesId` cuando corresponda;
 - `sourceType`;
 - `referenceKind`;
 - `sourceTitle`;
-- `evidenceRole`;
-- `photographerOrAuthor`;
-- `rightsHolder`;
-- `sourceUrl`;
-- `license`;
-- `licenseUrl`;
-- `dateAccessed`;
-- `dateTaken`.
-
-### B. Relación con el piloto
-
 - `pilotRelevance`;
-- `botanicalSourceRef`.
-
-Valores iniciales de `pilotRelevance`:
-
-- `core` — territorio núcleo del piloto o referencia directamente ligada a la fuente botánica del Fundo Los Nogales;
-- `contextual` — contexto territorial inmediato que ayuda a interpretar el área núcleo, especialmente cuenca del Arrayán y precordillera cercana;
-- `comparative` — referencia externa usada para contrastar patrones regionales, ecosistémicos, geomorfológicos o atmosféricos.
-
-`pilotRelevance` no expresa calidad científica. Expresa pertinencia territorial para el primer piloto.
-
-`botanicalSourceRef` debe usarse cuando exista un vínculo documental explícito con la fuente botánica maestra. Para el piloto actual, el valor canónico es:
-
-`data/source/Base_botanica_Pokedex_flora_Master.xlsx`
-
-No asignar ese vínculo por simple proximidad geográfica si la referencia no corresponde al mismo territorio o levantamiento.
-
-### C. Contexto espacial y temporal
-
-- `location`;
-- `protectedArea`;
+- `botanicalSourceRef` cuando exista vínculo directo;
+- `sourceUrl` o procedencia;
+- `dateTaken` si se conoce;
 - `referenceArea`;
-- `latitude`;
-- `longitude`;
-- `locationPrecision`;
-- `approxAltitudeM`;
-- `season`;
-- `timeOfDay`;
-- `cameraBearing`;
-- `slopeAspect`.
-
-`cameraBearing` y `slopeAspect` son campos distintos: el primero indica hacia dónde mira la fotografía; el segundo describe la exposición de la superficie o ladera documentada. No deben confundirse.
-
-### D. Contexto ecológico y físico
-
-- `environmentType`;
-- `ecosystemId`;
-- `ecosystemName`;
-- `ecosystemSource`;
+- `location`;
+- `approxAltitudeM` si se conoce;
+- `slopeAspect` si se conoce;
 - `category`;
-- `terrainForm`;
-- `slopeClass`;
-- `vegetationStructure`;
-- `canopyCoverClass`;
-- `substrate`;
-- `hydrology`;
-- `weatherAtmosphere`;
-- `visibleSpecies`;
-- `speciesEvidence`;
-- `landscapeElements`.
-
-`speciesEvidence` debe indicar la naturaleza de la identificación, por ejemplo `confirmed`, `sourceReported`, `visuallyProbable` o `unknown`. Una especie mencionada en una descripción de página no se considera automáticamente confirmada como visible en cada fotografía.
-
-### E. Lectura y uso de la referencia
-
-- `observedNotes` — hechos directamente visibles o documentados;
-- `interpretedNotes` — hipótesis o lectura contextual;
-- `ecologicalUse` — qué puede respaldar ecológicamente;
-- `artUse` — qué puede orientar visualmente;
-- `reviewConfidence` — confianza de la revisión.
-
-### F. Gestión
-
-- `localAssetPath`;
+- `evidenceRole`;
+- `observedNotes`;
 - `status`;
-- `notes`.
+- `reviewConfidence`.
 
-Los campos desconocidos se dejan vacíos o se indican como `unknown`; no se inventan.
+La metadata ampliada se completa solo cuando la referencia pasa a `reviewed` o `selected`, o cuando un campo sea necesario para una decisión concreta. Entre los campos ampliados se incluyen:
 
-## 3. Series y pseudorreplicación
+- `photographerOrAuthor`, `rightsHolder`, `license`, `licenseUrl`, `dateAccessed`;
+- `latitude`, `longitude`, `locationPrecision`, `season`, `timeOfDay`, `cameraBearing`;
+- `environmentType`, `ecosystemId`, `ecosystemName`, `ecosystemSource`;
+- `terrainForm`, `slopeClass`, `vegetationStructure`, `canopyCoverClass`;
+- `substrate`, `hydrology`, `weatherAtmosphere`;
+- `visibleSpecies`, `speciesEvidence`, `landscapeElements`;
+- `interpretedNotes`, `ecologicalUse`, `artUse`, `localAssetPath`, `notes`.
 
-Las fotografías tomadas en una misma visita, punto o secuencia próxima deben compartir un `seriesId`.
+No completar campos por inferencia. Vacío o `unknown` es preferible a un dato inventado.
 
-Una serie puede documentar distintos planos —paisaje, vegetación, suelo, roca, cielo—, pero no cuenta como múltiples evidencias independientes para declarar un patrón recurrente del ecosistema.
+## 3. Perfiles de registro
 
-Para pasar de una observación a una pauta general se debe buscar independencia entre series, lugares, fechas o fuentes institucionales.
+No todas las referencias requieren la misma profundidad de metadata.
 
-## 4. Roles de evidencia
+### Fotografía atmosférica
+Priorizar: procedencia, lugar, fecha, `weatherAtmosphere`, `artUse`.
 
-`evidenceRole` debe indicar para qué autoridad se incorpora una referencia. Valores iniciales recomendados:
+### Fotografía de ladera o vegetación
+Priorizar: lugar, altitud, `slopeAspect`, `vegetationStructure`, `substrate`, `observedNotes`.
 
-- `ecological`;
-- `visual`;
-- `atmospheric`;
-- `geomorphological`;
-- `artistic`;
-- combinaciones explícitas cuando una fuente cumpla más de un rol.
+### Fuente institucional o científica
+Priorizar: procedencia, `ecosystemId`, `ecosystemName`, `ecosystemSource`, `ecologicalUse`.
 
-El rol no reemplaza `ecologicalUse` ni `artUse`; define el tipo de evidencia que la referencia puede aportar.
+### Referencia `core` del Fundo Los Nogales
+Registrar con mayor profundidad porque puede afectar directamente el escenario piloto. Priorizar además `botanicalSourceRef`, altitud, exposición, estructura vegetal, microhábitat y cualquier vínculo verificable con las especies piloto.
 
-## 5. Estados del registro
+## 4. Fuente botánica maestra
 
-Usar uno de estos estados:
+`data/source/Base_botanica_Pokedex_flora_Master.xlsx` es la fuente botánica maestra del primer piloto y documenta el levantamiento de flora nativa del Fundo Los Nogales.
 
-- `collected`: incorporada al inventario, aún no analizada;
-- `reviewed`: procedencia y contenido revisados;
-- `selected`: elegida para sustentar una decisión de dirección de arte;
-- `rejected`: conservada solo para trazabilidad, no debe orientar producción;
-- `archived`: ya no participa del corpus activo.
+Su función aquí es dar trazabilidad territorial y botánica. No sustituye una fotografía ambiental ni una fuente ecológica.
 
-## 6. Categorías visuales
+Usar `botanicalSourceRef=data/source/Base_botanica_Pokedex_flora_Master.xlsx` solo cuando exista vínculo documental directo con la referencia. No asignarlo por simple proximidad geográfica.
 
-Las primeras categorías de trabajo son:
+Mientras la planilla esté en mejora:
 
-- paisaje general;
-- ladera;
-- quebrada;
-- sendero;
-- roca y suelo;
-- estructura de vegetación;
-- microhábitat;
-- cordillera y relieve;
-- cielo y nubes;
-- neblina, lluvia y atmósfera;
-- luz y hora del día;
-- referencia artística.
+- no modificarla desde esta rama;
+- no copiar campos desde versiones intermedias sin revisión;
+- no inferir metadata ambiental que la planilla no declare.
 
-Se pueden ampliar cuando el corpus lo justifique. Evitar crear categorías por una sola imagen aislada.
+## 5. Jerarquía territorial del piloto
 
-## 7. Jerarquía territorial del primer piloto
+### `core` — Fundo Los Nogales
+Territorio principal del primer escenario y del levantamiento botánico que origina las especies piloto.
 
-### Fundo Los Nogales / Los Nogales — núcleo
+### `contextual` — cuenca del Arrayán / Santuario Los Nogales
+Contexto inmediato para interpretar altitud, exposición de ladera, continuidad de cordones y variación vegetal local.
 
-Los Nogales se considera el **territorio núcleo del primer piloto** porque el levantamiento botánico que origina la selección de especies piloto proviene del Fundo Los Nogales y se conserva en la fuente maestra `data/source/Base_botanica_Pokedex_flora_Master.xlsx`.
+### `comparative` — Yerba Loca, Río Clarillo, Pirque y otras áreas
+Sirven para probar qué rasgos son regionales, ecosistémicos o locales. No deben definir por sí solas la apariencia del escenario núcleo.
 
-Las referencias ambientales del Fundo Los Nogales o de sectores inequívocamente vinculados a ese levantamiento deben usar:
+`pilotRelevance` expresa pertinencia territorial, no calidad científica.
 
-- `pilotRelevance=core`;
-- `botanicalSourceRef=data/source/Base_botanica_Pokedex_flora_Master.xlsx`.
+## 6. Series y pseudorreplicación
 
-Esto permite que botánica, identificación y dirección de arte compartan una misma procedencia territorial sin convertir una fuente botánica en evidencia visual de escenario.
+Fotografías tomadas en una misma visita, punto o secuencia próxima deben compartir `seriesId`.
 
-### Cuenca del Arrayán / Santuario Los Nogales — contexto inmediato
+Una serie puede contener paisaje, vegetación, suelo, roca y cielo, pero no cuenta como varias evidencias independientes para declarar un patrón recurrente.
 
-La cuenca del Arrayán y el Santuario Los Nogales constituyen el contexto territorial inmediato del núcleo. La fuente institucional describe formaciones de matorral esclerófilo andino, bosque esclerófilo andino y matorral xerófilo distribuidas por pisos altitudinales y diferencias de exposición solar.
+Para promover una observación a patrón, buscar independencia entre series, fechas, lugares o fuentes.
 
-Estas referencias deben usar normalmente `pilotRelevance=contextual`, salvo que se pueda demostrar que corresponden al mismo sector del levantamiento botánico del Fundo Los Nogales.
+## 7. Observación, interpretación y decisión artística
 
-`SlopeAspect`, `approxAltitudeM`, `vegetationStructure` y `ecosystemName` son especialmente relevantes en esta zona.
+Toda revisión separa tres niveles:
 
-### Yerba Loca — comparación precordillerana y gradiente
-
-Yerba Loca se considera una referencia comparativa prioritaria para estudiar la precordillera de Santiago, el relieve, el valle encajonado, la nieve, la transición altitudinal y ambientes de media y alta montaña.
-
-La información institucional disponible la describe como un territorio con un gradiente aproximado entre 1.300 y 5.340 m s. n. m. y múltiples ecosistemas. Por esta amplitud, “Yerba Loca” no debe funcionar como una sola categoría visual ni como sustituto del territorio núcleo del piloto.
-
-Las referencias de Yerba Loca usarán normalmente `pilotRelevance=comparative` y deben declarar altitud aproximada, tipo de ambiente y ecosistema cuando se conozcan.
-
-### Río Clarillo, Pirque y otras áreas — contraste regional
-
-Río Clarillo, Pirque, Cajón del Maipo, La Campana y otras zonas pueden utilizarse como referencias `comparative` para probar qué patrones son regionales, ecosistémicos o locales.
-
-Una pauta observada en un área comparativa no debe imponerse al escenario núcleo si contradice o no está respaldada por referencias del territorio core/contextual.
-
-## 8. Análisis de una referencia
-
-El análisis debe separar tres niveles.
-
-### A. Observado
-
-Lo directamente visible o documentado: pendiente, densidad aparente, distribución de rocas, silueta vegetal, color del cielo, profundidad atmosférica, etc.
-
-### B. Interpretado
-
-Hipótesis o lectura contextual: humedad relativa aparente, transición altitudinal, identificación visual no confirmada, relación funcional entre estratos, etc. Debe marcarse como interpretación y no como dato observado.
-
-### C. Decisión artística
-
-Qué se adopta para Árboris: relación entre estratos, amplitud del horizonte, paleta atmosférica, densidad de elementos, lectura de masa vegetal, escala de roca, etc.
-
-## 9. De referencia a patrón
+- `observedNotes`: lo directamente visible o documentado;
+- `interpretedNotes`: lectura contextual o hipótesis;
+- regla de arte: decisión adoptada por dirección de arte.
 
 Una sola referencia puede justificar una solución de escena específica, pero no una regla general del ecosistema.
 
-Para convertir una observación en pauta del manual de escenarios, exigir:
+## 8. Promoción de patrones a reglas
 
-1. varias series independientes o una fuente institucional/científica que la respalde;
-2. coherencia con la evidencia disponible;
-3. revisión de dirección de arte;
-4. formulación que indique alcance geográfico, altitudinal o estacional cuando corresponda;
-5. consideración explícita de `pilotRelevance` cuando la pauta se pretenda aplicar al escenario del primer piloto.
+Estados de pauta:
 
-El manual debe distinguir:
+- `OBSERVED`: documentada en una o más referencias concretas;
+- `RECURRENT`: repetida en varias referencias independientes;
+- `APPROVED_ART_RULE`: decisión artística aprobada;
+- `OPEN`: todavía insuficientemente sustentada.
 
-- `observed` — documentado en referencias concretas;
-- `recurrent` — repetido en varias referencias independientes;
-- `approvedArtRule` — decisión de dirección de arte;
-- `open` — todavía insuficientemente sustentado.
+Para convertir una pauta en `APPROVED_ART_RULE` del primer escenario:
 
-Para una regla específica del primer escenario, evidencia `core` tiene prioridad territorial sobre evidencia `comparative`. Esto no reemplaza la calidad científica ni permite ignorar contradicciones; solo evita que una zona externa defina por defecto la apariencia de Los Nogales.
+1. debe existir evidencia suficiente y trazable;
+2. debe revisarse su alcance geográfico, altitudinal y estacional;
+3. debe revisarse su pertinencia territorial;
+4. **no puede depender exclusivamente de referencias `comparative`**.
 
-## 10. Captura de campo recomendada
+Una referencia `comparative` puede apoyar, contrastar o cuestionar una regla, pero no gobernar por sí sola la apariencia del núcleo.
 
-Cuando Alejandra o Álvaro documenten una zona, priorizar series breves en vez de una sola fotografía:
+## 9. Captura de campo
 
-- vista amplia del paisaje;
-- vista media de estructura vegetal;
+Para una visita de campo, priorizar una serie breve y útil:
+
+- paisaje general;
+- estructura vegetal media;
 - suelo y roca;
-- borde de sendero o microhábitat;
-- cielo y horizonte;
-- cauce, quebrada o elemento hídrico cuando exista;
-- fotografías adicionales de elementos especialmente representativos.
+- sendero o microhábitat;
+- quebrada/cauce si existe;
+- cielo y horizonte.
 
-En Fundo Los Nogales, Arrayán y otras áreas del piloto, registrar cuando sea posible:
+En Fundo Los Nogales y Arrayán registrar cuando sea posible altitud, sector, exposición de ladera, rumbo de cámara, hora, estación y `seriesId`.
 
-- altitud aproximada;
-- punto o sector;
-- exposición de la ladera;
-- dirección de la fotografía;
-- hora;
-- estación;
-- si la imagen pertenece a una misma serie de captura;
-- si el punto corresponde directamente al área del levantamiento botánico o solo a su contexto inmediato.
+## 10. Uso de referencias web y de ChatGPT
 
-No es necesario fotografiar cada elemento botánico si ya existe una biblioteca científica específica para especies.
+ChatGPT puede localizar referencias públicas, comparar paisajes, identificar vacíos, analizar recurrencias y ayudar a redactar reglas.
 
-## 11. Uso de ChatGPT para búsqueda visual
+No debe:
 
-ChatGPT puede:
+- convertir una imagen web en asset sin verificar derechos;
+- atribuir ubicación o especie sin evidencia;
+- usar referencia artística como evidencia ecológica;
+- presentar una fotografía aislada como descripción universal de un ecosistema.
 
-- localizar referencias públicas;
-- comparar paisajes;
-- identificar vacíos del corpus;
-- sugerir categorías de captura;
-- analizar composición y recurrencias visibles;
-- ayudar a redactar pautas del manual.
+## 11. Regla de congelamiento provisional
 
-ChatGPT no debe:
+El esquema actual se considera **provisionalmente congelado** durante la fase de poblamiento del corpus `core`.
 
-- convertir una imagen web en asset del proyecto sin verificar derechos;
-- atribuir ubicación o especie sin evidencia suficiente;
-- usar una imagen artística como prueba ecológica;
-- presentar una única fotografía o un área comparativa como descripción universal del territorio núcleo del piloto.
+No agregar nuevos campos, categorías ni documentos salvo que una necesidad real del corpus no pueda resolverse con el esquema existente.
 
-## 12. Relación con producción
-
-Antes de iniciar un escenario nuevo, el brief debe incluir una lista de `referenceId` seleccionados y separar explícitamente:
-
-- qué proviene de evidencia real;
-- qué es una interpretación;
-- qué es una decisión estilística;
-- qué referencias son `core`, `contextual` o `comparative`.
-
-Para el escenario del primer piloto, el brief debe declarar también el vínculo con `data/source/Base_botanica_Pokedex_flora_Master.xlsx` cuando corresponda.
-
-Cuando el escenario esté basado en una zona concreta, debe declarar `referenceArea`, rango altitudinal aproximado y ecosistemas de referencia usados.
-
-La generación asistida por IA, cuando se use, parte de ese brief curado y nunca sustituye el corpus de referencias.
+El trabajo siguiente debe concentrarse en poblar y probar el sistema, no en seguir diseñándolo.
