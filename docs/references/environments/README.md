@@ -28,7 +28,7 @@ Para el primer piloto, cada referencia debe indicar su pertinencia territorial m
 
 Cuando exista vínculo documental directo con la fuente botánica maestra, usar:
 
-`botanicalSourceRef=data/source/Base_botanica_Pokedex_flora_Master.xlsx`
+`botanicalSourceRef=data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
 
 No asignar ese vínculo solo por proximidad geográfica.
 
