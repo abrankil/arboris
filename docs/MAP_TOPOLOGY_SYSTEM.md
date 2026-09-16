@@ -129,7 +129,7 @@ Una conexión abierta debe llegar realmente al borde del fragmento mediante tile
 
 Las paredes, roca alta, vegetación densa u otros bloqueos pueden traducir visualmente un tile no transitable, pero no deben modificar silenciosamente la topología aprobada.
 
-## 8. Vegetación y navegación
+## 8. Vegetación, especies y navegación
 
 No toda vegetación equivale a bloqueo.
 
@@ -140,6 +140,15 @@ Se distinguen al menos tres funciones conceptuales:
 - vegetación contextual: elementos fuera del espacio jugable o usados para profundidad y continuidad visual.
 
 La distribución final debe apoyarse en referencias ambientales reales. Las imágenes generadas no constituyen evidencia botánica o ecológica.
+
+Toda colocación de especies en el mapa debe distinguir entre peso de presencia y evidencia territorial.
+
+```text
+peso de presencia = prioridad visual o probabilidad contextual basada en conteos disponibles
+evidencia territorial = observación, fotografía o registro asociado a una unidad espacial concreta
+```
+
+Un peso alto de presencia puede orientar qué especies conviene representar primero. No permite fijar ubicación exacta, microhábitat o agrupación espacial si falta evidencia territorial. Si no hay unidad territorial asociada, la colocación queda como prueba visual o estado `OPEN`.
 
 ## 9. Flujo correcto de producción conceptual
 
