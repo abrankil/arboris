@@ -1,229 +1,146 @@
 import json
+import re
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
+SPECIES_FILE = ROOT / "data" / "botanical" / "species.json"
 
-SPECIES_DIR = ROOT / "data" / "species"
-BOTANICAL_DIR = ROOT / "data" / "botanical"
-KEY_FILE = ROOT / "tools" / "botanical-key-validation" / "logic.mjs"
-
-SPECIES_FILES = [
-    "SP001_cryptocarya_alba.json",
-    "SP002_lithraea_caustica.json",
-    "SP003_kageneckia_oblonga.json",
-    "SP004_podanthus_mitiqui.json",
-    "SP005_colliguaja_odorifera.json",
-    "SP006_quillaja_saponaria.json",
-]
+CANONICAL_ID_RE = re.compile(r"^SP-\d{3}$")
+LEGACY_RUNTIME_ID_RE = re.compile(r"^SP\d{3}$")
 
 
-def load_json(path):
-    with path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+def load_json(path: Path):
+    with path.open("r", encoding="utf-8") as file:
+        return json.load(file)
 
 
-def expected_runtime_id(master_id):
+def legacy_runtime_id(canonical_id: str) -> str:
     """
+    Devuelve la equivalencia histórica usada por algunos prototipos.
+
     SP-001 -> SP001
-    """
-    if not master_id:
-        return None
 
-    return master_id.replace("-", "")
+    Esta conversión existe solo como comprobación de compatibilidad.
+    El motor canónico de Árboris debe usar species_id directamente.
+    """
+    return canonical_id.replace("-", "")
 
 
 def main():
-    print("\nÁRBORIS — VALIDACIÓN DE IDs")
+    print("\nÁRBORIS — VALIDACIÓN DE IDs DE ESPECIE")
     print("=" * 72)
 
     errors = []
 
-    # ---------------------------------------------------------
-    # 1. Leer snapshot de especies procedente de la Master
-    # ---------------------------------------------------------
+    if not SPECIES_FILE.exists():
+        raise FileNotFoundError(f"No existe: {SPECIES_FILE}")
 
-    species_snapshot_path = BOTANICAL_DIR / "species_pilot.json"
+    species = load_json(SPECIES_FILE)
 
-    if not species_snapshot_path.exists():
-        raise FileNotFoundError(
-            f"No existe: {species_snapshot_path}"
-        )
+    if not isinstance(species, list):
+        raise ValueError("species.json debe contener un array JSON.")
 
-    species_snapshot = load_json(species_snapshot_path)
-    master_species = species_snapshot.get("records", [])
-
-    master_by_runtime_id = {}
-
-    for species in master_species:
-        master_id = species.get("species_id")
-        runtime_id = expected_runtime_id(master_id)
-
-        if not master_id or not runtime_id:
-            errors.append(
-                f"Registro Master sin species_id válido: {species}"
-            )
-            continue
-
-        master_by_runtime_id[runtime_id] = species
-
-    # ---------------------------------------------------------
-    # 2. Leer texto de la clave
-    # ---------------------------------------------------------
-
-    if not KEY_FILE.exists():
-        raise FileNotFoundError(
-            f"No existe la clave: {KEY_FILE}"
-        )
-
-    key_text = KEY_FILE.read_text(
-        encoding="utf-8"
-    )
-
-    # ---------------------------------------------------------
-    # 3. Comprobar las seis fichas
-    # ---------------------------------------------------------
-
+    canonical_ids = set()
+    legacy_ids = set()
+    scientific_names = set()
     results = []
 
-    for filename in SPECIES_FILES:
-        path = SPECIES_DIR / filename
-
-        if not path.exists():
+    for index, record in enumerate(species, start=1):
+        if not isinstance(record, dict):
             errors.append(
-                f"Falta ficha: {filename}"
+                f"Registro {index}: debe ser un objeto JSON."
             )
             continue
 
-        data = load_json(path)
+        canonical_id = record.get("species_id")
+        scientific_name = record.get("nombre_cientifico")
 
-        runtime_id = data.get("id")
-
-        botanical_data = data.get(
-            "botanicalData",
-            {},
-        )
-
-        master_id = botanical_data.get(
-            "masterSpeciesId"
-        )
-
-        # Si la ficha no conserva el master ID en botanicalData,
-        # intentamos obtenerlo desde el snapshot.
-        master_record = master_by_runtime_id.get(
-            runtime_id
-        )
-
-        expected_master_id = (
-            master_record.get("species_id")
-            if master_record
-            else None
-        )
-
-        expected_id = expected_runtime_id(
-            expected_master_id
-        )
-
-        id_ok = (
-            runtime_id is not None
-            and expected_id == runtime_id
-        )
-
-        master_trace_ok = (
-            master_id is None
-            or master_id == expected_master_id
-        )
-
-        # Buscamos si el runtime ID aparece actualmente
-        # en logic.mjs. Esto es diagnóstico, no exige todavía
-        # que la futura clave dependa de IDs hardcodeados.
-        appears_in_key = (
-            runtime_id in key_text
-            if runtime_id
-            else False
-        )
-
-        if not id_ok:
+        if not isinstance(canonical_id, str) or not canonical_id:
             errors.append(
-                f"{filename}: runtime ID {runtime_id} "
-                f"no corresponde a Master ID "
-                f"{expected_master_id}"
+                f"Registro {index}: species_id ausente o inválido."
+            )
+            continue
+
+        if not CANONICAL_ID_RE.fullmatch(canonical_id):
+            errors.append(
+                f"{canonical_id}: formato inválido; se espera SP-000."
             )
 
-        if not master_trace_ok:
+        if canonical_id in canonical_ids:
             errors.append(
-                f"{filename}: masterSpeciesId "
-                f"{master_id} != {expected_master_id}"
+                f"species_id duplicado: {canonical_id}"
             )
+        canonical_ids.add(canonical_id)
+
+        compatibility_id = legacy_runtime_id(canonical_id)
+
+        if not LEGACY_RUNTIME_ID_RE.fullmatch(compatibility_id):
+            errors.append(
+                f"{canonical_id}: equivalencia histórica inválida "
+                f"({compatibility_id})."
+            )
+
+        if compatibility_id in legacy_ids:
+            errors.append(
+                f"Equivalencia histórica duplicada: {compatibility_id}"
+            )
+        legacy_ids.add(compatibility_id)
+
+        if not isinstance(scientific_name, str) or not scientific_name.strip():
+            errors.append(
+                f"{canonical_id}: nombre_cientifico ausente o inválido."
+            )
+            normalized_name = None
+        else:
+            normalized_name = scientific_name.strip().casefold()
+            if normalized_name in scientific_names:
+                errors.append(
+                    f"nombre_cientifico duplicado: {scientific_name}"
+                )
+            scientific_names.add(normalized_name)
 
         results.append(
             {
-                "master_id": expected_master_id,
-                "runtime_id": runtime_id,
-                "id_ok": id_ok,
-                "master_trace_ok": master_trace_ok,
-                "appears_in_key": appears_in_key,
-                "scientific_name": data.get(
-                    "scientificName",
-                    "",
-                ),
+                "canonical_id": canonical_id,
+                "legacy_id": compatibility_id,
+                "scientific_name": scientific_name,
             }
         )
 
-    # ---------------------------------------------------------
-    # 4. Mostrar resultados
-    # ---------------------------------------------------------
-
-    print(
-        f"{'MASTER':<10}"
-        f"{'RUNTIME':<10}"
-        f"{'FICHA':<9}"
-        f"{'TRAZA':<9}"
-        f"{'CLAVE':<9}"
-        f"ESPECIE"
-    )
-
-    print("-" * 72)
+    print()
 
     for result in results:
         print(
-            f"{str(result['master_id']):<10}"
-            f"{str(result['runtime_id']):<10}"
-            f"{'OK' if result['id_ok'] else 'ERROR':<9}"
-            f"{'OK' if result['master_trace_ok'] else 'ERROR':<9}"
-            f"{'SÍ' if result['appears_in_key'] else 'NO':<9}"
-            f"{result['scientific_name']}"
+            f"{result['canonical_id']} | "
+            f"{result['scientific_name']} | "
+            f"compatibilidad histórica: {result['legacy_id']}"
         )
 
     print("\n" + "=" * 72)
-
-    print(
-        f"Especies comprobadas: {len(results)}"
-    )
-
-    print(
-        f"Conflictos de ID: {len(errors)}"
-    )
+    print(f"Especies comprobadas: {len(results)}")
+    print(f"Conflictos de ID/datos: {len(errors)}")
 
     if errors:
         print("\nDETALLE DE CONFLICTOS:")
-
         for error in errors:
             print(f"- {error}")
-
-    else:
-        print(
-            "\nOK — La equivalencia "
-            "SP-00X → SP00X es consistente."
-        )
+        raise SystemExit(1)
 
     print(
-        "\nNota: la columna CLAVE solo indica si el ID "
-        "aparece actualmente en logic.mjs."
+        "\nOK — Todos los species_id canónicos son válidos y únicos."
     )
-
     print(
-        "No se modificó ningún archivo."
+        "OK — La equivalencia histórica SP-00X -> SP00X es determinista "
+        "y no presenta colisiones."
+    )
+    print(
+        "\nNota: data/species, species_pilot.json y logic.mjs no participan "
+        "en esta validación."
+    )
+    print(
+        "El motor canónico debe usar species_id (SP-00X) directamente; "
+        "SP00X queda solo como compatibilidad con prototipos antiguos."
     )
 
 
