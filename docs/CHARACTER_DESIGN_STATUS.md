@@ -8,7 +8,7 @@ Los estados describen únicamente lo ya documentado. `open` significa que la dec
 
 ## Personajes vigentes
 
-| ID | Personaje | Master vigente | Morfología | Paleta | Rostro | Compañero | Cleanup | Animación | Gameplay |
+| ID | Personaje | Sprite canónico vigente | Morfología | Paleta | Rostro | Compañero | Cleanup | Animación | Gameplay |
 |---|---|---|---|---|---|---|---|---|---|
 | SP001 | Peumo / Peumito | `SP001_peumo/assets/peumito-layer-125x125.png` | approved | approved | approved | approved | verified | not_started | open |
 | SP002 | Litre / Litrini | `SP002_litre/assets/litrini-layer-125x125.png` | approved | approved | approved | approved | verified | not_started | open |
@@ -19,7 +19,7 @@ Los estados describen únicamente lo ya documentado. `open` significa que la dec
 | SP007 | Boldo | `SP007_boldo/assets/boldo-pixelorama-125x125.png` | approved | approved | approved | approved | verified | not_started | open |
 | GUIDE | Piedra-guía de líquen | `shared/guides/piedra-guia-pixelorama-125x125.png` | approved | approved | approved | none | verified | not_started | open |
 
-`Master vigente` usa rutas relativas a `data/characters/`.
+`Sprite canónico vigente` usa rutas relativas a `data/characters/`. Mientras no exista un asset master separado, este sprite seleccionado funciona como master visual operativo según la regla transitoria definida en `ART_STYLE_GUIDE.md`.
 
 ## Pendientes reales
 
@@ -39,6 +39,6 @@ Los estados describen únicamente lo ya documentado. `open` significa que la dec
 
 ## Assets y validación
 
-Los sprites canónicos viven en las carpetas `data/characters/*/assets/`; los auxiliares, bajo `data/characters/shared/`. La imagen promocional de tres personajes es una referencia histórica de composición y no sustituye los masters individuales.
+Los sprites canónicos viven en las carpetas `data/characters/*/assets/`; los auxiliares, bajo `data/characters/shared/`. La imagen promocional de tres personajes es una referencia histórica de composición y no sustituye los sprites canónicos individuales ni futuros masters separados.
 
 Ejecutar `pwsh -File tools/validate-graphic-assets.ps1` desde la raíz de Arboris para repetir comprobaciones medibles. El resultado informa problemas sin editar píxeles y no certifica por sí solo morfología, estilo ni aprobación artística.
