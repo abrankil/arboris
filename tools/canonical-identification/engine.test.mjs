@@ -78,7 +78,9 @@ test('filtering eliminates only candidates with explicit state conflicts', async
   assert.deepEqual(result.remaining, [conflict.left.speciesId]);
   assert.equal(result.eliminated.length, 1);
   assert.equal(result.eliminated[0].speciesId, conflict.right.speciesId);
-  assert.equal(result.eliminated[0].characterId, conflict.character.characterId);
+  assert.equal(result.eliminated[0].conflicts.length, 1);
+  assert.equal(result.eliminated[0].conflicts[0].characterId, conflict.character.characterId);
+  assert.equal(result.eliminated[0].conflicts[0].reason, 'explicit_state_conflict');
 });
 
 test('unknown evidence never removes candidates', async () => {
