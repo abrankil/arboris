@@ -51,6 +51,10 @@ Reglas:
 - una modificación estructural de silueta, morfología o identidad requiere una nueva versión documentada del master;
 - los derivados pueden adaptar encuadre o movimiento a su uso sin borrar los rasgos que identifican al personaje.
 
+### Regla transitoria de master visual
+
+El repositorio todavía no define un asset master separado para cada personaje. Mientras esa separación no exista, el `selectedDesign` de la ficha individual y su PNG canónico aprobado funcionan juntos como **master visual operativo**. El concepto de `gallery sprite` como derivado se aplica únicamente cuando exista un asset derivado explícitamente creado y declarado como tal. Esta regla transitoria evita reclasificar retroactivamente los sprites canónicos actuales sin una migración de datos y assets.
+
 ## Geometría de producción futura
 
 **Estado: PROPUESTO.** Estos campos preparan animación, composición y UI, pero no tienen valores normativos todavía.
