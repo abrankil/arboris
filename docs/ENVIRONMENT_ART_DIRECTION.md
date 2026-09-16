@@ -4,7 +4,7 @@
 
 Marco inicial consolidado con reglas provisionales derivadas del corpus actual. El sistema visual del primer escenario debe priorizar el territorio del Fundo Los Nogales y usar referencias externas solo como contexto o contraste.
 
-La fuente botánica maestra del piloto es `data/source/Base_botanica_Pokedex_flora_Master.xlsx`. Esta documentación no modifica ni reinterpreta esa planilla.
+La fuente botánica maestra vigente del piloto es `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`. Esta documentación no modifica ni reinterpreta esa planilla.
 
 ## Propósito
 
@@ -99,7 +99,7 @@ Estas reglas gobiernan o condicionan directamente el escenario núcleo.
 | PILOT-ENV-003 | `OPEN` | Diferencias visuales entre laderas norte y sur del territorio núcleo. | Requiere corpus `core`. |
 | PILOT-ENV-004 | `OPEN` | Frecuencia y distribución de roca y suelo desnudo por sector y altitud. | Requiere corpus `core`. |
 | PILOT-ENV-005 | `OPEN` | Estructura típica de senderos, quebradas y bordes del Fundo Los Nogales. | Requiere corpus `core`. |
-| PILOT-ENV-006 | `OPEN` | Relación espacial real entre las seis especies piloto y sus microhábitats. | Requiere enlazar referencias ambientales con la fuente botánica revisada. |
+| PILOT-ENV-006 | `OPEN` | Relación espacial real entre las seis especies piloto y sus microhábitats. | Requiere enlazar referencias ambientales con la fuente botánica vigente. |
 | PILOT-ENV-007 | `OPEN` | Variación estacional de color, densidad y atmósfera del territorio núcleo. | Requiere series estacionales. |
 
 ## Reglas de apoyo regional
