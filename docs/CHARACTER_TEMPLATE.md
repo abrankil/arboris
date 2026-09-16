@@ -7,11 +7,11 @@ No obliga a modificar inmediatamente el schema JSON existente.
 
 ## Identidad
 
-- `speciesId`:
-- `speciesCommonName`:
-- `characterName`:
-- `scientificName`:
 - `characterType`: `species | support`
+- `characterName`:
+- `speciesId`: obligatorio si `characterType: species`; usar `N/A` si es `support`
+- `speciesCommonName`: obligatorio si `characterType: species`; usar `N/A` si es `support`
+- `scientificName`: obligatorio si `characterType: species`; usar `N/A` si es `support`
 
 ## Versionado
 
@@ -19,14 +19,24 @@ No obliga a modificar inmediatamente el schema JSON existente.
 - `spriteVersion`:
 - `technicalRevision`:
 
-## Evidencia botánica
+## Evidencia y referencias
 
-- fuentes:
+### Si `characterType: species`
+
+- fuentes botánicas:
 - fotografías:
 - variación observada:
 - observaciones humanas atribuidas:
 
-## Rasgos botánicos obligatorios
+### Si `characterType: support`
+
+- referencias materiales/visuales:
+- función visual prevista:
+- observaciones humanas atribuidas:
+
+## Rasgos obligatorios
+
+### Personaje-especie
 
 - silueta:
 - margen:
@@ -36,6 +46,16 @@ No obliga a modificar inmediatamente el schema JSON existente.
 - textura:
 - estructuras reproductivas:
 - asimetrías relevantes:
+
+### Personaje auxiliar
+
+- silueta:
+- material/superficie:
+- paleta:
+- rasgo identificador:
+- restricciones de representación:
+
+No completar campos botánicos para personajes auxiliares.
 
 ## Identidad gráfica
 
@@ -59,7 +79,7 @@ No obliga a modificar inmediatamente el schema JSON existente.
 - `visualRepresentation`:
 - relación espacial:
 - prioridad visual:
-- `gameplayRole`: `OPEN | NONE | APPROVED`
+- `gameplayRole`: `open | none | approved`
 
 La representación gráfica de una estructura no define automáticamente una mecánica.
 
