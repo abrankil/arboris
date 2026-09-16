@@ -2,7 +2,7 @@
 
 ## Estado
 
-**Versión inicial de marco.** Este documento define cómo convertir referencias reales en decisiones visuales coherentes para escenarios y assets ambientales. No pretende cerrar todavía un manual ecológico completo del bosque esclerófilo.
+**Versión inicial de marco con primeras pautas derivadas del corpus piloto.** Este documento define cómo convertir referencias reales en decisiones visuales coherentes para escenarios y assets ambientales. No pretende cerrar todavía un manual ecológico completo del bosque esclerófilo.
 
 Las reglas específicas deben crecer a partir del corpus curado en `docs/references/environments/` y de fuentes botánicas/ecológicas pertinentes.
 
@@ -97,29 +97,105 @@ El objetivo no es reconstrucción fotográfica exacta. Es mantener relaciones pl
 
 Toda pauta futura debe marcarse como una de estas:
 
-- `OBSERVED` — visible en referencias concretas;
-- `RECURRENT` — aparece de forma consistente en varias referencias;
+- `OBSERVED` — visible o documentada en referencias concretas;
+- `RECURRENT` — aparece de forma consistente en varias referencias independientes;
 - `APPROVED_ART_RULE` — decisión de dirección de arte basada en evidencia y necesidades visuales;
 - `OPEN` — aún insuficientemente sustentada.
 
-No convertir automáticamente `OBSERVED` en regla general.
+No convertir automáticamente `OBSERVED` en regla general. Una fuente institucional puede respaldar contexto ecológico sin convertirse por sí sola en una pauta compositiva.
 
 ## Bosque esclerófilo — marco inicial
 
-El bosque esclerófilo será el primer corpus de entrenamiento visual para este manual.
+El bosque esclerófilo será el primer corpus de entrenamiento visual para este manual. El corpus piloto actual contiene referencias institucionales, científicas y fotográficas de Yerba Loca, Arrayán / Los Nogales, Río Clarillo, Pirque y vistas de la cordillera desde Santiago.
 
-Todavía deben definirse a partir de referencias reales:
+El ecosistema P41 — `Bosque esclerofilo mediterráneo andino de Quillaja saponaria - Lithraea caustica` — funciona como marco ecológico principal del piloto. La fuente institucional registrada en `ENV-0003` lo sitúa entre aproximadamente 200 y 1.400 m y documenta variación desde bosque esclerófilo hasta estados degradados de matorral arborescente o espinal.
 
-- variación entre laderas expuestas y sombrías;
-- relación entre bosque cerrado y zonas abiertas;
-- frecuencia visual de roca y suelo desnudo;
-- estructura de quebradas;
-- transición hacia ambientes de mayor altitud;
-- cambios estacionales de color y densidad;
-- formas recurrentes de horizonte y cordillera;
-- cielos característicos bajo distintas condiciones atmosféricas.
+Yerba Loca y Arrayán / Los Nogales se usan como áreas locales prioritarias para estudiar precordillera de Santiago. No constituyen una sola plantilla visual: ambas abarcan gradientes altitudinales y ambientes distintos.
 
-Hasta contar con corpus suficiente, estas materias permanecen `OPEN`.
+## Primeras pautas derivadas del corpus piloto
+
+Estas pautas son el primer resultado del sistema de referencias. Todavía no sustituyen las futuras láminas comparativas ni cierran decisiones de paleta, proporción o densidad numérica fuera de los alcances indicados.
+
+| ID | Estado | Pauta | Referencias | Alcance |
+| --- | --- | --- | --- | --- |
+| ENV-RULE-001 | `RECURRENT` | La altitud y el tipo de ambiente deben declararse antes de usar una referencia de precordillera como modelo de escena. | ENV-0001, ENV-0002, ENV-0003, ENV-0004 | Precordillera de Santiago y corpus piloto. |
+| ENV-RULE-002 | `RECURRENT` | El bosque esclerófilo no debe representarse por defecto como una masa arbórea continua: el corpus admite bosque, matorral, aperturas y estados degradados según lugar y condición. | ENV-0002, ENV-0003, ENV-0004, ENV-0008 | Bosque esclerófilo del corpus central. |
+| ENV-RULE-003 | `OBSERVED` | En Río Clarillo, la asociación peumo–litre–quillay documentada entre 870 y 1.500 m presenta preferencia por exposición sur, cobertura aproximada de 50–60 % y suelos graníticos de mayor desarrollo. | ENV-0005 | Local a la unidad descrita por el plan de manejo de Río Clarillo; no generalizar todavía. |
+| ENV-RULE-004 | `RECURRENT` | Las quebradas y cauces deben tratarse como microambientes diferenciados de la ladera general: roca expuesta, bloques, agua y vegetación de borde pueden dominar la lectura local. | ENV-0006, ENV-0007 | Ambientes ribereños de Río Clarillo; requiere ampliar corpus en Yerba Loca/Arrayán. |
+| ENV-RULE-005 | `OBSERVED` | El borde de bosque puede transicionar a una matriz abierta sin una frontera visual rígida. | ENV-0008 | Pirque; una sola serie fotográfica. |
+| ENV-RULE-006 | `RECURRENT` | La profundidad cordillerana puede expresarse mediante pérdida progresiva de contraste y presencia de bruma o atmósfera entre planos. | ENV-0009, ENV-0010 | Vistas de Andes desde Santiago/cuenca. |
+| ENV-RULE-007 | `OBSERVED` | En una referencia invernal de atardecer, la última luz cálida puede iluminar cumbres nevadas mientras los planos inferiores permanecen más fríos o velados. | ENV-0009 | Condición atmosférica y temporal específica; no generalizar a todo atardecer. |
+| ENV-RULE-008 | `OBSERVED` | Un cauce longitudinal puede funcionar compositivamente como eje que conduce la mirada hacia la cordillera y refuerza la profundidad de escena. | ENV-0007 | Río Clarillo; pauta compositiva candidata, no regla ecológica. |
+
+## Consecuencias de dirección de arte provisionales
+
+### Relieve y transición altitudinal
+
+`ENV-RULE-001` impide usar “Yerba Loca” o “precordillera” como etiquetas visuales suficientes. Un brief de escenario debe declarar al menos:
+
+- área de referencia;
+- rango altitudinal aproximado;
+- ambiente representado;
+- ecosistema de referencia cuando esté disponible.
+
+Un escenario bajo/medio de bosque esclerófilo no debe mezclar por conveniencia rasgos de vegas, herbazales de alta montaña, nieve permanente o glaciares que pertenecen a otros tramos del gradiente de Yerba Loca.
+
+### Masa vegetal y vacíos
+
+`ENV-RULE-002` orienta a evitar dos extremos igualmente genéricos:
+
+- bosque cerrado uniforme en todo el escenario;
+- ladera casi desnuda con arbustos distribuidos al azar.
+
+La composición debe trabajar masas, claros, suelo expuesto y cambios de densidad según la referencia concreta. Todavía permanece `OPEN` una regla cuantitativa general de cobertura para el ecosistema P41.
+
+### Exposición de ladera
+
+La relación entre exposición y estructura vegetal es relevante, pero todavía no existe evidencia suficiente para una regla general del piloto.
+
+- `ENV-0002` documenta que en Los Nogales existen diferencias por exposición solar.
+- `ENV-0005` documenta localmente en Río Clarillo una asociación preferente de exposición sur con cobertura de 50–60 %.
+
+Por ahora, la regla general permanece `OPEN`. No representar automáticamente toda ladera sur como densa ni toda ladera norte como seca hasta ampliar el corpus local de Yerba Loca y Arrayán.
+
+### Quebradas y cauces
+
+`ENV-RULE-004` establece una primera distinción visual útil. En ambientes ribereños, priorizar lectura de:
+
+- lecho y bloques;
+- relación agua–roca;
+- borde vegetal;
+- encajonamiento;
+- humedad visual local.
+
+No trasladar automáticamente esa densidad de vegetación o presencia de agua a laderas adyacentes.
+
+### Cordillera y atmósfera
+
+`ENV-RULE-006` permite incorporar profundidad atmosférica como parte del lenguaje realista de Santiago. En pixel art, esto puede traducirse mediante:
+
+- menor contraste en planos lejanos;
+- menor separación tonal dentro de los cordones distantes;
+- bruma o veladura resuelta por bloques y paleta, no por blur fotográfico;
+- siluetas sucesivas de cordones antes de la montaña principal cuando la referencia lo muestre.
+
+La combinación cálido-frío del atardecer invernal de `ENV-0009` permanece `OBSERVED`; puede usarse en una escena específica, no como paleta estándar del proyecto.
+
+## Materias que siguen abiertas
+
+El corpus actual todavía es insuficiente para fijar reglas generales sobre:
+
+- diferencias sistemáticas entre laderas norte, sur, este y oeste;
+- frecuencia de roca y suelo desnudo por piso altitudinal;
+- estructura de senderos en Yerba Loca y Arrayán;
+- color estacional del bosque en verano, otoño, invierno y primavera;
+- variación de dosel entre quebrada y ladera fuera de Río Clarillo;
+- presencia y forma visual de chaguales, cactus y herbáceas por microhábitat;
+- nieve visible desde la precordillera según estación y altitud;
+- paletas de cielo representativas por estación;
+- proporción visual entre Cordillera de la Costa, cuenca y Andes desde distintos puntos de Santiago.
+
+Estas materias permanecen `OPEN` y deben orientar la siguiente búsqueda y captura de campo.
 
 ## Manual visual futuro
 
@@ -135,7 +211,7 @@ A partir del corpus deberán desarrollarse láminas comparativas para:
 - cielo y atmósfera;
 - invierno/verano u otras diferencias estacionales suficientemente documentadas.
 
-Cada lámina debe incluir referencias, patrón observado y traducción a pixel art.
+Cada lámina debe incluir referencias, patrón observado, alcance y traducción a pixel art. Una lámina no convierte automáticamente una observación local en regla general.
 
 ## Uso con generación asistida
 
@@ -147,6 +223,8 @@ Un prompt de escenario debe citar o resumir las referencias seleccionadas y sepa
 4. elementos que permanecen abiertos.
 
 La IA no debe completar automáticamente flora, relieve o clima que no estén definidos en el brief.
+
+Cuando un prompt use Yerba Loca, Arrayán / Los Nogales o Río Clarillo, debe indicar el tramo altitudinal o ambiente objetivo en vez de usar únicamente el nombre del lugar.
 
 ## Relación con producción
 
