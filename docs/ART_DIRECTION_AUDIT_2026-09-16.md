@@ -130,6 +130,8 @@ conteo por especie = peso de presencia / prioridad visual
 conteo por especie + unidad territorial = regla de colocación
 ```
 
+Toda colocación de especies en el mapa debe distinguir entre peso de presencia y evidencia territorial. Un conteo alto puede justificar prioridad visual o atención de diseño, pero no autoriza ubicar una especie en un punto específico sin evidencia territorial asociada.
+
 ### 3.5 Mapas y topología
 
 Estado: **sistema conceptual listo; prueba determinista pendiente**.
@@ -166,7 +168,17 @@ Decisión concreta:
 Los fondos actuales son referencias visuales o pruebas. No son masters finales de producción salvo validación explícita.
 ```
 
-## 4. Riesgos activos
+## 4. Alcance de la próxima fase
+
+Durante la próxima fase, Dirección de Arte no rediseña el canon base.
+
+Trabaja solo en derivados de personajes, blockouts de mapa y pruebas ambientales pequeñas.
+
+Toda colocación de especies en el mapa debe distinguir entre peso de presencia y evidencia territorial.
+
+Esto mantiene simple el sistema: primero se validan unidades pequeñas y trazables; después se decide si corresponde producir assets finales o ampliar alcance.
+
+## 5. Riesgos activos
 
 ### Riesgo 1: saltar a imagen final
 
@@ -208,20 +220,22 @@ Control:
 La topología la define Árboris. La IA solo interpreta visualmente.
 ```
 
-## 5. Decisiones concretas adoptadas
+## 6. Decisiones concretas adoptadas
 
 1. Dirección de Arte pasa de expansión metodológica a ejecución controlada.
 2. Los personajes base quedan congelados como canon operativo.
 3. El siguiente trabajo de personajes son derivados, no rediseños.
-4. El primer ejercicio de mapa debe ser un `corridor` determinista.
-5. Toda prueba de mapa se evalúa primero por conectividad, legibilidad y continuidad territorial.
-6. `PILOT-ENV-006` permanece `OPEN` hasta contar con observaciones territorializadas `core`.
-7. Los conteos del Master pueden usarse para peso de presencia, no para microhábitat automático.
-8. Las referencias externas son contexto o contraste, no autoridad del escenario núcleo.
-9. No se agregan nuevas categorías al sistema ambiental mientras el esquema actual alcance.
-10. Cada producción debe registrar qué fuente consultó, qué decisión tomó y qué queda pendiente.
+4. Durante la próxima fase, Dirección de Arte trabaja solo en derivados de personajes, blockouts de mapa y pruebas ambientales pequeñas.
+5. El primer ejercicio de mapa debe ser un `corridor` determinista.
+6. Toda prueba de mapa se evalúa primero por conectividad, legibilidad y continuidad territorial.
+7. `PILOT-ENV-006` permanece `OPEN` hasta contar con observaciones territorializadas `core`.
+8. Los conteos del Master pueden usarse para peso de presencia, no para microhábitat automático.
+9. La colocación de especies en el mapa exige distinguir peso de presencia y evidencia territorial.
+10. Las referencias externas son contexto o contraste, no autoridad del escenario núcleo.
+11. No se agregan nuevas categorías al sistema ambiental mientras el esquema actual alcance.
+12. Cada producción debe registrar qué fuente consultó, qué decisión tomó y qué queda pendiente.
 
-## 6. Plan ejecutable para Álvaro
+## 7. Plan ejecutable para Álvaro
 
 ### Paso 1 — Confirmar tablero visual
 
@@ -324,7 +338,7 @@ Regla:
 Si no hay unidad territorial, la ubicación queda OPEN.
 ```
 
-## 7. Prioridad inmediata
+## 8. Prioridad inmediata
 
 La próxima unidad de trabajo recomendada es:
 
@@ -340,7 +354,7 @@ No producir todavía:
 - rediseño del elenco base;
 - assets finales de escenario sin pipeline validado.
 
-## 8. Criterio de cierre de esta fase
+## 9. Criterio de cierre de esta fase
 
 Esta fase se considera cerrada cuando exista:
 
@@ -354,7 +368,7 @@ Esta fase se considera cerrada cuando exista:
 
 Solo después conviene avanzar a `elbow`, `junction` y `crossroad`.
 
-## 9. Conclusión ejecutiva
+## 10. Conclusión ejecutiva
 
 Dirección de Arte está lista para ejecutar pruebas pequeñas. No está lista para producción masiva de escenarios ni para rediseñar el sistema.
 
@@ -368,6 +382,8 @@ Más pruebas pequeñas, verificables y trazables.
 Decisión de trabajo:
 
 ```text
-Durante la siguiente fase, Álvaro trabaja sobre derivados, blockouts y evidencia core.
+Durante la próxima fase, Dirección de Arte no rediseña el canon base.
+Trabaja solo en derivados de personajes, blockouts de mapa y pruebas ambientales pequeñas.
+Toda colocación de especies en el mapa debe distinguir entre peso de presencia y evidencia territorial.
 Alejandra mantiene dirección de proyecto y controla cambios de alcance.
 ```
