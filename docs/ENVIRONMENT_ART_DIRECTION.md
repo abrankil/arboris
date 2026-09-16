@@ -6,6 +6,8 @@ Marco inicial consolidado con reglas provisionales derivadas del corpus actual. 
 
 La fuente botánica maestra vigente del piloto es `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`. Esta documentación no modifica ni reinterpreta esa planilla.
 
+Mientras el Hito 15 no esté fusionado a `main`, las fichas canónicas de lectura para las seis especies piloto se consultan en la rama `hito15-canonical-engine`, bajo `data/species/`. Al fusionarse el Hito 15, esa referencia debe resolverse contra `main`.
+
 ## Propósito
 
 Los escenarios de Árboris deben sentirse como interpretaciones reconocibles del territorio chileno y no como fondos mediterráneos genéricos.
@@ -79,6 +81,51 @@ Hora, nubosidad, profundidad atmosférica, temperatura aparente de luz, bruma, l
 ### Composición jugable
 La fidelidad territorial debe conservar legibilidad de juego: plano jugable claro, separación de personajes, contraste de silueta y zonas visualmente calmas para UI.
 
+## Fidelidad visual y fidelidad de colocación
+
+Para `PILOT-ENV-006`, separar dos decisiones:
+
+```text
+species visual fidelity  → cómo debe verse la especie
+species placement fidelity → dónde aparece dentro del mapa
+```
+
+La fidelidad visual puede avanzar con las fichas canónicas del Master 2.0: hábito, silueta, hoja, textura, estructuras reproductivas, variación y restricciones de seguridad.
+
+La fidelidad de colocación requiere evidencia territorial: sector, unidad de mapa, exposición, pendiente, cobertura, sustrato, humedad, relación con quebrada/sendero y especies acompañantes. Un rasgo botánico no define por sí solo el microhábitat de una especie dentro del escenario.
+
+## Conteos de observación para dirección de arte
+
+Los conteos por especie del Master 2.0 se usan para ponderar presencia dentro de la muestra del piloto. No deben transformarse automáticamente en abundancia ecológica real.
+
+Regla corregida:
+
+```text
+conteo por especie = peso de presencia / prioridad visual
+conteo por especie + unidad territorial = regla de colocación
+```
+
+Si el conteo está disponible solo por especie, puede influir en densidad relativa, frecuencia de aparición o prioridad de representación. Si además está estratificado por sector, exposición, pendiente, sustrato o microhábitat, puede empezar a informar ubicación dentro del mapa.
+
+Distinguir siempre `observationCount`, `photoCount` e `individualCount`. Una fotografía adicional del mismo individuo no equivale automáticamente a una observación independiente.
+
+Para una primera ponderación interna puede usarse:
+
+```text
+spawnWeight = observationCount_species / totalObservationCount
+```
+
+El resultado es un prior de muestra, no una afirmación poblacional. Debe revisarse por sesgo de muestreo, series no independientes, múltiples fotos de un mismo individuo y sectores con esfuerzo de observación desigual.
+
+La colocación por ambiente solo puede formularse así:
+
+```text
+placementWeight(species, terrainUnit)
+  = observations(species, terrainUnit) / observations(species)
+```
+
+Esto exige observaciones `core` o inequívocamente vinculadas al Fundo Los Nogales. Las fichas canónicas y referencias externas pueden sugerir hipótesis, pero no cerrar una regla local sin evidencia territorial.
+
 ## Estados de regla
 
 - `OBSERVED`: visible o documentada en referencias concretas;
@@ -99,7 +146,7 @@ Estas reglas gobiernan o condicionan directamente el escenario núcleo.
 | PILOT-ENV-003 | `OPEN` | Diferencias visuales entre laderas norte y sur del territorio núcleo. | Requiere corpus `core`. |
 | PILOT-ENV-004 | `OPEN` | Frecuencia y distribución de roca y suelo desnudo por sector y altitud. | Requiere corpus `core`. |
 | PILOT-ENV-005 | `OPEN` | Estructura típica de senderos, quebradas y bordes del Fundo Los Nogales. | Requiere corpus `core`. |
-| PILOT-ENV-006 | `OPEN` | Relación espacial real entre las seis especies piloto y sus microhábitats. | Requiere enlazar referencias ambientales con la fuente botánica vigente. |
+| PILOT-ENV-006 | `OPEN` | Relación espacial real entre las seis especies piloto y sus microhábitats. Los conteos de observación ponderan presencia; la colocación requiere observaciones territorializadas. | Master 2.0, fichas canónicas y corpus `core` pendiente. |
 | PILOT-ENV-007 | `OPEN` | Variación estacional de color, densidad y atmósfera del territorio núcleo. | Requiere series estacionales. |
 
 ## Reglas de apoyo regional
@@ -137,6 +184,23 @@ La profundidad puede representarse en pixel art mediante menor contraste, menor 
 
 Las paletas estacionales específicas permanecen `OPEN`.
 
+### Peso de presencia de especies piloto
+
+Los conteos actuales deben interpretarse según su tipo. Si el Master exporta `observationCount`, ese dato gobierna el peso de aparición. Si una tabla usa fotografías o evidencias, debe declararlo como `photoCount` o `evidenceCount`.
+
+La línea base fotográfica actualmente registrada para el piloto es:
+
+| Especie | Evidencia fotográfica actual | Lectura para arte |
+| --- | ---: | --- |
+| Peumo | 4 | Presencia menor en la muestra; no implica rareza ecológica real. |
+| Litre | 12 | Presencia alta en la muestra; candidato a mayor peso de aparición. |
+| Bollén | 7 | Presencia intermedia; requiere caracterización ambiental `core`. |
+| Mitique | 8 | Presencia intermedia-alta; requiere caracterización ambiental `core`. |
+| Colliguay | 7 | Presencia intermedia; probar hipótesis de ambiente asoleado/pedregoso. |
+| Quillay | 7 | Presencia intermedia; mantener cautela por identificación piloto probable si la evidencia es solo vegetativa. |
+
+Esta tabla no asigna microhábitats. Para eso se requiere cruzar cada observación con unidad territorial.
+
 ## Prioridades de poblamiento
 
 El siguiente corpus debe centrarse en evidencia `core` y `contextual` sobre:
@@ -148,6 +212,21 @@ El siguiente corpus debe centrarse en evidencia `core` y `contextual` sobre:
 - variación estacional;
 - vistas del cajón del Arrayán y cordones cercanos;
 - atmósfera local.
+
+Para especies piloto, la captura debe permitir al menos:
+
+```text
+species_id
+individual_id
+observation_id
+mapSector / terrainUnit
+slopeAspect / slopePosition
+substrate
+vegetationStructure / canopyCover
+hydrology o señal de humedad
+associatedSpecies
+confidence
+```
 
 ## Regla de congelamiento
 
