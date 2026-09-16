@@ -1,0 +1,15 @@
+{
+  "master_name": "Base_botanica_Pokedex_flora_Master",
+  "master_version": "2.0.0",
+  "schema_version": "2.0.0",
+  "updated_at": "2026-09-16",
+  "source_of_truth": "xlsx",
+  "multi_state_separator": "|",
+  "null_semantics": "sin_dato",
+  "not_applicable_semantics": "aplica_si",
+  "computable_status": "activo",
+  "excluded_status": "retirado|pendiente_revision",
+  "export_integrity": "SHA-256",
+  "source_file": "Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx",
+  "source_sha256": "10e2702aa0448e24e6b8c157afcf10d7e0de1aa85f6e0169b13fbc55ec3c6409"
+}

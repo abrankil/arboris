@@ -1,0 +1,26 @@
+[
+  {
+    "error_id": "ERR-001",
+    "species_id_real": "SP-003",
+    "individual_id": "KO-002",
+    "prediccion_inicial": "Citronella mucronata",
+    "validacion_humana": "Kageneckia oblonga",
+    "tipo_evidencia": "vegetativa",
+    "caracteres_clave": "hoja alterna; envés pálido; dientes apuntados; base redondeada; nervios secundarios hacia dientes",
+    "causa_probable": "Sobreconfianza ante morfología foliar atípica y forma de los dientes, carácter que la bibliografía documenta como muy variable dentro de Kageneckia oblonga.",
+    "ajuste_modelo": "Aumentar representación intraespecífica; bajar peso de forma foliar y morfología del diente aisladas; priorizar combinación margen aserrado + envés blanquecino + fruto estrellado/yemas resinosas cuando estén disponibles.",
+    "estado": "registrado"
+  },
+  {
+    "error_id": "ERR-002",
+    "species_id_real": "SP-002",
+    "individual_id": "LC-002",
+    "prediccion_inicial": "Cryptocarya alba",
+    "validacion_humana": "Lithraea caustica",
+    "tipo_evidencia": "vegetativa",
+    "caracteres_clave": "hoja alterna; margen entero; coriácea; envés pálido glabro; punteaduras; nervadura muy notoria",
+    "causa_probable": "Sobreponderación de punteaduras/envés pálido y subponderación de nervadura",
+    "ajuste_modelo": "Reducir peso de caracteres compartidos; aumentar contraste litre-peumo; conservar ejemplo negativo",
+    "estado": "registrado"
+  }
+]

@@ -1,0 +1,532 @@
+[
+  {
+    "termino_id": "GL-001",
+    "termino": "simple",
+    "categoria": "Hoja",
+    "definicion_tecnica": "Hoja cuya lámina no está dividida en folíolos independientes.",
+    "explicacion_usuario": "Una sola lámina foliar unida al pecíolo.",
+    "fuente_id": "F-002",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-001."
+  },
+  {
+    "termino_id": "GL-002",
+    "termino": "compuesta",
+    "categoria": "Hoja",
+    "definicion_tecnica": "Hoja dividida en folíolos diferenciados.",
+    "explicacion_usuario": "La hoja está formada por varias unidades llamadas folíolos.",
+    "fuente_id": "F-002",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-001."
+  },
+  {
+    "termino_id": "GL-003",
+    "termino": "alterna",
+    "categoria": "Disposición foliar",
+    "definicion_tecnica": "Hojas insertas de una en una en distintos niveles del tallo.",
+    "explicacion_usuario": "Las hojas van apareciendo alternadamente a lo largo de la rama.",
+    "fuente_id": "F-002",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-002."
+  },
+  {
+    "termino_id": "GL-004",
+    "termino": "subopuesta",
+    "categoria": "Disposición foliar",
+    "definicion_tecnica": "Disposición en que dos hojas se aproximan a una posición opuesta sin compartir exactamente el mismo nudo.",
+    "explicacion_usuario": "Dos hojas parecen casi enfrentadas, pero no nacen exactamente al mismo nivel.",
+    "fuente_id": "F-002",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-002."
+  },
+  {
+    "termino_id": "GL-005",
+    "termino": "opuesta",
+    "categoria": "Disposición foliar",
+    "definicion_tecnica": "Dos hojas insertas enfrentadas en un mismo nudo.",
+    "explicacion_usuario": "Dos hojas nacen una frente a la otra.",
+    "fuente_id": "F-014",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-002."
+  },
+  {
+    "termino_id": "GL-006",
+    "termino": "verticilada",
+    "categoria": "Disposición foliar",
+    "definicion_tecnica": "Tres o más hojas insertas alrededor de un mismo nudo.",
+    "explicacion_usuario": "Varias hojas nacen al mismo nivel formando una corona alrededor del tallo.",
+    "fuente_id": "F-003",
+    "sinonimos": null,
+    "observaciones": "Estado permitido de CH-002."
+  },
+  {
+    "termino_id": "GL-007",
+    "termino": "entero",
+    "categoria": "Margen foliar",
+    "definicion_tecnica": "Margen sin dientes ni serraciones.",
+    "explicacion_usuario": "Borde de la hoja sin dientes.",
+    "fuente_id": "F-002",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-003; la ondulación se registra en CH-028."
+  },
+  {
+    "termino_id": "GL-008",
+    "termino": "finamente_serrado",
+    "categoria": "Margen foliar",
+    "definicion_tecnica": "Margen con dientes pequeños orientados hacia el ápice.",
+    "explicacion_usuario": "Borde con dientes muy pequeños, como una sierra fina.",
+    "fuente_id": "F-003",
+    "sinonimos": "finamente serrado",
+    "observaciones": "Estado permitido de CH-003."
+  },
+  {
+    "termino_id": "GL-009",
+    "termino": "serrado",
+    "categoria": "Margen foliar",
+    "definicion_tecnica": "Margen con dientes agudos orientados predominantemente hacia el ápice.",
+    "explicacion_usuario": "Borde con dientes similares a los de una sierra.",
+    "fuente_id": "F-009",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-003."
+  },
+  {
+    "termino_id": "GL-010",
+    "termino": "dentado",
+    "categoria": "Margen foliar",
+    "definicion_tecnica": "Margen con dientes que se proyectan principalmente hacia afuera.",
+    "explicacion_usuario": "Borde con dientes visibles que apuntan hacia el exterior.",
+    "fuente_id": "F-017",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-003."
+  },
+  {
+    "termino_id": "GL-011",
+    "termino": "coriacea",
+    "categoria": "Consistencia foliar",
+    "definicion_tecnica": "Lámina firme y relativamente rígida, de consistencia semejante al cuero.",
+    "explicacion_usuario": "Hoja firme y dura, con textura parecida al cuero.",
+    "fuente_id": "F-002",
+    "sinonimos": "coriácea",
+    "observaciones": "Estado de CH-004."
+  },
+  {
+    "termino_id": "GL-012",
+    "termino": "pubescencia",
+    "categoria": "Superficie",
+    "definicion_tecnica": "Presencia de pelos o tricomas visibles sobre un órgano vegetal.",
+    "explicacion_usuario": "Presencia de pelitos sobre una hoja, fruto u otra estructura.",
+    "fuente_id": "F-003",
+    "sinonimos": null,
+    "observaciones": "Concepto usado en CH-006 y CH-026."
+  },
+  {
+    "termino_id": "GL-013",
+    "termino": "haz",
+    "categoria": "Hoja",
+    "definicion_tecnica": "Cara adaxial o superior de la lámina foliar.",
+    "explicacion_usuario": "Cara superior de la hoja.",
+    "fuente_id": "F-003",
+    "sinonimos": null,
+    "observaciones": "Término descriptivo."
+  },
+  {
+    "termino_id": "GL-014",
+    "termino": "enves",
+    "categoria": "Hoja",
+    "definicion_tecnica": "Cara abaxial o inferior de la lámina foliar.",
+    "explicacion_usuario": "Cara inferior de la hoja.",
+    "fuente_id": "F-003",
+    "sinonimos": "envés",
+    "observaciones": "Término descriptivo."
+  },
+  {
+    "termino_id": "GL-015",
+    "termino": "ovada",
+    "categoria": "Forma foliar",
+    "definicion_tecnica": "Lámina con contorno semejante a un huevo, más ancha hacia la base.",
+    "explicacion_usuario": "Hoja ovalada, más ancha cerca de la base.",
+    "fuente_id": "F-007",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-011."
+  },
+  {
+    "termino_id": "GL-016",
+    "termino": "ovado_eliptica",
+    "categoria": "Forma foliar",
+    "definicion_tecnica": "Forma intermedia entre ovada y elíptica.",
+    "explicacion_usuario": "Hoja con forma intermedia entre ovalada y elíptica.",
+    "fuente_id": "F-002",
+    "sinonimos": "aovado-elíptica",
+    "observaciones": "Estado de CH-011."
+  },
+  {
+    "termino_id": "GL-017",
+    "termino": "ovado_oblonga",
+    "categoria": "Forma foliar",
+    "definicion_tecnica": "Forma intermedia entre ovada y oblonga.",
+    "explicacion_usuario": "Hoja ovalada pero relativamente alargada.",
+    "fuente_id": "F-007",
+    "sinonimos": "ovado-oblonga",
+    "observaciones": "Estado de CH-011."
+  },
+  {
+    "termino_id": "GL-018",
+    "termino": "eliptica",
+    "categoria": "Forma foliar",
+    "definicion_tecnica": "Lámina más ancha en la zona media y estrechada hacia ambos extremos.",
+    "explicacion_usuario": "Hoja con forma de elipse.",
+    "fuente_id": "F-007",
+    "sinonimos": "elíptica",
+    "observaciones": "Estado de CH-011."
+  },
+  {
+    "termino_id": "GL-019",
+    "termino": "oblonga",
+    "categoria": "Forma foliar",
+    "definicion_tecnica": "Lámina alargada con lados aproximadamente paralelos en buena parte de su longitud.",
+    "explicacion_usuario": "Hoja alargada, con lados relativamente paralelos.",
+    "fuente_id": "F-015",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-011."
+  },
+  {
+    "termino_id": "GL-020",
+    "termino": "ovado_lanceolada",
+    "categoria": "Forma foliar",
+    "definicion_tecnica": "Forma intermedia entre ovada y lanceolada.",
+    "explicacion_usuario": "Hoja más ancha hacia la base y progresivamente estrecha hacia la punta.",
+    "fuente_id": "F-012",
+    "sinonimos": "ovado-lanceolada",
+    "observaciones": "Estado de CH-011."
+  },
+  {
+    "termino_id": "GL-021",
+    "termino": "lanceolada",
+    "categoria": "Forma foliar",
+    "definicion_tecnica": "Lámina alargada, estrecha y afinada hacia ambos extremos, semejante a una lanza.",
+    "explicacion_usuario": "Hoja larga y angosta, terminada en punta.",
+    "fuente_id": "F-012",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-011."
+  },
+  {
+    "termino_id": "GL-022",
+    "termino": "obovada",
+    "categoria": "Forma foliar",
+    "definicion_tecnica": "Lámina ovada con la porción más ancha hacia el ápice.",
+    "explicacion_usuario": "Hoja ovalada cuya parte más ancha está hacia la punta.",
+    "fuente_id": "F-007",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-011."
+  },
+  {
+    "termino_id": "GL-023",
+    "termino": "orbicular",
+    "categoria": "Forma foliar",
+    "definicion_tecnica": "Lámina de contorno aproximadamente circular.",
+    "explicacion_usuario": "Hoja casi redonda.",
+    "fuente_id": "F-003",
+    "sinonimos": null,
+    "observaciones": "Estado permitido de CH-011."
+  },
+  {
+    "termino_id": "GL-024",
+    "termino": "agudo",
+    "categoria": "Ápice foliar",
+    "definicion_tecnica": "Ápice que termina en un ángulo marcado sin prolongación extensa.",
+    "explicacion_usuario": "Punta de la hoja claramente aguda.",
+    "fuente_id": "F-007",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-012."
+  },
+  {
+    "termino_id": "GL-025",
+    "termino": "acuminado",
+    "categoria": "Ápice foliar",
+    "definicion_tecnica": "Ápice que se estrecha gradualmente en una punta prolongada.",
+    "explicacion_usuario": "Punta alargada que se afina progresivamente.",
+    "fuente_id": "F-009",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-012."
+  },
+  {
+    "termino_id": "GL-026",
+    "termino": "obtuso",
+    "categoria": "Ápice foliar",
+    "definicion_tecnica": "Ápice de terminación roma, formando un ángulo amplio.",
+    "explicacion_usuario": "Punta más redondeada o roma que aguda.",
+    "fuente_id": "F-017",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-012."
+  },
+  {
+    "termino_id": "GL-027",
+    "termino": "redondeado",
+    "categoria": "Ápice foliar",
+    "definicion_tecnica": "Ápice de contorno curvo sin ángulo marcado.",
+    "explicacion_usuario": "Extremo de la hoja redondeado.",
+    "fuente_id": "F-003",
+    "sinonimos": null,
+    "observaciones": "Estado permitido de CH-012."
+  },
+  {
+    "termino_id": "GL-028",
+    "termino": "emarginado",
+    "categoria": "Ápice foliar",
+    "definicion_tecnica": "Ápice con una escotadura poco profunda en el extremo.",
+    "explicacion_usuario": "Punta con una pequeña hendidura central.",
+    "fuente_id": "F-003",
+    "sinonimos": null,
+    "observaciones": "Estado permitido de CH-012."
+  },
+  {
+    "termino_id": "GL-029",
+    "termino": "drupa",
+    "categoria": "Fruto",
+    "definicion_tecnica": "Fruto carnoso indehiscente cuyo endocarpo forma una estructura endurecida alrededor de la semilla.",
+    "explicacion_usuario": "Fruto carnoso con una parte interna dura que protege la semilla.",
+    "fuente_id": "F-002",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-013."
+  },
+  {
+    "termino_id": "GL-030",
+    "termino": "foliculo",
+    "categoria": "Fruto",
+    "definicion_tecnica": "Fruto seco derivado de un carpelo que se abre por una sutura al madurar.",
+    "explicacion_usuario": "Fruto seco que se abre al madurar para liberar semillas.",
+    "fuente_id": "F-002",
+    "sinonimos": "folículo",
+    "observaciones": "Estado de CH-013."
+  },
+  {
+    "termino_id": "GL-031",
+    "termino": "cipsela",
+    "categoria": "Fruto",
+    "definicion_tecnica": "Fruto seco indehiscente y uniseminado, característico de Asteraceae y derivado de ovario ínfero.",
+    "explicacion_usuario": "Fruto seco pequeño que contiene una semilla y no se abre al madurar.",
+    "fuente_id": "F-012",
+    "sinonimos": "aquenio",
+    "observaciones": "Árboris normaliza Mitique como cipsela."
+  },
+  {
+    "termino_id": "GL-032",
+    "termino": "capsula",
+    "categoria": "Fruto",
+    "definicion_tecnica": "Fruto seco dehiscente formado por más de un carpelo.",
+    "explicacion_usuario": "Fruto seco que se abre al madurar para liberar semillas.",
+    "fuente_id": "F-014",
+    "sinonimos": "cápsula",
+    "observaciones": "Estado de CH-013."
+  },
+  {
+    "termino_id": "GL-033",
+    "termino": "racimo",
+    "categoria": "Inflorescencia",
+    "definicion_tecnica": "Inflorescencia con eje principal alargado y flores pediceladas insertas lateralmente.",
+    "explicacion_usuario": "Flores unidas por pequeños pedúnculos a un eje principal.",
+    "fuente_id": "F-005",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-014."
+  },
+  {
+    "termino_id": "GL-034",
+    "termino": "panicula",
+    "categoria": "Inflorescencia",
+    "definicion_tecnica": "Inflorescencia ramificada cuyo eje principal porta ramas laterales floríferas.",
+    "explicacion_usuario": "Conjunto de flores ramificado.",
+    "fuente_id": "F-007",
+    "sinonimos": "panícula",
+    "observaciones": "Estado de CH-014."
+  },
+  {
+    "termino_id": "GL-035",
+    "termino": "corimbo",
+    "categoria": "Inflorescencia",
+    "definicion_tecnica": "Inflorescencia en que pedicelos de distinta longitud sitúan las flores aproximadamente al mismo nivel.",
+    "explicacion_usuario": "Flores que terminan aproximadamente a la misma altura.",
+    "fuente_id": "F-009",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-014."
+  },
+  {
+    "termino_id": "GL-036",
+    "termino": "solitaria",
+    "categoria": "Inflorescencia",
+    "definicion_tecnica": "Flor que aparece individualmente y no integrada en una inflorescencia pluriflora.",
+    "explicacion_usuario": "Una flor aparece sola.",
+    "fuente_id": "F-009",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-014."
+  },
+  {
+    "termino_id": "GL-037",
+    "termino": "capitulo",
+    "categoria": "Inflorescencia",
+    "definicion_tecnica": "Numerosas flores sésiles agrupadas sobre un receptáculo común.",
+    "explicacion_usuario": "Muchas flores pequeñas reunidas en una cabezuela.",
+    "fuente_id": "F-011",
+    "sinonimos": "capítulo|cabezuela",
+    "observaciones": "Estado de CH-014."
+  },
+  {
+    "termino_id": "GL-038",
+    "termino": "amento",
+    "categoria": "Inflorescencia",
+    "definicion_tecnica": "Inflorescencia generalmente alargada con numerosas flores pequeñas, a menudo unisexuales.",
+    "explicacion_usuario": "Grupo alargado de flores pequeñas sobre un mismo eje.",
+    "fuente_id": "F-015",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-014."
+  },
+  {
+    "termino_id": "GL-039",
+    "termino": "tricoca",
+    "categoria": "Fruto",
+    "definicion_tecnica": "Cápsula formada por tres cocos o unidades/lóculos claramente diferenciados.",
+    "explicacion_usuario": "Cápsula dividida en tres partes principales.",
+    "fuente_id": "F-014",
+    "sinonimos": null,
+    "observaciones": "Detalle descriptivo detrás de CH-023 = presente."
+  },
+  {
+    "termino_id": "GL-040",
+    "termino": "dehiscencia_explosiva",
+    "categoria": "Fruto",
+    "definicion_tecnica": "Apertura rápida del fruto maduro que proyecta o dispersa las semillas.",
+    "explicacion_usuario": "El fruto se abre bruscamente al madurar y libera las semillas.",
+    "fuente_id": "F-015",
+    "sinonimos": "dehiscencia explosiva",
+    "observaciones": "CH-024; pendiente de evaluación para el piloto."
+  },
+  {
+    "termino_id": "GL-041",
+    "termino": "tomentoso",
+    "categoria": "Superficie",
+    "definicion_tecnica": "Cubierto por una capa densa de pelos cortos, entrelazados y de aspecto afelpado.",
+    "explicacion_usuario": "Superficie cubierta por una capa densa de pelitos.",
+    "fuente_id": "F-017",
+    "sinonimos": "tomento",
+    "observaciones": "Detalle descriptivo de CH-026."
+  },
+  {
+    "termino_id": "GL-042",
+    "termino": "semilla_alada",
+    "categoria": "Semilla",
+    "definicion_tecnica": "Semilla provista de una expansión membranosa que forma una o más alas.",
+    "explicacion_usuario": "Semilla con una extensión fina parecida a un ala.",
+    "fuente_id": "F-019",
+    "sinonimos": "semilla alada",
+    "observaciones": "Concepto computado en CH-027."
+  },
+  {
+    "termino_id": "GL-043",
+    "termino": "ondulado",
+    "categoria": "Margen foliar",
+    "definicion_tecnica": "Margen que presenta una sucesión de curvas suaves fuera del plano general de la lámina, independientemente de tener o no dientes.",
+    "explicacion_usuario": "Borde que forma ondas suaves.",
+    "fuente_id": "F-002",
+    "sinonimos": null,
+    "observaciones": "Estado de CH-028."
+  },
+  {
+    "termino_id": "GL-044",
+    "termino": "plano",
+    "categoria": "Margen foliar",
+    "definicion_tecnica": "Margen sin ondulación apreciable respecto del plano general de la lámina.",
+    "explicacion_usuario": "Borde sin ondas apreciables.",
+    "fuente_id": "F-003",
+    "sinonimos": null,
+    "observaciones": "Estado permitido de CH-028; no inferirlo por ausencia de descripción."
+  },
+  {
+    "termino_id": "GL-045",
+    "termino": "blanda",
+    "categoria": "Consistencia foliar",
+    "definicion_tecnica": "Hoja de baja rigidez que cede fácilmente sin comportarse como una lámina rígida o coriácea.",
+    "explicacion_usuario": "Hoja poco rígida.",
+    "fuente_id": "F-021",
+    "sinonimos": null,
+    "observaciones": "Estado operacional de CH-004."
+  },
+  {
+    "termino_id": "GL-046",
+    "termino": "flexible",
+    "categoria": "Consistencia foliar",
+    "definicion_tecnica": "Hoja que puede curvarse con facilidad manteniendo una consistencia mayor que una hoja blanda.",
+    "explicacion_usuario": "Hoja que se dobla con relativa facilidad.",
+    "fuente_id": "F-021",
+    "sinonimos": null,
+    "observaciones": "Estado operacional de CH-004."
+  },
+  {
+    "termino_id": "GL-047",
+    "termino": "firme",
+    "categoria": "Consistencia foliar",
+    "definicion_tecnica": "Hoja con resistencia mecánica apreciable, sin alcanzar necesariamente la consistencia coriácea.",
+    "explicacion_usuario": "Hoja relativamente rígida y resistente.",
+    "fuente_id": "F-021",
+    "sinonimos": null,
+    "observaciones": "Estado operacional de CH-004."
+  },
+  {
+    "termino_id": "GL-048",
+    "termino": "contraste_observable",
+    "categoria": "Color foliar",
+    "definicion_tecnica": "Diferencia cromática reconocible entre haz y envés de una misma hoja bajo iluminación comparable.",
+    "explicacion_usuario": "Las dos caras de la hoja se ven claramente diferentes en color o tono.",
+    "fuente_id": "F-021",
+    "sinonimos": null,
+    "observaciones": "Estado operacional de CH-005; no implica un color específico."
+  },
+  {
+    "termino_id": "GL-049",
+    "termino": "sin_contraste_observable",
+    "categoria": "Color foliar",
+    "definicion_tecnica": "Ausencia de una diferencia cromática suficientemente clara entre haz y envés bajo condiciones comparables de observación.",
+    "explicacion_usuario": "Las dos caras de la hoja no muestran una diferencia clara de color o tono.",
+    "fuente_id": "F-021",
+    "sinonimos": null,
+    "observaciones": "Estado operacional de CH-005; no equivale a identidad espectral."
+  },
+  {
+    "termino_id": "GL-050",
+    "termino": "presente",
+    "categoria": "Estado binario",
+    "definicion_tecnica": "El rasgo definido por el carácter se observa o está documentado para la unidad evaluada.",
+    "explicacion_usuario": "El rasgo está presente.",
+    "fuente_id": "F-021",
+    "sinonimos": null,
+    "observaciones": "Token binario reutilizable; su significado depende del carácter."
+  },
+  {
+    "termino_id": "GL-051",
+    "termino": "ausente",
+    "categoria": "Estado binario",
+    "definicion_tecnica": "El rasgo definido por el carácter está documentado como ausente para la unidad evaluada.",
+    "explicacion_usuario": "El rasgo no está presente.",
+    "fuente_id": "F-021",
+    "sinonimos": null,
+    "observaciones": "No inferir por falta de datos o falta de mención."
+  },
+  {
+    "termino_id": "GL-052",
+    "termino": "aspera",
+    "categoria": "Superficie foliar",
+    "definicion_tecnica": "Superficie con textura irregular o rugosa perceptible visualmente o, cuando sea seguro, al tacto.",
+    "explicacion_usuario": "Superficie rugosa o áspera.",
+    "fuente_id": "F-021",
+    "sinonimos": "áspera",
+    "observaciones": "Estado operacional de CH-019."
+  },
+  {
+    "termino_id": "GL-053",
+    "termino": "lisa",
+    "categoria": "Superficie foliar",
+    "definicion_tecnica": "Superficie sin rugosidad apreciable según el criterio operacional del carácter.",
+    "explicacion_usuario": "Superficie sin aspereza apreciable.",
+    "fuente_id": "F-021",
+    "sinonimos": null,
+    "observaciones": "Estado operacional de CH-019; no inferir por ausencia de descripción."
+  }
+]
