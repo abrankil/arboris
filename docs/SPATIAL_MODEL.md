@@ -2,53 +2,53 @@
 
 ## Estado
 
-Modelo conceptual inicial consolidado para transformar territorios reales en mapas jugables reconocibles.
+Modelo conceptual consolidado para transformar territorios reales en espacios jugables reconocibles.
 
-Este documento no implementa mapas, tiles, pathfinding, renderer, assets ni datos botánicos nuevos. Define vocabulario, límites y flujo de decisión para la capa espacial de Árboris.
+Este documento define vocabulario, límites y relaciones entre territorio, evidencia, jugabilidad y arte. No fija todavía tamaño de celda, escala metro/celda, pathfinding, renderer, formato de datos final ni un Master Territorial implementado.
 
-## Fiscalización conceptual
+## Resultado de fiscalización conceptual
 
-La consolidación se revisó contra los criterios ya vigentes del proyecto:
+La propuesta se contrastó con los principios ya vigentes del proyecto, el protocolo ambiental y el sistema de topología. Se corrigieron cinco riesgos:
 
-- Árboris parte de observaciones del mundo real y conserva trazabilidad.
-- El arte no reemplaza evidencia científica, botánica, territorial ni ambiental.
-- La dirección de arte interpreta una estructura validada; no inventa silenciosamente el territorio.
-- La grilla o tile no debe transformarse en protagonista visual.
-- El primer escenario debe priorizar Fundo Los Nogales / El Arrayán y usar referencias externas solo como contexto o contraste.
-- `PILOT-ENV-006` permanece abierto: los conteos ponderan presencia, pero la colocación espacial exige observaciones territorializadas `core`.
+1. **Territorio ≠ mapa.** El mapa es un derivado jugable del territorio, no su fuente.
+2. **Unidad Espacial ≠ tile.** La Unidad Espacial es conceptual; las celdas son implementación.
+3. **Topología ≠ identidad territorial.** `corridor`, `junction`, etc. describen conectividad, no el lugar.
+4. **Evidencia ≠ canon.** Google Earth, fotografías y memoria de visitante son evidencias con procedencia y confianza; no son por sí solas fuente canónica.
+5. **Instancia Territorial ≠ mapa.** La instancia describe una versión jugable de un lugar; el mapa/prototipo es una representación derivada de esa instancia.
 
-Conclusión de fiscalización: el modelo es coherente si separa cuatro capas que no deben mezclarse:
-
-```text
-territorio real
-→ master territorial
-→ modelo espacial / jugable
-→ dirección de arte
-```
+También se corrige una ambigüedad territorial: para el piloto, **Fundo Los Nogales** se mantiene como sector núcleo. El Estero El Arrayán y la cuenca de El Arrayán se registran como contexto hidrológico/territorial cuando corresponda; no se usan como sinónimo automático del sector.
 
 ## Principio rector
 
-Árboris no diseña mapas desde cero. Árboris destila territorios reales en unidades jugables reconocibles.
+Árboris no diseña mapas desde cero. **Destila territorios reales en espacios jugables reconocibles.**
 
-El mapa no es la fuente. El mapa es el resultado.
+```text
+territorio real
+→ evidencia registrada
+→ modelo territorial
+→ Unidad Espacial
+→ Instancia Territorial
+→ Contrato Jugable
+→ Modelo Espacial / blockout
+→ Dirección de Arte
+→ mapa o prototipo
+```
 
-## Destilación territorial
+## Destilación Territorial
 
-La **destilación territorial** es el proceso mediante el cual un territorio real conserva su identidad reconocible mientras se simplifica, abstrae y traduce a un escenario jugable.
+La **Destilación Territorial** es el proceso mediante el cual un lugar real conserva su identidad reconocible mientras se simplifica para funcionar como juego.
 
-La destilación territorial debe declarar:
+Toda destilación debe declarar:
 
-- qué se conserva;
+- qué rasgos se conservan;
 - qué se simplifica;
 - qué se omite;
-- qué se exagera por legibilidad;
-- qué queda pendiente por falta de evidencia.
+- qué se enfatiza por legibilidad;
+- qué permanece `OPEN` por falta de evidencia.
 
-Una escena puede ser visualmente atractiva y fallar si deja de sentirse como el lugar que representa.
+Una escena puede ser atractiva y aun así fallar si deja de sentirse como el lugar que representa.
 
-## Escalas canónicas
-
-El sistema usa estas escalas:
+## Escalas conceptuales
 
 ```text
 Paisaje
@@ -60,139 +60,112 @@ Paisaje
 ```
 
 ### Paisaje
-
-Escala amplia que define el carácter territorial general.
-
-Ejemplo: precordillera de Santiago.
+Escala territorial amplia. Ejemplo: precordillera de Santiago.
 
 ### Sector
-
-Área concreta dentro del paisaje.
-
-Ejemplo: Fundo Los Nogales / El Arrayán.
+Área concreta del paisaje que actúa como ámbito de trabajo. Para el piloto: **Fundo Los Nogales**.
 
 ### Lugar
-
-Zona reconocible dentro del sector.
-
-Ejemplo: acceso principal del parque.
+Zona reconocible dentro del sector. Ejemplo: acceso principal.
 
 ### Unidad Espacial
-
-Fragmento indivisible desde la experiencia del jugador.
-
-Ejemplos: puente de madera, portal de acceso, casa del conserje, sendero inicial, claro de picnic.
+Fragmento reconocible e indivisible desde la experiencia del jugador. No se define por metros ni por cantidad de tiles.
 
 ### Instancia Territorial
-
-Versión jugable de una o más Unidades Espaciales bajo una condición específica.
-
-Ejemplos: acceso principal en mañana despejada, sendero inicial en primavera, claro de picnic como evento tutorial.
+Versión jugable de una o más Unidades Espaciales bajo una condición y objetivo de prueba concretos.
 
 ### Celda Espacial
+Unidad técnica mínima usada para representar altura, ocupación y navegación. Puede implementarse como celda cúbica o prismática. Su forma visual puede quedar completamente oculta por el arte.
 
-Unidad técnica mínima de implementación. Puede ser cúbica, tener altura y contener propiedades de navegación, suelo, agua, vegetación, obstáculos o interacción.
+## Evidencia territorial
 
-La Celda Espacial no reemplaza a la Unidad Espacial. La implementa.
+El modelo espacial separa fuente de evidencia y síntesis canónica.
+
+```text
+Google Earth / DEM / medición → evidencia topográfica
+fotografías reales            → evidencia visual territorial
+recuerdo de visitante          → evidencia experiencial
+Master Botánico 2.0            → evidencia botánica
+referencias ambientales        → evidencia ecológica/ambiental
+```
+
+Reglas:
+
+- toda evidencia debe conservar procedencia;
+- una captura aislada no autoriza una regla general;
+- un recuerdo declarado no se convierte en hecho observado hasta ser contrastado cuando sea posible;
+- una imagen generada nunca es evidencia territorial;
+- el Master Botánico aporta información de especies, no geometría del lugar.
+
+## Master Territorial
+
+El **Master Territorial** es una entidad arquitectónica objetivo: la futura fuente canónica que sintetizará Lugares, Unidades Espaciales, relaciones, evidencias y decisiones de Destilación Territorial.
+
+**Todavía no existe un formato canónico implementado.** No se crea un Excel/JSON paralelo hasta que el caso del Acceso Principal demuestre qué campos son realmente necesarios.
+
+La regla de diseño es equivalente a la usada en botánica: primero se estabiliza el modelo, luego se define una fuente canónica reproducible.
 
 ## Unidad Espacial
 
-Una **Unidad Espacial** es un lugar reconocible e indivisible desde la experiencia del jugador, con identidad territorial, ecológica, narrativa y jugable suficiente para ser representado en Árboris.
+Definición consolidada:
 
-No se define por tamaño. Se define por función perceptiva y experiencia.
+> Una Unidad Espacial es un fragmento del lugar que mantiene identidad territorial y experiencial suficiente para ser reconocido como una unidad del recorrido y ser traducido a juego.
 
 Debe responder:
 
 ```text
-¿Qué es este lugar?
-¿Por qué se reconoce?
-¿Qué función cumple en el recorrido real?
-¿Qué función cumple en el juego?
+¿Qué lugar es?
+¿Qué lo hace reconocible?
 ¿Qué evidencia lo respalda?
-¿Qué se transforma para hacerlo jugable?
+¿Cómo se relaciona con las unidades vecinas?
+¿Qué función tiene en el recorrido real?
+¿Qué función tendrá en el juego?
+¿Qué se conserva y qué se simplifica?
 ```
 
-Una Unidad Espacial puede ocupar muchas Celdas Espaciales. Un tile o celda no es una Unidad Espacial.
+Una Unidad Espacial puede contener muchas Celdas Espaciales.
 
-## Master Territorial
+## Instancia Territorial
 
-El **Master Territorial** es la fuente canónica donde Árboris registrará lugares, unidades espaciales, relaciones, evidencias y decisiones de destilación de un territorio real.
+La Instancia Territorial separa el lugar real de una versión concreta de juego.
 
-En esta etapa es una entidad conceptual. Su formato definitivo queda abierto.
-
-Relación de fuentes:
+Ejemplos posibles:
 
 ```text
-Google Earth / Google Earth Pro = evidencia topográfica
-fotografías reales = evidencia visual territorial
-memoria de visitante = evidencia experiencial
-Master Botánico 2.0 = evidencia botánica
-Master Territorial = síntesis canónica espacial
+IT-001 Acceso Principal — primera entrada/tutorial
+IT-002 Acceso Principal — variante estacional futura
 ```
 
-Google Earth no es autoridad canónica. Tampoco lo es una captura aislada, una imagen generada o una descripción no contrastada. Todas son evidencias que deben registrarse con procedencia y confianza.
+Una Instancia Territorial referencia Unidades Espaciales, pero no las redefine.
 
-## Modelo Espacial
+No usar prefijo `MAP-` para la instancia. `MAP-` se reserva para blockouts/mapas/prototipos derivados.
 
-El **Modelo Espacial** traduce el Master Territorial a estructura técnica.
+## Modelo Espacial y Celdas Espaciales
 
-Incluye:
+El Modelo Espacial traduce una Instancia Territorial a estructura técnica suficiente para blockout.
 
-- escala de abstracción;
-- Celdas Espaciales;
+Puede representar:
+
+- coordenadas locales;
 - altura relativa;
 - transitabilidad;
-- bloqueos;
-- pendientes;
+- bordes y cambios de nivel;
 - agua;
-- vegetación;
+- bloqueos;
 - puntos de interacción;
-- conexiones.
+- cobertura/ocupación necesaria para gameplay;
+- vínculos territoriales cuando exista evidencia suficiente.
 
-## Celdas Espaciales cúbicas
+Para la primera prueba se favorecen **Celdas Espaciales cúbicas o prismáticas** porque hacen legibles los niveles de altura y simplifican la construcción del blockout.
 
-Árboris puede implementar sus mapas mediante Celdas Espaciales cúbicas para representar altura, relieve y navegación.
-
-Decisión conceptual:
-
-```text
-Unidad Espacial = lugar reconocible
-Celda Espacial = implementación técnica
-```
-
-Una celda puede contener o declarar:
-
-- coordenada local;
-- altura relativa;
-- transitabilidad;
-- tipo de suelo;
-- pendiente o borde;
-- agua o humedad visible;
-- vegetación baja;
-- vegetación bloqueante;
-- roca u obstáculo;
-- punto de interacción;
-- vínculo con una especie cuando exista evidencia territorial suficiente.
-
-La apariencia final puede ocultar o erosionar la forma cúbica. La estructura cúbica sirve para legibilidad, altura y navegación; no obliga a que el mapa parezca un tablero rígido.
+Esto es una decisión de prototipado, no una obligación estética ni una selección definitiva de renderer.
 
 ## Contrato Jugable
 
-El **Contrato Jugable** define cómo se juega una Unidad Espacial o Instancia Territorial.
+El Contrato Jugable define cómo se recorre una Instancia Territorial. Tiene tres componentes distintos:
 
-Se compone de:
-
-```text
-Topología
-+
-Flujo
-```
-
-### Topología
-
-Describe conectividad.
-
-Valores iniciales ya definidos por el sistema de mapas:
+### 1. Topología
+Usa exclusivamente las categorías ya definidas en `MAP_TOPOLOGY_SYSTEM.md`:
 
 - `corridor`;
 - `elbow`;
@@ -201,150 +174,133 @@ Valores iniciales ya definidos por el sistema de mapas:
 - `pocket`;
 - `hub`.
 
-### Flujo
+### 2. Roles de conexión
+Conserva los roles vigentes:
 
-Describe la experiencia de movimiento.
+- `none`;
+- `primary`;
+- `secondary`;
+- `return`;
+- `conditional`.
 
-Valores iniciales:
+### 3. Flujo
+Describe la experiencia de movimiento. Vocabulario inicial, no exhaustivo:
 
-- `entrada`;
-- `ascenso`;
-- `descenso`;
-- `retorno`;
-- `transición`;
-- `exploración`;
-- `descubrimiento`;
-- `descanso`;
-- `tutorial`.
+- entrada;
+- ascenso;
+- descenso;
+- retorno;
+- transición;
+- exploración;
+- descubrimiento;
+- descanso;
+- tutorial.
 
-Dos Instancias Territoriales pueden compartir topología y tener flujos distintos.
-
-Ejemplo:
-
-```text
-Portal de acceso:
-  topología = corridor
-  flujo = entrada / transición
-
-Sendero de subida:
-  topología = corridor
-  flujo = ascenso / exploración
-```
+Topología, rol de conexión y flujo no son sinónimos.
 
 ## Blockout
 
-El **blockout** es la representación simplificada del Contrato Jugable sobre Celdas Espaciales.
+El blockout es una representación técnica simplificada del Contrato Jugable sobre Celdas Espaciales.
 
-No es arte final. Comprueba:
+Debe probar como mínimo:
 
-- conectividad;
-- altura;
+- conexiones;
+- continuidad de ruta;
+- alturas relativas;
 - transitabilidad;
-- entrada y salida;
-- zonas bloqueadas;
+- bloqueos;
+- entrada/salida;
 - nodos de decisión;
 - legibilidad.
 
-Si una imagen generada cambia la conectividad definida por el blockout, falla aunque sea visualmente atractiva.
+No es arte final. Si una estilización cambia la conectividad aprobada, la prueba falla aunque sea visualmente atractiva.
 
 ## Dirección de Arte
 
-Dirección de Arte recibe el blockout y lo interpreta visualmente.
-
-Traducciones típicas:
+Dirección de Arte recibe una estructura ya trazable y la convierte en paisaje reconocible.
 
 ```text
-altura → terrazas, rocas, escalones naturales
-bloqueo → vegetación densa, piedra, desnivel, agua
-ruta → sendero, suelo pisado, borde legible
-fondo → identidad territorial reconocible
-atmósfera → luz, estación, profundidad, color
+altura   → terrazas, roca, escalones naturales
+bloqueo  → vegetación densa, piedra, desnivel, agua
+ruta     → sendero y lectura del suelo
+fondo    → silueta territorial y continuidad del paisaje
+atmósfera→ luz, estación, profundidad y color
 ```
 
-La Dirección de Arte puede simplificar, estilizar o enfatizar, pero debe conservar la identidad espacial esencial del lugar.
+La estilización puede ocultar la estructura cúbica. Debe conservar la estructura espacial esencial y los rasgos ancla del lugar.
 
-## Caso inicial: Acceso Principal
+## Caso de validación inicial — Acceso Principal
 
-El primer caso de validación del modelo será el acceso principal del parque.
+La primera validación conceptual usa información experiencial aportada por una persona que ha visitado el lugar. **Se registra como recuerdo declarado y queda pendiente de corroboración topográfica/fotográfica donde sea posible.**
 
-Información experiencial registrada:
+Recuerdos declarados:
 
-- entrada principal después de un puente de madera;
-- el puente cruza el Estero El Arrayán;
-- la entrada es una reja metálica antigua que se abre de par en par;
-- las bases de la reja son fundamentos de piedra local;
-- inmediatamente a la izquierda se sitúa la casa del conserje;
-- el sendero nace directamente conectado con la entrada principal;
-- el sendero es una calle única;
-- avanza unos metros hasta llegar a un claro;
-- en el claro se disponen las zonas de picnic.
+- el acceso comienza después de un puente de madera que cruza el Estero El Arrayán;
+- existe una reja metálica antigua abierta de par en par;
+- sus soportes son de piedra de la zona;
+- a la izquierda se sitúa la casa del conserje;
+- el sendero nace directamente desde la entrada;
+- el recorrido inicial es una vía única;
+- tras unos metros se llega a un claro con zonas de picnic.
 
-Estructura espacial inicial:
+Jerarquía inicial:
 
 ```text
-Paisaje:
-  Precordillera de Santiago
+Paisaje: Precordillera de Santiago
+Sector: Fundo Los Nogales
+Lugar: Acceso Principal
+Contexto hidrológico: Estero El Arrayán
 
-Sector:
-  Fundo Los Nogales / El Arrayán
-
-Lugar:
-  Acceso principal
-
-Unidades Espaciales:
-  UE-001 Puente de madera
-  UE-002 Portal / reja metálica antigua
-  UE-003 Casa del conserje
-  UE-004 Sendero inicial
-  UE-005 Claro de picnic
+UE-001 Puente de acceso
+UE-002 Portal / reja de acceso
+UE-003 Casa del conserje
+UE-004 Sendero inicial
+UE-005 Claro de picnic
 ```
 
-Contrato inicial:
+Estado inicial de estas UE: `proposed` hasta disponer de corroboración suficiente.
+
+Primera Instancia Territorial:
 
 ```text
-Instancia Territorial:
-  MAP-001 — Acceso Principal
-
-Topología:
-  corridor
-
-Flujo:
-  entrada / transición / tutorial
-
-Destino:
-  claro de picnic
+IT-001 Acceso Principal — entrada inicial
 ```
+
+Contrato jugable provisional:
+
+```text
+topología: corridor
+flujo: entrada / transición / tutorial
+entrada: puente / portal
+salida: claro de picnic
+```
+
+El primer blockout/prototipo derivado puede usar el identificador `MAP-001`.
 
 ## Decisiones consolidadas
 
 1. El mapa es resultado, no fuente.
-2. La unidad conceptual base es la Unidad Espacial.
-3. La Unidad Espacial se implementa mediante Celdas Espaciales.
-4. Las Celdas Espaciales pueden ser cúbicas para representar altura y navegación.
-5. Google Earth es evidencia topográfica, no fuente canónica.
-6. Las fotografías reales son evidencia visual territorial.
-7. La memoria de visitante es evidencia experiencial y debe contrastarse cuando sea posible.
-8. El Master Botánico 2.0 aporta evidencia botánica, pero no describe por sí solo el territorio.
-9. El futuro Master Territorial sintetizará evidencia espacial, ambiental y experiencial.
-10. El primer caso espacial será el Acceso Principal.
-11. El primer contrato jugable será `corridor` con flujo de entrada.
-12. El primer prototipo será una prueba de destilación territorial, no un mapa final.
-13. No se cerrarán microhábitats de especies sin observaciones territorializadas `core`.
+2. La Unidad Espacial es la unidad conceptual del recorrido, no un tile.
+3. Las Celdas Espaciales son implementación técnica y pueden ser cúbicas/prismáticas en prototipos.
+4. El Master Territorial es un objetivo arquitectónico, no un archivo ya implementado.
+5. Google Earth es evidencia topográfica, no autoridad canónica única.
+6. La memoria de visitante se registra como evidencia experiencial con trazabilidad y corroboración pendiente cuando corresponda.
+7. Topología, roles de conexión y flujo permanecen separados.
+8. `IT-*` identifica Instancias Territoriales; `MAP-*` identifica representaciones/blockouts derivados.
+9. Fundo Los Nogales se conserva como sector núcleo; El Arrayán se registra como contexto cuando corresponda.
+10. La colocación fina de especies permanece sujeta a evidencia territorial `core`.
 
 ## Límites actuales
 
-Este documento no fija todavía:
+Quedan `OPEN` hasta validar `IT-001 / MAP-001`:
 
 - formato del Master Territorial;
-- tamaño estándar de mapas;
-- tamaño de celda;
-- número máximo de alturas;
+- tamaño de Celda Espacial;
 - escala metro/celda;
+- tamaño estándar de mapa;
+- número de niveles de altura;
 - pathfinding;
 - renderer;
-- editor de mapas;
-- formato JSON final de mapas;
-- paleta final del acceso principal;
-- distribución definitiva de especies en el mapa.
-
-Esos temas deben definirse después de probar el Acceso Principal y `TEST-MAP-01 corridor`.
+- esquema JSON final;
+- distribución ecológica definitiva de especies;
+- equivalencia exacta entre elevación real y altura jugable.
