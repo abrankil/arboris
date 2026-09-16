@@ -6,8 +6,6 @@ Marco inicial consolidado con reglas provisionales derivadas del corpus actual. 
 
 La fuente botánica maestra vigente del piloto es `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`. Esta documentación no modifica ni reinterpreta esa planilla.
 
-Mientras el Hito 15 no esté fusionado a `main`, las fichas canónicas de lectura para las seis especies piloto se consultan en la rama `hito15-canonical-engine`, bajo `data/species/`. Al fusionarse el Hito 15, esa referencia debe resolverse contra `main`.
-
 ## Propósito
 
 Los escenarios de Árboris deben sentirse como interpretaciones reconocibles del territorio chileno y no como fondos mediterráneos genéricos.
@@ -35,6 +33,88 @@ realidad observada
 ```
 
 No usar generación previa como fuente de verdad sobre paisaje, flora o ecología.
+
+## Comprensión visual ambiental
+
+Antes de decidir composición, paleta o assets, cada fotografía ambiental debe leerse como escena.
+
+La pregunta inicial no es:
+
+```text
+¿Qué especie es?
+```
+
+sino:
+
+```text
+¿Qué tipo de lugar muestra esta imagen?
+¿Qué estructura espacial se reconoce?
+¿Qué materiales, estratos y obstáculos aparecen?
+¿Qué podría convertirse en ruta, borde, fondo, bloqueo o punto de interacción?
+```
+
+Este enfoque permite entrenar criterio visual sin convertir una referencia de escenario en evidencia taxonómica o en regla de microhábitat.
+
+## Taxonomía inicial de escenas
+
+La clasificación inicial para referencias ambientales del piloto es:
+
+```text
+bosque_esclerofilo
+  interior_bosque
+  matorral_abierto
+  claro
+  ladera
+  quebrada_humeda
+  cauce_o_estero
+  borde_sendero
+  afloramiento_rocoso
+  terraza_o_explanada
+  infraestructura_rustica
+  vista_cajon_o_cordillera
+```
+
+Esta taxonomía sirve para organizar el corpus y detectar patrones visuales. No reemplaza evidencia ecológica formal ni permite cerrar reglas locales sin contraste.
+
+## Microhábitats visuales
+
+Un microhábitat visual es una combinación observable de terreno, sustrato, humedad aparente y vegetación. Es útil para arte y blockout, pero no equivale automáticamente a microhábitat ecológico validado.
+
+Ejemplos iniciales:
+
+```text
+roca_granitica_con_cactacea
+roca_granitica_con_matorral
+borde_de_sendero_seco
+sombra_de_bosque
+claro_con_suelo_expuesto
+ribera_o_borde_de_estero
+terraza_de_picnic
+```
+
+Reglas:
+
+- puede apoyar lenguaje visual de ambiente;
+- puede sugerir hipótesis de colocación;
+- no cierra `PILOT-ENV-006`;
+- siempre debe conservar vínculo con las referencias concretas que lo originan.
+
+## Capas de decisión visual
+
+### Territorio
+Relieve, pendiente, laderas, quebradas, valles, horizonte y continuidad del paisaje.
+
+### Estructura vegetal
+Masas, vacíos, altura relativa de estratos, siluetas dominantes y relación entre árboles, arbustos, herbáceas, roca y suelo.
+
+### Suelo y roca
+Cantidad de suelo expuesto, tamaño y frecuencia de rocas, formas, contraste y relación con senderos o vegetación.
+
+### Atmósfera
+Hora, nubosidad, profundidad atmosférica, temperatura aparente de luz, bruma, lluvia o sequedad visual.
+
+### Composición jugable
+La fidelidad territorial debe conservar legibilidad de juego: plano jugable claro, separación de personajes, contraste de silueta y zonas visualmente calmas para UI.
 
 ## Jerarquía territorial
 
@@ -64,22 +144,26 @@ Yerba Loca, Río Clarillo, Pirque y otras áreas.
 
 Sirven para distinguir rasgos regionales, ecosistémicos o locales. Una referencia `comparative` no puede imponer por sí sola la apariencia del primer escenario.
 
-## Capas de decisión visual
+## Fotografías con personas como escala
 
-### Territorio
-Relieve, pendiente, laderas, quebradas, valles, horizonte y continuidad del paisaje.
+Cuando una referencia ambiental incluye una persona, su uso permitido para Dirección de Arte es de escala y proporción.
 
-### Estructura vegetal
-Masas, vacíos, altura relativa de estratos, siluetas dominantes y relación entre árboles, arbustos, herbáceas, roca y suelo.
+Puede informar:
 
-### Suelo y roca
-Cantidad de suelo expuesto, tamaño y frecuencia de rocas, formas, contraste y relación con senderos o vegetación.
+- altura relativa de arbustos;
+- ancho de senderos;
+- tamaño de rocas o afloramientos;
+- distancia entre elementos;
+- proporción entre personaje, terreno y vegetación.
 
-### Atmósfera
-Hora, nubosidad, profundidad atmosférica, temperatura aparente de luz, bruma, lluvia o sequedad visual.
+No debe usarse para identificación personal ni para entrenar reconocimiento de personas.
 
-### Composición jugable
-La fidelidad territorial debe conservar legibilidad de juego: plano jugable claro, separación de personajes, contraste de silueta y zonas visualmente calmas para UI.
+Etiqueta conceptual recomendada:
+
+```text
+containsPerson: true
+personRole: scale_reference
+```
 
 ## Fidelidad visual y fidelidad de colocación
 
@@ -148,13 +232,15 @@ Estas reglas gobiernan o condicionan directamente el escenario núcleo.
 | PILOT-ENV-005 | `OPEN` | Estructura típica de senderos, quebradas y bordes del Fundo Los Nogales. | Requiere corpus `core`. |
 | PILOT-ENV-006 | `OPEN` | Relación espacial real entre las seis especies piloto y sus microhábitats. Los conteos de observación ponderan presencia; la colocación requiere observaciones territorializadas. | Master 2.0, fichas canónicas y corpus `core` pendiente. |
 | PILOT-ENV-007 | `OPEN` | Variación estacional de color, densidad y atmósfera del territorio núcleo. | Requiere series estacionales. |
+| PILOT-ENV-008 | `OBSERVED` | Las fotografías ambientales pueden clasificarse por escena, terreno, sustrato, estructura vegetal, elementos ancla y función jugable antes de cualquier lectura botánica. | Corpus de referencias ambientales de campo, septiembre 2026. |
+| PILOT-ENV-009 | `OBSERVED` | Las personas visibles en referencias de ambiente se usan solo como escala, no como sujeto de identificación. | Corpus de referencias ambientales de campo, septiembre 2026. |
 
 ## Reglas de apoyo regional
 
 Estas pautas ayudan a interpretar o contrastar el piloto, pero no gobiernan por sí solas el escenario núcleo.
 
 | ID | Estado | Pauta | Referencias | Alcance |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- | --- |
 | REG-ENV-001 | `RECURRENT` | La altitud y el tipo de ambiente deben declararse antes de usar una referencia de precordillera como modelo de escena. | ENV-0001, ENV-0002, ENV-0003, ENV-0004 | Precordillera y corpus regional. |
 | REG-ENV-002 | `RECURRENT` | El bosque esclerófilo no debe representarse por defecto como masa arbórea continua; puede presentar bosque, matorral, aperturas o estados degradados según lugar y condición. | ENV-0002, ENV-0003, ENV-0004, ENV-0008 | Bosque esclerófilo regional. |
 | REG-ENV-003 | `OBSERVED` | En Río Clarillo, la asociación peumo–litre–quillay documentada entre 870 y 1.500 m presenta preferencia por exposición sur, cobertura aproximada de 50–60 % y suelos graníticos más desarrollados. | ENV-0005 | Local a Río Clarillo. |
@@ -208,10 +294,12 @@ El siguiente corpus debe centrarse en evidencia `core` y `contextual` sobre:
 - roca y suelo;
 - senderos y quebradas;
 - estructura vegetal;
+- microhábitats visuales;
 - microhábitats de las especies piloto;
 - variación estacional;
 - vistas del cajón del Arrayán y cordones cercanos;
-- atmósfera local.
+- atmósfera local;
+- infraestructura rústica del acceso cuando corresponda a `IT-001`.
 
 Para especies piloto, la captura debe permitir al menos:
 
