@@ -1,7 +1,7 @@
 # Árboris — Instrucciones de modificación de manuales de personajes
-## Preparado para futura sincronización con Git
+## Plan de refactor documental en revisión
 
-**Estado:** propuesta de refactor documental; no aplicar todavía al repositorio remoto.  
+**Estado:** propuesta documentada en la rama `docs/character-manual-refactor`; no aplicar todavía cambios sobre los manuales existentes ni sobre `main` sin revisión separada.  
 **Objetivo:** reducir duplicaciones, separar canon/estado/workflow, mejorar escalabilidad del sistema de personajes y evitar que decisiones visuales abiertas se conviertan accidentalmente en reglas de gameplay o botánica.
 
 ---
@@ -202,6 +202,8 @@ No duplicar aquí su contenido completo. El plan solo exige que la plantilla cub
 
 `speciesId`, `speciesCommonName` y `scientificName` son obligatorios solo para `characterType: species`; en auxiliares deben figurar como `N/A`.
 
+Los campos botánicos específicos de elementos secundarios se completan solo cuando `characterType: species`; para auxiliares se usan descripciones visuales/materiales equivalentes sin fingir una estructura botánica.
+
 `gameplayRole` usa una única convención en minúsculas: `open | none | approved`, y debe permanecer `open` mientras no exista una mecánica aprobada.
 
 Ver [`CHARACTER_TEMPLATE.md`](CHARACTER_TEMPLATE.md) para la estructura vigente.
@@ -400,6 +402,8 @@ botanicalStructure:
 visualRepresentation:
 gameplayRole:
 ```
+
+Para `characterType: support`, `botanicalStructure` debe ser `N/A` y la identidad del elemento se describe mediante su referencia material/visual.
 
 ---
 
