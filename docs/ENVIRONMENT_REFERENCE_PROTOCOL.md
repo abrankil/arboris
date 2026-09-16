@@ -87,6 +87,54 @@ Reglas de integración:
 - no inferir metadata ambiental que el Master no declare;
 - si una futura versión sustituye al Master 2.0, actualizar esta referencia de forma explícita y trazable.
 
+### Conteos de observación y colocación de especies
+
+Los conteos por especie extraídos del Master 2.0 son datos computables válidos para estimar peso de presencia dentro de la muestra del piloto. No equivalen automáticamente a abundancia ecológica real ni a una regla de microhábitat.
+
+Distinguir siempre tres conteos:
+
+- `observationCount`: número de observaciones reales de la especie;
+- `photoCount`: número de fotografías o evidencias asociadas;
+- `individualCount`: número de individuos físicos diferenciados.
+
+No usar `photoCount` como sustituto silencioso de `observationCount`. Si una tabla de trabajo utiliza fotografías porque el conteo de observaciones aún no está disponible o no está exportado, debe etiquetarlo como evidencia fotográfica, no como observación.
+
+Regla de uso:
+
+```text
+conteo por especie → peso de aparición / prioridad visual
+conteo por especie + unidad territorial → regla de colocación
+```
+
+Un conteo no estratificado por sector, exposición, pendiente, cobertura, sustrato, hidrología o microhábitat solo permite ajustar densidad relativa, probabilidad de encuentro o prioridad de representación. No permite ubicar una especie con rigor dentro de una ladera, quebrada, borde de sendero u otra unidad del mapa.
+
+Una regla de colocación solo puede formularse cuando las observaciones estén territorializadas, por ejemplo:
+
+```text
+species_id + observation_id + individual_id
++ referenceArea / mapSector / terrainUnit
++ slopeAspect / slopePosition / substrate
++ vegetationStructure / canopyCover / hydrology
++ associatedSpecies / evidenceConfidence
+```
+
+Para una primera ponderación interna puede usarse:
+
+```text
+spawnWeight = observationCount_species / totalObservationCount
+```
+
+Ese valor es un prior de muestra del piloto, no una afirmación de abundancia poblacional. Debe revisarse si hay sesgo de muestreo, múltiples fotografías de un mismo individuo, series no independientes o sectores con diferente esfuerzo de observación.
+
+Cuando los conteos estén estratificados por unidad ambiental, la regla pasa a:
+
+```text
+placementWeight(species, terrainUnit)
+  = observations(species, terrainUnit) / observations(species)
+```
+
+Ese cálculo solo puede informar una regla de arte si las observaciones son `core` o están inequívocamente vinculadas al Fundo Los Nogales. Referencias `contextual` o `comparative` pueden orientar hipótesis, pero no gobernar por sí solas la colocación del escenario núcleo.
+
 ## 5. Jerarquía territorial del piloto
 
 ### `core` — Fundo Los Nogales
@@ -148,6 +196,18 @@ Para una visita de campo, priorizar una serie breve y útil:
 - cielo y horizonte.
 
 En Fundo Los Nogales y Arrayán registrar cuando sea posible altitud, sector, exposición de ladera, rumbo de cámara, hora, estación y `seriesId`.
+
+Cuando una referencia tenga una especie piloto visible, registrar además el vínculo botánico mínimo:
+
+```text
+species_id
+individual_id si se conoce
+observation_id si se conoce
+tipo de evidencia visible
+confidence
+```
+
+Ese vínculo permite cruzar después el conteo botánico con unidades de mapa sin alterar el Master ni agregar columnas nuevas al `manifest`.
 
 ## 10. Uso de referencias web y de ChatGPT
 
