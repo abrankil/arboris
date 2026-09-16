@@ -1,8 +1,8 @@
 # Árboris — Roadmap
 
-**Versión:** 0.4  
+**Versión:** 0.5  
 **Última actualización:** 16 septiembre 2026  
-**Estado:** Piloto 1.0 en desarrollo
+**Estado:** Piloto 1.0 en desarrollo; Hito 15 cerrado como base canónica mínima.
 
 ## 1. Propósito
 
@@ -14,9 +14,11 @@ El piloto permanece limitado a seis especies nativas y debe demostrar un ciclo c
 
 La única fuente editorial y científica de verdad del piloto es:
 
-`data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
+```text
+data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx
+```
 
-El **Master Botánico 2.0** gobierna especies, caracteres, estados permitidos, relaciones especie–carácter, variabilidad, fuentes, seguridad, evidencia fotográfica, glosario y errores conocidos del modelo.
+El Master Botánico 2.0 gobierna especies, caracteres, estados permitidos, relaciones especie–carácter, variabilidad, fuentes, seguridad, evidencia fotográfica, glosario y errores conocidos del modelo.
 
 Flujo canónico:
 
@@ -32,9 +34,11 @@ tools/botanical-data/validate_master_export.py
 6 fichas canónicas en data/species/
         ↓
 tools/botanical-data/validate_species_data.py
+        ↓
+tools/canonical-identification/
 ```
 
-Los JSON y fichas por especie son **derivados reproducibles**. No deben editarse como una segunda fuente de verdad.
+Los JSON y fichas por especie son derivados reproducibles. No deben editarse como una segunda fuente de verdad.
 
 Estado validado del Master 2.0:
 
@@ -83,7 +87,7 @@ Estado: completado.
 Estado: completado para el alcance actual.
 
 **Hito 6 — Master Botánico 2.0 consolidado.**  
-Estado: completado. El archivo `Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx` reemplaza cualquier Master anterior como fuente botánica oficial.
+Estado: completado.
 
 **Hito 7 — Datos de las seis especies validados.**  
 Estado: completado.
@@ -123,9 +127,11 @@ BioCLIP es generador/priorizador de candidatos, no autoridad taxonómica.
 
 ## 5. Hito 15 — Integración botánica canónica con la clave adaptativa
 
-**Estado:** en curso.
+**Estado:** cerrado como base canónica mínima.  
+**Documento de cierre:** `docs/HITO15_CLOSEOUT_2026-09-16.md`.  
+**Módulo implementado:** `tools/canonical-identification/`.
 
-El objetivo del Hito 15 ya no es conectar una colección de fichas antiguas mediante un adaptador permanente. La arquitectura corregida parte directamente del Master 2.0 y sus derivados canónicos.
+El objetivo corregido del Hito 15 fue reemplazar la dependencia de fichas antiguas/adaptadores permanentes por una base directa en Master Botánico 2.0 y sus derivados canónicos.
 
 ### 15.1 — Master 2.0 como fuente canónica
 
@@ -150,14 +156,12 @@ data/botanical/model_errors.json
 
 ### 15.3 — Validación estricta del export
 
-Estado: completado.
-
+Estado: completado.  
 Herramienta: `tools/botanical-data/validate_master_export.py`.
 
 ### 15.4 — IDs canónicos de especies
 
-Estado: completado.
-
+Estado: completado.  
 Herramienta: `tools/botanical-data/validate_species_ids.py`.
 
 ### 15.4B — Fichas canónicas por especie
@@ -166,15 +170,13 @@ Estado: completado.
 
 Las seis fichas de `data/species/` se generan exclusivamente desde `data/botanical/*.json` mediante `tools/botanical-data/build_species_data.py` y se validan con `tools/botanical-data/validate_species_data.py`.
 
-Las fichas son vistas derivadas para consumo humano, IA, interfaz y dirección de arte. No son una base editorial paralela.
-
 ### 15.5 — Motor genérico de identificación
 
-Estado: siguiente etapa de implementación.
+Estado: completado como núcleo mínimo.
 
-El motor debe operar directamente sobre la matriz canónica especie × carácter. Debe contener algoritmos, no botánica hardcodeada.
+El motor opera sobre la matriz canónica especie × carácter. Contiene algoritmos, no botánica hardcodeada.
 
-Regla básica:
+Regla implementada:
 
 - dato esperado desconocido → no elimina;
 - observación desconocida/no observable → no elimina;
@@ -182,50 +184,45 @@ Regla básica:
 
 ### 15.6 — Selección adaptativa del siguiente carácter
 
-Estado: pendiente.
+Estado: completado como versión mínima.
 
-Seleccionar dinámicamente el carácter más informativo entre candidatos activos, considerando discriminación, observabilidad, seguridad, costo y fenología.
+`nextCharacter()` selecciona un carácter activo, no observado, capaz de separar candidatos activos. El desempate considera tamaño de grupos, desconocidos, cantidad de grupos conocidos y puntajes derivados de poder diagnóstico, observabilidad, costo y seguridad.
 
 ### 15.7 — Adquisición adaptativa de evidencia
 
-Estado: pendiente.
+Estado: completado como contrato mínimo de evidencia.
 
-Para el carácter seleccionado:
-
-```text
-evidencia existente
-→ si basta, usarla
-→ si puede observarse automáticamente, intentarlo
-→ si no, solicitar otra foto o preguntar al usuario
-```
-
-“No sé / no puedo observarlo” sigue siendo siempre válido.
+El motor acepta evidencia simple por `characterId` y estados observados. La adquisición visual o mediante UI queda fuera del núcleo y se implementa en hitos posteriores.
 
 ### 15.8 — Integración visión + BioCLIP + evidencia botánica
 
-Estado: pendiente.
+Estado: cerrado como contrato, no como integración visual final.
 
-BioCLIP aporta candidatos/prior. Los modelos visuales pueden aportar observaciones de caracteres. Ningún score visual sentencia la especie.
+BioCLIP y visión quedan delimitados como fuentes futuras de candidatos u observaciones de caracteres. Ningún score visual sentencia la especie. La integración real continúa en Hito 17.
 
 ### 15.9 — Retirada controlada de legado
 
-Estado: pendiente.
+Estado: completado como demarcación.
 
-Solo después de validar el motor nuevo se revisarán y retirarán dependencias legacy como conocimiento botánico hardcodeado, adaptadores transitorios y claves fijas incompatibles con Master 2.0.
+Los componentes legacy fueron marcados como históricos o de migración. No se eliminan masivamente hasta que los flujos nuevos cubran las funciones necesarias.
 
 ### 15.10 — Documentación y cierre técnico
 
-Estado: en progreso.
+Estado: completado.
 
-La documentación debe reflejar Master 2.0, los 24 caracteres totales/19 activos, las fichas derivadas y la arquitectura canónica.
+El cierre queda registrado en `docs/HITO15_CLOSEOUT_2026-09-16.md`, `tools/canonical-identification/README.md` y esta hoja de ruta.
 
 ## 6. Hitos posteriores
 
 **Hito 16 — Extracción automática de caracteres botánicos.**  
-Estado: pendiente.
+Estado: siguiente etapa técnica.
+
+Objetivo: probar observadores visuales restringidos por carácter. El modelo debe responder con estado permitido, `NO_OBSERVABLE` o incertidumbre; no con una especie definitiva.
 
 **Hito 17 — Integración visión → caracteres → clave adaptativa.**  
 Estado: pendiente.
+
+Objetivo: conectar BioCLIP, observaciones visuales de caracteres, evidencia humana y motor canónico.
 
 **Hito 18 — Contexto ecológico, geográfico y fenológico.**  
 Estado: pendiente.
@@ -252,9 +249,16 @@ Estado: pendiente.
 - Priorizar observación segura y no destructiva.
 - Mantener arquitectura offline-first.
 - No ampliar especies antes de cerrar el ciclo del piloto.
+- Mantener el sistema simple mientras el piloto siga siendo de seis especies.
 
 ## 8. Prioridad inmediata
 
-Con Master 2.0, los JSON canónicos y las seis fichas sincronizadas ya cerrados, la prioridad técnica vuelve a ser **Hito 15.5: motor genérico de identificación**, seguido por selección adaptativa y adquisición de evidencia.
+Con Hito 15 cerrado, la prioridad técnica pasa a Hito 16:
 
-La dirección de arte puede avanzar en paralelo utilizando `data/species/` como vista completa por especie, siempre recordando que su autoridad científica proviene del Master Botánico 2.0.
+```text
+probar extracción automática de caracteres botánicos concretos
+```
+
+La regla sigue siendo restrictiva: visión observa caracteres; el motor identifica por evidencia; la app no presenta identificación definitiva ciega.
+
+La dirección de arte puede avanzar en paralelo solo dentro del alcance definido para la próxima fase: derivados de personajes, blockouts de mapa y pruebas ambientales pequeñas, sin rediseñar el canon base.
