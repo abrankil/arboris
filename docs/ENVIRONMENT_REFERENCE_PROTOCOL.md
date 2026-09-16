@@ -4,7 +4,7 @@
 
 Definir cómo capturar, localizar, catalogar y usar referencias ambientales para escenarios de Árboris sin confundir observación, interpretación ecológica y decisión artística.
 
-Para el primer piloto, el territorio núcleo es el Fundo Los Nogales. La fuente botánica maestra es `data/source/Base_botanica_Pokedex_flora_Master.xlsx`. Mientras Alejandra mejora esa planilla, este flujo solo registra su vínculo territorial y no modifica ni reinterpreta su contenido.
+Para el primer piloto, el territorio núcleo es el Fundo Los Nogales. La fuente botánica maestra vigente es `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`. Este flujo solo registra su vínculo territorial y no modifica ni reinterpreta su contenido.
 
 ## 1. Unidad básica
 
@@ -74,17 +74,18 @@ Registrar con mayor profundidad porque puede afectar directamente el escenario p
 
 ## 4. Fuente botánica maestra
 
-`data/source/Base_botanica_Pokedex_flora_Master.xlsx` es la fuente botánica maestra del primer piloto y documenta el levantamiento de flora nativa del Fundo Los Nogales.
+`data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx` es la fuente botánica maestra vigente del primer piloto y documenta el levantamiento de flora nativa del Fundo Los Nogales.
 
 Su función aquí es dar trazabilidad territorial y botánica. No sustituye una fotografía ambiental ni una fuente ecológica.
 
-Usar `botanicalSourceRef=data/source/Base_botanica_Pokedex_flora_Master.xlsx` solo cuando exista vínculo documental directo con la referencia. No asignarlo por simple proximidad geográfica.
+Usar `botanicalSourceRef=data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx` solo cuando exista vínculo documental directo con la referencia. No asignarlo por simple proximidad geográfica.
 
-Mientras la planilla esté en mejora:
+Reglas de integración:
 
-- no modificarla desde esta rama;
-- no copiar campos desde versiones intermedias sin revisión;
-- no inferir metadata ambiental que la planilla no declare.
+- no modificar el Master desde el flujo ambiental;
+- no copiar campos derivados sin revisión;
+- no inferir metadata ambiental que el Master no declare;
+- si una futura versión sustituye al Master 2.0, actualizar esta referencia de forma explícita y trazable.
 
 ## 5. Jerarquía territorial del piloto
 
