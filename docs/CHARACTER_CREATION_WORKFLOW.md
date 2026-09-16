@@ -11,7 +11,7 @@ Consultar en este orden:
 2. `ART_STYLE_GUIDE.md` — contrato visual y técnico.
 3. `CHARACTER_DESIGN_STATUS.md` — estado real de producción.
 4. `data/characters/index.json` y ficha individual — canon operativo.
-5. ficha de especie, fotografías y fuentes botánicas — evidencia.
+5. ficha de especie, fotografías y fuentes botánicas cuando `characterType: species`; referencias visuales/materiales y función aprobada cuando `characterType: support`.
 
 ## 1. Brief mínimo
 
@@ -20,7 +20,7 @@ Antes de producir registrar:
 - especie o personaje auxiliar;
 - uso previsto;
 - archivo de partida;
-- fuentes botánicas;
+- fuentes botánicas o referencias materiales/visuales, según corresponda;
 - rasgos que deben conservarse;
 - cambio solicitado;
 - elementos secundarios;
@@ -29,20 +29,27 @@ Antes de producir registrar:
 - comparación con el canon;
 - validación prevista.
 
-## 2. Evidencia
+## 2. Evidencia y referencias
 
-Separar explícitamente:
+Para personajes-especie, separar explícitamente:
 
 - lo descrito por fuentes botánicas;
 - lo visible en fotografías;
 - variación intraespecífica;
 - decisiones de dirección de arte.
 
+Para personajes auxiliares, registrar por separado:
+
+- referencias materiales o visuales;
+- función visual aprobada;
+- decisiones de dirección de arte;
+- límites que evitan confundirlos con una especie del catálogo.
+
 No convertir una decisión gráfica en regla botánica universal.
 
 ## 3. Rasgos obligatorios
 
-Definir antes de dibujar:
+Para personajes-especie, definir antes de dibujar:
 
 - silueta;
 - margen;
@@ -52,6 +59,14 @@ Definir antes de dibujar:
 - textura;
 - asimetrías relevantes;
 - estructuras reproductivas incluidas.
+
+Para personajes auxiliares, definir:
+
+- silueta;
+- material o superficie;
+- paleta;
+- rasgo identificador;
+- restricciones de representación.
 
 Si un rasgo no está respaldado, dejarlo abierto.
 
@@ -75,7 +90,7 @@ Aplicar cuatro pruebas:
 ¿El personaje se distingue del elenco por su silueta?
 
 ### Botanical cue test
-¿Siguen visibles los rasgos botánicos seleccionados como esenciales?
+¿Siguen visibles los rasgos botánicos seleccionados como esenciales? Para un personaje auxiliar, sustituir esta prueba por la verificación de sus rasgos materiales/visuales obligatorios.
 
 ### Thumbnail test
 ¿Se lee correctamente a tamaño de colección/UI?
@@ -143,7 +158,7 @@ Registrar:
 - versión de diseño;
 - versión de sprite;
 - revisión técnica;
-- fuentes;
+- fuentes o referencias;
 - prompt/modelo si hubo generación;
 - asset resultante;
 - pendientes.
