@@ -5,12 +5,13 @@
 
 Sincronizar el trabajo documental de personajes sin tocar sprites ni datos científicos.
 
-## Archivos nuevos propuestos
+## Archivos incluidos
 
 - `docs/CHARACTER_WORKLOG_2026-09-15.md`
 - `docs/CHARACTER_CREATION_WORKFLOW.md`
 - `docs/CHARACTER_TEMPLATE.md`
 - `docs/CHARACTER_MANUAL_REFACTOR_PLAN.md`
+- `docs/CHARACTER_DOCUMENTATION_SYNC_MANIFEST.md`
 
 ## Lo que NO hace este paquete
 
@@ -22,11 +23,11 @@ Sincronizar el trabajo documental de personajes sin tocar sprites ni datos cient
 - no cambia todavía el schema ni el canon operativo;
 - incorpora algunos conceptos de la Fase B únicamente como borradores documentales para revisión (tests visuales, versionado, derivados y estados por atributo), sin convertirlos todavía en reglas de datos ni en requisitos de assets.
 
-## Siguiente commit recomendado
+## Estado de esta sincronización
 
-Después de revisar estos cuatro documentos:
+Estos cinco documentos están contenidos en la rama `docs/character-manual-refactor` y se revisan mediante un Draft PR antes de cualquier merge a `main`.
 
-`docs: add character workflow and refactor plan`
+La presencia de estos documentos en la rama no implica que las fases posteriores del refactor hayan sido aplicadas a los manuales existentes.
 
 ## Segunda etapa posterior
 
