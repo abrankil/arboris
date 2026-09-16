@@ -1,90 +1,225 @@
-# Product principles
+Árboris — Product Principles
 
-## Established purpose
+Versión: 0.2
+Última actualización: 15 septiembre 2026
 
-Árboris is a mobile application for exploration, observation, documentation, learning, and assisted identification of native Chilean flora.
+Established purpose
 
-## Authority and permanence
+Árboris is a real-world exploration, observation, learning, collection, and assisted-identification experience focused on native Chilean flora.
 
-The following 15 principles are explicit, permanent, non-negotiable product requirements, not preliminary ideas. They must guide all future architecture, data-model, UX, AI, and implementation decisions.
+Its casual experience is primarily a game of exploration and discovery. Its scientific foundation preserves observations, evidence, uncertainty, provenance, and identification history.
+
+Assisted identification is essential to the experience, but it is a means to support trustworthy discovery and learning rather than the whole product.
+
+Authority and permanence
+
+The following 15 principles are explicit, permanent, non-negotiable product requirements, not preliminary ideas.
+
+They must guide all future architecture, data-model, UX, AI, gameplay, and implementation decisions.
 
 Future features may extend them but must not remove, weaken, reinterpret, or contradict them unless the project owner explicitly decides to change a principle.
 
-## 1. Assisted identification, never blind definitive AI identification
+1. Assisted identification, never blind definitive AI identification
 
-Árboris must not present an AI prediction as an unquestionable identification. Identification must combine multiple sources of evidence whenever available: photographs, observable botanical characters, geographic location, ecosystem, known distribution, phenology, and other ecological context.
+Árboris must not present an AI prediction as an unquestionable identification.
 
-## 2. Adaptive taxonomic keys
+Identification must combine multiple sources of evidence whenever available: photographs, observable botanical characters, geographic location, ecosystem, known distribution, phenology, and other ecological context.
 
-The identification process should prioritize characteristics already visible in photographs. The system should dynamically ask the user only for additional diagnostic characters that meaningfully discriminate between the remaining candidate taxa.
+AI models may generate candidates, observe specific characters, prioritize evidence, or assist the user.
 
-## 3. “I don’t know / I can’t observe it” is always a valid answer
+They do not constitute taxonomic authority.
 
-Users must never be forced to invent botanical information. If a character cannot be observed, the system must preserve uncertainty and either continue with other diagnostic characters or maintain multiple candidates.
+2. Adaptive taxonomic keys
 
-## 4. Evidence and traceability are mandatory
+The identification process should prioritize characteristics already visible in photographs or otherwise present in the observation.
 
-Every identification must preserve the evidence behind it, including photographs, observed characters, identification method, contextual information, quantity and quality of evidence, uncertainty, and confidence.
+The system should dynamically ask only for additional diagnostic characters that meaningfully discriminate between the remaining candidate taxa.
 
-## 5. Offline-first architecture from the beginning
+Question selection should consider not only discriminative value, but also observability, safety, invasiveness, and evidence already available.
 
-Core field functionality must work without connectivity. Offline capability must be an architectural requirement, not a feature added later. Synchronization can occur when connectivity becomes available.
+3. “I don’t know / I can’t observe it” is always a valid answer
 
-## 6. Downloadable geographic/ecological packages
+Users must never be forced to invent botanical information.
+
+If a character cannot be observed, the system must preserve uncertainty and either continue with other diagnostic characters or maintain multiple candidates.
+
+Automated visual models must also be allowed to abstain when a requested character cannot be observed reliably.
+
+4. Evidence and traceability are mandatory
+
+Every identification must preserve the evidence behind it, including photographs, observed characters, identification method, contextual information, quantity and quality of evidence, uncertainty, and confidence where applicable.
+
+The system must preserve enough information to understand how an identification hypothesis was produced and later revised.
+
+5. Offline-first architecture from the beginning
+
+Core field functionality must be designed to work without continuous connectivity.
+
+Offline capability is an architectural requirement, not a feature to be added after the product is built.
+
+Synchronization may occur when connectivity becomes available.
+
+The exact on-device inference strategy for visual models remains subject to technical validation.
+
+6. Downloadable geographic/ecological packages
 
 Users should eventually be able to download packages for specific areas or ecosystems containing the information required for offline exploration and identification, such as maps, species data, identification resources, and relevant local context.
 
-## 7. Identification must be geographically and ecologically contextual
+The final package format does not need to be designed before the pilot demonstrates the core experience.
 
-Candidate species must be filtered or weighted using geographic distribution, ecosystem, habitat, altitude, and other available environmental information. A visually plausible species that is ecologically or geographically implausible must not be treated equivalently to a locally plausible candidate.
+7. Identification must be geographically and ecologically contextual
 
-## 8. Preserve uncertainty instead of hiding it
+Candidate species must eventually be filtered, weighted, or interpreted using geographic distribution, ecosystem, habitat, altitude, phenology, and other available environmental information.
 
-Árboris must be capable of returning multiple plausible candidates and explaining why uncertainty remains. The system must distinguish between confirmed, probable, tentative, and unresolved identifications rather than forcing a single answer.
+A visually plausible species that is ecologically or geographically implausible must not be treated equivalently to a locally plausible candidate when reliable contextual information is available.
 
-## 9. Observations are evidence, not merely records
+8. Preserve uncertainty instead of hiding it
+
+Árboris must be capable of returning multiple plausible candidates and explaining why uncertainty remains.
+
+The system must support states equivalent to confirmed, probable, tentative, and unresolved rather than forcing a single answer.
+
+The exact implementation vocabulary may evolve, but the underlying distinction must remain.
+
+9. Observations are evidence, not merely records
 
 An observation should preserve enough structured information to be useful later for verification, comparison, research, learning, and improvement of identification systems.
 
-## 10. Separate species knowledge from individual observations
+A real-world observation is the underlying source of truth shared by the scientific and game layers.
 
-Canonical taxonomic/species information must be modeled separately from field observations. Individual observations can contain variation, uncertainty, unusual morphology, environmental context, and identification history without altering the canonical species description.
+10. Separate species knowledge from individual observations
 
-## 11. Intraspecific variation is a first-class requirement
+Canonical taxonomic/species information must be modeled separately from field observations.
 
-Árboris must never model a species as having one single “typical appearance.” Visible morphology can vary with microhabitat, environmental conditions, developmental stage, phenology, and other factors.
+Individual observations can contain variation, uncertainty, unusual morphology, environmental context, and identification history without altering the canonical species description.
 
-The system should learn and represent ranges of variation using multiple examples per species. Whenever possible, observations and image collections should preserve contextual variables such as exposure, shade/canopy cover, slope, altitude, phenology, microhabitat, and other relevant environmental factors.
+Scientific species data, observational evidence, and game-character data must remain separate but connected objects.
+
+11. Intraspecific variation is a first-class requirement
+
+Árboris must never model a species as having one single “typical appearance.”
+
+Visible morphology can vary with microhabitat, environmental conditions, developmental stage, phenology, and other factors.
+
+The system should represent ranges of variation using multiple examples per species.
+
+Whenever possible, observations and image collections should preserve contextual variables such as exposure, shade/canopy cover, slope, altitude, phenology, microhabitat, and other relevant environmental factors.
 
 This is necessary to distinguish true intraspecific variation from identification errors.
 
-## 12. Identification errors are valuable data
+12. Identification errors are valuable data
 
-Incorrect or initially ambiguous identifications should not simply disappear. When appropriate, they should be preserved as traceable identification history because confusion between taxa can reveal useful diagnostic characters and improve future identification workflows.
+Incorrect or initially ambiguous identifications should not simply disappear.
+
+When appropriate, they should be preserved as traceable identification history because confusion between taxa can reveal useful diagnostic characters and improve future identification workflows.
 
 For example, confusion between Lithraea caustica and Cryptocarya alba can become useful information for designing discriminating questions and explaining similar-looking species.
 
-## 13. Human-readable botanical reasoning
+A later correction should not silently erase the evidence or reasoning that produced the earlier hypothesis.
 
-Whenever possible, Árboris should explain why a candidate is suggested or rejected using understandable botanical and ecological evidence. The goal is not only to produce a name but also to help the user learn how to observe plants.
+13. Human-readable botanical reasoning
 
-## 14. Data provenance must be preserved
+Whenever possible, Árboris should explain why a candidate is suggested or rejected using understandable botanical and ecological evidence.
 
-Taxonomic information, distribution information, photographs, external datasets, expert validations, and other imported knowledge must retain their source/provenance. Future updates must not silently overwrite the origin of scientific information.
+The goal is not only to produce a name but also to help the user learn how to observe plants.
 
-## 15. Architecture must preserve future scientific usefulness
+Technology should act as scaffolding: as users learn, they should progressively become more capable of recognizing flora without depending entirely on automated identification.
 
-Even though Árboris begins as a practical flora exploration and identification application, its data structures must not unnecessarily destroy information that could later support ecological analysis, population monitoring, temporal comparisons, conservation work, or research.
+14. Data provenance must be preserved
 
-## Decision rule for future development
+Taxonomic information, distribution information, photographs, external datasets, model-generated observations, expert validations, and other imported or generated knowledge must retain their source or provenance.
 
-“When a proposed feature, architecture decision, AI behavior, UX simplification, or data-model decision conflicts with one of these principles, the principle takes precedence. The conflict must be documented rather than silently resolving it by weakening the requirement.”
+Future updates must not silently overwrite the origin of scientific information.
 
-## Current documentation-stage boundaries
+Evidence generated by a model must remain distinguishable from evidence supplied by a user or validated by an expert.
 
-- Establish repository structure and documentation before implementing the application.
-- Leave the mobile framework undecided at this stage.
-- Do not add external dependencies at this stage.
-- Treat product behavior not specified by the project owner as an open question, not an accepted requirement.
+15. Architecture must preserve future scientific usefulness
 
-These stage boundaries do not defer or weaken the 15 requirements above. Detailed workflows, supported platforms, technical choices, and implementation details remain to be defined within those requirements.
+Even though Árboris begins as a practical exploration and collection game, its data structures must not unnecessarily destroy information that could later support ecological analysis, population monitoring, temporal comparisons, conservation work, citizen science, or research.
+
+Future scientific usefulness must be preserved without making the casual game experience unnecessarily complex.
+
+Decision rule for future development
+
+When a proposed feature, architecture decision, AI behavior, UX simplification, gameplay mechanic, or data-model decision conflicts with one of these principles, the principle takes precedence. The conflict must be documented rather than silently resolved by weakening the requirement.
+
+Current Pilot 1.0 boundaries
+
+Árboris is currently developing a deliberately constrained pilot.
+
+The pilot consists of:
+
+one geographic/ecological pilot context;
+
+six native species;
+
+real photographic evidence;
+
+structured botanical knowledge;
+
+assisted identification;
+
+an adaptive botanical key;
+
+candidate generation using BioCLIP;
+
+observation and evidence records;
+
+discovery and collection mechanics;
+
+one character associated with each species;
+
+a real-world treasure-hunt style exploration loop.
+
+The current technical priority is integration rather than expansion.
+
+The project should connect the components that already exist before introducing new technical systems.
+
+In particular, the current milestone is to connect the validated computable species fichas with the adaptive key so that botanical knowledge is not duplicated manually inside identification logic.
+
+After that integration is validated, the next visual experiment should remain restricted to one or two botanical characters and must support explicit abstention when the character cannot be observed reliably.
+
+The following are not current priorities unless a demonstrated pilot blockage requires them:
+
+additional species;
+
+custom classifiers;
+
+specialized segmentation pipelines;
+
+custom detectors for every botanical character;
+
+cloud backend;
+
+authentication;
+
+complex synchronization;
+
+social networks;
+
+leaderboards;
+
+large-scale multiplayer systems;
+
+complex game progression;
+
+multiple territories.
+
+The pilot should first demonstrate a coherent end-to-end experience:
+
+explore
+→ search
+→ encounter
+→ observe
+→ gather evidence
+→ identify with assistance
+→ discover
+→ unlock
+→ collect
+→ gain a reason to explore again
+
+Technical novelty is not a goal by itself.
+
+A new component should enter the architecture only when it solves a demonstrated problem that cannot be addressed adequately by the existing system or a simpler available tool.
+
+These pilot boundaries do not weaken the 15 principles above. They define the current scope in which those principles are being implemented and tested.
