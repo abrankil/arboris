@@ -27,6 +27,23 @@ Alejandra dirige el proyecto y su orientación general. Alvaro dirige el arte, d
 
 Una instrucción explícita nueva actualiza la decisión gráfica correspondiente. Si entra en conflicto con evidencia científica o con principios del producto, registrar el conflicto y resolverlo en su ámbito; no reescribir silenciosamente la ficha científica. `output/` contiene entregas y exploraciones, no una segunda guía normativa.
 
+## Arquitectura documental de personajes
+
+Cada tipo de decisión debe tener una fuente principal. Evitar duplicar reglas completas en varios manuales.
+
+| Documento o recurso | Responsabilidad principal |
+| --- | --- |
+| [`GRAPHIC_DIRECTION.md`](GRAPHIC_DIRECTION.md) | Propósito, roles, jerarquía de autoridad y método de decisión. |
+| [`ART_STYLE_GUIDE.md`](ART_STYLE_GUIDE.md) | Contrato visual y técnico. |
+| [`CHARACTER_CREATION_WORKFLOW.md`](CHARACTER_CREATION_WORKFLOW.md) | Procedimiento operativo para crear, revisar, limpiar e integrar personajes. |
+| [`CHARACTER_TEMPLATE.md`](CHARACTER_TEMPLATE.md) | Plantilla de ficha para personajes-especie y auxiliares. |
+| [`CHARACTER_DESIGN_STATUS.md`](CHARACTER_DESIGN_STATUS.md) | Estado de producción vigente, pendientes e incidencias. |
+| [`../data/characters/index.json`](../data/characters/index.json) | Índice activo y canon operativo. |
+| JSON individual en `data/characters/<character>.json` + carpeta correspondiente `data/characters/<character>/assets/` o recurso compartido equivalente | Identidad específica, selección vigente, procedencia y assets. |
+| [`CHARACTER_CANON_SNAPSHOT_2026-09-15.md`](CHARACTER_CANON_SNAPSHOT_2026-09-15.md) | Snapshot histórico; no fuente normativa vigente. |
+
+`ARBORIS_CHARACTER_CREATION_RULES.md` y `CHARACTER_COLLECTION_FINAL.md` se mantienen únicamente como rutas de compatibilidad deprecadas durante la transición. No deben recibir reglas nuevas.
+
 ## Cinco modelos de pensamiento
 
 Son herramientas de decisión para el equipo, no una selección de modelos de IA ni cambios de configuración del asistente.
