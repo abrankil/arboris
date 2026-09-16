@@ -219,10 +219,19 @@ Ese documento es un registro histórico y no constituye la fuente de verdad actu
 
 La antigua [colección final de personajes](docs/CHARACTER_COLLECTION_FINAL.md) se mantiene temporalmente como referencia de compatibilidad obsoleta.
 
-## Ambientes y recursos gráficos
+## Ambientes y mapas
+
+La construcción de escenarios y mapas conectados se documenta en:
+
+- [Protocolo de referencias ambientales](docs/ENVIRONMENT_REFERENCE_PROTOCOL.md)
+- [Dirección de arte de escenarios](docs/ENVIRONMENT_ART_DIRECTION.md)
+- [Sistema de topología y conectividad de mapas](docs/MAP_TOPOLOGY_SYSTEM.md)
+- [Plan de pruebas de blockouts](docs/MAP_TOPOLOGY_BLOCKOUT_TEST_PLAN.md)
+- [Plantilla de brief de escena](docs/SCENE_REFERENCE_BRIEF_TEMPLATE.md)
 
 Los recursos de ambientes se registran en:
 
+- [Biblioteca de referencias ambientales](docs/references/environments/README.md)
 - [Catálogo de ambientes](docs/assets/backgrounds/README.md)
 
 Para recursos destinados a Android, Steam/PC y web se utiliza:
