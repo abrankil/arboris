@@ -1,443 +1,1014 @@
 {
-  "id": "SP005",
-  "commonName": "Colliguay",
-  "scientificName": "Colliguaja odorifera",
-  "family": "Euphorbiaceae",
-  "habit": "Arbusto",
-  "origin": "Nativa",
-  "endemicToChile": true,
+  "view_schema": "arboris.species-card.v2",
+  "generated_from": {
+    "master_name": "Base_botanica_Pokedex_flora_Master",
+    "master_version": "2.0.0",
+    "schema_version": "2.0.0",
+    "source_file": "Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx",
+    "source_sha256": "10e2702aa0448e24e6b8c157afcf10d7e0de1aa85f6e0169b13fbc55ec3c6409",
+    "source_of_truth": "xlsx"
+  },
+  "species": {
+    "species_id": "SP-005",
+    "nombre_cientifico": "Colliguaja odorifera",
+    "nombre_comun": "Colliguay",
+    "familia": "Euphorbiaceae",
+    "orden": "Malpighiales",
+    "habito": "Arbusto",
+    "origen": "Nativa",
+    "endemismo": "Sí",
+    "estado_piloto": "Activa",
+    "notas": "Ficha avanzada: respaldo UdeC, SAG y Fundación Philippi. Corregida disposición foliar a opuesta según fuentes; látex queda como carácter no prioritario por invasividad."
+  },
+  "botanical_characters": [
+    {
+      "character": {
+        "caracter_id": "CH-001",
+        "grupo": "Hoja",
+        "nombre_caracter": "Tipo de hoja",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "simple",
+          "compuesta"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Arquitectura general de la hoja.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-001",
+        "estado_esperado": [
+          "simple"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-014",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "bajo",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Hoja simple."
+      },
+      "source": {
+        "fuente_id": "F-014",
+        "tipo": "Guía oficial / SAG",
+        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
+        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
+        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+        "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-002",
+        "grupo": "Hoja",
+        "nombre_caracter": "Disposición foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "alterna",
+          "subopuesta",
+          "opuesta",
+          "verticilada"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Patrón de inserción de hojas sobre una misma ramilla. Evaluar varios nudos visibles; no inferir desde una hoja aislada ni desde ramillas diferentes.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-002",
+        "estado_esperado": [
+          "opuesta"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-014",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Hojas opuestas."
+      },
+      "source": {
+        "fuente_id": "F-014",
+        "tipo": "Guía oficial / SAG",
+        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
+        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
+        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+        "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-003",
+        "grupo": "Hoja",
+        "nombre_caracter": "Dentición del margen foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "entero",
+          "finamente_serrado",
+          "serrado",
+          "dentado"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Presencia y tipo de dientes en un margen suficientemente conservado. No confundir daño, herbivoría o necrosis con dentición.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-003",
+        "estado_esperado": [
+          "serrado"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-015",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio-alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Margen dentado/aserrado; revisar terminología fina posteriormente si es necesario."
+      },
+      "source": {
+        "fuente_id": "F-015",
+        "tipo": "Ficha botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
+        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
+        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
+        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-004",
+        "grupo": "Hoja",
+        "nombre_caracter": "Consistencia",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "blanda",
+          "flexible",
+          "firme",
+          "coriacea"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Propiedad mecánica de una hoja madura. Preferir observación de campo en hoja intacta cuando sea segura; la fotografía aporta evidencia indirecta.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-004",
+        "estado_esperado": [
+          "coriacea"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-015",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Hoja coriácea."
+      },
+      "source": {
+        "fuente_id": "F-015",
+        "tipo": "Ficha botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
+        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
+        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
+        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-005",
+        "grupo": "Hoja",
+        "nombre_caracter": "Contraste cromático entre haz y envés",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "contraste_observable",
+          "sin_contraste_observable"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Diferencia cromática visualmente reconocible entre ambas caras de la misma hoja, comparadas bajo iluminación equivalente. No describe un color específico.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-005",
+        "estado_esperado": [
+          "sin_contraste_observable"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "bajo",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "media",
+        "notas": "Estado operativo del piloto."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-006",
+        "grupo": "Hoja",
+        "nombre_caracter": "Presencia de pubescencia en el envés",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Presencia de pelos o indumento visible en la superficie inferior. No clasifica tipo, densidad ni longitud del pelo.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-006",
+        "estado_esperado": [
+          "ausente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "bajo",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "media",
+        "notas": "Sin pubescencia evidente en la evidencia del piloto."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-008",
+        "grupo": "Hoja",
+        "nombre_caracter": "Nervadura visualmente contrastante",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Indica si la nervadura se distingue visualmente de la lámina por color o contraste. No representa relieve o prominencia física.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-008",
+        "estado_esperado": [
+          "ausente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "media",
+        "notas": "Nervadura sin contraste visual consistente."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-009",
+        "grupo": "Hoja",
+        "nombre_caracter": "Nervaduras secundarias visualmente distinguibles",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Se considera presente cuando varias nervaduras secundarias se distinguen claramente desde el nervio central hacia el margen.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-009",
+        "estado_esperado": [
+          "ausente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "media",
+        "notas": "Nervaduras secundarias no claramente distinguibles."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-010",
+        "grupo": "Hoja",
+        "nombre_caracter": "Nervaduras secundarias conectadas a reborde marginal",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Las nervaduras secundarias alcanzan o se unen a una línea o reborde continuo próximo al margen foliar.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-010",
+        "estado_esperado": [
+          "ausente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "media",
+        "notas": "No se observa reborde marginal continuo."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-011",
+        "grupo": "Hoja",
+        "nombre_caracter": "Forma de la lámina foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "ovada",
+          "ovado_eliptica",
+          "ovado_oblonga",
+          "eliptica",
+          "oblonga",
+          "ovado_lanceolada",
+          "lanceolada",
+          "obovada",
+          "orbicular"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Forma de la lámina madura e intacta. La variación se representa mediante múltiples estados y el campo variabilidad, no mediante un estado 'variable'.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-011",
+        "estado_esperado": [
+          "oblonga"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-015",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Forma oblonga."
+      },
+      "source": {
+        "fuente_id": "F-015",
+        "tipo": "Ficha botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
+        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
+        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
+        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-012",
+        "grupo": "Hoja",
+        "nombre_caracter": "Ápice foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "agudo",
+          "acuminado",
+          "obtuso",
+          "redondeado",
+          "emarginado"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Forma del extremo distal de una hoja madura e intacta; evitar hojas con ápice dañado o incompleto.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-012",
+        "estado_esperado": [
+          "agudo"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Ápice agudo validado en fotografía del piloto."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-013",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Tipo de fruto diagnóstico",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "drupa",
+          "foliculo",
+          "cipsela",
+          "capsula"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Categoría botánica del fruto. Los atributos de forma, color, número de lóbulos o dehiscencia se registran por separado.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-013",
+        "estado_esperado": [
+          "capsula"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-014",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Tipo de fruto normalizado; CH-023 conserva el detalle tricoca."
+      },
+      "source": {
+        "fuente_id": "F-014",
+        "tipo": "Guía oficial / SAG",
+        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
+        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
+        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+        "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-014",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Tipo de inflorescencia",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "racimo",
+          "panicula",
+          "corimbo",
+          "solitaria",
+          "capitulo",
+          "amento"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Arquitectura de la inflorescencia. Color, sexualidad y otros rasgos florales no se codifican dentro de este carácter.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-014",
+        "estado_esperado": [
+          "amento"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-015",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Tipo de inflorescencia normalizado; detalles sexuales permanecen en nota."
+      },
+      "source": {
+        "fuente_id": "F-015",
+        "tipo": "Ficha botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
+        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
+        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
+        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-023",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Cápsula tricoca",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Indica si el fruto corresponde a una cápsula tricoca, con tres cocos/lóculos. Usar solo cuando el fruto esté disponible; complementa CH-013 sin duplicar el tipo general de fruto.",
+        "estado_piloto": "activo",
+        "aplica_si": "CH-013 contiene capsula"
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-023",
+        "estado_esperado": [
+          "presente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-014",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Cápsula tricoca documentada para Colliguay; detalle reproductivo complementario a CH-013 = capsula."
+      },
+      "source": {
+        "fuente_id": "F-014",
+        "tipo": "Guía oficial / SAG",
+        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
+        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
+        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+        "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-024",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Dehiscencia explosiva",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "No",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Medio",
+        "invasividad_base": "Baja",
+        "descripcion": "Apertura espontánea y violenta del fruto maduro con dispersión de semillas. Carácter pendiente de evaluación para el piloto; nunca provocar la dehiscencia como prueba.",
+        "estado_piloto": "pendiente_revision",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-005",
+        "caracter_id": "CH-024",
+        "estado_esperado": [
+          "presente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-015",
+        "detectable_imagen": "No",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "medio",
+        "confianza": "alta",
+        "notas": "Dehiscencia explosiva documentada; carácter pendiente de evaluación en el piloto. No provocar la apertura del fruto."
+      },
+      "source": {
+        "fuente_id": "F-015",
+        "tipo": "Ficha botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
+        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
+        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
+        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
+      },
+      "computable": false
+    }
+  ],
   "photos": [
     {
-      "individualId": "CO001",
-      "file": "SP005_CO001_hojas_01.jpg",
-      "structure": "hojas"
+      "photo_id": "PH-019",
+      "species_id": "SP-005",
+      "individual_id": "CO001",
+      "archivo": "SP005_CO001_inflorescencia_masculina_01.jpg",
+      "organo_estructura": "inflorescencia masculina",
+      "tipo_evidencia": "reproductiva",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "132zV0sxrSI6DlwWSO2yVQd5JZFKPZr7G",
+      "drive_url": "https://drive.google.com/file/d/132zV0sxrSI6DlwWSO2yVQd5JZFKPZr7G/view",
+      "notas": "Inflorescencia masculina alargada visible.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
     },
     {
-      "individualId": "CO001",
-      "file": "SP005_CO001_hojas_02.jpg",
-      "structure": "hojas"
+      "photo_id": "PH-020",
+      "species_id": "SP-005",
+      "individual_id": "CO001",
+      "archivo": "SP005_CO001_inflorescencia_masculina_02.jpg",
+      "organo_estructura": "inflorescencia masculina",
+      "tipo_evidencia": "reproductiva",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "15hbQMo_BMuPnuJsNP8mZF77pF94Pt1iW",
+      "drive_url": "https://drive.google.com/file/d/15hbQMo_BMuPnuJsNP8mZF77pF94Pt1iW/view",
+      "notas": "Segunda vista de la inflorescencia masculina.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
     },
     {
-      "individualId": "CO001",
-      "file": "SP005_CO001_inflorescencia_fruto_01.jpg",
-      "structure": "inflorescencia fruto"
+      "photo_id": "PH-021",
+      "species_id": "SP-005",
+      "individual_id": "CO001",
+      "archivo": "SP005_CO001_hojas_01.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1ATW6NLO7xUEBB90q52Pzi9oyotMY1_SR",
+      "drive_url": "https://drive.google.com/file/d/1ATW6NLO7xUEBB90q52Pzi9oyotMY1_SR/view",
+      "notas": "Morfología y margen foliar visibles.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
     },
     {
-      "individualId": "CO001",
-      "file": "SP005_CO001_inflorescencia_masculina_01.jpg",
-      "structure": "inflorescencia masculina"
+      "photo_id": "PH-022",
+      "species_id": "SP-005",
+      "individual_id": "CO001",
+      "archivo": "SP005_CO001_hojas_02.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1HQEQuZVbbzhf1osRTWVJgzQTwjNEXDh9",
+      "drive_url": "https://drive.google.com/file/d/1HQEQuZVbbzhf1osRTWVJgzQTwjNEXDh9/view",
+      "notas": "Segunda vista foliar.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
     },
     {
-      "individualId": "CO001",
-      "file": "SP005_CO001_inflorescencia_masculina_02.jpg",
-      "structure": "inflorescencia masculina"
+      "photo_id": "PH-023",
+      "species_id": "SP-005",
+      "individual_id": "CO001",
+      "archivo": "SP005_CO001_inflorescencia_fruto_01.jpg",
+      "organo_estructura": "inflorescencia + fruto",
+      "tipo_evidencia": "mixta",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1jQ3l7x5lnZzLQQvUFbxuBCRY8M9T20GR",
+      "drive_url": "https://drive.google.com/file/d/1jQ3l7x5lnZzLQQvUFbxuBCRY8M9T20GR/view",
+      "notas": "Estructuras reproductivas secas/fructíferas asociadas.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
     },
     {
-      "individualId": "CO002",
-      "file": "SP005_CO002_hojas_01.jpg",
-      "structure": "hojas"
+      "photo_id": "PH-040",
+      "species_id": "SP-005",
+      "individual_id": "CO002",
+      "archivo": "SP005_CO002_hojas_01.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1W83xLM_n-IrJXT5OSzVxTwv3jFbN1pAI",
+      "drive_url": "https://drive.google.com/file/d/1W83xLM_n-IrJXT5OSzVxTwv3jFbN1pAI/view",
+      "notas": "Nuevo individuo CO002. Original: IMG_20260911_134242.jpg.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
     },
     {
-      "individualId": "CO002",
-      "file": "SP005_CO002_ramilla_hojas_01.jpg",
-      "structure": "ramilla hojas"
+      "photo_id": "PH-041",
+      "species_id": "SP-005",
+      "individual_id": "CO002",
+      "archivo": "SP005_CO002_ramilla_hojas_01.jpg",
+      "organo_estructura": "ramilla + hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1rxcYimulR8GOxMa3Lmi8rc6cvwmiOz8s",
+      "drive_url": "https://drive.google.com/file/d/1rxcYimulR8GOxMa3Lmi8rc6cvwmiOz8s/view",
+      "notas": "Original: IMG_20260911_134257.jpg; útil para disposición foliar y margen.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
     }
   ],
-  "order": "Malpighiales",
-  "endemicChile": true,
-  "pilotStatus": "Activa",
-  "botanicalNotes": "Ficha avanzada: respaldo UdeC, SAG y Fundación Philippi. Corregida disposición foliar a opuesta según fuentes; látex queda como carácter no prioritario por invasividad.",
-  "botanicalCharacters": [
+  "sources": [
     {
-      "characterId": "CH-001",
-      "group": "Hoja",
-      "name": "Tipo de hoja",
-      "dataType": "categorico",
-      "expectedStates": [
-        "simple"
-      ],
-      "allowedStates": [
-        "simple",
-        "compuesta"
-      ],
-      "variability": "baja",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "bajo",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-014",
-      "source": {
-        "tipo": "Guía oficial / SAG",
-        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
-        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
-        "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
-      },
-      "notes": "Hoja simple.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "fuente_id": "F-002",
+      "tipo": "Flora/clave",
+      "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+      "uso_prioritario": "Morfología y claves de árboles",
+      "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+      "notas": "Fuente morfológica prioritaria para especies arbóreas."
     },
     {
-      "characterId": "CH-002",
-      "group": "Hoja",
-      "name": "Disposición foliar",
-      "dataType": "categorico",
-      "expectedStates": [
-        "opuesta"
-      ],
-      "allowedStates": [
-        "alterna",
-        "subopuesta",
-        "opuesta",
-        "verticilada",
-        "no_observable"
-      ],
-      "variability": "baja",
-      "imageObservability": "Parcial",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "alto",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-014",
-      "source": {
-        "tipo": "Guía oficial / SAG",
-        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
-        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
-        "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
-      },
-      "notes": "SAG y Fundación Philippi coinciden en hojas opuestas. Corrige observación piloto previa que las trató como alternas.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "fuente_id": "F-004",
+      "tipo": "Registro de terreno",
+      "referencia": "Observaciones y validación humana del piloto.",
+      "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+      "url": null,
+      "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
     },
     {
-      "characterId": "CH-003",
-      "group": "Hoja",
-      "name": "Margen foliar",
-      "dataType": "categorico",
-      "expectedStates": [
-        "serrado"
-      ],
-      "allowedStates": [
-        "entero",
-        "ondulado",
-        "finamente_serrado",
-        "serrado",
-        "dentado",
-        "variable",
-        "no_observable"
-      ],
-      "variability": "media",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio-alto",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-015",
-      "source": {
-        "tipo": "Ficha botánica / Fundación Philippi",
-        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
-        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
-        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
-      },
-      "notes": "Margen dentado/aserrado; Fundación Philippi precisa dientes agudos.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "fuente_id": "F-007",
+      "tipo": "Guía oficial / CONAF",
+      "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
+      "uso_prioritario": "Morfología foliar y reproductiva de litre",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+      "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
     },
     {
-      "characterId": "CH-004",
-      "group": "Hoja",
-      "name": "Consistencia",
-      "dataType": "categorico",
-      "expectedStates": [
-        "coriacea"
-      ],
-      "allowedStates": [
-        "blanda",
-        "flexible",
-        "firme",
-        "coriacea",
-        "no_se"
-      ],
-      "variability": "baja",
-      "imageObservability": "Probable",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-015",
-      "source": {
-        "tipo": "Ficha botánica / Fundación Philippi",
-        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
-        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
-        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
-      },
-      "notes": "Hojas coriáceas.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "fuente_id": "F-009",
+      "tipo": "Flora/clave",
+      "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+      "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+      "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+      "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
     },
     {
-      "characterId": "CH-011",
-      "group": "Hoja",
-      "name": "Forma foliar predominante",
-      "dataType": "categorico",
-      "expectedStates": [
-        "oblonga"
-      ],
-      "allowedStates": [
-        "ovada",
-        "eliptica",
-        "oblonga",
-        "lanceolada",
-        "obovada",
-        "orbicular",
-        "variable",
-        "no_observable"
-      ],
-      "variability": "media",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-015",
-      "source": {
-        "tipo": "Ficha botánica / Fundación Philippi",
-        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
-        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
-        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
-      },
-      "notes": "Forma foliar oblonga según Fundación Philippi.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "fuente_id": "F-014",
+      "tipo": "Guía oficial / SAG",
+      "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
+      "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
+      "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+      "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
     },
     {
-      "characterId": "CH-022",
-      "group": "Glándula apical en dientes foliares",
-      "name": "Hoja",
-      "dataType": "categórico",
-      "expectedStates": [
-        "si"
-      ],
-      "allowedStates": [
-        "si",
-        "no",
-        "no_se"
-      ],
-      "variability": "desconocida",
-      "imageObservability": "Parcial",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "alto",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-015",
-      "source": {
-        "tipo": "Ficha botánica / Fundación Philippi",
-        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
-        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
-        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
-      },
-      "notes": "Dientes agudos provistos de glándulas oscuras.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "fuente_id": "F-015",
+      "tipo": "Ficha botánica / Fundación Philippi",
+      "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
+      "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
+      "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
+      "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
     },
     {
-      "characterId": "CH-014",
-      "group": "Reproductivo",
-      "name": "Tipo de inflorescencia/flor diagnóstica",
-      "dataType": "texto",
-      "expectedStates": [
-        "espiga_terminal_amarillo_rojiza_masculinas_arriba_femeninas_abajo"
-      ],
-      "allowedStates": [
-        "texto libre"
-      ],
-      "variability": "baja",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "alto",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-014",
-      "source": {
-        "tipo": "Guía oficial / SAG",
-        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
-        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
-        "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
-      },
-      "notes": "SAG describe espigas terminales con flores masculinas superiores y femeninas inferiores.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-023",
-      "group": "Tipo de cápsula",
-      "name": "Reproductivo",
-      "dataType": "categórico",
-      "expectedStates": [
-        "tricoca"
-      ],
-      "allowedStates": [
-        "tricoca",
-        "otro",
-        "no_se"
-      ],
-      "variability": "baja",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "alto",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-014",
-      "source": {
-        "tipo": "Guía oficial / SAG",
-        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
-        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
-        "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
-      },
-      "notes": "Fruto cápsula tricoca.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-024",
-      "group": "Dehiscencia explosiva",
-      "name": "Reproductivo",
-      "dataType": "categórico",
-      "expectedStates": [
-        "si"
-      ],
-      "allowedStates": [
-        "si",
-        "no",
-        "no_se"
-      ],
-      "variability": "baja",
-      "imageObservability": "No",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "medio",
-      "confidence": "alta",
-      "sourceId": "F-014",
-      "source": {
-        "tipo": "Guía oficial / SAG",
-        "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
-        "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
-        "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
-      },
-      "notes": "Dehiscencia explosiva al madurar; no provocar como prueba.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-025",
-      "group": "Monoecia",
-      "name": "Reproductivo",
-      "dataType": "categórico",
-      "expectedStates": [
-        "monoica"
-      ],
-      "allowedStates": [
-        "monoica",
-        "dioica",
-        "no_se"
-      ],
-      "variability": "baja",
-      "imageObservability": "Parcial",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio-alto",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-015",
-      "source": {
-        "tipo": "Ficha botánica / Fundación Philippi",
-        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
-        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
-        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
-      },
-      "notes": "Planta monoica.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-016",
-      "group": "Fisiológico",
-      "name": "Látex al corte",
-      "dataType": "categorico",
-      "expectedStates": [
-        "blanco"
-      ],
-      "allowedStates": [
-        "blanco",
-        "otro",
-        "ausente",
-        "no_se"
-      ],
-      "variability": "desconocida",
-      "imageObservability": "No",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "precaucion",
-      "observationCost": "alto",
-      "confidence": "alta",
-      "sourceId": "F-015",
-      "source": {
-        "tipo": "Ficha botánica / Fundación Philippi",
-        "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
-        "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
-        "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
-        "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
-      },
-      "notes": "Presenta látex, pero no solicitar corte para confirmarlo salvo necesidad científica excepcional.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "fuente_id": "F-021",
+      "tipo": "Definición operacional interna",
+      "referencia": "Árboris Master Botánico 2.0. Vocabulario controlado y reglas de interoperabilidad.",
+      "uso_prioritario": "Definiciones operacionales del esquema; no constituye evidencia taxonómica de especies.",
+      "url": null,
+      "notas": "Fuente interna para términos del vocabulario computable. No usar para respaldar asignaciones botánicas especie–carácter."
     }
   ],
-  "botanicalData": {
-    "version": "pilot-master-v0.1",
-    "source": "data/source/Base_botanica_Pokedex_flora_Master.xlsx",
-    "masterSpeciesId": "SP-005",
-    "validationWarnings": 0
-  }
+  "glossary": [
+    {
+      "termino_id": "GL-001",
+      "termino": "simple",
+      "categoria": "Hoja",
+      "definicion_tecnica": "Hoja cuya lámina no está dividida en folíolos independientes.",
+      "explicacion_usuario": "Una sola lámina foliar unida al pecíolo.",
+      "fuente_id": "F-002",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-001."
+    },
+    {
+      "termino_id": "GL-005",
+      "termino": "opuesta",
+      "categoria": "Disposición foliar",
+      "definicion_tecnica": "Dos hojas insertas enfrentadas en un mismo nudo.",
+      "explicacion_usuario": "Dos hojas nacen una frente a la otra.",
+      "fuente_id": "F-014",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-002."
+    },
+    {
+      "termino_id": "GL-009",
+      "termino": "serrado",
+      "categoria": "Margen foliar",
+      "definicion_tecnica": "Margen con dientes agudos orientados predominantemente hacia el ápice.",
+      "explicacion_usuario": "Borde con dientes similares a los de una sierra.",
+      "fuente_id": "F-009",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-003."
+    },
+    {
+      "termino_id": "GL-011",
+      "termino": "coriacea",
+      "categoria": "Consistencia foliar",
+      "definicion_tecnica": "Lámina firme y relativamente rígida, de consistencia semejante al cuero.",
+      "explicacion_usuario": "Hoja firme y dura, con textura parecida al cuero.",
+      "fuente_id": "F-002",
+      "sinonimos": "coriácea",
+      "observaciones": "Estado de CH-004."
+    },
+    {
+      "termino_id": "GL-019",
+      "termino": "oblonga",
+      "categoria": "Forma foliar",
+      "definicion_tecnica": "Lámina alargada con lados aproximadamente paralelos en buena parte de su longitud.",
+      "explicacion_usuario": "Hoja alargada, con lados relativamente paralelos.",
+      "fuente_id": "F-015",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-011."
+    },
+    {
+      "termino_id": "GL-024",
+      "termino": "agudo",
+      "categoria": "Ápice foliar",
+      "definicion_tecnica": "Ápice que termina en un ángulo marcado sin prolongación extensa.",
+      "explicacion_usuario": "Punta de la hoja claramente aguda.",
+      "fuente_id": "F-007",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-012."
+    },
+    {
+      "termino_id": "GL-032",
+      "termino": "capsula",
+      "categoria": "Fruto",
+      "definicion_tecnica": "Fruto seco dehiscente formado por más de un carpelo.",
+      "explicacion_usuario": "Fruto seco que se abre al madurar para liberar semillas.",
+      "fuente_id": "F-014",
+      "sinonimos": "cápsula",
+      "observaciones": "Estado de CH-013."
+    },
+    {
+      "termino_id": "GL-038",
+      "termino": "amento",
+      "categoria": "Inflorescencia",
+      "definicion_tecnica": "Inflorescencia generalmente alargada con numerosas flores pequeñas, a menudo unisexuales.",
+      "explicacion_usuario": "Grupo alargado de flores pequeñas sobre un mismo eje.",
+      "fuente_id": "F-015",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-014."
+    },
+    {
+      "termino_id": "GL-049",
+      "termino": "sin_contraste_observable",
+      "categoria": "Color foliar",
+      "definicion_tecnica": "Ausencia de una diferencia cromática suficientemente clara entre haz y envés bajo condiciones comparables de observación.",
+      "explicacion_usuario": "Las dos caras de la hoja no muestran una diferencia clara de color o tono.",
+      "fuente_id": "F-021",
+      "sinonimos": null,
+      "observaciones": "Estado operacional de CH-005; no equivale a identidad espectral."
+    },
+    {
+      "termino_id": "GL-050",
+      "termino": "presente",
+      "categoria": "Estado binario",
+      "definicion_tecnica": "El rasgo definido por el carácter se observa o está documentado para la unidad evaluada.",
+      "explicacion_usuario": "El rasgo está presente.",
+      "fuente_id": "F-021",
+      "sinonimos": null,
+      "observaciones": "Token binario reutilizable; su significado depende del carácter."
+    },
+    {
+      "termino_id": "GL-051",
+      "termino": "ausente",
+      "categoria": "Estado binario",
+      "definicion_tecnica": "El rasgo definido por el carácter está documentado como ausente para la unidad evaluada.",
+      "explicacion_usuario": "El rasgo no está presente.",
+      "fuente_id": "F-021",
+      "sinonimos": null,
+      "observaciones": "No inferir por falta de datos o falta de mención."
+    }
+  ],
+  "model_errors": []
 }
