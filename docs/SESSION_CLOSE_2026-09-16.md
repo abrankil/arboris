@@ -30,7 +30,7 @@ El sistema ambiental se sincroniza con esta ruta y no modifica el Master.
 ## Estado de integración al cierre
 
 - El sistema ambiental fue revisado e integrado sobre el `main` vigente mediante PR dedicado.
-- El sistema de topologías se prepara e integra sobre el `main` ya actualizado con el sistema ambiental.
+- El sistema de topologías fue revisado e integrado sobre el `main` ya actualizado con el sistema ambiental.
 - No se integraron imágenes generadas como evidencia ambiental ni como assets canónicos.
 - No se modificaron sprites, gameplay, lógica de identificación ni el Master Botánico desde este frente.
 
