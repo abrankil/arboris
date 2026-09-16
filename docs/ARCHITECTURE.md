@@ -1,6 +1,6 @@
 # Árboris — Architecture
 
-**Versión:** 0.3  
+**Versión:** 0.4  
 **Última actualización:** 16 septiembre 2026  
 **Alcance:** Piloto 1.0
 
@@ -31,7 +31,9 @@ Ningún modelo de IA constituye por sí mismo autoridad taxonómica.
 
 La única fuente editorial y científica de verdad del piloto es:
 
-`data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
+```text
+data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx
+```
 
 El Master Botánico 2.0 se exporta a ocho JSON canónicos:
 
@@ -66,6 +68,8 @@ build_species_data.py
 6 fichas por especie
         ↓
 validate_species_data.py
+        ↓
+tools/canonical-identification/
 ```
 
 Estado del Master 2.0:
@@ -98,16 +102,29 @@ Identification
 
 Una identificación puede cambiar sin destruir la observación ni la evidencia que la originó.
 
-## 6. Motor de identificación
+## 6. Motor de identificación canónico
 
-La arquitectura objetivo reemplaza la botánica hardcodeada por un motor genérico que consume datos canónicos.
+Hito 15 dejó implementado un núcleo mínimo en:
+
+```text
+tools/canonical-identification/
+  dataset.mjs
+  engine.mjs
+  engine.test.mjs
+```
+
+El módulo consume datos canónicos, no fichas antiguas ni conocimiento botánico hardcodeado.
 
 ```text
 JSON botánico canónico
         ↓
-Identification Engine
+loadCanonicalDataset()
         ↓
-Session / Evidence
+filterCandidates()
+        ↓
+nextCharacter()
+        ↓
+assessIdentification()
 ```
 
 El JSON contiene conocimiento. El engine contiene comportamiento. La sesión contiene observaciones/evidencia.
@@ -118,12 +135,12 @@ El engine no debe contener reglas específicas del tipo “Peumo tiene X” o �
 
 Una observación solo elimina un taxón cuando existe incompatibilidad explícita entre estados conocidos.
 
-Reglas conceptuales:
+Reglas implementadas:
 
 ```text
 expected vacío → neutral
-observed unknown → neutral
-observed not_observable → neutral
+observed vacío → neutral
+observed unknown/not_observable/not_applicable → neutral
 intersección(expected, observed) ≠ ∅ → compatible
 intersección(expected, observed) = ∅ → incompatibilidad explícita
 ```
@@ -160,17 +177,38 @@ La pregunta de interfaz puede estar asociada a un `CH-xxx`, pero no debe contene
 
 Para el piloto de seis especies, una estrategia simple es suficiente.
 
-La selección puede minimizar el peor caso de candidatos restantes y desempatar considerando:
+La implementación actual minimiza el peor caso de candidatos restantes y desempata considerando:
 
+- cantidad de especies en el grupo conocido más grande;
+- cantidad de candidatos con dato desconocido;
+- cantidad de grupos conocidos;
 - poder diagnóstico;
-- observabilidad;
-- costo;
-- seguridad;
-- dependencia fenológica.
+- observabilidad en imagen;
+- costo de observación;
+- seguridad de interacción;
+- orden estable por `characterId`.
 
 No se requiere un motor de reglas externo complejo mientras unas pocas funciones puras resuelvan el problema.
 
-## 10. BioCLIP
+## 10. Evidencia mínima de sesión
+
+El núcleo actual acepta evidencia simple por carácter:
+
+```js
+[
+  { characterId: 'CH-003', observedStates: ['serrado'], source: 'human' }
+]
+```
+
+o como objeto:
+
+```js
+{ 'CH-003': 'serrado' }
+```
+
+Esta evidencia es suficiente para probar compatibilidad, descarte de candidatos y selección del siguiente carácter. La persistencia formal de sesiones se implementa después.
+
+## 11. BioCLIP
 
 BioCLIP funciona como generador/priorizador de candidatos.
 
@@ -186,7 +224,7 @@ Sus scores no constituyen identificación definitiva ni evidencia botánica.
 
 La evidencia botánica debe poder corregir una especie verdadera que BioCLIP haya rankeado bajo.
 
-## 11. Modelos visuales auxiliares
+## 12. Modelos visuales auxiliares
 
 Los modelos visuales pueden observar caracteres concretos, no dictar directamente la especie.
 
@@ -204,7 +242,7 @@ NO_OBSERVABLE
 
 La procedencia, modelo, versión y evidencia de origen deben conservarse.
 
-## 12. Observación, evidencia e identificación
+## 13. Observación, evidencia e identificación
 
 La arquitectura debe distinguir:
 
@@ -217,7 +255,7 @@ La arquitectura debe distinguir:
 
 Una corrección posterior no debe borrar el proceso previo.
 
-## 13. Seguridad
+## 14. Seguridad
 
 La adquisición de evidencia prioriza métodos observacionales y no destructivos.
 
@@ -225,7 +263,7 @@ Mientras *Lithraea caustica* sea candidata, el sistema no debe pedir frotar, tri
 
 La seguridad prevalece sobre el valor diagnóstico.
 
-## 14. Offline-first
+## 15. Offline-first
 
 La lógica central de identificación debe poder ejecutarse sin servidor.
 
@@ -233,7 +271,7 @@ El motor debe poder probarse de forma independiente de UI, BioCLIP y modelos vis
 
 La app móvil utiliza Expo/React Native y prevé SQLite mediante `expo-sqlite` para persistencia local.
 
-## 15. Dirección de arte
+## 16. Dirección de arte
 
 La capa gráfica utiliza datos científicos sin mezclarlos con decisiones lúdicas.
 
@@ -251,21 +289,21 @@ data/characters/ — decisiones y assets lúdicos
 
 Una decisión de personaje no modifica conocimiento botánico.
 
-## 16. Componentes legacy
+Durante la próxima fase, Dirección de Arte no rediseña el canon base. Trabaja solo en derivados de personajes, blockouts de mapa y pruebas ambientales pequeñas.
+
+## 17. Componentes legacy
 
 Existen componentes experimentales anteriores a Master 2.0, incluidos adaptadores, lógica hardcodeada y claves fijas.
 
-No deben eliminarse hasta que el motor canónico y sus pruebas demuestren equivalencia funcional suficiente.
+No deben usarse para definir nuevas funciones canónicas. Se conservan por trazabilidad y comparación mientras los flujos nuevos cubren las funciones necesarias.
 
-Después de esa validación se realizará una retirada controlada del legado.
+## 18. Prioridad arquitectónica actual
 
-## 17. Prioridad arquitectónica actual
+Con Hito 15 cerrado, la siguiente responsabilidad técnica es Hito 16: extracción automática de caracteres botánicos concretos.
 
-Con Master 2.0, los JSON canónicos y las fichas derivadas ya cerrados, la siguiente responsabilidad es implementar el motor genérico de identificación sobre `data/botanical/`.
+Después vienen integración visión → caracteres → clave adaptativa, persistencia y validación end-to-end.
 
-Después vienen selección adaptativa, adquisición de evidencia, integración visual y retiro del legado.
-
-## 18. Criterio de simplicidad
+## 19. Criterio de simplicidad
 
 Árboris debe diseñarse para el piloto real de seis especies.
 

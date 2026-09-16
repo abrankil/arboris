@@ -20,6 +20,8 @@ data/botanical/   (8 JSON canónicos generados)
         ↓
 data/species/     (6 fichas completas generadas)
         ↓
+tools/canonical-identification/
+        ↓
 consumidores: identificación, interfaz, IA y dirección de arte
 ```
 
@@ -80,6 +82,8 @@ Estado operativo actual de Dirección de Arte:
 - Master Territorial: concepto arquitectónico, formato aún `OPEN`;
 - `PILOT-ENV-006`: abierto; los conteos ponderan presencia, la colocación exige observaciones territorializadas.
 
+Durante la próxima fase, Dirección de Arte no rediseña el canon base. Trabaja solo en derivados de personajes, blockouts de mapa y pruebas ambientales pequeñas. Toda colocación de especies en el mapa debe distinguir entre peso de presencia y evidencia territorial.
+
 La siguiente ejecución recomendada para mapas es:
 
 ```text
@@ -97,13 +101,15 @@ Orden recomendado:
 1. `README.md`.
 2. `docs/START_HERE.md`.
 3. `docs/ROADMAP.md` — estado real y siguiente trabajo.
-4. `docs/ARCHITECTURE.md` — límites entre datos, evidencia, motor e IA.
-5. `docs/DATA_MODEL.md` — semántica de las entidades.
-6. `docs/SPATIAL_MODEL.md` — vocabulario espacial y límites entre territorio, juego y arte cuando la tarea afecte mapas/escenarios.
-7. `data/botanical/metadata.json` — versión, SHA y contrato del Master exportado.
-8. `data/botanical/` y `data/species/` — datos canónicos derivados.
+4. `docs/HITO15_CLOSEOUT_2026-09-16.md` — cierre técnico del motor canónico.
+5. `docs/ARCHITECTURE.md` — límites entre datos, evidencia, motor e IA.
+6. `docs/DATA_MODEL.md` — semántica de las entidades.
+7. `docs/SPATIAL_MODEL.md` — vocabulario espacial y límites entre territorio, juego y arte cuando la tarea afecte mapas/escenarios.
+8. `data/botanical/metadata.json` — versión, SHA y contrato del Master exportado.
+9. `data/botanical/` y `data/species/` — datos canónicos derivados.
+10. `tools/canonical-identification/` — núcleo mínimo de identificación canónica.
 
-Estado técnico actual: Master 2.0, export canónico, validaciones, IDs y fichas por especie están cerrados. No implementar conocimiento botánico hardcodeado nuevo. La clave debe consumir conocimiento canónico, no mantener una segunda botánica.
+Estado técnico actual: Master 2.0, export canónico, validaciones, IDs, fichas por especie y motor canónico mínimo están cerrados. No implementar conocimiento botánico hardcodeado nuevo. La clave debe consumir conocimiento canónico, no mantener una segunda botánica.
 
 Para el frente espacial, no fijar todavía tamaño de celda, escala metro/celda, renderer, pathfinding ni formato final de mapas. Esas decisiones dependen de la validación de `IT-001 / MAP-001`.
 
@@ -130,7 +136,7 @@ Existen archivos históricos que todavía se conservan por trazabilidad o compat
 - `data/source/Fichas_especies_arboris.xlsx` — material editorial/descriptivo anterior.
 - `data/botanical/species_pilot.json` — export legacy `pilot-master-v0.1`.
 - `docs/BOTANICAL_KEY_PILOT.md` — referencia histórica/metodológica de la clave, no fuente botánica.
-- componentes legacy de clave/adaptador — pendientes de auditoría y retirada controlada en Hito 15.9.
+- componentes legacy de clave/adaptador — pendientes de auditoría y retirada controlada en hitos posteriores.
 
 Si cualquiera de estos elementos contradice Master 2.0, gobierna Master 2.0.
 
@@ -141,16 +147,24 @@ No confundir:
 - `data/botanical/characters.json` = **caracteres botánicos** (`CH-xxx`).
 - `data/characters/` = **personajes del juego** y sus assets.
 
-## 7. Comprobación de la capa botánica
+## 7. Comprobación de la capa botánica y motor
 
 Desde la raíz del repositorio:
 
 ```powershell
-python tools/botanical-data/export_master.py
-python tools/botanical-data/validate_master_export.py
-python tools/botanical-data/validate_species_ids.py
-python tools/botanical-data/build_species_data.py
-python tools/botanical-data/validate_species_data.py
+npm.cmd test
+```
+
+Este comando ejecuta:
+
+```text
+verify:botanical
+→ validación de Master 2.0 exportado
+→ validación de IDs canónicos
+→ validación de fichas canónicas por especie
+
+test:canonical-identification
+→ pruebas del motor canónico mínimo
 ```
 
 La salida canónica debe mantenerse reproducible. Las fichas de `data/species/` no se editan manualmente.
