@@ -142,18 +142,22 @@ Primero medir el elenco existente.
 
 ---
 
-### A3. Renombrar `ARBORIS_CHARACTER_CREATION_RULES.md`
+### A3. Migrar y deprecar `ARBORIS_CHARACTER_CREATION_RULES.md`
 
-Nombre recomendado:
+`CHARACTER_CREATION_WORKFLOW.md` ya existe como documento nuevo en esta rama. Por tanto, no ejecutar un rename directo que pueda sobrescribirlo.
 
-`CHARACTER_CREATION_WORKFLOW.md`
+Acción recomendada:
 
-El contenido debe reducirse al procedimiento de trabajo.
+1. comparar `ARBORIS_CHARACTER_CREATION_RULES.md` con `CHARACTER_CREATION_WORKFLOW.md`;
+2. migrar únicamente contenido todavía útil que no esté representado en el workflow nuevo;
+3. actualizar referencias entrantes para que apunten a `CHARACTER_CREATION_WORKFLOW.md`;
+4. marcar el archivo antiguo como deprecado durante una transición breve;
+5. eliminarlo solo cuando no existan referencias activas ni contenido único.
 
-Conservar:
+El workflow debe conservar:
 
 1. brief mínimo;
-2. consulta de evidencia;
+2. consulta de evidencia o referencias;
 3. definición de rasgos obligatorios;
 4. propuesta;
 5. comparación con canon;
@@ -163,105 +167,44 @@ Conservar:
 9. integración;
 10. registro.
 
-Eliminar del workflow:
+Eliminar del workflow cualquier duplicación innecesaria de:
 
 - listado completo del elenco vigente;
-- contrato técnico repetido del `ART_STYLE_GUIDE`;
+- contrato técnico detallado del `ART_STYLE_GUIDE`;
 - descripciones individuales extensas.
 
 En su lugar enlazar:
 
-- `CHARACTER_DESIGN_STATUS.md`
-- `data/characters/index.json`
+- `CHARACTER_DESIGN_STATUS.md`;
+- `data/characters/index.json`;
 - fichas individuales.
 
 ---
 
-### A4. Crear `docs/CHARACTER_TEMPLATE.md`
+### A4. `docs/CHARACTER_TEMPLATE.md`
 
-Esta será la plantilla estándar para todo nuevo personaje.
+La plantilla estándar ya existe en esta rama. Debe mantenerse como única fuente para la estructura de una ficha nueva.
 
-Estructura propuesta:
+No duplicar aquí su contenido completo. El plan solo exige que la plantilla cubra:
 
-```markdown
-# [Nombre personaje]
+- identidad y `characterType`;
+- versionado;
+- evidencia/referencias diferenciadas para personajes-especie y auxiliares;
+- rasgos obligatorios;
+- identidad gráfica y rostro;
+- elementos secundarios;
+- restricciones;
+- canon;
+- estados por atributo;
+- derivados;
+- geometría futura;
+- historial.
 
-## Identidad
-speciesId:
-speciesCommonName:
-characterName:
-scientificName:
-characterType: species | support
+`speciesId`, `speciesCommonName` y `scientificName` son obligatorios solo para `characterType: species`; en auxiliares deben figurar como `N/A`.
 
-## Estado
-designVersion:
-spriteVersion:
-technicalRevision:
+`gameplayRole` usa una única convención en minúsculas: `open | none | approved`, y debe permanecer `open` mientras no exista una mecánica aprobada.
 
-## Evidencia botánica
-- fuentes:
-- fotos:
-- variación observada:
-
-## Rasgos botánicos obligatorios
-- silueta:
-- margen:
-- ápice:
-- nervaduras:
-- color:
-- textura:
-- estructuras reproductivas:
-
-## Identidad gráfica
-- rasgo visual principal:
-- forma de lectura:
-- paleta:
-- asimetrías:
-- gesto base:
-
-## Rostro
-- posición:
-- tamaño relativo:
-- variantes permitidas:
-
-## Elementos secundarios
-- fruto/flor/cápsula:
-- relación espacial:
-- prioridad visual:
-- función lúdica: OPEN / NONE / APPROVED
-
-## Restricciones
-- no hacer:
-- rasgos que no deben simplificarse:
-
-## Canon
-masterSprite:
-sourceEditable:
-sha256:
-
-## Estados por atributo
-morphology:
-palette:
-face:
-companion:
-spriteCleanup:
-animation:
-gameplayRole:
-
-## Derivados
-- gallery:
-- discovery:
-- gameplay:
-- promotional:
-
-## Historial
-- fecha:
-- cambio:
-- responsable:
-```
-
-Importante:
-`gameplayRole` debe permanecer `OPEN` mientras no exista una mecánica aprobada.
+Ver [`CHARACTER_TEMPLATE.md`](CHARACTER_TEMPLATE.md) para la estructura vigente.
 
 ---
 
@@ -320,6 +263,13 @@ Añadir al inicio:
 > Documento histórico de consolidación. No es fuente normativa vigente. El canon operativo está definido por `data/characters/index.json`, las fichas individuales y `CHARACTER_DESIGN_STATUS.md`.
 
 No mantenerlo actualizado después del refactor.
+
+Antes de renombrar o retirar el nombre anterior:
+
+1. buscar todas las referencias a `CHARACTER_COLLECTION_FINAL.md` en `README.md`, `docs/`, scripts y cualquier otro archivo textual;
+2. actualizar esos enlaces al nuevo snapshot;
+3. verificar que no queden enlaces rotos;
+4. recién entonces completar el cambio de nombre.
 
 ---
 
@@ -401,7 +351,7 @@ Añadir al workflow:
 ¿Se diferencia del elenco por la silueta?
 
 #### Botanical cue test
-¿Siguen visibles los rasgos botánicos seleccionados como esenciales?
+¿Siguen visibles los rasgos botánicos seleccionados como esenciales? Para personajes auxiliares, sustituir por la verificación de sus rasgos materiales/visuales obligatorios.
 
 #### Thumbnail test
 ¿Funciona en tamaño de colección/UI?
@@ -501,9 +451,9 @@ docs: clarify character documentation responsibilities
 
 - actualizar `GRAPHIC_DIRECTION.md`;
 - añadir mapa documental;
-- renombrar reglas a workflow;
-- crear `CHARACTER_TEMPLATE.md`;
-- deprecar/renombrar snapshot.
+- migrar contenido único desde las reglas antiguas al workflow y actualizar referencias;
+- consolidar `CHARACTER_TEMPLATE.md` como plantilla única;
+- preparar el snapshot histórico y actualizar enlaces antes de cambiar su nombre.
 
 No tocar sprites ni JSON.
 
