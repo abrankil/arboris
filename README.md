@@ -201,6 +201,7 @@ La dirección gráfica y el trabajo de arte tienen documentación propia y no de
 Comenzar por:
 
 - [Dirección gráfica y método de trabajo](docs/GRAPHIC_DIRECTION.md)
+- [Auditoría y decisiones de Dirección de Arte](docs/ART_DIRECTION_AUDIT_2026-09-16.md)
 - [Guía unificada de arte](docs/ART_STYLE_GUIDE.md)
 - [Flujo de creación de personajes](docs/CHARACTER_CREATION_WORKFLOW.md)
 - [Plantilla de personajes](docs/CHARACTER_TEMPLATE.md)
