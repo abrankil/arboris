@@ -2,363 +2,379 @@
 
 ## Estado
 
-Protocolo inicial para levantar evidencia territorial y convertirla en Unidades Espaciales, Contratos Jugables, blockouts y pruebas visuales.
+Protocolo inicial para levantar evidencia territorial y convertirla en Unidades Espaciales, Instancias Territoriales, Contratos Jugables, blockouts y pruebas visuales.
 
-Depende del modelo conceptual definido en `docs/SPATIAL_MODEL.md`.
+Depende de `docs/SPATIAL_MODEL.md` y debe mantener separación entre evidencia, síntesis territorial, jugabilidad y arte.
 
 No implementa mapas, motores, assets ni datos botánicos nuevos.
 
 ## Objetivo
 
-Establecer un flujo reproducible para transformar un territorio real en un mapa jugable reconocible de Árboris.
-
-El flujo general es:
+Establecer un flujo reproducible para transformar un lugar real en una representación jugable reconocible sin confundir fuente, interpretación y resultado.
 
 ```text
 territorio real
-→ evidencia
-→ Unidad Espacial
+→ evidencia registrada
+→ Unidades Espaciales
 → Instancia Territorial
 → Contrato Jugable
-→ Celdas Espaciales / blockout
+→ Modelo Espacial / blockout
 → Dirección de Arte
-→ prototipo visual
+→ prototipo
 → evaluación
 ```
 
-## Principio de trabajo
+## Regla de entrada
 
-No empezar por una imagen final. Empezar por el lugar.
+No empezar por una imagen final. Empezar por un Lugar y por la evidencia disponible.
 
 ```text
 lugar reconocible
-→ rasgos que lo hacen reconocible
-→ estructura de recorrido
-→ abstracción jugable
+→ rasgos ancla
+→ relaciones espaciales
+→ destilación territorial
+→ contrato jugable
+→ blockout
 → arte
 ```
 
-El mapa debe conservar identidad territorial, no copiar el territorio metro por metro.
+El objetivo no es copiar el lugar metro por metro, sino conservar su identidad espacial y experiencial.
 
-## 1. Seleccionar el lugar
-
-Elegir un Lugar dentro del Sector.
+## 1. Delimitar el Lugar
 
 Para el piloto:
 
 ```text
-Paisaje:
-  Precordillera de Santiago
-
-Sector:
-  Fundo Los Nogales / El Arrayán
+Paisaje: Precordillera de Santiago
+Sector: Fundo Los Nogales
 ```
 
-El Lugar seleccionado debe cumplir al menos tres condiciones:
+Seleccionar un Lugar acotado y reconocible. Debe:
 
-- ser reconocible para alguien que lo haya visitado;
-- tener una estructura espacial comprensible;
-- poder traducirse a una función jugable simple.
+- poder describirse como una experiencia espacial coherente;
+- tener rasgos ancla distinguibles;
+- permitir una función jugable simple;
+- disponer o admitir levantamiento de evidencia.
 
-No elegir todavía áreas demasiado extensas.
+El primer Lugar candidato es el **Acceso Principal**.
 
-## 2. Registrar evidencia
-
-Cada evidencia debe indicar procedencia y confianza.
+## 2. Registrar evidencia con procedencia
 
 Tipos iniciales:
 
-- evidencia topográfica: Google Earth / Google Earth Pro;
-- evidencia visual: fotografías reales;
-- evidencia experiencial: memoria de visitante;
-- evidencia botánica: Master Botánico 2.0 y derivados;
-- evidencia ambiental: referencias ambientales `core`, `contextual` o `comparative`.
+- `topographic`: Google Earth/Google Earth Pro, DEM o mediciones;
+- `visual`: fotografías reales;
+- `experiential`: recuerdo declarado de una persona que ha visitado el lugar;
+- `botanical`: Master Botánico 2.0 y derivados;
+- `environmental`: referencias `core`, `contextual` o `comparative` del protocolo ambiental.
 
-Una evidencia no se convierte automáticamente en regla. Primero se registra, luego se contrasta, después se destila.
+Cada registro debe declarar, cuando corresponda:
 
-## 3. Capturas mínimas en Google Earth
+```text
+sourceType
+sourceRef
+whatItSupports
+confidence
+observedOrDeclared
+pendingCorroboration
+notes
+```
 
-Para una Unidad Espacial o Lugar candidato, obtener idealmente:
+Reglas:
+
+- evidencia ≠ regla;
+- imagen generada ≠ evidencia territorial;
+- recuerdo declarado ≠ hecho observado hasta corroborarlo cuando sea posible;
+- vacío/unknown es preferible a inventar;
+- el Master Botánico no se modifica desde este flujo.
+
+## 3. Captura topográfica en Google Earth
+
+Para cada Lugar o Unidad Espacial candidata, obtener idealmente:
 
 ```text
 GE-01 vista superior general
-GE-02 vista oblicua desde entrada
-GE-03 vista oblicua hacia salida
-GE-04 detalle de ruta o tramo
-GE-05 vista amplia del contexto territorial
+GE-02 vista oblicua desde la entrada
+GE-03 vista oblicua hacia la salida
+GE-04 detalle del recorrido
+GE-05 contexto territorial amplio
 ```
 
-Registrar para cada captura:
+Registrar:
 
-- fecha de captura;
+- fecha;
 - orientación aproximada;
-- qué se ve;
-- qué decisión podría informar;
-- qué no permite concluir.
+- escala/altura de cámara si resulta útil;
+- rasgos visibles;
+- decisiones que puede informar;
+- limitaciones de la captura.
 
-Google Earth se usa como evidencia topográfica, no como arte final ni como fuente canónica única.
+Google Earth sirve para topografía, relaciones espaciales, orientación y contexto. No es arte final ni fuente canónica única.
 
-## 4. Memoria de visitante
+## 4. Evidencia experiencial
 
-La memoria de una persona que conoce el lugar es evidencia experiencial válida para reconocibilidad.
-
-Debe registrarse separando:
+Registrar por separado:
 
 ```text
 hecho recordado
-interpretación
-confianza
-pendiente de respaldo
+graduación de confianza
+interpretación posterior
+pendiente de corroboración
 ```
 
-Ejemplo:
+Ejemplo inicial:
 
 ```text
 Hecho recordado:
-  La entrada principal comienza después de un puente de madera que cruza el Estero El Arrayán.
+  El acceso comienza después de un puente de madera sobre el Estero El Arrayán.
 
 Interpretación:
-  El puente funciona como transición exterior/interior.
+  El puente funciona como umbral de entrada.
 
-Pendiente:
-  respaldar con fotografía o captura topográfica cuando sea posible.
+Estado:
+  declared / pending corroboration
 ```
+
+La interpretación nunca debe mezclarse con el hecho recordado.
 
 ## 5. Definir Unidades Espaciales
 
-Una Unidad Espacial no es un tile ni un objeto decorativo. Es un fragmento del lugar que el jugador puede reconocer como una unidad de experiencia.
+Una Unidad Espacial es una unidad reconocible del recorrido, no un tile ni un objeto decorativo.
 
-Para cada Unidad Espacial registrar:
+Campos conceptuales mínimos:
 
 ```text
 id
 nombre
-tipo
-rasgos reconocibles
-evidencia disponible
-función real
-función experiencial
-función jugable
-relaciones con otras unidades
+lugarPadre
+rasgosAncla
+relacionesEspaciales
+evidencia
+funcionRecorridoReal
+funcionJugablePropuesta
+decisionDestilacion
 estado
 ```
 
 Estados iniciales:
 
-- `proposed` — propuesta a partir de evidencia inicial;
-- `observed` — respaldada por evidencia visual/topográfica suficiente;
-- `modeled` — traducida a Contrato Jugable y blockout;
-- `tested` — usada en prototipo visual;
-- `approved` — aprobada como regla o base de producción.
+- `proposed` — propuesta basada en evidencia inicial o recuerdo declarado;
+- `observed` — corroborada suficientemente por evidencia territorial;
+- `modeled` — traducida a Instancia/Contrato/Blockout;
+- `tested` — usada en prototipo;
+- `approved` — aceptada para producción o como regla estable.
+
+No promover a `observed` solo porque una descripción resulte plausible.
 
 ## 6. Definir Instancia Territorial
 
-Una Instancia Territorial es la versión jugable de una o más Unidades Espaciales bajo una condición concreta.
+La Instancia Territorial es una versión de juego de una o más Unidades Espaciales bajo un objetivo y condición concretos.
 
-Registrar:
+Usar prefijo `IT-`.
+
+Campos mínimos:
 
 ```text
 id
 nombre
-unidades espaciales incluidas
-condición o variante
-objetivo de prueba
+unidadesEspaciales
+condicion
+objetivoPrueba
 alcance
-no objetivos
+noObjetivos
 ```
 
 Ejemplo:
 
 ```text
-MAP-001 — Acceso Principal
-Incluye:
-  UE-001 Puente de madera
-  UE-002 Portal / reja metálica antigua
-  UE-003 Casa del conserje
-  UE-004 Sendero inicial
-  UE-005 Claro de picnic
-
-Condición:
-  primera prueba de entrada / transición / tutorial
+IT-001 — Acceso Principal / entrada inicial
 ```
+
+`MAP-*` queda reservado para blockouts, mapas o prototipos derivados.
 
 ## 7. Definir Contrato Jugable
 
-El Contrato Jugable separa topología y flujo.
+Separar tres cosas:
 
-Registrar:
+### Topología
+Solo categorías ya definidas en `MAP_TOPOLOGY_SYSTEM.md`.
+
+### Roles de conexión
+`none`, `primary`, `secondary`, `return`, `conditional`.
+
+### Flujo
+Describe cómo se vive el recorrido: entrada, transición, ascenso, descenso, exploración, descubrimiento, descanso, tutorial, etc.
+
+Campos mínimos:
 
 ```text
-topología
+topologia
+conexiones
 flujo
 entrada
 salida
-conexiones cerradas
-ruta principal
-nodos de decisión
+rutaPrincipal
 bloqueos
+nodosDecision
 interacciones
-criterio de falla
+criterioFalla
 ```
 
-Para el primer caso:
+Para `IT-001` el contrato inicial es provisional:
 
 ```text
-topología: corridor
-flujo: entrada / transición / tutorial
+topologia: corridor
+flujo: entrada / transicion / tutorial
 entrada: puente / portal
 salida: claro de picnic
-rutas laterales: ninguna en la primera prueba
 ```
 
 ## 8. Traducir a Celdas Espaciales
 
-La Celda Espacial es técnica. Debe permitir construir el blockout y representar altura, transitabilidad y bloqueos.
+Las Celdas Espaciales son implementación técnica del blockout, no descripción del lugar real.
 
-Registrar solo lo necesario para la prueba:
+Para el primer prototipo pueden ser cúbicas/prismáticas para facilitar altura y navegación.
+
+Registrar solo lo necesario:
 
 ```text
 x
 y
-z / altura relativa
+zRelative
 walkable
-terrainType
-blockerType
 edgeConnection
+blockerType
 interactionPoint
 notes
 ```
 
-No fijar todavía tamaño real de celda ni escala metro/celda. Esa decisión queda abierta hasta probar prototipos.
+Campos ambientales adicionales solo se agregan si son necesarios para una decisión concreta y están respaldados.
 
-## 9. Crear blockout
+No fijar aún tamaño de celda ni equivalencia metro/celda.
 
-El blockout es la prueba estructural antes del arte.
+## 9. Construir blockout
 
-Debe mostrar:
+El blockout debe mostrar:
 
-- ruta caminable;
-- bloqueos;
+- entrada y salida;
+- conectividad;
+- continuidad de ruta;
 - alturas relativas;
-- entrada;
-- salida;
-- bordes conectados o cerrados.
+- bloqueos;
+- tiles/celdas transitables;
+- nodos de decisión si existen.
 
-El blockout puede ser simple. No debe ser bonito.
+Debe ser determinista y simple.
 
 Regla dura:
 
 ```text
-si el prototipo visual cambia la conectividad del blockout, falla.
+si una estilizacion altera la conectividad obligatoria, la prueba falla
 ```
 
-## 10. Pasar a Dirección de Arte
+## 10. Paso a Dirección de Arte
 
 Dirección de Arte recibe:
 
 - Lugar;
-- Unidades Espaciales;
-- evidencia;
+- Unidades Espaciales y estado;
+- evidencias y confianza;
+- decisiones de Destilación Territorial;
+- Instancia Territorial;
 - Contrato Jugable;
-- blockout;
-- restricciones.
+- blockout.
 
-Debe decidir:
+Dirección de Arte define cómo traducir visualmente altura, bloqueos, sendero, fondo, materiales, vegetación y atmósfera, sin convertir hipótesis territoriales en hechos.
 
-- cómo se ve la altura;
-- cómo se ven los bloqueos;
-- cómo se lee la ruta;
-- qué elementos hacen reconocible el lugar;
-- qué queda como fondo;
-- qué queda como plano jugable;
-- qué queda como foreground.
+La primera salida es **prototipo visual**, no asset final.
 
-La salida inicial es un prototipo visual, no un asset final.
-
-## 11. Evaluación del prototipo
+## 11. Evaluación
 
 Ficha mínima:
 
 ```text
 testId:
-instanciaTerritorial:
-topología:
-flujo:
-conectividadPreservada: sí/no
-conexionesInventadas: sí/no
-rutaPrincipalLegible: sí/no
-reconocibilidadTerritorial: baja/media/alta
-coherenciaAmbiental: baja/media/alta
-legibilidadJugable: baja/media/alta
-usoComoReferenciaProducción: no/parcial/sí
-decisión: pass/revise/fail
+instanceId:
+mapId:
+topology:
+flow:
+connectivityPreserved: yes/no
+inventedConnections: yes/no
+mainRouteReadable: yes/no
+territorialRecognizability: low/medium/high
+evidenceFaithfulness: low/medium/high
+environmentalCoherence: low/medium/high
+gameplayLegibility: low/medium/high
+productionReferenceUse: no/partial/yes
+decision: pass/revise/fail
 ```
 
 Criterios:
 
-- `fail` si altera conectividad obligatoria;
-- `revise` si mantiene conectividad pero se siente genérico;
-- `pass` si mantiene conectividad, conserva rasgos reconocibles y permite continuar a otra prueba.
+- `fail`: cambia conectividad o contradice rasgos ancla obligatorios;
+- `revise`: estructura correcta pero reconocibilidad insuficiente/genérica;
+- `pass`: conserva estructura y rasgos ancla y permite avanzar a una prueba más precisa.
 
-## 12. Primer caso: Acceso Principal
+## 12. Caso inicial — Acceso Principal
 
-El primer ejercicio del protocolo será:
-
-```text
-MAP-001 — Acceso Principal
-```
-
-Secuencia experiencial registrada:
+La información experiencial inicial se registra como `declared / pending corroboration`:
 
 ```text
 exterior
 → puente de madera sobre Estero El Arrayán
-→ reja metálica antigua abierta
+→ portal con reja metálica antigua abierta
 → casa del conserje a la izquierda
-→ sendero único
+→ sendero inicial único
 → claro de picnic
 ```
 
-Modelo inicial:
+Unidades Espaciales propuestas:
 
 ```text
-UE-001 Puente de madera
-UE-002 Portal / reja metálica antigua
+UE-001 Puente de acceso
+UE-002 Portal / reja de acceso
 UE-003 Casa del conserje
 UE-004 Sendero inicial
 UE-005 Claro de picnic
 ```
 
-Contrato inicial:
+Instancia:
 
 ```text
-topología: corridor
-flujo: entrada / transición / tutorial
+IT-001 Acceso Principal — entrada inicial
 ```
 
-## 13. Límites actuales
+Primer derivado de prueba:
+
+```text
+MAP-001 — blockout/prototipo del Acceso Principal
+```
+
+## 13. Paquete mínimo para iniciar MAP-001
+
+Reunir, cuando sea posible:
+
+- vista superior del acceso;
+- vista oblicua desde el puente hacia el portal;
+- fotografía/captura del puente;
+- fotografía/captura de la reja y soportes;
+- fotografía/captura de la casa del conserje;
+- fotografía/captura del sendero inicial;
+- fotografía/captura del claro de picnic;
+- notas de orientación y relaciones espaciales.
+
+No es obligatorio tener todo antes de empezar el blockout, pero cualquier elemento no corroborado debe permanecer `proposed`/`OPEN`.
+
+## 14. Límites
 
 Este protocolo no autoriza todavía:
 
+- crear un Master Territorial definitivo;
+- cerrar tamaño de celda;
 - cerrar escala metro/celda;
-- declarar un mapa final;
-- fijar pathfinding;
-- elegir renderer;
-- modificar el Master Botánico;
-- cerrar microhábitats de especies;
-- agregar especies por intuición;
-- convertir capturas de Google Earth en assets finales;
-- usar imágenes generadas como evidencia territorial.
-
-## 14. Próximo paso operativo
-
-Para iniciar `MAP-001`, reunir:
-
-- captura superior del acceso;
-- captura oblicua desde el puente hacia la reja;
-- captura o foto de la reja y pilares de piedra;
-- captura o foto de la casa del conserje;
-- captura o foto del sendero hacia el claro;
-- captura o foto del claro de picnic.
-
-Con esa evidencia se podrá dibujar el primer blockout y probar una versión visual del corredor de acceso.
+- fijar renderer/pathfinding;
+- declarar mapa final;
+- usar Google Earth como textura o asset final;
+- usar imágenes generadas como evidencia;
+- cerrar distribución de especies sin evidencia `core` territorializada;
+- modificar el Master Botánico desde Dirección de Arte.
