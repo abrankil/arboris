@@ -32,28 +32,43 @@ Orden recomendado:
 1. `README.md` — visión general del producto.
 2. `docs/GRAPHIC_DIRECTION.md` — autoridad, método y flujo gráfico.
 3. `docs/ART_DIRECTION_AUDIT_2026-09-16.md` — estado del departamento, decisiones concretas y siguiente ejecución.
-4. `data/species/` — ficha completa de cada una de las seis especies piloto.
-5. `species/<especie>/photos/` — fotografías reales disponibles.
-6. `data/characters/` — canon gráfico/jugable y assets de personajes.
-7. `docs/ART_STYLE_GUIDE.md` — contrato visual y técnico.
+4. `docs/SPATIAL_MODEL.md` — modelo conceptual para transformar territorio real en espacio jugable.
+5. `docs/TERRITORIAL_MAPPING_PROTOCOL.md` — procedimiento para levantar evidencia, definir Unidades Espaciales y construir blockouts.
+6. `data/species/` — ficha completa de cada una de las seis especies piloto.
+7. `species/<especie>/photos/` — fotografías reales disponibles.
+8. `data/characters/` — canon gráfico/jugable y assets de personajes.
+9. `docs/ART_STYLE_GUIDE.md` — contrato visual y técnico.
 
 Modelo simple de trabajo:
 
 ```text
-qué es real → qué se ve → qué decido como arte → qué produzco → qué valido
+qué es real → qué evidencia tengo → qué conservo → cómo se juega → cómo se ve → qué valido
 ```
 
 Para una decisión morfológica, consultar primero la ficha de `data/species/` y las fotografías reales. Si se necesita detalle de fuentes, estados o trazabilidad, revisar `data/botanical/`.
 
 Una decisión artística no modifica la botánica. Un sprite tampoco constituye evidencia científica.
 
-Regla de la próxima fase:
+Para mapas, aplicar estas reglas:
 
 ```text
-Durante la próxima fase, Dirección de Arte no rediseña el canon base.
-Trabaja solo en derivados de personajes, blockouts de mapa y pruebas ambientales pequeñas.
-Toda colocación de especies en el mapa debe distinguir entre peso de presencia y evidencia territorial.
+territorio real
+→ evidencia registrada
+→ Unidad Espacial
+→ Instancia Territorial
+→ Contrato Jugable
+→ blockout
+→ Dirección de Arte
 ```
+
+No confundir:
+
+- Unidad Espacial = lugar reconocible del recorrido;
+- Celda Espacial = implementación técnica;
+- Instancia Territorial = versión jugable de una o más Unidades Espaciales;
+- `MAP-*` = blockout/mapa/prototipo derivado;
+- topología = conectividad;
+- flujo = experiencia de movimiento.
 
 Estado operativo actual de Dirección de Arte:
 
@@ -61,12 +76,18 @@ Estado operativo actual de Dirección de Arte:
 - derivados de personajes: pendientes;
 - escenarios: marco definido, evidencia `core` pendiente;
 - topología de mapas: sistema definido, pruebas de blockout pendientes;
+- modelo espacial: consolidado conceptualmente, implementación pendiente;
+- Master Territorial: concepto arquitectónico, formato aún `OPEN`;
 - `PILOT-ENV-006`: abierto; los conteos ponderan presencia, la colocación exige observaciones territorializadas.
 
-La siguiente ejecución recomendada es una prueba acotada:
+La siguiente ejecución recomendada para mapas es:
 
 ```text
-primer derivado de personaje + TEST-MAP-01 corridor ambiental
+IT-001 Acceso Principal
+→ corroborar evidencia
+→ MAP-001 blockout corridor
+→ prototipo visual
+→ pass / revise / fail
 ```
 
 ## 3. Si eres otra IA / desarrollo
@@ -78,12 +99,13 @@ Orden recomendado:
 3. `docs/ROADMAP.md` — estado real y siguiente trabajo.
 4. `docs/ARCHITECTURE.md` — límites entre datos, evidencia, motor e IA.
 5. `docs/DATA_MODEL.md` — semántica de las entidades.
-6. `data/botanical/metadata.json` — versión, SHA y contrato del Master exportado.
-7. `data/botanical/` y `data/species/` — datos canónicos derivados.
+6. `docs/SPATIAL_MODEL.md` — vocabulario espacial y límites entre territorio, juego y arte cuando la tarea afecte mapas/escenarios.
+7. `data/botanical/metadata.json` — versión, SHA y contrato del Master exportado.
+8. `data/botanical/` y `data/species/` — datos canónicos derivados.
 
-Estado técnico actual: Master 2.0, export canónico, validaciones, IDs y fichas por especie están cerrados. La siguiente etapa del Hito 15 es **15.5 — motor genérico de identificación**.
+Estado técnico actual: Master 2.0, export canónico, validaciones, IDs y fichas por especie están cerrados. No implementar conocimiento botánico hardcodeado nuevo. La clave debe consumir conocimiento canónico, no mantener una segunda botánica.
 
-No implementar conocimiento botánico hardcodeado nuevo. La clave debe consumir conocimiento canónico, no mantener una segunda botánica.
+Para el frente espacial, no fijar todavía tamaño de celda, escala metro/celda, renderer, pathfinding ni formato final de mapas. Esas decisiones dependen de la validación de `IT-001 / MAP-001`.
 
 ## 4. Datos validados del piloto
 

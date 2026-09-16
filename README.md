@@ -224,6 +224,8 @@ La antigua [colección final de personajes](docs/CHARACTER_COLLECTION_FINAL.md) 
 
 La construcción de escenarios y mapas conectados se documenta en:
 
+- [Modelo espacial](docs/SPATIAL_MODEL.md)
+- [Protocolo de mapeo territorial](docs/TERRITORIAL_MAPPING_PROTOCOL.md)
 - [Protocolo de referencias ambientales](docs/ENVIRONMENT_REFERENCE_PROTOCOL.md)
 - [Dirección de arte de escenarios](docs/ENVIRONMENT_ART_DIRECTION.md)
 - [Sistema de topología y conectividad de mapas](docs/MAP_TOPOLOGY_SYSTEM.md)
