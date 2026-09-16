@@ -6,6 +6,8 @@ Definir cómo capturar, localizar, catalogar y usar referencias fotográficas pa
 
 El sistema debe permitir construir un manual de dirección de arte territorialmente coherente para la precordillera de Santiago y el bosque esclerófilo, manteniendo explícitos los límites geográficos, altitudinales y estacionales de cada referencia.
 
+Para el primer piloto, existe además un anclaje territorial explícito en Los Nogales. La fuente botánica maestra se encuentra en `data/source/Base_botanica_Pokedex_flora_Master.xlsx` y corresponde al levantamiento de flora nativa del Fundo Los Nogales. Mientras esa planilla está siendo mejorada por Alejandra, este protocolo solo registra su función y su vínculo territorial; no modifica ni reinterpreta su contenido.
+
 ## 1. Fuentes aceptadas
 
 ### Fotografías de campo
@@ -42,6 +44,21 @@ Pueden utilizarse para reforzar contexto ecológico, distribución, geomorfolog�
 
 Cuando exista una clasificación oficial aplicable, registrar `ecosystemId`, `ecosystemName` y `ecosystemSource` en vez de usar únicamente etiquetas amplias como “bosque esclerófilo”.
 
+### Fuente botánica maestra del piloto
+
+`data/source/Base_botanica_Pokedex_flora_Master.xlsx` se reconoce como fuente botánica maestra del primer piloto y como vínculo documental con el levantamiento de flora nativa del Fundo Los Nogales.
+
+Su función en este sistema es aportar trazabilidad territorial y botánica. No sustituye una referencia ambiental ni una fotografía de terreno.
+
+Las referencias del manifest pueden vincularse a esta fuente mediante `botanicalSourceRef`.
+
+Mientras la planilla maestra esté en proceso de mejora:
+
+- no modificarla desde el flujo ambiental;
+- no inferir datos ambientales que la planilla no declare explícitamente;
+- no copiar campos no verificados desde versiones intermedias;
+- conservar su ruta como referencia estable hasta que el equipo confirme una nueva versión o estructura.
+
 ### Referencias artísticas
 
 Se usan para estudiar composición, atmósfera, profundidad, iluminación o lenguaje visual. Deben marcarse como `sourceType=art` y no respaldan afirmaciones ecológicas.
@@ -50,13 +67,15 @@ Se usan para estudiar composición, atmósfera, profundidad, iluminación o leng
 
 Cada referencia recibe un `referenceId` único y una fila en `docs/references/environments/manifest.csv`.
 
-El manifest distingue cinco grupos de información:
+El manifest distingue seis grupos de información.
 
 ### A. Identidad y procedencia
 
 - `referenceId`;
 - `seriesId`;
 - `sourceType`;
+- `referenceKind`;
+- `sourceTitle`;
 - `evidenceRole`;
 - `photographerOrAuthor`;
 - `rightsHolder`;
@@ -66,7 +85,26 @@ El manifest distingue cinco grupos de información:
 - `dateAccessed`;
 - `dateTaken`.
 
-### B. Contexto espacial y temporal
+### B. Relación con el piloto
+
+- `pilotRelevance`;
+- `botanicalSourceRef`.
+
+Valores iniciales de `pilotRelevance`:
+
+- `core` — territorio núcleo del piloto o referencia directamente ligada a la fuente botánica del Fundo Los Nogales;
+- `contextual` — contexto territorial inmediato que ayuda a interpretar el área núcleo, especialmente cuenca del Arrayán y precordillera cercana;
+- `comparative` — referencia externa usada para contrastar patrones regionales, ecosistémicos, geomorfológicos o atmosféricos.
+
+`pilotRelevance` no expresa calidad científica. Expresa pertinencia territorial para el primer piloto.
+
+`botanicalSourceRef` debe usarse cuando exista un vínculo documental explícito con la fuente botánica maestra. Para el piloto actual, el valor canónico es:
+
+`data/source/Base_botanica_Pokedex_flora_Master.xlsx`
+
+No asignar ese vínculo por simple proximidad geográfica si la referencia no corresponde al mismo territorio o levantamiento.
+
+### C. Contexto espacial y temporal
 
 - `location`;
 - `protectedArea`;
@@ -82,7 +120,7 @@ El manifest distingue cinco grupos de información:
 
 `cameraBearing` y `slopeAspect` son campos distintos: el primero indica hacia dónde mira la fotografía; el segundo describe la exposición de la superficie o ladera documentada. No deben confundirse.
 
-### C. Contexto ecológico y físico
+### D. Contexto ecológico y físico
 
 - `environmentType`;
 - `ecosystemId`;
@@ -102,7 +140,7 @@ El manifest distingue cinco grupos de información:
 
 `speciesEvidence` debe indicar la naturaleza de la identificación, por ejemplo `confirmed`, `sourceReported`, `visuallyProbable` o `unknown`. Una especie mencionada en una descripción de página no se considera automáticamente confirmada como visible en cada fotografía.
 
-### D. Lectura y uso de la referencia
+### E. Lectura y uso de la referencia
 
 - `observedNotes` — hechos directamente visibles o documentados;
 - `interpretedNotes` — hipótesis o lectura contextual;
@@ -110,7 +148,7 @@ El manifest distingue cinco grupos de información:
 - `artUse` — qué puede orientar visualmente;
 - `reviewConfidence` — confianza de la revisión.
 
-### E. Gestión
+### F. Gestión
 
 - `localAssetPath`;
 - `status`;
@@ -168,40 +206,44 @@ Las primeras categorías de trabajo son:
 
 Se pueden ampliar cuando el corpus lo justifique. Evitar crear categorías por una sola imagen aislada.
 
-## 7. Áreas de referencia prioritarias
+## 7. Jerarquía territorial del primer piloto
 
-### Yerba Loca — precordillera de Santiago
+### Fundo Los Nogales / Los Nogales — núcleo
 
-Yerba Loca se adopta como **área de referencia prioritaria** para estudiar visualmente la precordillera de Santiago, no como plantilla universal para todo el bosque esclerófilo chileno.
+Los Nogales se considera el **territorio núcleo del primer piloto** porque el levantamiento botánico que origina la selección de especies piloto proviene del Fundo Los Nogales y se conserva en la fuente maestra `data/source/Base_botanica_Pokedex_flora_Master.xlsx`.
 
-La información institucional disponible la describe como un territorio montañoso del valle del estero Yerba Loca, en Lo Barnechea, con un gradiente aproximado entre 1.300 y 5.340 m s. n. m. y con el objetivo explícito de conservar la ecología original de la precordillera. Dentro del área aparecen, entre otros, el bosque esclerófilo mediterráneo andino de `Quillaja saponaria - Lithraea caustica`, el bosque esclerófilo andino de `Kageneckia angustifolia / Guindilia trinervis`, matorrales y herbazales de altitud, vegas, afloramientos rocosos, nieve y glaciares.
+Las referencias ambientales del Fundo Los Nogales o de sectores inequívocamente vinculados a ese levantamiento deben usar:
 
-Por esta amplitud altitudinal, **“Yerba Loca” no debe funcionar como una sola categoría visual**. Toda referencia del área debe registrar altitud aproximada, tipo de ambiente y, cuando corresponda, ecosistema oficial. Esto permite distinguir precordillera esclerófila baja/media, transición altitudinal y ambientes de alta montaña.
+- `pilotRelevance=core`;
+- `botanicalSourceRef=data/source/Base_botanica_Pokedex_flora_Master.xlsx`.
 
-Para el piloto de Árboris, las referencias de Yerba Loca son especialmente valiosas para:
+Esto permite que botánica, identificación y dirección de arte compartan una misma procedencia territorial sin convertir una fuente botánica en evidencia visual de escenario.
 
-- relación entre ladera, quebrada, fondo cordillerano y valle encajonado;
-- estructura del bosque y matorral de precordillera;
-- afloramientos rocosos, suelo expuesto y cauces;
-- transiciones altitudinales visibles;
-- profundidad atmosférica y lectura de cordones montañosos;
-- variación estacional de nieve, sequedad, vegetación y cielo.
+### Cuenca del Arrayán / Santuario Los Nogales — contexto inmediato
 
-Las reglas extraídas desde Yerba Loca deben indicar el tramo altitudinal y ambiente al que corresponden.
+La cuenca del Arrayán y el Santuario Los Nogales constituyen el contexto territorial inmediato del núcleo. La fuente institucional describe formaciones de matorral esclerófilo andino, bosque esclerófilo andino y matorral xerófilo distribuidas por pisos altitudinales y diferencias de exposición solar.
 
-### Arrayán / Los Nogales
+Estas referencias deben usar normalmente `pilotRelevance=contextual`, salvo que se pueda demostrar que corresponden al mismo sector del levantamiento botánico del Fundo Los Nogales.
 
-La cuenca del Arrayán y el Santuario Los Nogales constituyen una segunda área prioritaria complementaria. La fuente institucional describe allí formaciones de matorral esclerófilo andino, bosque esclerófilo andino y matorral xerófilo distribuidas por pisos altitudinales y diferencias de exposición solar.
+`SlopeAspect`, `approxAltitudeM`, `vegetationStructure` y `ecosystemName` son especialmente relevantes en esta zona.
 
-Por ello, `slopeAspect`, `approxAltitudeM`, `vegetationStructure` y `ecosystemName` se consideran campos de alto valor para las referencias de esta zona.
+### Yerba Loca — comparación precordillerana y gradiente
 
-### Uso de áreas prioritarias
+Yerba Loca se considera una referencia comparativa prioritaria para estudiar la precordillera de Santiago, el relieve, el valle encajonado, la nieve, la transición altitudinal y ambientes de media y alta montaña.
 
-Las áreas prioritarias sirven para construir profundidad documental local y comparaciones repetibles. No impiden incorporar Río Clarillo, Cajón del Maipo, La Campana u otras zonas cuando ayuden a contrastar estructuras, límites geográficos o variantes del bosque esclerófilo.
+La información institucional disponible la describe como un territorio con un gradiente aproximado entre 1.300 y 5.340 m s. n. m. y múltiples ecosistemas. Por esta amplitud, “Yerba Loca” no debe funcionar como una sola categoría visual ni como sustituto del territorio núcleo del piloto.
+
+Las referencias de Yerba Loca usarán normalmente `pilotRelevance=comparative` y deben declarar altitud aproximada, tipo de ambiente y ecosistema cuando se conozcan.
+
+### Río Clarillo, Pirque y otras áreas — contraste regional
+
+Río Clarillo, Pirque, Cajón del Maipo, La Campana y otras zonas pueden utilizarse como referencias `comparative` para probar qué patrones son regionales, ecosistémicos o locales.
+
+Una pauta observada en un área comparativa no debe imponerse al escenario núcleo si contradice o no está respaldada por referencias del territorio core/contextual.
 
 ## 8. Análisis de una referencia
 
-El análisis debe separar tres niveles:
+El análisis debe separar tres niveles.
 
 ### A. Observado
 
@@ -224,7 +266,8 @@ Para convertir una observación en pauta del manual de escenarios, exigir:
 1. varias series independientes o una fuente institucional/científica que la respalde;
 2. coherencia con la evidencia disponible;
 3. revisión de dirección de arte;
-4. formulación que indique alcance geográfico, altitudinal o estacional cuando corresponda.
+4. formulación que indique alcance geográfico, altitudinal o estacional cuando corresponda;
+5. consideración explícita de `pilotRelevance` cuando la pauta se pretenda aplicar al escenario del primer piloto.
 
 El manual debe distinguir:
 
@@ -232,6 +275,8 @@ El manual debe distinguir:
 - `recurrent` — repetido en varias referencias independientes;
 - `approvedArtRule` — decisión de dirección de arte;
 - `open` — todavía insuficientemente sustentado.
+
+Para una regla específica del primer escenario, evidencia `core` tiene prioridad territorial sobre evidencia `comparative`. Esto no reemplaza la calidad científica ni permite ignorar contradicciones; solo evita que una zona externa defina por defecto la apariencia de Los Nogales.
 
 ## 10. Captura de campo recomendada
 
@@ -245,7 +290,7 @@ Cuando Alejandra o Álvaro documenten una zona, priorizar series breves en vez d
 - cauce, quebrada o elemento hídrico cuando exista;
 - fotografías adicionales de elementos especialmente representativos.
 
-En áreas como Yerba Loca y Arrayán, registrar cuando sea posible:
+En Fundo Los Nogales, Arrayán y otras áreas del piloto, registrar cuando sea posible:
 
 - altitud aproximada;
 - punto o sector;
@@ -253,7 +298,8 @@ En áreas como Yerba Loca y Arrayán, registrar cuando sea posible:
 - dirección de la fotografía;
 - hora;
 - estación;
-- si la imagen pertenece a una misma serie de captura.
+- si la imagen pertenece a una misma serie de captura;
+- si el punto corresponde directamente al área del levantamiento botánico o solo a su contexto inmediato.
 
 No es necesario fotografiar cada elemento botánico si ya existe una biblioteca científica específica para especies.
 
@@ -273,7 +319,7 @@ ChatGPT no debe:
 - convertir una imagen web en asset del proyecto sin verificar derechos;
 - atribuir ubicación o especie sin evidencia suficiente;
 - usar una imagen artística como prueba ecológica;
-- presentar una única fotografía o un único sector de Yerba Loca como descripción universal de la precordillera o del bosque esclerófilo.
+- presentar una única fotografía o un área comparativa como descripción universal del territorio núcleo del piloto.
 
 ## 12. Relación con producción
 
@@ -281,7 +327,10 @@ Antes de iniciar un escenario nuevo, el brief debe incluir una lista de `referen
 
 - qué proviene de evidencia real;
 - qué es una interpretación;
-- qué es una decisión estilística.
+- qué es una decisión estilística;
+- qué referencias son `core`, `contextual` o `comparative`.
+
+Para el escenario del primer piloto, el brief debe declarar también el vínculo con `data/source/Base_botanica_Pokedex_flora_Master.xlsx` cuando corresponda.
 
 Cuando el escenario esté basado en una zona concreta, debe declarar `referenceArea`, rango altitudinal aproximado y ecosistemas de referencia usados.
 
