@@ -56,7 +56,107 @@ La metadata ampliada se completa solo cuando la referencia pasa a `reviewed` o `
 
 No completar campos por inferencia. Vacío o `unknown` es preferible a un dato inventado.
 
-## 3. Perfiles de registro
+## 3. Modelo de comprensión visual ambiental
+
+Las fotografías ambientales deben analizarse primero como **escena**, no como identificación botánica.
+
+El objetivo inicial no es decir “qué especie es”, sino entender:
+
+```text
+qué ambiente es
+qué forma de terreno muestra
+qué estructura vegetal tiene
+qué sustrato domina
+qué elementos ancla aparecen
+qué función espacial podría cumplir
+qué evidencia sí respalda y qué no respalda
+```
+
+Esto evita que una foto útil para escenario sea mal utilizada como prueba taxonómica o como regla de colocación de especies.
+
+### Capas de lectura visual
+
+Toda fotografía de ambiente puede revisarse en estas capas:
+
+| Capa | Pregunta | Ejemplos de salida |
+| --- | --- | --- |
+| `environmentClass` | ¿Qué ambiente general muestra? | bosque esclerófilo, matorral abierto, quebrada, borde de sendero |
+| `terrainForm` | ¿Qué forma de terreno domina? | ladera, claro, afloramiento rocoso, cauce, terraza |
+| `spatialFunction` | ¿Qué función puede cumplir en mapa? | ruta, bloqueo, borde, nodo, fondo, microhábitat |
+| `substrate` | ¿Qué suelo/material se observa? | roca granítica, suelo desnudo, hojarasca, arena, grava |
+| `vegetationStructure` | ¿Cómo se organiza la vegetación? | estrato bajo, arbustos medios, dosel denso, manchas irregulares |
+| `anchorElements` | ¿Qué rasgos hacen reconocible la escena? | roca grande, cactus, sendero, tronco, reja, puente, estero |
+| `scaleEvidence` | ¿Hay referencia de escala? | persona, camino, construcción, baranda, árbol conocido |
+| `gameplayReading` | ¿Qué se puede traducir a juego? | celda caminable, obstáculo, desnivel, punto de interacción |
+
+Estas capas son interpretaciones de trabajo. Deben distinguirse de `observedNotes`.
+
+## 4. Taxonomía inicial de escenas
+
+La clasificación de escenas permite organizar referencias sin crear reglas ecológicas prematuras.
+
+Taxonomía inicial para el piloto:
+
+```text
+bosque_esclerofilo
+  interior_bosque
+  matorral_abierto
+  claro
+  ladera
+  quebrada_humeda
+  cauce_o_estero
+  borde_sendero
+  afloramiento_rocoso
+  terraza_o_explanada
+  infraestructura_rustica
+  vista_cajon_o_cordillera
+```
+
+Esta taxonomía no reemplaza `environmentType`, `terrainForm` ni `category`; ayuda a revisar series fotográficas y entrenar criterio visual.
+
+No crear subtipos nuevos salvo que una referencia real no pueda clasificarse adecuadamente con este conjunto.
+
+## 5. Microhábitats visuales
+
+Un microhábitat visual es una combinación observable de terreno, sustrato, humedad aparente y vegetación. No equivale automáticamente a microhábitat ecológico validado ni a regla de ubicación de especies.
+
+Ejemplos iniciales:
+
+```text
+roca_granitica_con_cactacea
+roca_granitica_con_matorral
+borde_de_sendero_seco
+sombra_de_bosque
+claro_con_suelo_expuesto
+ribera_o_borde_de_estero
+terraza_de_picnic
+```
+
+Reglas:
+
+- puede usarse para Dirección de Arte;
+- puede orientar hipótesis de colocación;
+- no puede cerrar `PILOT-ENV-006` sin observaciones territorializadas `core`;
+- debe conservar el vínculo con las fotografías concretas que lo originan.
+
+## 6. Series fotográficas y escala
+
+Fotografías tomadas en una misma visita, punto o secuencia próxima deben compartir `seriesId`.
+
+Una serie puede contener paisaje, vegetación, suelo, roca y cielo, pero no cuenta como varias evidencias independientes para declarar un patrón recurrente.
+
+Cuando una serie incluye personas, construcciones, caminos, barandas u otros objetos de tamaño conocido, puede aportar evidencia de escala.
+
+Las personas visibles se etiquetan solo por su función de referencia espacial:
+
+```text
+containsPerson: true
+personRole: scale_reference
+```
+
+No usar estas fotos para reconocimiento de personas ni para entrenar identidad personal. Su valor es medir proporciones del terreno, altura de vegetación, tamaño de rocas, ancho de sendero y distancia entre elementos.
+
+## 7. Perfiles de registro
 
 No todas las referencias requieren la misma profundidad de metadata.
 
@@ -66,13 +166,19 @@ Priorizar: procedencia, lugar, fecha, `weatherAtmosphere`, `artUse`.
 ### Fotografía de ladera o vegetación
 Priorizar: lugar, altitud, `slopeAspect`, `vegetationStructure`, `substrate`, `observedNotes`.
 
+### Fotografía de microhábitat
+Priorizar: `terrainForm`, `substrate`, `hydrology`, `vegetationStructure`, `anchorElements`, relación con sendero/cauce/roca y utilidad de gameplay.
+
+### Fotografía con persona como escala
+Priorizar: `scaleEvidence`, distancia aproximada, tamaño relativo de roca/vegetación/sendero y encuadre. No usar para identidad personal.
+
 ### Fuente institucional o científica
 Priorizar: procedencia, `ecosystemId`, `ecosystemName`, `ecosystemSource`, `ecologicalUse`.
 
 ### Referencia `core` del Fundo Los Nogales
 Registrar con mayor profundidad porque puede afectar directamente el escenario piloto. Priorizar además `botanicalSourceRef`, altitud, exposición, estructura vegetal, microhábitat y cualquier vínculo verificable con las especies piloto.
 
-## 4. Fuente botánica maestra
+## 8. Fuente botánica maestra
 
 `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx` es la fuente botánica maestra vigente del primer piloto y documenta el levantamiento de flora nativa del Fundo Los Nogales.
 
@@ -135,7 +241,7 @@ placementWeight(species, terrainUnit)
 
 Ese cálculo solo puede informar una regla de arte si las observaciones son `core` o están inequívocamente vinculadas al Fundo Los Nogales. Referencias `contextual` o `comparative` pueden orientar hipótesis, pero no gobernar por sí solas la colocación del escenario núcleo.
 
-## 5. Jerarquía territorial del piloto
+## 9. Jerarquía territorial del piloto
 
 ### `core` — Fundo Los Nogales
 Territorio principal del primer escenario y del levantamiento botánico que origina las especies piloto.
@@ -148,15 +254,7 @@ Sirven para probar qué rasgos son regionales, ecosistémicos o locales. No debe
 
 `pilotRelevance` expresa pertinencia territorial, no calidad científica.
 
-## 6. Series y pseudorreplicación
-
-Fotografías tomadas en una misma visita, punto o secuencia próxima deben compartir `seriesId`.
-
-Una serie puede contener paisaje, vegetación, suelo, roca y cielo, pero no cuenta como varias evidencias independientes para declarar un patrón recurrente.
-
-Para promover una observación a patrón, buscar independencia entre series, fechas, lugares o fuentes.
-
-## 7. Observación, interpretación y decisión artística
+## 10. Observación, interpretación y decisión artística
 
 Toda revisión separa tres niveles:
 
@@ -166,7 +264,7 @@ Toda revisión separa tres niveles:
 
 Una sola referencia puede justificar una solución de escena específica, pero no una regla general del ecosistema.
 
-## 8. Promoción de patrones a reglas
+## 11. Promoción de patrones a reglas
 
 Estados de pauta:
 
@@ -184,7 +282,7 @@ Para convertir una pauta en `APPROVED_ART_RULE` del primer escenario:
 
 Una referencia `comparative` puede apoyar, contrastar o cuestionar una regla, pero no gobernar por sí sola la apariencia del núcleo.
 
-## 9. Captura de campo
+## 12. Captura de campo
 
 Para una visita de campo, priorizar una serie breve y útil:
 
@@ -209,7 +307,7 @@ confidence
 
 Ese vínculo permite cruzar después el conteo botánico con unidades de mapa sin alterar el Master ni agregar columnas nuevas al `manifest`.
 
-## 10. Uso de referencias web y de ChatGPT
+## 13. Uso de referencias web y de ChatGPT
 
 ChatGPT puede localizar referencias públicas, comparar paisajes, identificar vacíos, analizar recurrencias y ayudar a redactar reglas.
 
@@ -220,7 +318,7 @@ No debe:
 - usar referencia artística como evidencia ecológica;
 - presentar una fotografía aislada como descripción universal de un ecosistema.
 
-## 11. Regla de congelamiento provisional
+## 14. Regla de congelamiento provisional
 
 El esquema actual se considera **provisionalmente congelado** durante la fase de poblamiento del corpus `core`.
 
