@@ -39,7 +39,7 @@ Cada tipo de decisión debe tener una fuente principal. Evitar duplicar reglas c
 | [`CHARACTER_TEMPLATE.md`](CHARACTER_TEMPLATE.md) | Plantilla de ficha para personajes-especie y auxiliares. |
 | [`CHARACTER_DESIGN_STATUS.md`](CHARACTER_DESIGN_STATUS.md) | Estado de producción vigente, pendientes e incidencias. |
 | [`../data/characters/index.json`](../data/characters/index.json) | Índice activo y canon operativo. |
-| `data/characters/<character>.json` + `assets/` | Identidad específica, selección vigente, procedencia y assets. |
+| JSON individual en `data/characters/<character>.json` + carpeta correspondiente `data/characters/<character>/assets/` o recurso compartido equivalente | Identidad específica, selección vigente, procedencia y assets. |
 | [`CHARACTER_CANON_SNAPSHOT_2026-09-15.md`](CHARACTER_CANON_SNAPSHOT_2026-09-15.md) | Snapshot histórico; no fuente normativa vigente. |
 
 `ARBORIS_CHARACTER_CREATION_RULES.md` y `CHARACTER_COLLECTION_FINAL.md` se mantienen únicamente como rutas de compatibilidad deprecadas durante la transición. No deben recibir reglas nuevas.
