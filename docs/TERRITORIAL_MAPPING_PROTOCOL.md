@@ -88,7 +88,35 @@ Reglas:
 - vacío/unknown es preferible a inventar;
 - el Master Botánico no se modifica desde este flujo.
 
-## 3. Captura topográfica en Google Earth
+## 3. Comprensión visual antes de destilación
+
+Las fotografías de referencia se revisan primero como escenas ambientales, no como assets ni como identificación botánica.
+
+Para cada foto o serie relevante, registrar una lectura breve:
+
+```text
+environmentClass
+terrainForm
+substrate
+vegetationStructure
+anchorElements
+spatialFunction
+scaleEvidence
+gameplayReading
+limitations
+```
+
+Esto permite decidir si una imagen sirve para:
+
+- reconocer un Lugar;
+- definir una Unidad Espacial;
+- informar un borde, bloqueo, ruta, fondo o punto de interacción;
+- estimar escala relativa;
+- formular una hipótesis visual que deberá contrastarse.
+
+No usar esta lectura para cerrar microhábitats de especies sin evidencia territorializada `core`.
+
+## 4. Captura topográfica en Google Earth
 
 Para cada Lugar o Unidad Espacial candidata, obtener idealmente:
 
@@ -111,7 +139,7 @@ Registrar:
 
 Google Earth sirve para topografía, relaciones espaciales, orientación y contexto. No es arte final ni fuente canónica única.
 
-## 4. Evidencia experiencial
+## 5. Evidencia experiencial
 
 Registrar por separado:
 
@@ -137,7 +165,7 @@ Estado:
 
 La interpretación nunca debe mezclarse con el hecho recordado.
 
-## 5. Definir Unidades Espaciales
+## 6. Definir Unidades Espaciales
 
 Una Unidad Espacial es una unidad reconocible del recorrido, no un tile ni un objeto decorativo.
 
@@ -166,7 +194,7 @@ Estados iniciales:
 
 No promover a `observed` solo porque una descripción resulte plausible.
 
-## 6. Definir Instancia Territorial
+## 7. Definir Instancia Territorial
 
 La Instancia Territorial es una versión de juego de una o más Unidades Espaciales bajo un objetivo y condición concretos.
 
@@ -192,7 +220,7 @@ IT-001 — Acceso Principal / entrada inicial
 
 `MAP-*` queda reservado para blockouts, mapas o prototipos derivados.
 
-## 7. Definir Contrato Jugable
+## 8. Definir Contrato Jugable
 
 Separar tres cosas:
 
@@ -229,7 +257,7 @@ entrada: puente / portal
 salida: claro de picnic
 ```
 
-## 8. Traducir a Celdas Espaciales
+## 9. Traducir a Celdas Espaciales
 
 Las Celdas Espaciales son implementación técnica del blockout, no descripción del lugar real.
 
@@ -252,7 +280,7 @@ Campos ambientales adicionales solo se agregan si son necesarios para una decisi
 
 No fijar aún tamaño de celda ni equivalencia metro/celda.
 
-## 9. Construir blockout
+## 10. Construir blockout
 
 El blockout debe mostrar:
 
@@ -272,13 +300,15 @@ Regla dura:
 si una estilizacion altera la conectividad obligatoria, la prueba falla
 ```
 
-## 10. Paso a Dirección de Arte
+## 11. Paso a Dirección de Arte
 
 Dirección de Arte recibe:
 
 - Lugar;
 - Unidades Espaciales y estado;
 - evidencias y confianza;
+- lectura visual ambiental;
+- microhábitats visuales pertinentes;
 - decisiones de Destilación Territorial;
 - Instancia Territorial;
 - Contrato Jugable;
@@ -288,7 +318,7 @@ Dirección de Arte define cómo traducir visualmente altura, bloqueos, sendero, 
 
 La primera salida es **prototipo visual**, no asset final.
 
-## 11. Evaluación
+## 12. Evaluación
 
 Ficha mínima:
 
@@ -315,7 +345,7 @@ Criterios:
 - `revise`: estructura correcta pero reconocibilidad insuficiente/genérica;
 - `pass`: conserva estructura y rasgos ancla y permite avanzar a una prueba más precisa.
 
-## 12. Caso inicial — Acceso Principal
+## 13. Caso inicial — Acceso Principal
 
 La información experiencial inicial se registra como `declared / pending corroboration`:
 
@@ -350,7 +380,7 @@ Primer derivado de prueba:
 MAP-001 — blockout/prototipo del Acceso Principal
 ```
 
-## 13. Paquete mínimo para iniciar MAP-001
+## 14. Paquete mínimo para iniciar MAP-001
 
 Reunir, cuando sea posible:
 
@@ -361,11 +391,12 @@ Reunir, cuando sea posible:
 - fotografía/captura de la casa del conserje;
 - fotografía/captura del sendero inicial;
 - fotografía/captura del claro de picnic;
-- notas de orientación y relaciones espaciales.
+- notas de orientación y relaciones espaciales;
+- lectura visual ambiental de cada fotografía o serie usada.
 
 No es obligatorio tener todo antes de empezar el blockout, pero cualquier elemento no corroborado debe permanecer `proposed`/`OPEN`.
 
-## 14. Límites
+## 15. Límites
 
 Este protocolo no autoriza todavía:
 
