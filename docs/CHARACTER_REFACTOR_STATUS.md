@@ -6,12 +6,14 @@ Este documento registra qué partes del plan de `CHARACTER_MANUAL_REFACTOR_PLAN.
 
 ## Fase A — reorden documental
 
-**Estado: implementada en `docs/character-phase-a`, pendiente de revisión/merge a `main`.**
+**Estado: implementada documentalmente.**
+
+La integración a `main` se gestiona mediante el PR correspondiente; este estado describe el contenido implementado y no depende del nombre de una rama temporal.
 
 Cambios incluidos:
 
 - `GRAPHIC_DIRECTION.md` incorpora el mapa de responsabilidades documentales;
-- `ART_STYLE_GUIDE.md` define master/derivados, geometría futura como propuesta y lenguaje neutral para estructuras secundarias;
+- `ART_STYLE_GUIDE.md` define master/derivados, geometría futura como propuesta, una regla transitoria para el master visual operativo y lenguaje neutral para estructuras secundarias;
 - `CHARACTER_CREATION_WORKFLOW.md` queda como procedimiento operativo vigente;
 - `ARBORIS_CHARACTER_CREATION_RULES.md` queda deprecado como ruta de compatibilidad;
 - `CHARACTER_DESIGN_STATUS.md` se concentra en estado, pendientes e incidencias;
