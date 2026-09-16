@@ -1,25 +1,55 @@
-Árboris — Data Model
+# Árboris — Data Model
 
-Versión: 0.2
-Última actualización: 15 septiembre 2026
-Alcance: modelo de dominio del Piloto 1.0
+**Versión:** 0.3  
+**Última actualización:** 16 septiembre 2026  
+**Alcance:** Piloto 1.0
 
-1. Propósito
+## 1. Propósito
 
-Este documento define el modelo conceptual de datos de Árboris.
+Este documento define el modelo conceptual de datos de Árboris. No constituye todavía un esquema físico definitivo de SQLite.
 
-No constituye todavía un esquema físico definitivo de SQLite ni prescribe todas las tablas, columnas, índices o relaciones de almacenamiento.
+La arquitectura debe separar conocimiento botánico, observaciones reales, evidencia, hipótesis de identificación y capa lúdica.
 
-Su función es establecer qué objetos existen en el dominio, qué significan y qué relaciones deben preservarse cuando se implemente la persistencia.
+## 2. Fuente botánica canónica
 
-La arquitectura debe permitir modificar la tecnología de almacenamiento sin alterar estos conceptos.
+La única fuente editorial y científica de verdad del piloto es:
 
-2. Principio fundamental
+`data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
 
-La unidad fundamental del registro científico de Árboris es la observación real.
+El Master Botánico 2.0 contiene el conocimiento científico estructurado del piloto.
 
-El modelo central es:
+Los ocho JSON de `data/botanical/` son derivados reproducibles:
 
+```text
+metadata.json
+species.json
+characters.json
+species_characters.json
+sources.json
+glossary.json
+photos.json
+model_errors.json
+```
+
+Las seis fichas de `data/species/` también son derivadas y se generan desde esos JSON. No deben editarse manualmente como una segunda fuente de verdad.
+
+Flujo:
+
+```text
+Master Botánico 2.0
+        ↓
+data/botanical/*.json
+        ↓
+data/species/SP001...SP006.json
+        ↓
+runtime / UI / dirección de arte / identificación
+```
+
+## 3. Modelo conceptual central
+
+La unidad fundamental del registro científico es la observación real:
+
+```text
 Species
    ↓
 Individual
@@ -29,551 +59,324 @@ Observation
 Evidence
    ↓
 Identification
+```
 
-Estos objetos no son equivalentes.
+Una fotografía no es una observación. Una identificación no es una especie. Una identificación no debe sobrescribir la evidencia que la originó.
 
-Una fotografía no es una observación.
+## 4. Species
 
-Una identificación no es una especie.
+`Species` representa una entidad biológica/taxonómica incluida en el catálogo.
 
-Una observación no es un desbloqueo.
+Piloto:
 
-Una identificación no debe sobrescribir la evidencia que permitió formularla.
+| ID canónico | Compatibilidad histórica | Especie |
+| --- | --- | --- |
+| SP-001 | SP001 | *Cryptocarya alba* — Peumo |
+| SP-002 | SP002 | *Lithraea caustica* — Litre |
+| SP-003 | SP003 | *Kageneckia oblonga* — Bollén |
+| SP-004 | SP004 | *Podanthus mitiqui* — Mitique |
+| SP-005 | SP005 | *Colliguaja odorifera* — Colliguay |
+| SP-006 | SP006 | *Quillaja saponaria* — Quillay |
 
-3. Species
+Los nuevos componentes botánicos deben utilizar `SP-00X`. `SP00X` permanece solo como compatibilidad con componentes históricos.
 
-Species representa una entidad biológica/taxonómica incluida en el catálogo de Árboris.
+## 5. BotanicalCharacter
 
-Para el Piloto 1.0 existen seis especies:
+`BotanicalCharacter` representa un carácter científico estructurado del Master 2.0.
 
-SP001 — Cryptocarya alba — Peumo
-SP002 — Lithraea caustica — Litre
-SP003 — Kageneckia oblonga — Bollén
-SP004 — Podanthus mitiqui — Mitique
-SP005 — Colliguaja odorifera — Colliguay
-SP006 — Quillaja saponaria — Quillay
+Estado actual del catálogo:
 
-Una especie puede relacionarse con información taxonómica, nombres comunes, caracteres botánicos, distribución, hábitat, fenología, fuentes, individuos, observaciones, identificaciones, contenido educativo y personaje jugable.
+- 24 caracteres totales;
+- 19 activos/computables;
+- 4 retirados;
+- 1 pendiente de revisión.
 
-La ficha científica y el personaje jugable no forman parte del mismo objeto.
+Un carácter puede incluir grupo, nombre, tipo de dato, estados permitidos, observabilidad, dependencia fenológica, seguridad, costo y otras propiedades definidas por el Master.
 
-4. Species ID
+Los caracteres retirados se conservan por trazabilidad, pero no deben participar en el motor de identificación.
 
-Los datos editoriales y el runtime utilizan actualmente representaciones distintas del identificador:
+## 6. SpeciesCharacter
 
-SP-001 ↔ SP001
-SP-002 ↔ SP002
-...
-SP-006 ↔ SP006
+`SpeciesCharacter` representa conocimiento esperado para una especie respecto de un carácter.
 
-Esta diferencia está validada y debe resolverse mediante una transformación explícita y determinista.
+Conceptualmente:
 
-No deben generarse nuevas variantes manuales de los identificadores.
+```text
+Species × BotanicalCharacter → ExpectedStates
+```
 
-5. Individual
+El Master 2.0 contiene 89 relaciones especie–carácter para las seis especies del piloto.
 
-Individual representa un organismo físico concreto que puede ser observado más de una vez.
+Una relación puede contener uno o varios estados esperados y metadatos de variabilidad, confianza, fuente y notas.
 
-Ejemplo:
+Una relación inexistente o un valor vacío significa conocimiento no documentado, no ausencia botánica.
 
-Species: Lithraea caustica
-Individual: LC002
+## 7. Estados botánicos vs estados de observación
 
-El objeto permite distinguir variación entre individuos de la misma especie.
+Debe distinguirse estrictamente entre estados botánicos y estados operativos.
 
-Un individuo puede acumular múltiples observaciones realizadas en fechas diferentes, durante distintos estados fenológicos, bajo distintas condiciones, desde distintos ángulos y con diferentes tipos de evidencia.
+Estados como:
 
-No todas las observaciones futuras requerirán necesariamente que el individuo pueda reconocerse nuevamente de forma inequívoca.
+```text
+unknown
+not_observable
+not_applicable
+not_evaluated
+```
+
+no son estados botánicos de una especie.
+
+Reglas:
+
+- `sin dato` ≠ ausencia;
+- `No sé` ≠ no;
+- `No puedo observarlo` ≠ carácter ausente;
+- `no aplica` describe aplicabilidad, no un estado morfológico.
+
+## 8. Individual
+
+`Individual` representa un organismo físico concreto. Permite registrar variación intraespecífica y reobservaciones.
+
+Un individuo puede acumular múltiples observaciones en fechas, fenologías y condiciones ambientales distintas.
 
 El modelo debe admitir observaciones cuyo individuo sea desconocido.
 
-6. Observation
+## 9. Observation
 
-Observation representa un encuentro concreto con un organismo real en un lugar y momento determinados.
+`Observation` representa un encuentro concreto con un organismo real en un lugar y momento determinados.
 
-Es el núcleo del registro de terreno.
-
-Una observación puede contener o relacionarse con individuo, fecha y hora, ubicación, precisión de ubicación, observador, contexto territorial, ecosistema, microhábitat, altitud, exposición, cobertura, pendiente, fenología, fotografías, caracteres observados, candidatos, identificaciones y notas.
-
-No todos estos datos serán obligatorios.
+Puede relacionarse con fecha/hora, ubicación, individuo, contexto territorial, ecosistema, microhábitat, fenología, fotografías, caracteres observados, candidatos, identificaciones y notas.
 
 Los datos desconocidos deben permanecer desconocidos.
 
-No deben inventarse valores para completar un registro.
+## 10. Evidence
 
-7. Evidence
+`Evidence` representa una pieza de información utilizada para describir una observación o evaluar una hipótesis.
 
-Evidence representa una pieza de información utilizada para describir una observación o evaluar una hipótesis de identificación.
+Puede provenir de:
 
-Puede provenir de diferentes fuentes.
+- fotografía;
+- usuario;
+- modelo visual;
+- contexto geográfico/ecológico;
+- fenología;
+- validación experta;
+- otro mecanismo trazable.
 
-Ejemplos:
+La procedencia debe conservarse.
 
-photograph
-user_observation
-model_observation
-botanical_character
-location_context
-ecological_context
-phenology
-expert_validation
+## 11. PhotographicEvidence
 
-Una observación puede contener múltiples evidencias.
+Una fotografía es evidencia primaria y debe preservarse aunque cambien sus interpretaciones derivadas.
 
-La evidencia debe conservar su procedencia.
+Una misma foto puede aportar evidencia para varios caracteres.
 
-8. PhotographicEvidence
+Una predicción automática nunca reemplaza la fotografía que la originó.
 
-Una fotografía es un tipo de evidencia.
+## 12. CharacterEvidence
 
-Debe poder relacionarse con:
+`CharacterEvidence` afirma que, para una observación concreta, un carácter presenta uno o varios estados observados.
 
-Observation
-    ↓
-PhotographicEvidence
+Ejemplo conceptual:
 
-Una fotografía puede aportar evidencia sobre uno o varios caracteres.
-
-Ejemplo:
-
-Photo
- ├── CH-003 margin = entero
- ├── CH-005 underside = no_observable
- └── CH-011 shape = eliptica
-
-La fotografía original debe preservarse aunque posteriormente cambien las interpretaciones derivadas de ella.
-
-Una predicción de un modelo no debe reemplazar la fotografía que la originó.
-
-9. BotanicalCharacter
-
-BotanicalCharacter representa una característica botánica estructurada que puede ser utilizada para describir o discriminar especies.
-
-La base botánica computable contiene actualmente 27 caracteres.
-
-Cada carácter puede definir información como character_id, grupo, nombre, tipo de dato, estados permitidos, observabilidad en fotografía, observabilidad en terreno, dependencia fenológica, riesgo, invasividad y descripción.
-
-Los caracteres pertenecen a la base botánica, no a un modelo de IA.
-
-10. CharacterState
-
-Un CharacterState representa un estado permitido de un carácter botánico.
-
-Los estados válidos deben derivarse de la base botánica estructurada.
-
-No deben crearse estados ad hoc dentro de la lógica de identificación.
-
-11. CharacterEvidence
-
-CharacterEvidence representa la afirmación de que un determinado carácter presenta un estado determinado en una observación.
-
-Ejemplo:
-
+```text
 Observation: OBS001
 Character: CH-003
-Value: entero
+ObservedState: serrado
 Source: user_observed
 Evidence: IMG001
+```
 
-Debe ser posible registrar quién o qué realizó la observación, fotografía utilizada, método, incertidumbre, calidad, momento de generación y validación posterior.
+Debe poder conservar método, evidencia de origen, incertidumbre, calidad, fecha y validación posterior.
 
-12. Procedencia de la evidencia
+## 13. Candidate
 
-Árboris debe distinguir explícitamente la procedencia.
-
-Ejemplos conceptuales:
-
-user_observed
-model_observed
-photo_derived
-context_derived
-expert_validated
-
-Estos nombres todavía no constituyen un enum definitivo de implementación.
-
-El principio sí es obligatorio:
-
-Evidencia producida por mecanismos diferentes no debe volverse indistinguible después de almacenarse.
-
-13. Unknown y Not Observable
-
-Árboris debe representar explícitamente la incertidumbre.
-
-Conceptualmente deben distinguirse:
-
-known value
-unknown
-not observable
-not evaluated
-missing data
-
-Estas situaciones no son equivalentes.
-
-SIN DATO ≠ NO
-
-NO PUEDO OBSERVARLO ≠ EL CARÁCTER ESTÁ AUSENTE
-
-Una especie no debe ser eliminada porque su ficha no contenga información sobre un carácter.
-
-14. Candidate
-
-Candidate representa una especie considerada plausible durante un proceso de identificación.
+`Candidate` representa una especie considerada plausible durante una sesión de identificación.
 
 Un candidato no es una identificación.
 
-Puede provenir de BioCLIP, contexto territorial, clave botánica u otro mecanismo futuro.
+BioCLIP puede ordenar candidatos, pero sus scores no constituyen evidencia botánica ni probabilidad taxonómica por sí mismos.
 
-Los scores visuales pueden almacenarse como información del método que los produjo, pero no constituyen evidencia botánica por sí mismos.
+## 14. IdentificationSession
 
-Un score de BioCLIP no debe interpretarse automáticamente como probabilidad taxonómica.
+`IdentificationSession` representa el proceso de inferencia para una observación.
 
-15. IdentificationSession
+Puede contener:
 
-IdentificationSession representa el proceso mediante el cual Árboris intenta determinar la identidad de una observación.
+- candidatos iniciales;
+- evidencia utilizada;
+- caracteres evaluados;
+- preguntas formuladas;
+- respuestas;
+- candidatos descartados;
+- candidatos restantes;
+- explicación de incompatibilidades;
+- resultado e incertidumbre.
 
-Puede contener observación, candidatos iniciales, modelos utilizados, preguntas formuladas, respuestas, caracteres evaluados, evidencia, candidatos descartados, candidatos restantes, resultado e incertidumbre.
+La sesión debe ser reconstruible a partir de evidencia y eventos, sin depender de estados botánicos hardcodeados en el motor.
 
-La sesión permite preservar el proceso y no solamente el resultado final.
+## 15. Motor de identificación
 
-16. Identification
+El motor debe consumir directamente los JSON canónicos del Master 2.0.
 
-Identification representa una hipótesis sobre la identidad taxonómica de una observación.
+Su responsabilidad es algorítmica:
 
-No debe tratarse como una verdad inmutable.
+```text
+loadDataset()
+compatible()
+filterCandidates()
+scoreCharacter()
+nextCharacter()
+assessIdentification()
+```
 
-Una identificación puede tener estados conceptuales como:
+El motor no debe contener conocimiento específico de Peumo, Litre, Bollén, Mitique, Colliguay o Quillay.
 
-confirmed
-probable
-tentative
-unresolved
+Compatibilidad básica:
 
-La nomenclatura definitiva puede modificarse durante la implementación.
+- expected desconocido → neutral;
+- observation desconocida/no observable → neutral;
+- expected y observed conocidos con intersección → compatible;
+- expected y observed conocidos y disjuntos → incompatibilidad explícita.
 
-Una identificación debe poder relacionarse con observación, especie propuesta, sesión de identificación, evidencia utilizada, método, nivel de confianza, fecha, autor/agente, versión y estado.
+## 16. AdaptiveQuestion
 
-17. Historial de identificaciones
-
-Una observación puede acumular más de una hipótesis a lo largo del tiempo.
-
-La arquitectura debe permitir reconstruir qué se pensó inicialmente, qué evidencia existía, qué nueva evidencia apareció y por qué cambió la hipótesis.
-
-El historial debe tender a un modelo append-only para eventos científicos relevantes.
-
-18. AdaptiveQuestion
-
-Una AdaptiveQuestion representa una solicitud de evidencia realizada por el sistema.
-
-No constituye conocimiento botánico por sí misma.
+`AdaptiveQuestion` es una forma de solicitar evidencia, no conocimiento botánico independiente.
 
 Debe derivarse de:
 
-active candidates
-        +
-botanical knowledge
+```text
+candidatos activos
++
+conocimiento canónico
++
+evidencia existente
         ↓
-informative character
+carácter informativo
         ↓
-question
+forma de obtenerlo
+```
 
-La pregunta es una presentación de un carácter botánico.
+La clave adaptativa debe preguntar solo cuando la información no pueda recuperarse con suficiente confianza de evidencia ya existente.
 
-La semántica científica debe permanecer en la base estructurada.
+## 17. VisualModelObservation
 
-19. AdaptiveResponse
+Un modelo visual puede producir `CharacterEvidence` restringida a un carácter solicitado.
 
-Una respuesta puede representar:
+Debe poder abstenerse.
 
-sí
-no
-no sé
-no puedo observarlo
+Ejemplo conceptual:
 
-“No puedo observarlo” no debe eliminar candidatos.
-
-20. VisualModelObservation
-
-Los modelos visuales futuros deben generar observaciones restringidas de caracteres.
-
-Conceptualmente:
-
-Photo
-  +
-Requested BotanicalCharacter
-        ↓
-Visual model
-        ↓
-CharacterEvidence
+```text
+Photo + CH-003
+      ↓
+visual model
+      ↓
+estado permitido
 or
 NO_OBSERVABLE
+```
 
-El nombre del modelo, versión y configuración relevante deben poder conservarse.
+El modelo no modifica la ficha científica de la especie.
 
-El modelo no modifica directamente la ficha botánica de la especie.
+## 18. Identification
 
-21. Conocimiento botánico vs evidencia observacional
+`Identification` representa una hipótesis revisable sobre la identidad de una observación.
 
-Árboris debe mantener separados el conocimiento estructurado sobre una especie y la evidencia observada en un organismo concreto.
+Puede permanecer suficientemente respaldada, probable, tentativa o no resuelta.
 
-Ejemplo de conocimiento:
+Una observación puede acumular varias hipótesis a lo largo del tiempo. La corrección de una identificación no debe destruir su historia.
 
-Quillay
-CH-003 = serrado
+## 19. Discovery, Collection y GameCharacter
 
-Ejemplo de evidencia:
+La capa lúdica permanece separada del conocimiento científico.
 
-OBS041
-CH-003 = serrado
-source = user_observed
-
-Estas capas se comparan durante la identificación, pero no son el mismo dato.
-
-22. Variación intraespecífica
-
-El modelo debe permitir que una especie tenga más de un estado válido para determinados caracteres cuando la evidencia científica lo justifique.
-
-Debe poder representarse:
-
-Species
-→ expected variation
-→ multiple individuals
-→ multiple observations
-→ environmental context
-
-La variación puede relacionarse con exposición, sombra, altitud, microhábitat, fenología, estación y otras condiciones.
-
-23. Discovery
-
-Discovery pertenece a la capa de juego.
-
-Representa el evento en que el sistema considera que una especie ha sido descubierta por el jugador.
-
-Conceptualmente:
-
+```text
 Observation
-    ↓
+   ↓
 Identification
-    ↓
+   ↓
 evidence policy
-    ↓
+   ↓
 Discovery
-
-La política exacta de evidencia necesaria para producir un descubrimiento todavía debe definirse.
-
-Una identificación no produce necesariamente un desbloqueo de forma automática.
-
-24. GameCharacter
-
-GameCharacter representa el personaje lúdico inspirado en una especie.
-
-Species
-    ↓
+   ↓
+Collection
+   ↓
 GameCharacter
+```
 
-Pero:
+`Species ≠ GameCharacter`.
 
-Species ≠ GameCharacter
+Los datos de juego no deben modificar la ficha científica.
 
-El personaje puede tener atributos de juego, progresión, variantes, capacidades, recursos gráficos, animaciones y estado de desbloqueo.
+## 20. Variación intraespecífica
 
-Estos datos no deben almacenarse dentro de la ficha científica de la especie.
+La variación es un requisito de primera clase.
 
-25. Collection
+El modelo debe permitir múltiples estados esperados por especie, múltiples individuos, múltiples observaciones y contexto ambiental/fenológico.
 
-Collection representa el estado lúdico de especies/personajes descubiertos por un jugador.
+No debe existir una única apariencia “típica” obligatoria por especie.
 
-Puede derivarse de eventos Discovery.
+## 21. Datos fuente y datos derivados
 
-La colección no sustituye el registro de observaciones.
+Datos fuente incluyen observaciones reales, fotografías originales, respuestas humanas, ubicación registrada, evidencia y validaciones.
 
-Descubrir una especie una vez no elimina el valor de observarla nuevamente.
+Datos derivados incluyen:
 
-26. Relación general del dominio
+- JSON canónicos exportados desde Master 2.0;
+- fichas de `data/species/`;
+- candidatos de modelos;
+- embeddings/features;
+- scores;
+- índices runtime.
 
-                    Botanical knowledge
-                           │
-                           ▼
-Species ───────── BotanicalCharacters
-  │                        │
-  ▼                        │
-Individual                 │
-  │                        │
-  ▼                        │
-Observation                │
-  │                        │
-  ├── Evidence ────────────┘
-  │
-  ├── Photos
-  │
-  └── IdentificationSession
-            │
-            ├── Candidates
-            ├── AdaptiveQuestions
-            ├── Responses
-            ├── CharacterEvidence
-            │
-            ▼
-       Identification
-            │
-            │ sufficient evidence
-            ▼
-         Discovery
-            │
-            ▼
-        Collection
-            │
-            ▼
-       GameCharacter
+Los derivados deben poder regenerarse o auditarse desde su fuente.
 
-27. Fuente botánica de verdad
-
-Los datos científicos editoriales siguen el flujo:
-
-Base_botanica_Pokedex_flora_Master.xlsx
-        ↓
-validation
-        ↓
-data/botanical/*.json
-        ↓
-data/species/SP001...SP006.json
-        ↓
-runtime systems
-
-La Master es la fuente científica/editorial de verdad.
-
-Los JSON y objetos runtime son derivados computables.
-
-No deben convertirse en bases editoriales paralelas.
-
-28. Relación actual con la clave adaptativa
-
-Actualmente logic.mjs contiene todavía una representación manual de parte del conocimiento de las seis especies.
-
-El Hito 15 eliminará progresivamente esta duplicación.
-
-Flujo objetivo:
-
-Master
-   ↓
-botanical JSON
-   ↓
-species JSON
-   ↓
-species_adapter.mjs
-   ↓
-adaptive key
-
-Mapeo inicial:
-
-margin     ← CH-003
-glands     ← CH-017
-venation   ← CH-008
-underside  ← CH-005
-
-Las equivalencias deben validarse antes de conectar automáticamente los datos.
-
-29. Persistencia local
+## 22. Persistencia y offline-first
 
 Árboris es offline-first.
 
-La aplicación móvil utilizará SQLite mediante expo-sqlite para los datos estructurados que requieran persistencia local.
+La persistencia móvil prevista utiliza SQLite mediante `expo-sqlite`.
 
-Este documento no define todavía una correspondencia 1:1 entre objetos de dominio y tablas SQLite.
+El esquema físico definitivo debe derivarse de este modelo de dominio y del flujo end-to-end validado, no al revés.
 
-Esa decisión se tomará cuando el flujo end-to-end del piloto determine qué entidades necesitan persistencia, qué relaciones son necesarias, qué datos son derivados, qué información puede regenerarse, qué historial debe conservarse y qué consultas requiere la aplicación.
+## 23. Versionado y procedencia
 
-30. Datos fuente y datos derivados
+Debe poder saberse qué versión produjo una inferencia relevante.
 
-Debe distinguirse entre datos fuente y datos derivados.
+Conceptualmente pueden conservarse:
 
-Datos fuente son aquellos que no pueden reconstruirse fácilmente, como observaciones reales, fotografías originales, respuestas del usuario, ubicación registrada, evidencia y validación humana.
-
-Datos derivados pueden incluir candidatos de un modelo, embeddings, features, scores, índices y representaciones runtime derivadas de la Master.
-
-Los datos derivados no deben convertirse accidentalmente en la única copia de la información fuente.
-
-31. Versionado
-
-Debe ser posible conocer qué versión de un componente produjo una inferencia relevante.
-
-Ejemplos:
-
+```text
+master_version
+schema_version
 botanical_data_version
-key_version
 model_name
 model_version
 identification_logic_version
+```
 
-No es necesario implementar todos estos campos inmediatamente.
+El Master 2.0 incluye metadata y SHA-256 de integridad para sus derivados canónicos.
 
-El modelo debe evitar decisiones que hagan imposible incorporar esa trazabilidad posteriormente.
+## 24. Privacidad y ubicación
 
-32. Privacidad y ubicación
+Las observaciones pueden contener información geográfica sensible.
 
-Las observaciones pueden contener información geográfica.
+El modelo futuro deberá distinguir ubicación necesaria para funcionamiento, ubicación científica, ubicación pública y ubicación sensible.
 
-El modelo futuro deberá distinguir entre ubicación necesaria para funcionamiento, ubicación científica, ubicación mostrada públicamente y ubicación sensible.
+No debe asumirse que todas las coordenadas serán públicas.
 
-La política de privacidad y publicación todavía no está definida.
+## 25. Decisiones abiertas
 
-No debe asumirse que todas las coordenadas registradas serán públicas.
+Permanecen abiertos, entre otros:
 
-33. Decisiones todavía abiertas
+- esquema físico definitivo de SQLite;
+- política exacta de descubrimiento/desbloqueo;
+- sincronización;
+- backend;
+- exportación científica;
+- interoperabilidad Darwin Core;
+- tratamiento de ubicaciones sensibles;
+- política de revisión experta;
+- formato final de paquetes territoriales.
 
-Permanecen abiertos:
-
-esquema físico definitivo de SQLite;
-
-nombres finales de tablas;
-
-cardinalidades exactas de implementación;
-
-política exacta de desbloqueo;
-
-modelo de usuario/cuenta;
-
-sincronización;
-
-conflictos entre dispositivos;
-
-backend;
-
-exportación científica;
-
-interoperabilidad Darwin Core;
-
-tratamiento de ubicaciones sensibles;
-
-política de revisión experta;
-
-esquema definitivo de confianza;
-
-retención de fotografías;
-
-formato final de paquetes territoriales.
-
-Estas decisiones deben resolverse cuando sean necesarias para el piloto.
-
-No deben diseñarse anticipadamente solo para completar el modelo.
-
-34. Regla de implementación
-
-Antes de crear una nueva entidad, tabla o relación debe existir un caso real del piloto que la necesite.
-
-El modelo de dominio debe mantenerse suficientemente expresivo para preservar:
-
-observación + evidencia + incertidumbre + procedencia + historial
-
-sin convertir el Piloto 1.0 en una infraestructura para funcionalidades que todavía no existen.
-
-Estado actual
-
-Modelo conceptual: definido.
-
-Fuente botánica: consolidada para las seis especies piloto.
-
-Datos computables: disponibles.
-
-Persistencia completa del modelo: pendiente.
-
-Prioridad inmediata: Hito 15 — conectar las fichas computables con la clave adaptativa sin duplicar conocimiento botánico.
+Estas decisiones se resolverán cuando sean necesarias para cerrar el piloto, no anticipadamente.
