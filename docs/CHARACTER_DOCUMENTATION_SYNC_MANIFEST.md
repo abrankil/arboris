@@ -19,7 +19,8 @@ Sincronizar el trabajo documental de personajes sin tocar sprites ni datos cient
 - no cambia `data/characters/index.json`;
 - no cambia fichas JSON;
 - no elimina ni renombra manuales existentes;
-- no aplica todavía la Fase B/C del refactor.
+- no cambia todavía el schema ni el canon operativo;
+- incorpora algunos conceptos de la Fase B únicamente como borradores documentales para revisión (tests visuales, versionado, derivados y estados por atributo), sin convertirlos todavía en reglas de datos ni en requisitos de assets.
 
 ## Siguiente commit recomendado
 
@@ -33,8 +34,8 @@ En una rama/documentación separada:
 
 1. añadir el mapa documental a `GRAPHIC_DIRECTION.md`;
 2. consolidar el contrato técnico en `ART_STYLE_GUIDE.md`;
-3. deprecar `ARBORIS_CHARACTER_CREATION_RULES.md` a favor del workflow;
+3. migrar cualquier contenido único de `ARBORIS_CHARACTER_CREATION_RULES.md` al workflow, actualizar referencias entrantes y solo después marcar el archivo anterior como deprecado;
 4. convertir `CHARACTER_DESIGN_STATUS.md` en estado de producción;
-5. convertir `CHARACTER_COLLECTION_FINAL.md` en snapshot histórico.
+5. convertir `CHARACTER_COLLECTION_FINAL.md` en snapshot histórico, actualizando primero todos los enlaces que apunten al nombre anterior.
 
 Esa segunda etapa debe revisarse por diff antes del merge.
