@@ -47,6 +47,14 @@ Para una decisión morfológica, consultar primero la ficha de `data/species/` y
 
 Una decisión artística no modifica la botánica. Un sprite tampoco constituye evidencia científica.
 
+Regla de la próxima fase:
+
+```text
+Durante la próxima fase, Dirección de Arte no rediseña el canon base.
+Trabaja solo en derivados de personajes, blockouts de mapa y pruebas ambientales pequeñas.
+Toda colocación de especies en el mapa debe distinguir entre peso de presencia y evidencia territorial.
+```
+
 Estado operativo actual de Dirección de Arte:
 
 - personajes base: canon operativo cerrado;
