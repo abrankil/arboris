@@ -26,6 +26,10 @@ compilación de escenas / prompts generativos
 → ASC_EXTERNAL_REFERENCE_BENCHMARK_2026-09-17.md
 → ASC_CLOSEOUT_HANDOFF_2026-09-17.md
 
+manuales operativos aprobados
+→ ARBORIS_WORK_MANUALS_INTEGRATION_2026-09-17.md
+→ Google Drive / Proyecto Árboris / 00_MANUALES_DE_TRABAJO
+
 arte / personajes
 → GRAPHIC_DIRECTION.md
 → ART_STYLE_GUIDE.md
@@ -53,6 +57,10 @@ ambientes / mapas
 - [`ASC_TEST_RECORD_TEMPLATE.md`](ASC_TEST_RECORD_TEMPLATE.md): plantilla operativa provisional para registrar pruebas ASC con contrato, prompt ASC, prompt efectivo, handoff, auditoría, atribución y lectura separada ASC/proyecto consumidor.
 - [`ASC_EXTERNAL_REFERENCE_BENCHMARK_2026-09-17.md`](ASC_EXTERNAL_REFERENCE_BENCHMARK_2026-09-17.md): investigación de referentes externos similares o complementarios a ASC.
 - [`ASC_CLOSEOUT_HANDOFF_2026-09-17.md`](ASC_CLOSEOUT_HANDOFF_2026-09-17.md): cierre de sesión y punto de reinicio para Alejandra antes de continuar con TEST-004.
+
+## Manuales operativos aprobados
+
+- [`ARBORIS_WORK_MANUALS_INTEGRATION_2026-09-17.md`](ARBORIS_WORK_MANUALS_INTEGRATION_2026-09-17.md): registro técnico de documentación, validación e integración de 4A `Verbos de trabajo` y 4B `Ciclo de trabajo`. Las piezas visuales aprobadas se consultan en Google Drive, dentro de `Proyecto Árboris/00_MANUALES_DE_TRABAJO/01_METODO_DE_TRABAJO/`.
 
 ## Para Alejandra
 
