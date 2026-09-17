@@ -139,19 +139,32 @@ Esta distinción evita convertir cada objeto reconocible en una Unidad Espacial.
 
 Un rasgo puede funcionar además como `anchorElement` cuando sea decisivo para reconocer el lugar.
 
-La unidad primaria de certeza es la **afirmación territorial** (`claim`), no la Unidad Espacial completa. Una misma UE puede contener relaciones corroboradas y otras `OPEN`.
+La unidad primaria de certeza es la **afirmación territorial** (`claim`), no la Unidad Espacial completa. Una misma UE puede contener relaciones corroboradas y otras todavía no cerradas.
+
+Cada claim separa dos ejes:
+
+```text
+claimState:
+  open | asserted
+
+evidenceStatus:
+  proposed | partially_corroborated | corroborated
+```
+
+`claimState: open` significa que la afirmación todavía no puede cerrarse; en ese estado no corresponde asignar `evidenceStatus` como si existiera una afirmación ya formulada.
 
 Ejemplo conceptual:
 
 ```text
 CLAIM-001
 statement: bridge crosses stream
-status: proposed | partially_corroborated | corroborated
+claimState: asserted
+evidenceStatus: proposed
 sources: [...]
 
 CLAIM-002
 statement: exact bridge bearing
-status: OPEN
+claimState: open
 sources: []
 ```
 
@@ -179,11 +192,20 @@ Reglas:
 
 ## 7. Estado de evidencia y estado de producción
 
-No usar un único estado para describir dos cosas distintas.
+No usar un único estado para describir cosas distintas.
+
+### Estado del claim
+
+```text
+open
+asserted
+```
+
+Describe si una afirmación está todavía sin cerrar o ya formulada para ser evaluada.
 
 ### Estado de evidencia
 
-Se aplica primariamente a claims, rasgos o relaciones concretas:
+Solo para claims `asserted`:
 
 ```text
 proposed
@@ -191,7 +213,7 @@ partially_corroborated
 corroborated
 ```
 
-`OPEN` se usa cuando la afirmación todavía no puede formularse o cerrarse con evidencia suficiente.
+Describe cuánto respaldo territorial tiene la afirmación.
 
 ### Estado de producción
 
@@ -204,7 +226,7 @@ tested
 approved
 ```
 
-Una afirmación territorial puede estar `corroborated` mientras `MAP-001` sigue `blockout`. Del mismo modo, un blockout experimental puede usar una geometría provisional de una relación todavía `OPEN`, siempre que esa provisionalidad quede explícita.
+Una afirmación territorial puede estar `corroborated` mientras `MAP-001` sigue `blockout`. Un blockout experimental puede usar una geometría provisional asociada a un claim `open`, siempre que esa provisionalidad quede explícita.
 
 ## 8. Master Territorial
 
@@ -214,7 +236,7 @@ Cuando exista, no debe mezclar hechos territoriales y decisiones de arte como si
 
 ```text
 evidencia / procedencia
-afirmaciones territoriales y su estado
+afirmaciones territoriales + claimState + evidenceStatus
 síntesis territorial
 Unidades Espaciales y rasgos
 relaciones espaciales
@@ -277,14 +299,7 @@ Define la lógica del blockout y la pantalla:
 
 No asumir que `screenUp = north`.
 
-Para el piloto es canónico:
-
-```text
-screenUp   = cordillera / interior / progresión
-screenDown = entrada / dirección general hacia el mar / retorno
-```
-
-La correspondencia exacta entre esos ejes y norte/sur/este/oeste geográficos permanece `OPEN` hasta corroborarla.
+Las relaciones visuales específicas del piloto se definen en `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md`; este documento solo define la semántica del marco local y del Camera Contract.
 
 ## 11. Contrato de Navegación
 
@@ -343,8 +358,6 @@ movementProfile: level | ascent | descent | mixed | transition
 experienceRole: tutorial | exploration | discovery | rest | transit | redistribution
 ```
 
-Esto evita mezclar topología, dirección, progresión y función narrativa en un solo campo `flow`.
-
 ## 12. Contrato de Cámara
 
 La cámara forma parte del diseño espacial cuando las relaciones de pantalla son canónicas.
@@ -361,7 +374,7 @@ zoomPolicy
 screenRelationInvariants
 ```
 
-Para `IT-001 / MAP-001`:
+Para el piloto, el perfil de prueba es:
 
 ```text
 profileId: PILOT_FIXED_ISOMETRIC
@@ -370,14 +383,9 @@ rotationPolicy: disabled
 followPolicy: allowed
 panPolicy: allowed
 zoomPolicy: testable / not canonical yet
-screenRelationInvariants:
-  screen_up   = cordillera / interior / progresión
-  screen_down = entrada / retorno
-  stream      = screen_right y nivel inferior tras el umbral
-worldCardinalMapping: OPEN
 ```
 
-El contrato fija comportamiento, no grados exactos. Pitch, yaw, FOV y zoom definitivo permanecen `OPEN` hasta prueba técnica.
+Los invariantes visuales concretos de `MAP-001` se consultan en `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md`, que es la autoridad de esas relaciones. El contrato fija comportamiento, no grados exactos. Pitch, yaw, FOV y zoom definitivo permanecen `OPEN` hasta prueba técnica.
 
 ## 13. Contrato de Interacción / Aprendizaje
 
@@ -534,7 +542,7 @@ UE-003 Claro de picnic
   rasgos: apertura del recorrido, zonas de picnic, continuidad hacia interior
 ```
 
-El estado de evidencia se registra por afirmación/rasgo/relación concreta. La forma exacta del puente, su bearing y la geometría del claro permanecen `OPEN` mientras no exista corroboración suficiente.
+La forma exacta del puente, su bearing y la geometría del claro permanecen como claims `open` mientras no exista corroboración suficiente.
 
 Primera Instancia Territorial:
 
@@ -563,7 +571,6 @@ Navigation Contract
     progressionRole: exit
 
   mainRoute: centro perceptual
-  stream: derecha del camino, nivel inferior tras el umbral de acceso
   lateralContainment: ambas laderas
   worldCardinalMapping: OPEN
 
@@ -580,6 +587,8 @@ Interaction / Learning Contract
   UE-002: exploration + observationOpportunity(required, content OPEN)
   UE-003: pause / reflection / progression
 ```
+
+Las relaciones visuales específicas de camino, estero y orientación de pantalla se toman de `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md`.
 
 El primer blockout/prototipo derivado conserva el identificador `MAP-001`.
 
@@ -601,7 +610,7 @@ Antes de naturalización ambiental, v0.3 debe presentar tres vistas derivadas de
 
 - `UE-001 → UE-002 → UE-003`;
 - claims y relaciones obligatorias;
-- estado de evidencia;
+- `claimState` + `evidenceStatus` cuando corresponda;
 - geometría `OPEN` claramente separada de invariantes.
 
 ### Vista C — Isometric Massing + Camera Test
@@ -622,7 +631,7 @@ Las tres vistas son representaciones de revisión. Ninguna debe convertirse manu
 2. El mapa isométrico complementa la exploración real; no reemplaza observación/fotografía/evidencia de campo.
 3. La jerarquía territorial termina en Unidad Espacial; Instancia y Celda pertenecen a otros planos del modelo.
 4. Un puente, reja, casa, sendero o estero es primero un rasgo territorial; solo es Unidad Espacial si realmente constituye una experiencia espacial autónoma.
-5. El estado de evidencia se registra primariamente por claim/rasgo/relación; el estado de producción pertenece a derivados jugables.
+5. `claimState`, `evidenceStatus` y `productionStatus` son ejes distintos.
 6. El marco geográfico y el marco local de pantalla no se confunden.
 7. La conectividad explícita y el walkable envelope gobiernan; las etiquetas y celdas son derivados de lectura/implementación.
 8. `elbow` es forma de ruta de un corredor; `hub` es función, no topología única.
