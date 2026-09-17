@@ -21,6 +21,7 @@ desarrollo seguro
 
 compilación de escenas / prompts generativos
 → ARBORIS_SCENE_COMPILER.md
+→ ASC_V0_1_EXECUTABLE_SPEC.md   # implementación v0.1 compile-only
 → ASC_VOCABULARY_GUIDE.md       # referencia rápida, no normativa
 
 arte / personajes
@@ -45,13 +46,21 @@ ambientes / mapas
 - [`GENERAL_VOCABULARY_GUIDE.md`](GENERAL_VOCABULARY_GUIDE.md): vocabulario transversal para desarrollo, territorio, revisión, GitHub y trabajo diario. Es una guía operativa aprobada provisionalmente; las autoridades normativas de cada dominio siguen prevaleciendo.
 - [`ASC_VOCABULARY_GUIDE.md`](ASC_VOCABULARY_GUIDE.md): referencia rápida para términos, órdenes y tratamientos de información de ASC. La autoridad normativa sigue siendo `ARBORIS_SCENE_COMPILER.md`.
 
+## Implementación ASC
+
+- [`ARBORIS_SCENE_COMPILER.md`](ARBORIS_SCENE_COMPILER.md): autoridad normativa de ASC.
+- [`ASC_V0_1_EXECUTABLE_SPEC.md`](ASC_V0_1_EXECUTABLE_SPEC.md): contrato de implementación del compilador determinista `compile-only` v0.1.
+- `tools/asc/`: implementación ejecutable, pruebas y fixture mínimo de v0.1.
+
+La existencia de v0.1 no cierra el formato serializado definitivo, la ejecución generativa, los providers, las métricas automáticas ni la integración con renderer; esos elementos siguen `OPEN` según la autoridad normativa.
+
 ## Para Alejandra
 
 Si la tarea es decisión de producto, alcance, arquitectura, datos o estado del desarrollo, partir por los documentos de producto/arquitectura y luego abrir solo la autoridad específica del tema.
 
 Para consultas rápidas de terminología transversal se puede abrir `GENERAL_VOCABULARY_GUIDE.md`, sin tratarla como sustituto del documento normativo correspondiente.
 
-Si la tarea consiste en generar o auditar una escena mediante IA/herramienta generativa, usar `ARBORIS_SCENE_COMPILER.md` como autoridad de compilación y abrir después únicamente los contratos y documentos de dominio necesarios. `ASC_VOCABULARY_GUIDE.md` sirve como recordatorio operativo.
+Si la tarea consiste en generar o auditar una escena mediante IA/herramienta generativa, usar `ARBORIS_SCENE_COMPILER.md` como autoridad de compilación y abrir después únicamente los contratos y documentos de dominio necesarios. `ASC_VOCABULARY_GUIDE.md` sirve como recordatorio operativo. Para trabajar en el compilador ejecutable, continuar con `ASC_V0_1_EXECUTABLE_SPEC.md` y `tools/asc/README.md`.
 
 ## Para Álvaro
 
