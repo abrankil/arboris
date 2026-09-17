@@ -191,12 +191,21 @@ commit: 470925ee67891be889e5668fb12e40f49eaf13f3
 resultado: SUCCESS
 ```
 
-CI del cierre documental final previo a la verificación de ramas:
+CI del cierre documental posterior:
 
 ```text
 workflow: CI
 run: 35179690007
 commit: 7b54449360c876ae9912034deb6465e5452a6865
+resultado: SUCCESS
+```
+
+CI del commit inmediatamente anterior a esta consolidación final:
+
+```text
+workflow: CI
+run: 35179759966
+commit: 5cbbe86850e4d9fc76993863b8d964c41d0aa083
 resultado: SUCCESS
 ```
 
@@ -355,7 +364,7 @@ consulta compacta                         CLOSED / PASS
 benchmark host de routing                 CLOSED / PASS
 benchmark host JSON vs SQLite             CLOSED / PASS
 integridad CI post-optimización            CLOSED / PASS
-sincronización remota de ramas            se verifica post-commit contra HEAD final
+sincronización remota de ramas            verificación post-commit requerida
 benchmark Android real                    OPEN
 ```
 
