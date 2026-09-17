@@ -100,17 +100,36 @@ build/reference-benchmark.json
 build/reference-benchmark.md
 ```
 
-El workflow `.github/workflows/reference-data-benchmark.yml` vuelve a ejecutarlo cuando cambian datos botánicos o las capas de acceso relevantes y publica el reporte como artifact temporal.
-
 El benchmark host es evidencia direccional y no un gate de rendimiento. **No** sustituye el benchmark final con Hermes + `expo-sqlite` en Android. La baseline vigente del motor de identificación del piloto es JSON + índices en memoria; SQLite permanece como prototipo de profiling/escalamiento.
 
-La estrategia completa y los resultados medidos están en `docs/DATA_ACCESS_PERFORMANCE.md`.
+## Benchmark de routing para IA/agentes
+
+`benchmark_ai_routing.mjs` compara una lectura transversal amplia de las seis fichas `data/species/*.json` con la ruta normalizada definida en `AGENTS.md` y `data/README.md`.
+
+Ejecución local:
+
+```powershell
+npm run benchmark:ai-routing
+```
+
+Produce:
+
+```text
+build/ai-routing-benchmark.json
+build/ai-routing-benchmark.md
+```
+
+Este benchmark mide dos proxies reproducibles de eficiencia para agentes: bytes que deben recuperarse/procesarse y costo host de parseo + consulta. **No** mide directamente la velocidad de pensamiento, latencia de generación ni tiempo de red de un modelo de IA.
+
+`.github/workflows/reference-data-benchmark.yml` ejecuta ambos benchmarks cuando cambian las capas de datos/acceso pertinentes y publica los reportes como artifact temporal.
+
+La estrategia completa y las decisiones vigentes están en `docs/DATA_ACCESS_PERFORMANCE.md`. El snapshot de cierre de optimización está en `docs/OPTIMIZATION_CLOSURE_SYNC_2026-09-17.md`.
 
 ## Regla de edición
 
 No corregir botánica editando JSON derivados. Toda corrección debe entrar al Master 2.0 y propagarse mediante el flujo anterior.
 
-`query_botanical.py` es una interfaz de lectura. `build_reference_sqlite.py` produce un artefacto runtime regenerable. `benchmark_reference_access.mjs` solo mide. Ninguno constituye una fuente de verdad ni un generador de conocimiento.
+`query_botanical.py` es una interfaz de lectura. `build_reference_sqlite.py` produce un artefacto runtime regenerable. Los scripts de benchmark solo miden. Ninguno constituye una fuente de verdad ni un generador de conocimiento.
 
 ## Herramientas legacy
 
