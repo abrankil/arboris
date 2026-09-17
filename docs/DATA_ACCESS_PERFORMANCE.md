@@ -1,6 +1,6 @@
 # Árboris — Estrategia de rendimiento de acceso a datos
 
-**Estado:** operativo para acceso de IA; prototipo SQLite derivado implementado; esquema físico definitivo `OPEN`  
+**Estado:** operativo para acceso de IA; benchmark host JSON vs SQLite ejecutado; arquitectura Android final `OPEN`  
 **Fecha:** 17 septiembre 2026  
 **Alcance:** datos botánicos canónicos, consultas de agentes y preparación del runtime offline-first.
 
@@ -15,10 +15,11 @@ IA / GitHub / revisión humana
 → JSON legible, consultas pequeñas, trazabilidad
 
 runtime móvil / profiling
-→ SQLite derivado, índices y consultas locales
+→ JSON + índices en memoria como baseline del piloto
+→ SQLite derivado como alternativa experimental para validar escalamiento
 ```
 
-SQLite no reemplaza los JSON canónicos como superficie de inspección para agentes. El prototipo SQLite es un artefacto runtime regenerable desde el export canónico.
+SQLite no reemplaza los JSON canónicos como superficie de inspección para agentes. El prototipo SQLite es un artefacto regenerable desde el export canónico.
 
 ## 2. Autoridad y capas
 
@@ -39,14 +40,14 @@ query_botanical.py
 = acceso compacto de solo lectura
 
 build_reference_sqlite.py
-= artefacto SQLite derivado para runtime/performance
+= artefacto SQLite derivado para profiling/runtime
 ```
 
 Una optimización puede duplicar estructuras para lectura o índices solo cuando sea regenerable y no permita editar conocimiento botánico fuera del Master.
 
 ## 3. Auditoría de payload actual
 
-Tamaños observados en `main` antes de esta optimización:
+Tamaños del conjunto canónico:
 
 | Archivo | Bytes aprox. |
 | --- | ---: |
@@ -62,7 +63,7 @@ Tamaños observados en `main` antes de esta optimización:
 
 Las seis vistas de `data/species/` suman aproximadamente **246,702 bytes**.
 
-Para comparar especies por caracteres no es necesario cargar esas seis vistas. La ruta normalizada `species.json + characters.json + species_characters.json` requiere aproximadamente **55,284 bytes**, cerca de 4.5 veces menos que cargar las seis fichas completas.
+Para el motor de identificación, `metadata.json + species.json + characters.json + species_characters.json` ocupan aproximadamente **55,841 bytes**. Para comparar especies por caracteres no es necesario cargar las seis fichas completas.
 
 ## 4. Clases de consulta
 
@@ -96,12 +97,6 @@ python tools/botanical-data/query_botanical.py relation SP-001 CH-003 --with-sou
 python tools/botanical-data/query_botanical.py compare CH-003
 ```
 
-Puede limitarse a candidatos concretos:
-
-```powershell
-python tools/botanical-data/query_botanical.py compare CH-003 SP-001 SP-002 SP-006
-```
-
 ### Q5 — fotografías y errores conocidos
 
 ```powershell
@@ -129,7 +124,7 @@ El CLI devuelve JSON compacto por defecto. `--pretty` cambia solo presentación.
 
 ## 6. Índices en memoria actuales
 
-El motor canónico ya construye al cargar:
+El motor canónico construye al cargar:
 
 ```text
 speciesById
@@ -143,7 +138,7 @@ Estas estructuras permiten lookup directo por ID en el proceso de identificació
 
 El esquema SQLite **definitivo** continúa `OPEN`, conforme a `docs/DATA_MODEL.md`.
 
-Sin embargo, ya existe un prototipo regenerable para validar forma física e índices sin fijar todavía la arquitectura final:
+El prototipo regenerable es:
 
 ```text
 tools/botanical-data/build_reference_sqlite.py
@@ -160,16 +155,16 @@ build/arboris_reference.sqlite3
 Construcción:
 
 ```powershell
-npm.cmd run build:reference-db
+npm run build:reference-db
 ```
 
 Prueba de equivalencia básica e índices:
 
 ```powershell
-npm.cmd run verify:reference-db
+npm run verify:reference-db
 ```
 
-### 7.1 Tablas materializadas en el prototipo
+### 7.1 Tablas materializadas
 
 ```text
 metadata
@@ -182,7 +177,7 @@ photos
 model_errors
 ```
 
-`species_character_states` explota los arrays de `estado_esperado` para permitir filtrado rápido por carácter + estado sin depender de JSON embebido.
+`species_character_states` explota los arrays de `estado_esperado` para permitir filtrado por carácter + estado sin depender de JSON embebido.
 
 El prototipo conserva además `payload_json` por registro para no perder campos del export mientras se prueba qué columnas merecen normalización física definitiva.
 
@@ -205,21 +200,97 @@ CREATE INDEX idx_model_errors_species
 ON model_errors(species_id_real);
 ```
 
-El PK compuesto de `species_characters(species_id, character_id)` cubre la dirección especie → carácter; el índice secundario cubre la dirección carácter → especies.
+El PK compuesto de `species_characters(species_id, character_id)` cubre la dirección especie → carácter; el índice secundario cubre carácter → especies.
 
-No se crean índices por defecto sobre campos de baja cardinalidad como `estado_piloto`, `confianza` o `poder_diagnostico` sin evidencia de consulta real.
+No se crean índices por defecto sobre campos de baja cardinalidad sin evidencia de consulta real.
 
 ### 7.3 Validación del query plan
 
-`test_reference_sqlite.py` comprueba con `EXPLAIN QUERY PLAN` que SQLite use los índices críticos para:
+`test_reference_sqlite.py` comprueba con `EXPLAIN QUERY PLAN` que SQLite use los índices críticos y valida conteos, materialización de estados y metadata de procedencia.
 
-- relaciones por `character_id`;
-- candidatos por `(character_id, state)`;
-- fotografías por `species_id`.
+## 8. Benchmark controlado JSON vs SQLite — fase host
 
-También comprueba conteos centrales, materialización de estados y preservación de metadata de procedencia.
+El benchmark reproducible está en:
 
-## 8. Consultas que el futuro SQLite debe optimizar
+```text
+tools/botanical-data/benchmark_reference_access.mjs
+.github/workflows/reference-data-benchmark.yml
+```
+
+Ejecución local:
+
+```powershell
+npm run benchmark:reference-data
+```
+
+El workflow se ejecuta cuando cambian datos botánicos, el builder SQLite, el loader canónico, el propio benchmark o su workflow. No es un gate de CI: los tiempos de runners compartidos son evidencia direccional, no un umbral estable de rendimiento.
+
+### 8.1 Entorno medido
+
+Primera corrida controlada:
+
+```text
+GitHub Actions / Ubuntu x64
+Node v24.20.0
+Master 2.0.0
+6 especies
+19 caracteres activos
+88 relaciones activas del motor
+```
+
+La validación botánica reporta 89 relaciones totales. No es una contradicción: el benchmark usa la misma superficie computable del motor, que excluye la relación asociada a un carácter no activo.
+
+### 8.2 Tamaño
+
+```text
+bundle JSON usado por el motor     55,841 bytes
+bundle JSON canónico completo     116,721 bytes
+SQLite derivado                   151,552 bytes
+
+SQLite / JSON motor                 2.714x
+SQLite / JSON canónico total        1.298x
+```
+
+Para el piloto actual, SQLite no reduce el footprint de reference data.
+
+### 8.3 Tiempos medianos observados
+
+| Escenario | JSON | SQLite | SQLite / JSON |
+| --- | ---: | ---: | ---: |
+| fresh session / first lookup | 592.133 µs | 131.684 µs | 0.222x |
+| species lookup | 0.029 µs | 11.377 µs | 395.049x |
+| species × character | 0.046 µs | 11.561 µs | 249.704x |
+| character → candidate relations | 0.174 µs | 13.254 µs | 76.217x |
+| character + state → compatible species | 0.365 µs | 13.255 µs | 36.276x |
+
+Interpretación:
+
+- SQLite gana claramente en el costo de abrir una sesión y realizar una primera consulta sin cargar el bundle completo.
+- Una vez cargado el dataset pequeño del piloto, los índices `Map` en memoria son órdenes de magnitud más rápidos que consultas SQLite host para el loop de identificación.
+- El bundle JSON requerido por el motor es menor que el DB SQLite derivado.
+- Estos resultados no son equivalentes a `expo-sqlite` en Android y no autorizan una decisión definitiva sobre almacenamiento móvil.
+
+### 8.4 Decisión aprobada para el piloto
+
+Para la **capa de referencia botánica usada por el motor de identificación del piloto**:
+
+```text
+JSON canónico + índices en memoria
+→ BASELINE APROBADA
+
+migración del motor a SQLite
+→ NO JUSTIFICADA por el benchmark host actual
+
+SQLite derivado
+→ conservar como prototipo de profiling y escalamiento
+
+arquitectura final Android
+→ OPEN hasta benchmark con expo-sqlite en dispositivo real
+```
+
+Esto no decide el almacenamiento de observaciones, progreso, mapas, paquetes territoriales ni datasets futuros más grandes.
+
+## 9. Consultas que un futuro SQLite debe optimizar
 
 Prioridad alta:
 
@@ -245,7 +316,7 @@ sincronización
 
 FTS, RTree/geospatial y otros índices especializados permanecen `OPEN` hasta existir consultas reales y pruebas en Android.
 
-## 9. Separación reference data / user data
+## 10. Separación reference data / user data
 
 Debe preservarse la separación conceptual entre:
 
@@ -257,66 +328,68 @@ USER / FIELD DATA
 observaciones, evidencia, sesiones, progreso y estado de juego
 ```
 
-Queda `OPEN` si esto se implementará físicamente como dos bases SQLite o como familias de tablas dentro de una sola base. No elegirlo solo por conveniencia antes de validar sincronización y migraciones.
+Queda `OPEN` si esto se implementará físicamente como dos bases SQLite o como familias de tablas dentro de una sola base. El prototipo actual contiene **solo reference data**.
 
-El prototipo actual contiene **solo reference data**.
+## 11. Medición pendiente antes de consolidar arquitectura Android
 
-## 10. Medición antes de consolidar SQLite
+Antes de promover SQLite o descartar su uso para otras capas, medir en dispositivo Android representativo:
 
-Antes de promover el prototipo a arquitectura runtime final, medir al menos:
-
-- tiempo de construcción y tamaño del DB derivado;
-- tiempo de apertura en Android real;
-- tiempo de primera consulta y consultas repetidas;
+- tiempo de apertura con `expo-sqlite`;
+- primera consulta y consultas repetidas;
 - memoria residente;
-- tamaño del paquete offline;
+- tamaño del paquete offline instalado;
+- costo de bootstrap JSON real en Hermes;
 - frecuencia de cada query;
-- costo de migración/versionado;
-- comportamiento con el dataset territorial futuro;
-- beneficio real de cada índice mediante `EXPLAIN QUERY PLAN`.
+- migración/versionado;
+- comportamiento al incorporar dataset territorial;
+- beneficio real de índices con volúmenes mayores.
 
 Una estructura que mejora microbenchmarks pero aumenta ambigüedad de autoridad o mantenimiento no se aprueba.
 
-## 11. Protocolo de auditoría de esta optimización
+## 12. Protocolo de auditoría
 
 ### AUDITORÍA
 
-Se mantiene una sola autoridad editorial y se añadieron dos superficies derivadas con propósitos distintos: CLI compacto para agentes y SQLite temporal para profiling/runtime.
+Se conserva una única cadena de autoridad. El benchmark compara dos superficies derivadas con la misma información y el mismo proceso host. La capa JSON actual sigue alineada con el motor canónico.
 
 ### INCONSISTENCIAS
 
-Resuelta la tensión entre “SQLite está `OPEN`” y la necesidad de probar índices: el **esquema final** permanece abierto, mientras el prototipo se declara explícitamente experimental y regenerable.
+No se detectó inconsistencia entre las 89 relaciones del Master exportado y las 88 relaciones activas del benchmark: corresponden a universos distintos y explícitos, total vs. computable.
+
+Queda resuelta la tensión “SQLite está `OPEN` / existe SQLite”: el esquema final sigue abierto; el prototipo solo mide una alternativa.
 
 ### VACÍOS / OMISIONES
 
 Permanecen `OPEN`:
 
-- benchmark en dispositivo Android real;
+- benchmark con Hermes + `expo-sqlite` en Android real;
+- memoria residente comparada;
+- impacto de datasets territoriales mucho mayores;
 - esquema de observaciones/evidencia del usuario;
 - estrategia de migraciones;
-- una base vs dos bases para reference/user data;
-- FTS y geospatial;
-- integración directa con `expo-sqlite`.
+- una base vs. dos bases para reference/user data;
+- FTS y geospatial.
 
 ### REDUNDANCIAS
 
-`payload_json` duplica campos indexados de manera **intencional** dentro del prototipo para preservar información durante la exploración del esquema. No debe asumirse como diseño final.
+`payload_json` duplica campos indexados de manera **intencional** dentro del prototipo para preservar información durante la exploración del esquema. No es diseño final.
 
-No se creó un `query_index.json` persistente porque sería una redundancia adicional sin beneficio demostrado.
+El benchmark no crea una nueva base persistente ni un segundo índice JSON. Sus reportes viven en `build/` o como artifacts temporales de Actions.
 
-## 12. Gate actual
+## 13. Gate actual
 
 ```text
 AI routing: PASS
 compact query CLI: PASS
-CLI smoke tests: ADDED
 normalized JSON authority chain: PASS
-persistent JSON query index: NOT NEEDED
-SQLite derived prototype: IMPLEMENTED
-critical SQLite indexes: IMPLEMENTED
-EXPLAIN QUERY PLAN tests: ADDED
+JSON in-memory identification baseline: APPROVED
+SQLite derived prototype: PASS
+critical SQLite indexes: PASS
+host JSON-vs-SQLite benchmark: PASS
+migrate pilot identification engine to SQLite: NOT JUSTIFIED
 SQLite final schema: OPEN
-Android runtime benchmark: NOT TESTED
+Android Hermes/expo-sqlite benchmark: NOT TESTED
+user/field persistence architecture: OPEN
 ```
 
-El siguiente gate de datos es ejecutar y perfilar este prototipo en el entorno de desarrollo y, cuando exista la primera necesidad runtime real, conectarlo a `expo-sqlite` sin convertir el DB derivado en fuente editorial.
+El siguiente gate de datos es medir la misma carga en Android real cuando exista una superficie ejecutable mínima con Hermes + `expo-sqlite`. Hasta entonces, el motor de identificación del piloto permanece sobre JSON canónico + índices en memoria.
