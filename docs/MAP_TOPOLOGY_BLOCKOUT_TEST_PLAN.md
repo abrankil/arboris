@@ -1,47 +1,48 @@
-# Árboris — Plan de pruebas de blockout para topologías conectadas
+# Árboris — Plan de pruebas de blockout para conectividad
 
 ## Objetivo
 
-Comprobar si un generador visual puede conservar una topología definida por Árboris cuando recibe un blockout determinista como referencia, en vez de inferir la navegación únicamente desde texto.
+Comprobar si una estilización visual conserva un Contrato de Navegación explícito cuando recibe un blockout determinista como referencia.
 
 Este plan no fija tamaño de mapa de producción. Las matrices son esquemas normalizados de prueba.
 
 ## Convenciones
 
 ```text
-. = tile no transitable / fuera de ruta
-# = tile transitable
+. = no transitable / fuera de ruta
+# = transitable
 X = nodo o zona de decisión
-^ v < > = borde abierto conceptual
+^ v < > = puerto abierto conceptual
 ```
 
-Las matrices representan conectividad lógica. Altura, roca, vegetación y estilo se incorporan después.
+Las matrices representan conectividad lógica. Elevación, roca, vegetación y estilo se incorporan después.
 
 ## Regla de prueba
 
 La estilización se considera fiel solo si conserva:
 
-- todos los bordes abiertos requeridos;
+- todos los puertos abiertos requeridos;
 - todos los bordes cerrados requeridos;
-- continuidad de tiles entre conexiones;
-- jerarquía de ruta indicada;
-- ausencia de conexiones nuevas inventadas.
+- continuidad de la región transitable;
+- jerarquía de ruta;
+- ausencia de conexiones inventadas.
 
-La calidad visual no compensa una alteración topológica.
+La calidad visual no compensa una alteración estructural.
 
 ---
 
-## TEST-MAP-01 — `corridor`
+## TEST-MAP-01 — `corridor / straight`
 
 ### Contrato
 
 ```text
-mapTopology: corridor
-connections:
-  north: primary
-  south: return
-  east: none
-  west: none
+patternLabel: corridor
+routeShape: straight
+ports:
+  screen_up: open / primary / exit
+  screen_down: open / primary / entry
+  screen_left: closed
+  screen_right: closed
 ```
 
 ### Esquema lógico
@@ -56,27 +57,27 @@ connections:
 ...#...
 ```
 
-La ruta puede serpentear visualmente, pero debe conservar continuidad entre norte y sur sin abrir este u oeste.
-
 ### Qué validar
 
-- lectura inmediata de una ruta dominante;
-- continuidad fuera de dos bordes opuestos;
-- posibilidad de variación de altura sin crear ramas falsas.
+- una ruta dominante;
+- continuidad entre dos bordes opuestos;
+- ninguna apertura lateral;
+- elevación variable sin crear ramas falsas.
 
 ---
 
-## TEST-MAP-02 — `elbow`
+## TEST-MAP-02 — `corridor / bend`
 
 ### Contrato
 
 ```text
-mapTopology: elbow
-connections:
-  north: none
-  south: return
-  east: primary
-  west: none
+patternLabel: corridor
+routeShape: bend
+ports:
+  screen_up: closed
+  screen_down: open / primary / entry
+  screen_right: open / primary / exit
+  screen_left: closed
 ```
 
 ### Esquema lógico
@@ -91,14 +92,14 @@ connections:
 ...#...
 ```
 
-El cambio de dirección debe sentirse causado por relieve, roca o vegetación, no por una esquina geométrica artificial.
+El giro debe sentirse causado por relieve o estructura territorial, no por una esquina artificial.
 
 ### Qué validar
 
-- entrada sur y salida este inequívocas;
-- ausencia de salida norte/oeste;
-- curva natural de navegación;
-- sin plaza central ni hub inventado.
+- entrada inferior y salida derecha inequívocas;
+- ausencia de salida superior/izquierda;
+- curva natural;
+- sin plaza central inventada.
 
 ---
 
@@ -107,12 +108,12 @@ El cambio de dirección debe sentirse causado por relieve, roca o vegetación, n
 ### Contrato
 
 ```text
-mapTopology: junction
-connections:
-  north: primary
-  south: return
-  east: secondary
-  west: none
+patternLabel: junction
+ports:
+  screen_up: open / primary / exit
+  screen_down: open / primary / entry
+  screen_right: open / secondary / optional
+  screen_left: closed
 ```
 
 ### Esquema lógico
@@ -127,15 +128,12 @@ connections:
 ...#...
 ```
 
-El nodo `X` debe leerse como bifurcación natural del terreno, no como plaza construida.
-
 ### Qué validar
 
-- ruta norte visualmente dominante;
-- rama este claramente secundaria;
-- sur como entrada/retorno;
-- oeste efectivamente cerrado;
-- ausencia de simetría artificial.
+- ruta principal dominante;
+- rama secundaria legible;
+- borde izquierdo cerrado;
+- nodo natural, no plaza simétrica.
 
 ---
 
@@ -144,12 +142,12 @@ El nodo `X` debe leerse como bifurcación natural del terreno, no como plaza con
 ### Contrato
 
 ```text
-mapTopology: crossroad
-connections:
-  north: primary
-  south: return
-  east: secondary
-  west: secondary
+patternLabel: crossroad
+ports:
+  screen_up: open / primary / exit
+  screen_down: open / primary / entry
+  screen_right: open / secondary / optional
+  screen_left: open / secondary / optional
 ```
 
 ### Esquema lógico
@@ -164,15 +162,47 @@ connections:
 ...#...
 ```
 
-Las cuatro conexiones existen, pero deben diferenciarse por jerarquía y carácter ambiental. No deben sentirse como cuatro caminos equivalentes.
+### Qué validar
+
+- cuatro puertos realmente conectados;
+- una ruta principal dominante;
+- ramas secundarias legibles;
+- continuidad visual fuera del encuadre;
+- nodo natural, no arena.
+
+---
+
+## TEST-MAP-05 — `pocket`
+
+### Contrato
+
+```text
+patternLabel: pocket
+ports:
+  screen_down: open / primary / entry-return
+  screen_up: closed
+  screen_left: closed
+  screen_right: closed
+```
+
+### Esquema lógico
+
+```text
+..###..
+.#####.
+.#####.
+..###..
+...#...
+...#...
+...#...
+```
 
 ### Qué validar
 
-- cuatro bordes realmente conectados;
-- una ruta principal dominante;
-- dos ramas secundarias legibles;
-- continuidad visual fuera del encuadre;
-- nodo central natural, no plaza ni arena.
+- un solo acceso real;
+- zona terminal legible;
+- retorno por el mismo acceso;
+- ninguna salida visual falsa.
 
 ---
 
@@ -180,32 +210,30 @@ Las cuatro conexiones existen, pero deben diferenciarse por jerarquía y caráct
 
 Para cada test:
 
-1. entregar al generador el blockout como referencia visual;
-2. indicar que **no debe cambiar conectividad ni transitabilidad**;
+1. entregar el blockout como referencia visual;
+2. indicar que no se debe cambiar conectividad ni transitabilidad;
 3. pedir solo interpretación ambiental y visual;
-4. usar el mismo lenguaje artístico provisional en las cuatro pruebas;
+4. usar el mismo lenguaje artístico provisional en todas las pruebas;
 5. generar una variante por test antes de modificar prompts;
-6. comparar resultado con el contrato lógico original.
+6. comparar contra el contrato original.
 
 ## Prompt base de estilización
-
-Usar el mismo prompt base y cambiar únicamente el blockout:
 
 ```text
 Transform this exact map blockout into a stylized isometric Árboris environment set in the Chilean sclerophyllous precordillera associated with Fundo Los Nogales / Arrayán.
 
 PRESERVE THE BLOCKOUT EXACTLY AS GAMEPLAY STRUCTURE.
 Do not add, remove, close or relocate any map-edge connection.
-Do not change which tiles form the traversable route.
+Do not change which cells form the traversable region.
 Do not create additional paths.
 
-Interpret non-walkable space as natural terrain using rock faces, dense vegetation, elevation changes or other plausible landscape barriers.
+Interpret non-walkable space as natural terrain using rock faces, vegetation, elevation changes or other plausible barriers.
 
-Keep the walkable route readable for click-to-move navigation while integrating the grid subtly into soil and rock.
+Keep the walkable region readable for navigation while integrating the grid subtly into soil and rock.
 
-Use stylized hand-painted isometric game art, subtle cel-shaded outlines, natural rocky terraces, dry soil and irregular sclerophyllous vegetation clusters. Avoid photorealism.
+Use stylized isometric game art, natural rocky terraces, dry soil and irregular sclerophyllous vegetation clusters. Avoid photorealism.
 
-No text, arrows, UI, characters, buildings, fantasy ruins, plazas, monuments or artificial symmetry.
+No text, arrows, UI, characters, fantasy ruins, plazas, monuments or artificial symmetry. Buildings or territorial structures may appear only when explicitly required by the blockout/reference brief.
 
 The environment must feel like one seamless section of a larger connected Árboris world.
 ```
@@ -215,18 +243,20 @@ The environment must feel like one seamless section of a larger connected Árbor
 Cada resultado debe registrar:
 
 - `testId`;
-- generador/modelo utilizado;
+- generador/modelo;
 - prompt exacto;
 - imagen resultante;
-- conexiones conservadas: sí/no;
+- puertos conservados: sí/no;
 - conexiones inventadas: sí/no;
+- región transitable conservada: sí/no;
 - ruta principal conservada: sí/no;
+- anclas territoriales conservadas cuando corresponda: sí/no/NA;
 - observaciones de legibilidad;
 - observaciones de arte;
 - decisión: `pass`, `revise`, `fail`.
 
-## Criterio para cerrar la fase
+## Criterio de cierre
 
-La fase puede considerarse validada cuando las cuatro topologías son reproducibles sin alteraciones de conectividad importantes usando blockout + prompt ambiental.
+La fase puede considerarse validada cuando los cinco patrones son reproducibles sin alteraciones importantes de conectividad mediante blockout + estilización.
 
-Si el generador sigue modificando la topología, el blockout se mantiene como autoridad y la generación se usa solo como referencia de arte, no como diseño de mapa.
+Si el generador sigue modificando estructura, el blockout permanece como autoridad y la generación se usa solo como referencia de arte.
