@@ -252,3 +252,50 @@ Traduce A+B a prismas/terrazas continuas para arte. La grilla se usa como guía,
 - `docs/ENVIRONMENT_PRODUCTION_SPEC.md`
 
 No se modifica en esta auditoría el canon visual del piloto: orientación de pantalla, camino central, estero derecho/inferior, laderas laterales, baja densidad y continuidad territorial permanecen vigentes.
+
+## 9. Resultado de revisión — MAP-001 v0.3
+
+**Decisión de dirección de proyecto:** revisión visual aprobada.  
+**Fecha de decisión:** 16 septiembre 2026.
+
+La aprobación corresponde al **modelo estructural v0.3 y a su gate de lectura visual**, no al mapa final ni a una geometría territorial cerrada.
+
+Resultado:
+
+```text
+MAP-001 v0.3
+productionStatus: tested
+visualReview: approved
+nextGate: v0.4 visual prototype
+```
+
+La aprobación confirma que v0.3 puede avanzar a naturalización ambiental porque la revisión considera suficientemente legibles para esta fase:
+
+- continuidad del corredor;
+- relación entrada → umbral → corredor → claro → interior;
+- lectura central del camino;
+- estero a la derecha y en nivel inferior después del umbral;
+- contención lateral por masas/laderas;
+- presencia y escala de player proxy;
+- configuración de cámara fija de prueba;
+- ausencia de ramas laterales inventadas.
+
+Se conservan explícitamente como `OPEN` y no pueden cerrarse por el arte de v0.4:
+
+- bearing exacto del puente;
+- footprint exacto del claro;
+- escala métrica del mapa;
+- dimensiones finales del personaje de exploración;
+- pitch/yaw/FOV y zoom definitivos;
+- renderer y pathfinding;
+- especies y microhábitats concretos de los interaction slots.
+
+### Gate aprobado
+
+```text
+v0.3 structural model
+→ revisión visual: APPROVED
+→ v0.4 visual prototype naturalizado
+```
+
+`v0.4` sigue siendo una traducción artística/prototipo. No constituye evidencia territorial y no puede modificar claims, topología o incertidumbre `OPEN` por conveniencia visual.
