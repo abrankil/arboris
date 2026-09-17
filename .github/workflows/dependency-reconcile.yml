@@ -22,11 +22,18 @@ jobs:
           node-version: '24'
           cache: npm
 
-      - name: Pin React DOM to the Expo SDK 57 React line
-        run: npm install react-dom@19.2.3 --save-exact --package-lock-only
+      - name: Align Expo SDK 57 dependency graph
+        run: |
+          npm pkg set dependencies.expo="~57.0.23"
+          npm pkg set dependencies.expo-image-picker="~57.0.18"
+          npm pkg set dependencies.react-dom="19.2.3"
+          npm install --package-lock-only
 
       - name: Verify clean npm install without legacy peer resolution
         run: npm ci
+
+      - name: Verify Expo package compatibility
+        run: npx expo install --check
 
       - name: Commit reconciled dependency files if changed
         run: |
@@ -37,5 +44,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "deps: align react-dom with Expo SDK 57 React"
+          git commit -m "deps: align Expo SDK 57 package set"
           git push
