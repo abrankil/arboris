@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   reconcile:
@@ -28,15 +28,14 @@ jobs:
       - name: Verify clean npm install without legacy peer resolution
         run: npm ci
 
-      - name: Stage reconciled dependency files
+      - name: Commit reconciled dependency files if changed
         run: |
-          mkdir -p dependency-reconcile
-          cp package.json package-lock.json dependency-reconcile/
-
-      - name: Upload reconciled dependency files
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-reconcile
-          path: dependency-reconcile/
-          if-no-files-found: error
-          retention-days: 1
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "Dependency graph already reconciled."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "deps: align react-dom with Expo SDK 57 React"
+          git push
