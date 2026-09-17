@@ -136,3 +136,7 @@ corregir antes de escalar
 simplificar antes de duplicar
 mantener OPEN antes de inventar
 ```
+
+## Guía operativa de vocabulario
+
+[`GENERAL_VOCABULARY_GUIDE.md`](GENERAL_VOCABULARY_GUIDE.md) es la referencia rápida aprobada provisionalmente para vocabulario transversal de desarrollo, territorio, revisión y repositorio. Es didáctica y no reemplaza este manual ni las autoridades específicas de cada dominio.
