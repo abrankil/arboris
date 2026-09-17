@@ -1,0 +1,62 @@
+{
+  "version": "0.1",
+  "executionMode": "compile-only",
+  "testId": "ASC-REAL-SCENE-TRANSLATION-001",
+  "objective": "Translate curated field/environment evidence into a bounded ASC prompt without closing unsupported spatial, ecological, taxonomic, gameplay, artistic, or execution decisions.",
+  "authorizedSources": [
+    "FIELD-ARR-2026-09-16-01",
+    "docs/ENVIRONMENT_REFERENCE_PROTOCOL.md",
+    "docs/ARBORIS_SCENE_COMPILER.md"
+  ],
+  "structuralContract": [
+    "Preserve provenance from field evidence to ASC prompt.",
+    "Preserve separation between observed evidence, interpretation, contract, execution, and result.",
+    "Do not convert environmental photographs into map topology or species placement rules.",
+    "Do not treat generated output as evidence automatically."
+  ],
+  "mandatoryRelations": [
+    "FIELD-ARR-2026-09-16-01 supplies environmental evidence only where directly documented.",
+    "ASC produces an ASC prompt; an external executor produces any generative result.",
+    "Unsupported spatial, taxonomic, ecological, gameplay, artistic, and provider decisions remain OPEN."
+  ],
+  "open": [
+    "Exact mapping of field photographs to versioned environment manifest records.",
+    "Exact field coordinates, altitude, bearing, and orientation where not recorded.",
+    "Map topology and walkable envelope.",
+    "Territorialized species placement rules.",
+    "Approved final art direction for this scene.",
+    "Generative provider and execution implementation.",
+    "End-to-end renderer validation."
+  ],
+  "doNotInfer": [
+    "Do not infer species identity from visual resemblance alone.",
+    "Do not infer ecological placement from a generic environmental photograph.",
+    "Do not infer map topology from perspective photographs.",
+    "Do not infer exact camera metadata when it is absent.",
+    "Do not infer an ecological rule from a single reference.",
+    "Do not select a generative provider by plausibility or convenience."
+  ],
+  "prohibited": [
+    "Do not present a generated image as automatic ecological or botanical evidence.",
+    "Do not silently promote interpretedNotes into observed facts.",
+    "Do not use comparative references as sole authority for the appearance of the territory core.",
+    "Do not modify the botanical master through this adapter."
+  ],
+  "artisticFreedom": [
+    "Translate directly observed environmental structure into scene-language constraints while preserving the evidence boundary."
+  ],
+  "cameraFormat": [],
+  "readingPriorities": [
+    "Prioritize provenance and evidence boundaries.",
+    "Preserve OPEN decisions.",
+    "Preserve observed-versus-interpreted separation.",
+    "Prefer omission over unsupported specificity."
+  ],
+  "validationCriteria": [
+    "The contract passes ASC v0.1 structural validation.",
+    "The same contract produces exactly the same compiled prompt.",
+    "All unsupported decisions remain explicitly OPEN.",
+    "No unauthorized top-level ASC fields are introduced.",
+    "A negative test with an unauthorized field fails closed."
+  ]
+}
