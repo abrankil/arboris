@@ -1,6 +1,6 @@
 # Árboris — Estrategia de rendimiento de acceso a datos
 
-**Estado:** operativo para acceso de IA; arquitectura SQLite física todavía `OPEN`  
+**Estado:** operativo para acceso de IA; prototipo SQLite derivado implementado; esquema físico definitivo `OPEN`  
 **Fecha:** 17 septiembre 2026  
 **Alcance:** datos botánicos canónicos, consultas de agentes y preparación del runtime offline-first.
 
@@ -14,11 +14,11 @@ La optimización distingue dos consumidores con necesidades diferentes:
 IA / GitHub / revisión humana
 → JSON legible, consultas pequeñas, trazabilidad
 
-runtime móvil
-→ persistencia e índices locales eficientes
+runtime móvil / profiling
+→ SQLite derivado, índices y consultas locales
 ```
 
-SQLite no reemplaza los JSON canónicos como superficie de inspección para agentes. El futuro SQLite será un artefacto runtime derivado y regenerable.
+SQLite no reemplaza los JSON canónicos como superficie de inspección para agentes. El prototipo SQLite es un artefacto runtime regenerable desde el export canónico.
 
 ## 2. Autoridad y capas
 
@@ -35,8 +35,11 @@ data/species/*.json
 = vistas denormalizadas por especie
         ↓
 
-query_botanical.py / futuro SQLite
-= superficies de acceso derivadas
+query_botanical.py
+= acceso compacto de solo lectura
+
+build_reference_sqlite.py
+= artefacto SQLite derivado para runtime/performance
 ```
 
 Una optimización puede duplicar estructuras para lectura o índices solo cuando sea regenerable y no permita editar conocimiento botánico fuera del Master.
@@ -65,23 +68,17 @@ Para comparar especies por caracteres no es necesario cargar esas seis vistas. L
 
 ### Q1 — identidad de especie
 
-Usar `species.json` o:
-
 ```powershell
 python tools/botanical-data/query_botanical.py species SP-001
 ```
 
 ### Q2 — definición de carácter
 
-Usar `characters.json` o:
-
 ```powershell
 python tools/botanical-data/query_botanical.py character CH-003
 ```
 
 ### Q3 — relación especie × carácter
-
-Ruta preferida para una consulta puntual:
 
 ```powershell
 python tools/botanical-data/query_botanical.py relation SP-001 CH-003
@@ -121,13 +118,14 @@ Usar una única ficha en `data/species/`. No reconstruir manualmente todos los j
 Por defecto:
 
 1. resolver IDs antes de abrir tablas grandes;
-2. pedir una relación o carácter específico cuando la pregunta sea puntual;
-3. usar comparación normalizada para varias especies;
-4. cargar fuentes o fotos solo bajo demanda;
-5. evitar `data/species/*.json` múltiples en una misma consulta;
-6. evitar archivos históricos y binarios salvo necesidad explícita.
+2. usar `query_botanical.py` cuando exista ejecución local;
+3. pedir una relación o carácter específico cuando la pregunta sea puntual;
+4. usar comparación normalizada para varias especies;
+5. cargar fuentes o fotos solo bajo demanda;
+6. evitar `data/species/*.json` múltiples en una misma consulta;
+7. evitar archivos históricos y binarios salvo necesidad explícita.
 
-El CLI devuelve JSON compacto por defecto. `--pretty` queda disponible cuando la lectura humana lo requiera.
+El CLI devuelve JSON compacto por defecto. `--pretty` cambia solo presentación.
 
 ## 6. Índices en memoria actuales
 
@@ -139,97 +137,87 @@ charactersById
 relationsBySpecies
 ```
 
-Estas estructuras permiten lookup directo por ID en el proceso de identificación. No se justifica introducir una base de índices persistentes adicional para el piloto mientras el dataset normalizado siga en este orden de magnitud.
+Estas estructuras permiten lookup directo por ID en el proceso de identificación. No se introduce un índice JSON persistente adicional porque el beneficio no compensa una nueva capa derivada que habría que mantener y validar.
 
-Un índice persistente nuevo solo debe añadirse si una medición demuestra que reduce de forma material tiempo de carga, memoria o payload.
+## 7. Prototipo SQLite derivado
 
-## 7. Diseño físico SQLite — estado
+El esquema SQLite **definitivo** continúa `OPEN`, conforme a `docs/DATA_MODEL.md`.
 
-El esquema SQLite definitivo continúa `OPEN`, conforme a `docs/DATA_MODEL.md`.
-
-La optimización actual establece únicamente requisitos de acceso e índices recomendados para cuando se implemente el esquema físico.
-
-### 7.1 Tablas de referencia mínimas candidatas
+Sin embargo, ya existe un prototipo regenerable para validar forma física e índices sin fijar todavía la arquitectura final:
 
 ```text
+tools/botanical-data/build_reference_sqlite.py
+```
+
+Salida predeterminada:
+
+```text
+build/arboris_reference.sqlite3
+```
+
+`build/` está excluido de Git. No se versiona el binario SQLite.
+
+Construcción:
+
+```powershell
+npm.cmd run build:reference-db
+```
+
+Prueba de equivalencia básica e índices:
+
+```powershell
+npm.cmd run verify:reference-db
+```
+
+### 7.1 Tablas materializadas en el prototipo
+
+```text
+metadata
 species
 characters
+sources
 species_characters
 species_character_states
-sources
 photos
 model_errors
 ```
 
-`species_character_states` es recomendable para evitar depender de arrays JSON al filtrar candidatos por estado.
+`species_character_states` explota los arrays de `estado_esperado` para permitir filtrado rápido por carácter + estado sin depender de JSON embebido.
 
-Esquema conceptual candidato:
+El prototipo conserva además `payload_json` por registro para no perder campos del export mientras se prueba qué columnas merecen normalización física definitiva.
 
-```sql
-species(
-  species_id TEXT PRIMARY KEY,
-  ...
-)
-
-characters(
-  character_id TEXT PRIMARY KEY,
-  ...
-)
-
-species_characters(
-  species_id TEXT NOT NULL,
-  character_id TEXT NOT NULL,
-  source_id TEXT,
-  ...,
-  PRIMARY KEY (species_id, character_id)
-)
-
-species_character_states(
-  species_id TEXT NOT NULL,
-  character_id TEXT NOT NULL,
-  state TEXT NOT NULL,
-  PRIMARY KEY (species_id, character_id, state)
-)
-```
-
-Esto es una propuesta de implementación, no una nueva fuente de datos.
-
-### 7.2 Índices recomendados
-
-El PK compuesto de `species_characters` cubre consultas que comienzan por `species_id`.
-
-Para consultas transversales por carácter:
+### 7.2 Índices implementados
 
 ```sql
 CREATE INDEX idx_species_characters_character
 ON species_characters(character_id, species_id);
-```
 
-Para filtrado de candidatos por estado:
-
-```sql
 CREATE INDEX idx_species_character_states_lookup
 ON species_character_states(character_id, state, species_id);
-```
 
-Para evidencia fotográfica por especie/individuo:
-
-```sql
 CREATE INDEX idx_photos_species
 ON photos(species_id);
 
 CREATE INDEX idx_photos_individual
 ON photos(individual_id);
-```
 
-Para errores conocidos por especie real:
-
-```sql
 CREATE INDEX idx_model_errors_species
 ON model_errors(species_id_real);
 ```
 
-No crear índices por defecto sobre campos de baja cardinalidad como `estado_piloto`, `confianza` o `poder_diagnostico` sin un perfil de consultas que lo justifique.
+El PK compuesto de `species_characters(species_id, character_id)` cubre la dirección especie → carácter; el índice secundario cubre la dirección carácter → especies.
+
+No se crean índices por defecto sobre campos de baja cardinalidad como `estado_piloto`, `confianza` o `poder_diagnostico` sin evidencia de consulta real.
+
+### 7.3 Validación del query plan
+
+`test_reference_sqlite.py` comprueba con `EXPLAIN QUERY PLAN` que SQLite use los índices críticos para:
+
+- relaciones por `character_id`;
+- candidatos por `(character_id, state)`;
+- fotografías por `species_id`.
+
+También comprueba conteos centrales, materialización de estados y preservación de metadata de procedencia.
 
 ## 8. Consultas que el futuro SQLite debe optimizar
 
@@ -271,29 +259,64 @@ observaciones, evidencia, sesiones, progreso y estado de juego
 
 Queda `OPEN` si esto se implementará físicamente como dos bases SQLite o como familias de tablas dentro de una sola base. No elegirlo solo por conveniencia antes de validar sincronización y migraciones.
 
-## 10. Medición antes de optimizar
+El prototipo actual contiene **solo reference data**.
 
-Antes de introducir cachés persistentes, materialized views o nuevos índices, medir al menos:
+## 10. Medición antes de consolidar SQLite
 
-- tiempo de apertura/carga en Android real;
-- tiempo de primera consulta;
+Antes de promover el prototipo a arquitectura runtime final, medir al menos:
+
+- tiempo de construcción y tamaño del DB derivado;
+- tiempo de apertura en Android real;
+- tiempo de primera consulta y consultas repetidas;
 - memoria residente;
 - tamaño del paquete offline;
 - frecuencia de cada query;
-- costo de regeneración/migración;
-- beneficio real del índice mediante `EXPLAIN QUERY PLAN` cuando SQLite exista.
+- costo de migración/versionado;
+- comportamiento con el dataset territorial futuro;
+- beneficio real de cada índice mediante `EXPLAIN QUERY PLAN`.
 
 Una estructura que mejora microbenchmarks pero aumenta ambigüedad de autoridad o mantenimiento no se aprueba.
 
-## 11. Gate de esta optimización
+## 11. Protocolo de auditoría de esta optimización
+
+### AUDITORÍA
+
+Se mantiene una sola autoridad editorial y se añadieron dos superficies derivadas con propósitos distintos: CLI compacto para agentes y SQLite temporal para profiling/runtime.
+
+### INCONSISTENCIAS
+
+Resuelta la tensión entre “SQLite está `OPEN`” y la necesidad de probar índices: el **esquema final** permanece abierto, mientras el prototipo se declara explícitamente experimental y regenerable.
+
+### VACÍOS / OMISIONES
+
+Permanecen `OPEN`:
+
+- benchmark en dispositivo Android real;
+- esquema de observaciones/evidencia del usuario;
+- estrategia de migraciones;
+- una base vs dos bases para reference/user data;
+- FTS y geospatial;
+- integración directa con `expo-sqlite`.
+
+### REDUNDANCIAS
+
+`payload_json` duplica campos indexados de manera **intencional** dentro del prototipo para preservar información durante la exploración del esquema. No debe asumirse como diseño final.
+
+No se creó un `query_index.json` persistente porque sería una redundancia adicional sin beneficio demostrado.
+
+## 12. Gate actual
 
 ```text
-AI routing: implemented
-compact query CLI: implemented
-normalized JSON remains authority-derived: preserved
-persistent duplicate query index: not introduced
-SQLite physical schema: OPEN
-SQLite index contract: proposed for later validation
+AI routing: PASS
+compact query CLI: PASS
+CLI smoke tests: ADDED
+normalized JSON authority chain: PASS
+persistent JSON query index: NOT NEEDED
+SQLite derived prototype: IMPLEMENTED
+critical SQLite indexes: IMPLEMENTED
+EXPLAIN QUERY PLAN tests: ADDED
+SQLite final schema: OPEN
+Android runtime benchmark: NOT TESTED
 ```
 
-El siguiente gate de datos será implementar un prototipo SQLite derivado **solo cuando una funcionalidad runtime del piloto necesite persistencia/consulta local real**. Hasta entonces, JSON normalizado + CLI compacto es la ruta de menor costo y menor riesgo.
+El siguiente gate de datos es ejecutar y perfilar este prototipo en el entorno de desarrollo y, cuando exista la primera necesidad runtime real, conectarlo a `expo-sqlite` sin convertir el DB derivado en fuente editorial.
