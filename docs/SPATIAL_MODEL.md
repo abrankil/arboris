@@ -2,41 +2,50 @@
 
 ## Estado
 
-Modelo conceptual consolidado para transformar territorios reales en espacios jugables reconocibles.
+Modelo conceptual corregido para transformar territorios reales en espacios jugables reconocibles sin confundir escala territorial, evidencia, navegación, implementación y arte.
 
-Este documento define vocabulario, límites y relaciones entre territorio, evidencia, jugabilidad y arte. No fija todavía tamaño de celda, escala metro/celda, pathfinding, renderer, formato de datos final ni un Master Territorial implementado.
-
-## Resultado de fiscalización conceptual
-
-La propuesta se contrastó con los principios ya vigentes del proyecto, el protocolo ambiental y el sistema de topología. Se corrigieron cinco riesgos:
-
-1. **Territorio ≠ mapa.** El mapa es un derivado jugable del territorio, no su fuente.
-2. **Unidad Espacial ≠ tile.** La Unidad Espacial es conceptual; las celdas son implementación.
-3. **Topología ≠ identidad territorial.** `corridor`, `junction`, etc. describen conectividad, no el lugar.
-4. **Evidencia ≠ canon.** Google Earth, fotografías y memoria de visitante son evidencias con procedencia y confianza; no son por sí solas fuente canónica.
-5. **Instancia Territorial ≠ mapa.** La instancia describe una versión jugable de un lugar; el mapa/prototipo es una representación derivada de esa instancia.
-
-También se corrige una ambigüedad territorial: para el piloto, **Fundo Los Nogales** se mantiene como sector núcleo. El Estero El Arrayán y la cuenca de El Arrayán se registran como contexto hidrológico/territorial cuando corresponda; no se usan como sinónimo automático del sector.
+Este documento no fija todavía tamaño de celda, escala metro/celda, pathfinding, renderer ni esquema final de datos. Tampoco convierte una representación jugable en autoridad sobre el territorio real.
 
 ## Principio rector
 
 Árboris no diseña mapas desde cero. **Destila territorios reales en espacios jugables reconocibles.**
 
+La corrección principal de este modelo es separar tres planos que antes aparecían mezclados:
+
+```text
+A. TERRITORIO
+Paisaje → Sector → Lugar → Unidad Espacial
+
+B. DERIVACIÓN JUGABLE
+Instancia Territorial → Contrato de Navegación → Blockout → Prototipo visual
+
+C. IMPLEMENTACIÓN
+celdas / tiles / objetos / navegación / renderer
+```
+
+Estos planos se relacionan, pero no forman una sola jerarquía.
+
+## 1. Territorio, evidencia y derivación
+
 ```text
 territorio real
 → evidencia registrada
-→ modelo territorial
-→ Unidad Espacial
+→ síntesis territorial trazable
+→ Unidades Espaciales + rasgos territoriales
 → Instancia Territorial
-→ Contrato Jugable
-→ Modelo Espacial / blockout
+→ Contrato de Navegación
+→ blockout determinista
 → Dirección de Arte
-→ mapa o prototipo
+→ prototipo
+→ evaluación
+↺ revisión controlada
 ```
 
-## Destilación Territorial
+La revisión puede cambiar la derivación jugable o artística sin reescribir la evidencia. La evidencia solo cambia cuando aparece nueva información o se corrige una fuente.
 
-La **Destilación Territorial** es el proceso mediante el cual un lugar real conserva su identidad reconocible mientras se simplifica para funcionar como juego.
+## 2. Destilación Territorial
+
+La **Destilación Territorial** conserva identidad reconocible mientras simplifica el lugar para hacerlo jugable.
 
 Toda destilación debe declarar:
 
@@ -48,38 +57,59 @@ Toda destilación debe declarar:
 
 Una escena puede ser atractiva y aun así fallar si deja de sentirse como el lugar que representa.
 
-## Escalas conceptuales
+## 3. Jerarquía territorial
+
+La jerarquía territorial contiene únicamente entidades que describen el lugar real o una síntesis territorial de ese lugar:
 
 ```text
 Paisaje
 → Sector
 → Lugar
 → Unidad Espacial
-→ Instancia Territorial
-→ Celda Espacial
 ```
 
 ### Paisaje
 Escala territorial amplia. Ejemplo: precordillera de Santiago.
 
 ### Sector
-Área concreta del paisaje que actúa como ámbito de trabajo. Para el piloto: **Fundo Los Nogales**.
+Área concreta del paisaje que actúa como ámbito de trabajo. Para el piloto: **Fundo Los Nogales / territorio núcleo del piloto**, conservando separada la nomenclatura oficial o contextual cuando corresponda.
 
 ### Lugar
 Zona reconocible dentro del sector. Ejemplo: acceso principal.
 
 ### Unidad Espacial
-Fragmento reconocible e indivisible desde la experiencia del jugador. No se define por metros ni por cantidad de tiles.
+Segmento o zona reconocible del recorrido que mantiene identidad territorial y experiencial suficiente para ser tratado como una unidad de diseño.
 
-### Instancia Territorial
-Versión jugable de una o más Unidades Espaciales bajo una condición y objetivo de prueba concretos.
+Una Unidad Espacial no es un objeto individual, un tile ni una versión del juego.
 
-### Celda Espacial
-Unidad técnica mínima usada para representar altura, ocupación y navegación. Puede implementarse como celda cúbica o prismática. Su forma visual puede quedar completamente oculta por el arte.
+## 4. Rasgos territoriales
 
-## Evidencia territorial
+Dentro de un Lugar o de una Unidad Espacial existen **rasgos territoriales**. Pueden ser puntuales, lineales o de área.
 
-El modelo espacial separa fuente de evidencia y síntesis canónica.
+Ejemplos:
+
+- puente;
+- reja;
+- casa del conserje;
+- sendero;
+- estero;
+- ladera;
+- claro;
+- afloramiento rocoso.
+
+Para describir su geometría basta, cuando sea necesario, con una clase mínima:
+
+```text
+point | line | area | unknown
+```
+
+Esta distinción evita convertir cada objeto reconocible en una Unidad Espacial.
+
+Un rasgo puede funcionar además como `anchorElement` cuando sea decisivo para reconocer el lugar.
+
+## 5. Evidencia territorial
+
+El modelo separa fuente, observación, interpretación y derivación.
 
 ```text
 Google Earth / DEM / medición → evidencia topográfica
@@ -91,174 +121,264 @@ referencias ambientales        → evidencia ecológica/ambiental
 
 Reglas:
 
-- toda evidencia debe conservar procedencia;
+- toda evidencia conserva procedencia;
 - una captura aislada no autoriza una regla general;
-- un recuerdo declarado no se convierte en hecho observado hasta ser contrastado cuando sea posible;
+- un recuerdo declarado no se convierte en hecho observado solo por ser plausible;
 - una imagen generada nunca es evidencia territorial;
 - el Master Botánico aporta información de especies, no geometría del lugar.
 
-## Master Territorial
+## 6. Estado de evidencia y estado de producción
 
-El **Master Territorial** es una entidad arquitectónica objetivo: la futura fuente canónica que sintetizará Lugares, Unidades Espaciales, relaciones, evidencias y decisiones de Destilación Territorial.
+No usar un único estado para describir dos cosas distintas.
 
-**Todavía no existe un formato canónico implementado.** No se crea un Excel/JSON paralelo hasta que el caso del Acceso Principal demuestre qué campos son realmente necesarios.
-
-La regla de diseño es equivalente a la usada en botánica: primero se estabiliza el modelo, luego se define una fuente canónica reproducible.
-
-## Unidad Espacial
-
-Definición consolidada:
-
-> Una Unidad Espacial es un fragmento del lugar que mantiene identidad territorial y experiencial suficiente para ser reconocido como una unidad del recorrido y ser traducido a juego.
-
-Debe responder:
+### Estado de evidencia
 
 ```text
-¿Qué lugar es?
-¿Qué lo hace reconocible?
-¿Qué evidencia lo respalda?
-¿Cómo se relaciona con las unidades vecinas?
-¿Qué función tiene en el recorrido real?
-¿Qué función tendrá en el juego?
-¿Qué se conserva y qué se simplifica?
+proposed
+partially_corroborated
+corroborated
 ```
 
-Una Unidad Espacial puede contener muchas Celdas Espaciales.
+Describe cuánto respaldo territorial tiene una Unidad Espacial o un rasgo.
 
-## Instancia Territorial
-
-La Instancia Territorial separa el lugar real de una versión concreta de juego.
-
-Ejemplos posibles:
+### Estado de producción
 
 ```text
-IT-001 Acceso Principal — primera entrada/tutorial
+unmodeled
+blockout
+tested
+approved
+```
+
+Describe cuánto ha avanzado su traducción jugable.
+
+Una Unidad Espacial puede estar `corroborated` y todavía `unmodeled`, o seguir `proposed` mientras ya participa en un blockout experimental. Los dos ejes no deben pisarse.
+
+## 7. Master Territorial
+
+El **Master Territorial** sigue siendo un objetivo arquitectónico, no un archivo implementado.
+
+Cuando exista, no debe mezclar hechos territoriales y decisiones de arte como si fueran equivalentes. Como mínimo deberá separar:
+
+```text
+evidencia / procedencia
+síntesis territorial
+Unidades Espaciales y rasgos
+relaciones espaciales
+Derivaciones jugables que los referencian
+```
+
+La Instancia Territorial, el blockout y el arte son derivados trazables del territorio; no deben reescribir silenciosamente la fuente territorial.
+
+No crear todavía un Excel/JSON definitivo hasta que `IT-001 / MAP-001` demuestre qué campos son necesarios.
+
+## 8. Instancia Territorial
+
+La **Instancia Territorial** es una versión jugable de una o más Unidades Espaciales bajo una condición y un objetivo concretos.
+
+Ejemplos:
+
+```text
+IT-001 Acceso Principal — entrada inicial/tutorial
 IT-002 Acceso Principal — variante estacional futura
 ```
 
-Una Instancia Territorial referencia Unidades Espaciales, pero no las redefine.
+Una Instancia referencia Unidades Espaciales y rasgos territoriales; no forma parte de la jerarquía geográfica y no redefine el lugar real.
 
-No usar prefijo `MAP-` para la instancia. `MAP-` se reserva para blockouts/mapas/prototipos derivados.
+`MAP-*` queda reservado para blockouts, mapas o prototipos derivados.
 
-## Modelo Espacial y Celdas Espaciales
+## 9. Marcos de coordenadas
 
-El Modelo Espacial traduce una Instancia Territorial a estructura técnica suficiente para blockout.
+Árboris debe distinguir el marco territorial del marco local de juego.
 
-Puede representar:
+### Marco territorial
 
-- coordenadas locales;
-- altura relativa;
-- transitabilidad;
-- bordes y cambios de nivel;
-- agua;
-- bloqueos;
-- puntos de interacción;
-- cobertura/ocupación necesaria para gameplay;
-- vínculos territoriales cuando exista evidencia suficiente.
+Cuando existe evidencia suficiente puede contener:
 
-Para la primera prueba se favorecen **Celdas Espaciales cúbicas o prismáticas** porque hacen legibles los niveles de altura y simplifican la construcción del blockout.
+- coordenadas geográficas;
+- CRS o referencia espacial;
+- orientación/bearing;
+- elevación real;
+- relaciones topográficas.
 
-Esto es una decisión de prototipado, no una obligación estética ni una selección definitiva de renderer.
+### Marco local de mapa
 
-## Contrato Jugable
+Define la lógica del blockout y la pantalla:
 
-El Contrato Jugable define cómo se recorre una Instancia Territorial. Tiene tres componentes distintos:
+- `screenUp`;
+- `screenDown`;
+- `screenLeft`;
+- `screenRight`;
+- origen local;
+- filas/columnas;
+- bandas de elevación relativa.
 
-### 1. Topología
-Usa exclusivamente las categorías ya definidas en `MAP_TOPOLOGY_SYSTEM.md`:
+No asumir que `screenUp = north`.
 
-- `corridor`;
-- `elbow`;
-- `junction`;
-- `crossroad`;
-- `pocket`;
-- `hub`.
+Para el piloto es canónico:
 
-### 2. Roles de conexión
-Conserva los roles vigentes:
+```text
+screenUp   = cordillera / interior / progresión
+screenDown = entrada / dirección general hacia el mar / retorno
+```
 
-- `none`;
-- `primary`;
-- `secondary`;
-- `return`;
-- `conditional`.
+La correspondencia exacta entre esos ejes y norte/sur/este/oeste geográficos permanece `OPEN` hasta corroborarla.
 
-### 3. Flujo
-Describe la experiencia de movimiento. Vocabulario inicial, no exhaustivo:
+## 10. Contrato de Navegación
 
-- entrada;
-- ascenso;
-- descenso;
-- retorno;
-- transición;
-- exploración;
-- descubrimiento;
-- descanso;
-- tutorial.
+El Contrato de Navegación define cómo se recorre una Instancia Territorial. Su autoridad no es una etiqueta como `corridor`, sino la conectividad explícita.
 
-Topología, rol de conexión y flujo no son sinónimos.
+Debe separar:
 
-## Blockout
+### Puertos de conexión
 
-El blockout es una representación técnica simplificada del Contrato Jugable sobre Celdas Espaciales.
+Cada conexión de borde declara dimensiones independientes:
+
+```text
+id
+localEdge: screen_up | screen_down | screen_left | screen_right
+state: open | closed | conditional
+priority: primary | secondary | none
+progressionRole: entry | exit | return | optional | none
+directionality: bidirectional | one_way
+worldBearing: optional / OPEN
+```
+
+### Grafo / región transitable
+
+Debe existir una representación determinista de qué zonas o celdas están conectadas y cuáles no.
+
+### Etiqueta de patrón
+
+`corridor`, `junction`, `crossroad`, `pocket` pueden mantenerse como etiquetas de lectura rápida, pero se derivan de la conectividad explícita y no la reemplazan.
+
+`elbow` describe la **forma de la ruta** de un corredor, no una topología distinta.
+
+`hub` describe una **función de permanencia o redistribución**, no una conectividad única.
+
+### Forma de ruta
+
+Puede describirse por separado cuando sea útil:
+
+```text
+straight | bend | meander | unknown
+```
+
+### Perfil de experiencia
+
+Separar también:
+
+```text
+movementProfile: level | ascent | descent | mixed | transition
+experienceRole: tutorial | exploration | discovery | rest | transit
+```
+
+Esto evita mezclar topología, dirección, progresión y función narrativa en un solo campo `flow`.
+
+## 11. Celdas Espaciales
+
+Las Celdas Espaciales son una discretización técnica del blockout, no una escala territorial ni un voxel físico del mundo real.
+
+Para el piloto pueden representarse visualmente como prismas o celdas cúbicas en vista isométrica, pero el dato lógico mínimo puede seguir siendo 2D:
+
+```text
+col
+row
+elevationBand
+walkability
+blocker
+interaction
+notes
+```
+
+La altura se expresa como banda relativa mientras no exista equivalencia métrica.
+
+El prisma es una **forma de visualizar** la celda y sus cambios de nivel. No obliga a implementar navegación 3D apilada ni selecciona renderer.
+
+## 12. Blockout
+
+El blockout es una representación técnica simplificada del Contrato de Navegación.
 
 Debe probar como mínimo:
 
-- conexiones;
+- puertos abiertos/cerrados;
+- conectividad;
 - continuidad de ruta;
-- alturas relativas;
+- bandas de altura relativa;
 - transitabilidad;
 - bloqueos;
 - entrada/salida;
 - nodos de decisión;
-- legibilidad.
+- relación con rasgos territoriales obligatorios;
+- legibilidad sin depender de etiquetas explicativas.
 
-No es arte final. Si una estilización cambia la conectividad aprobada, la prueba falla aunque sea visualmente atractiva.
+Si una estilización cambia la conectividad aprobada, la prueba falla aunque sea visualmente atractiva.
 
-## Dirección de Arte
+## 13. Dirección de Arte
 
-Dirección de Arte recibe una estructura ya trazable y la convierte en paisaje reconocible.
+Dirección de Arte recibe una estructura trazable y la convierte en paisaje reconocible.
 
 ```text
-altura   → terrazas, roca, escalones naturales
-bloqueo  → vegetación densa, piedra, desnivel, agua
-ruta     → sendero y lectura del suelo
-fondo    → silueta territorial y continuidad del paisaje
-atmósfera→ luz, estación, profundidad y color
+elevationBand → terrazas, roca, desnivel
+bloqueo       → vegetación, piedra, agua, pendiente
+ruta          → sendero y lectura del suelo
+rasgo         → ancla territorial reconocible
+fondo         → continuidad del paisaje
+atmósfera     → luz, estación, profundidad y color
 ```
 
-La estilización puede ocultar la estructura cúbica. Debe conservar la estructura espacial esencial y los rasgos ancla del lugar.
+La estilización debe conservar estructura espacial y rasgos ancla. Puede simplificar detalle, pero no inventar evidencia.
 
-## Caso de validación inicial — Acceso Principal
+## 14. Iteración controlada
 
-La primera validación conceptual usa información experiencial aportada por una persona que ha visitado el lugar. **Se registra como recuerdo declarado y queda pendiente de corroboración topográfica/fotográfica donde sea posible.**
+La producción real no es estrictamente lineal. Después del primer prototipo puede ser necesario ajustar:
 
-Recuerdos declarados:
+- ancho de ruta;
+- separación entre anclas;
+- forma de una terraza;
+- lectura de alturas;
+- composición y densidad visual.
 
-- el acceso comienza después de un puente de madera que cruza el Estero El Arrayán;
-- existe una reja metálica antigua abierta de par en par;
-- sus soportes son de piedra de la zona;
-- a la izquierda se sitúa la casa del conserje;
-- el sendero nace directamente desde la entrada;
-- el recorrido inicial es una vía única;
-- tras unos metros se llega a un claro con zonas de picnic.
+La revisión vuelve al nivel que corresponda:
 
-Jerarquía inicial:
+```text
+problema territorial → revisar evidencia/síntesis
+problema de navegación → revisar contrato/blockout
+problema visual → revisar dirección de arte
+problema técnico → revisar implementación
+```
+
+No usar una corrección visual para alterar evidencia territorial ni una limitación del renderer para redefinir silenciosamente el lugar.
+
+## 15. Caso de validación inicial — Acceso Principal
+
+Información experiencial declarada:
+
+- puente de madera sobre el Estero El Arrayán;
+- reja metálica antigua abierta con fundamentos de piedra;
+- casa del conserje inmediatamente a la izquierda después del acceso;
+- sendero/calle principal única;
+- claro con zonas de picnic;
+- continuación hacia la cordillera.
+
+La corrección del modelo agrupa estas evidencias por experiencia espacial en vez de convertir cada objeto en Unidad Espacial:
 
 ```text
 Paisaje: Precordillera de Santiago
-Sector: Fundo Los Nogales
+Sector: Fundo Los Nogales / territorio núcleo del piloto
 Lugar: Acceso Principal
-Contexto hidrológico: Estero El Arrayán
 
-UE-001 Puente de acceso
-UE-002 Portal / reja de acceso
-UE-003 Casa del conserje
-UE-004 Sendero inicial
-UE-005 Claro de picnic
+UE-001 Umbral de acceso
+  rasgos: puente, reja, fundamentos, casa del conserje
+
+UE-002 Corredor inicial
+  rasgos: camino principal, Estero El Arrayán, laderas laterales
+
+UE-003 Claro de picnic
+  rasgos: apertura del recorrido, zonas de picnic, continuidad hacia interior
 ```
 
-Estado inicial de estas UE: `proposed` hasta disponer de corroboración suficiente.
+El estado de evidencia de estas unidades y rasgos permanece `proposed` o `partially_corroborated` según la evidencia concreta disponible.
 
 Primera Instancia Territorial:
 
@@ -266,29 +386,48 @@ Primera Instancia Territorial:
 IT-001 Acceso Principal — entrada inicial
 ```
 
-Contrato jugable provisional:
+Contrato local provisional:
 
 ```text
-topología: corridor
-flujo: entrada / transición / tutorial
-entrada: puente / portal
-salida: claro de picnic
+patternLabel: corridor
+routeShape: OPEN
+
+P-IN
+  localEdge: screen_down
+  state: open
+  priority: primary
+  progressionRole: entry
+
+P-OUT
+  localEdge: screen_up
+  state: open
+  priority: primary
+  progressionRole: exit
+
+screenUp: cordillera / interior
+screenDown: entrada / dirección mar
+mainRoute: centro perceptual
+stream: derecha del camino, nivel inferior tras el umbral de acceso
+lateralContainment: ambas laderas
+worldCardinalMapping: OPEN
 ```
 
-El primer blockout/prototipo derivado puede usar el identificador `MAP-001`.
+El primer blockout/prototipo derivado conserva el identificador `MAP-001`.
 
-## Decisiones consolidadas
+## 16. Decisiones consolidadas
 
 1. El mapa es resultado, no fuente.
-2. La Unidad Espacial es la unidad conceptual del recorrido, no un tile.
-3. Las Celdas Espaciales son implementación técnica y pueden ser cúbicas/prismáticas en prototipos.
-4. El Master Territorial es un objetivo arquitectónico, no un archivo ya implementado.
-5. Google Earth es evidencia topográfica, no autoridad canónica única.
-6. La memoria de visitante se registra como evidencia experiencial con trazabilidad y corroboración pendiente cuando corresponda.
-7. Topología, roles de conexión y flujo permanecen separados.
-8. `IT-*` identifica Instancias Territoriales; `MAP-*` identifica representaciones/blockouts derivados.
-9. Fundo Los Nogales se conserva como sector núcleo; El Arrayán se registra como contexto cuando corresponda.
-10. La colocación fina de especies permanece sujeta a evidencia territorial `core`.
+2. La jerarquía territorial termina en Unidad Espacial; Instancia y Celda pertenecen a otros planos del modelo.
+3. Un puente, reja, casa, sendero o estero es primero un rasgo territorial; solo es Unidad Espacial si realmente constituye una experiencia espacial autónoma.
+4. Evidencia y estado de producción usan estados separados.
+5. El marco geográfico y el marco local de pantalla no se confunden.
+6. La conectividad explícita gobierna; las etiquetas de topología son atajos descriptivos.
+7. `elbow` es forma de ruta de un corredor; `hub` es función, no topología única.
+8. Las Celdas Espaciales son discretización 2D con elevación relativa; los prismas son su representación isométrica de trabajo.
+9. `IT-*` identifica Instancias Territoriales; `MAP-*` identifica derivados de mapa/blockout.
+10. Fundo Los Nogales se conserva como territorio núcleo del piloto y El Arrayán como rasgo/contexto cuando corresponda.
+11. La colocación fina de especies sigue sujeta a evidencia territorial `core`.
+12. La iteración puede volver a blockout o arte sin alterar silenciosamente la evidencia.
 
 ## Límites actuales
 
@@ -298,9 +437,10 @@ Quedan `OPEN` hasta validar `IT-001 / MAP-001`:
 - tamaño de Celda Espacial;
 - escala metro/celda;
 - tamaño estándar de mapa;
-- número de niveles de altura;
+- número de bandas de altura;
 - pathfinding;
 - renderer;
 - esquema JSON final;
 - distribución ecológica definitiva de especies;
-- equivalencia exacta entre elevación real y altura jugable.
+- equivalencia exacta entre elevación real y altura jugable;
+- mapeo exacto entre ejes de pantalla y cardinales geográficos.
