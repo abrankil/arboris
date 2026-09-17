@@ -4,10 +4,11 @@
 
 Los fondos actuales son referencias visuales y pruebas de parallax, no masters de producción.
 
-Esta especificación distingue dos cosas que no deben confundirse:
+Esta especificación distingue:
 
 1. **viewport lógico de presentación** — cómo se ve el juego en pantalla;
-2. **contenido espacial del mapa** — cuánto territorio jugable existe y cómo se almacena.
+2. **contenido espacial del mapa** — cuánto territorio jugable existe y cómo se almacena;
+3. **contratos jugables** — navegación, cámara e interacción/aprendizaje que el arte debe respetar.
 
 La dirección de arte corresponde a Álvaro; cualquier cambio de alcance de plataforma o producto debe ser aprobado por Alejandra como directora de proyecto.
 
@@ -46,11 +47,18 @@ La estructura de producción debe poder separar, independientemente del renderer
 
 ```text
 MAP DATA
-- región transitable
+- walkable envelope / región transitable
 - elevación relativa
 - bloqueos
 - interacciones
 - puertos/conexiones
+- referencias a claims/rasgos territoriales
+
+CAMERA / INTERACTION CONTRACTS
+- invariantes de pantalla
+- restricciones de orientación/rotación
+- interaction slots
+- learning beats
 
 WORLD ART
 - terreno/suelo
@@ -84,17 +92,11 @@ La nomenclatura histórica se conserva como **orden compositivo**, no como oblig
 
 `02-world` reemplaza el antiguo concepto de `02-midground` como PNG monolítico. Debe poder contener terreno, senderos, terrazas, agua, vegetación, props y estructuras en unidades reutilizables o chunks.
 
-Una capa puede materializarse como:
-
-- imagen repetible;
-- sprite/objeto;
-- tile/chunk;
-- grupo de assets;
-- composición generada por el renderer.
+Una capa puede materializarse como imagen repetible, sprite/objeto, tile/chunk, grupo de assets o composición generada por el renderer.
 
 No exigir que todas compartan exactamente la extensión del viewport si el mundo se desplaza.
 
-## 5. Chunks y mosaicos
+## 5. Chunks, mosaicos y paquetes offline
 
 No fijar todavía un tamaño canónico de chunk de producción.
 
@@ -112,34 +114,40 @@ El tamaño de chunk definitivo debe decidirse después de probar:
 
 Para atlas, 1024×1024 puede mantenerse como punto de partida técnico, sujeto a medición real del renderer y del dispositivo.
 
+Como requisito de producto, los datos y assets de una zona deben poder **empaquetarse por área para uso offline**. Este documento no fija todavía el formato del paquete, pero la solución elegida no puede depender de conexión permanente para cargar geometría, arte o contratos esenciales de una zona descargada.
+
 ## 6. Relación entre blockout y arte
 
 Cada mapa debe conservar un blockout lógico independiente del arte.
 
 ```text
-Contrato de Navegación
+Navigation Contract + Camera Contract + Interaction/Learning Contract
 → blockout determinista
 → assets/terreno/objetos
 → composición visual
 ```
 
-El arte puede ocultar la cuadrícula y naturalizar terrazas, pero no debe redefinir silenciosamente la transitabilidad.
+El arte puede ocultar la cuadrícula y naturalizar terrazas, pero no debe redefinir silenciosamente transitabilidad, relaciones de pantalla o interaction slots obligatorios.
 
 El blockout lógico no se rasteriza obligatoriamente dentro del PNG final.
 
-## 7. Isometría y elevación
+## 7. Isometría, elevación y autoridad geométrica
 
 El lenguaje visual del piloto es isométrico y usa terrazas/celdas prismáticas para hacer legibles cambios de altura.
 
 Esto no obliga a un mundo 3D voxelado.
 
-El dato lógico puede usar:
+La autoridad geométrica de navegación es el `walkableEnvelope`; una grilla puede derivarse para implementación o pruebas.
+
+El dato lógico mínimo puede usar:
 
 ```text
-col
-row
-elevationBand
-walkability
+walkableEnvelope
+cells[]:
+  col
+  row
+  elevationBand
+  walkability
 ```
 
 El renderer traduce después esas bandas a desplazamiento vertical, sprites, bordes de terreno o geometría según la solución elegida.
@@ -169,9 +177,24 @@ Para gameplay continuo se mantiene como propuesta producir una familia específi
 
 Es una derivación artística nueva, no una conversión automática.
 
+Durante `MAP-001 v0.3` debe existir un **player proxy provisional** para validar escala perceptual, ancho aparente, oclusión y relación con estructuras. El proxy no fija el sprite final.
+
 ## 10. Cámara, parallax y movimiento
 
 La cámara usa el viewport 480×270 y puede desplazarse sobre un mundo mayor.
+
+Para `IT-001 / MAP-001`, la prueba estructural usa:
+
+```text
+profileId: PILOT_FIXED_ISOMETRIC
+orientationPolicy: fixed
+rotationPolicy: disabled
+followPolicy: allowed
+panPolicy: allowed
+zoomPolicy: testable / OPEN
+```
+
+Pitch, yaw, FOV y zoom definitivo permanecen `OPEN`.
 
 Cuando el renderer lo permita, posiciones de cámara y sprites se cuantizan a píxeles lógicos enteros para evitar shimmer.
 
@@ -188,8 +211,12 @@ No aplicar blur de tiempo real para simular profundidad del pixel art; resolver 
 Antes de integración, el paquete de una zona debe poder contener:
 
 - brief territorial/ambiental;
-- Contrato de Navegación;
+- claims/rasgos territoriales relevantes;
+- Navigation Contract;
+- Camera Contract cuando corresponda;
+- Interaction/Learning Contract cuando corresponda;
 - blockout lógico verificable;
+- player proxy en pruebas estructurales;
 - preview compuesto;
 - assets raster/editables utilizados;
 - definición de orden de capas y offsets;
@@ -202,7 +229,10 @@ Cuando el renderer esté seleccionado se añadirá el archivo técnico de mapa c
 
 Una zona puede declararse lista para integración cuando:
 
-- conserva puertos, ruta y transitabilidad del blockout;
+- conserva puertos, ruta y walkable envelope del blockout;
+- conserva invariantes de cámara aprobados;
+- no introduce oclusiones críticas del personaje o interacciones obligatorias;
+- mantiene utilizables los interaction slots requeridos;
 - el mundo se lee a 1× lógico y a escalas enteras 2× y 4×;
 - no existe filtrado bilinear accidental en arte pixelado;
 - flora y contexto respetan evidencia registrada;
@@ -210,6 +240,7 @@ Una zona puede declararse lista para integración cuando:
 - las uniones entre chunks/assets no producen discontinuidades visibles;
 - cámara y navegación funcionan sobre la misma geometría lógica;
 - Android, PC y web muestran escalado entero correcto;
+- el paquete de zona puede operar offline una vez descargado;
 - rendimiento y memoria se miden en al menos un Android de gama media antes de ampliar presupuesto.
 
 ## 13. Límites actuales
@@ -224,6 +255,8 @@ La elección debe demostrar, como mínimo:
 - navegación/colliders reproducibles;
 - capas/orden de dibujo;
 - exportación Android, PC/Steam y web;
-- posibilidad de mantener datos lógicos separados del arte.
+- posibilidad de mantener datos lógicos separados del arte;
+- empaquetado offline por área;
+- preservación de Camera/Interaction Contracts.
 
 Los fondos existentes y las pruebas de parallax siguen siendo material de referencia. No convertirlos automáticamente en mapas jugables.
