@@ -102,6 +102,44 @@ test('nextCharacter chooses an active unobserved character', async () => {
   assert.notEqual(next.characterId, 'CH-017');
 });
 
+test('nextCharacter does not automatically repeat an attempted unresolved character', async () => {
+  dataset ??= await loadCanonicalDataset();
+
+  const first = nextCharacter(dataset);
+  assert.ok(first);
+
+  const evidence = [
+    { characterId: first.characterId, observedStates: ['not_observable'] },
+  ];
+  const next = nextCharacter(dataset, evidence);
+
+  assert.ok(next);
+  assert.notEqual(next.characterId, first.characterId);
+});
+
+test('an attempted unresolved character can be requested again explicitly', async () => {
+  dataset ??= await loadCanonicalDataset();
+
+  const first = nextCharacter(dataset);
+  assert.ok(first);
+
+  const evidence = [
+    { characterId: first.characterId, observedStates: ['not_observable'] },
+  ];
+  const engine = await import('./engine.mjs');
+
+  assert.equal(
+    typeof engine.retryCharacter,
+    'function',
+    'engine must expose an explicit retry operation for attempted unresolved characters',
+  );
+
+  const retry = engine.retryCharacter(dataset, evidence, first.characterId);
+
+  assert.ok(retry);
+  assert.equal(retry.characterId, first.characterId);
+});
+
 test('documented natural variability keeps a contradicting candidate as inconclusive, not eliminated', async () => {
   dataset ??= await loadCanonicalDataset();
 
