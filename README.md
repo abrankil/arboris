@@ -235,6 +235,7 @@ La construcción de escenarios y mapas conectados se documenta en:
 - [Sistema de topología y conectividad de mapas](docs/MAP_TOPOLOGY_SYSTEM.md)
 - [Plan de pruebas de blockouts](docs/MAP_TOPOLOGY_BLOCKOUT_TEST_PLAN.md)
 - [Plantilla de brief de escena](docs/SCENE_REFERENCE_BRIEF_TEMPLATE.md)
+- [Gramática modular de terreno v0.1 — checkpoint experimental](docs/MODULAR_TERRAIN_GRAMMAR_v0.1.md)
 
 Los recursos de ambientes se registran en:
 
