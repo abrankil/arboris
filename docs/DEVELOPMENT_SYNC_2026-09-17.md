@@ -264,7 +264,37 @@ main
 = rama compartida de referencia
 
 art/spatial-model-audit-2026-09-16
-= debe mantenerse alineada con main mientras siga existiendo como rama histórica de trabajo
+= rama histórica de trabajo, alineada con main
 ```
 
 Las imágenes generadas durante exploración visual no se promueven automáticamente a assets canónicos ni a evidencia. Su incorporación al repositorio debe hacerse solo cuando exista una decisión explícita de conservarlas como referencia o asset de producción.
+
+## 10. Cierre de auditoría de sincronización
+
+La sincronización remota fue auditada antes de continuar desarrollo.
+
+```text
+AUDITORÍA
+PASS
+
+INCONSISTENCIAS
+No se detectan divergencias entre main y art/spatial-model-audit-2026-09-16 al inicio del cierre.
+La aprobación conceptual del piloto y el estilo gráfico final están correctamente separados.
+
+VACÍOS / OMISIONES
+Los prototipos y muestras visuales generados durante exploración no están todos promovidos como assets del repositorio. Esto es intencional mientras no exista una selección explícita de qué imagen conservar.
+No puede inferirse desde GitHub si existen archivos locales no commiteados en computadores personales; este cierre certifica el estado remoto del repositorio, no working trees locales.
+
+REDUNDANCIAS
+La rama art/spatial-model-audit-2026-09-16 ya no contiene trabajo exclusivo respecto de main y es redundante funcionalmente. Se conserva por trazabilidad histórica; no debe volver a operar como segunda fuente de verdad.
+```
+
+Estado remoto verificado inmediatamente antes de este cierre:
+
+```text
+main HEAD: ab7eaca4fe6c5800c5bfc688225ecc0436f101ae
+art/spatial-model-audit-2026-09-16 HEAD: ab7eaca4fe6c5800c5bfc688225ecc0436f101ae
+compare status: identical
+```
+
+Después de este commit, `main` vuelve a ser la única rama de referencia para nuevas decisiones. Si la rama histórica se mantiene, debe fast-forwardearse al mismo commit y no recibir cambios independientes.
