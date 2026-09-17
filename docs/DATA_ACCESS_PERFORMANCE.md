@@ -392,4 +392,4 @@ Android Hermes/expo-sqlite benchmark: NOT TESTED
 user/field persistence architecture: OPEN
 ```
 
-El siguiente gate de datos es medir la misma carga en Android real cuando exista una superficie ejecutable mínima con Hermes + `expo-sqlite`. Hasta entonces, el motor de identificación del piloto permanece sobre JSON canónico + índices en memoria.
+El benchmark host cierra solamente el gate de comparación en entorno de desarrollo. El siguiente gate de datos es medir la misma carga en Android real cuando exista una superficie ejecutable mínima con Hermes + `expo-sqlite`. Hasta entonces, el motor de identificación del piloto permanece sobre JSON canónico + índices en memoria.
