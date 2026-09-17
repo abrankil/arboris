@@ -57,7 +57,7 @@ function getInput() {
 
   const filePath = args[0];
   if (!filePath) {
-    console.error("Uso: node audit-check.js <archivo.md>  |  node audit-check.js --stdin-env VAR_NAME");
+    console.error("Uso: node tools/audit-check.js <archivo.md>  |  node tools/audit-check.js --stdin-env VAR_NAME");
     process.exit(1);
   }
   if (!fs.existsSync(filePath)) {
@@ -78,10 +78,11 @@ function extractSectionContent(body, headingRegex, allHeadingRegexes) {
       continue;
     }
     if (capturing) {
-      // Detener si llegamos a otro heading de nivel ### o ## o al final del bloque de auditoría
+      // Detener ante cualquier heading de nivel ### o ante un heading superior (##).
       const hitsAnotherSection = allHeadingRegexes.some((re) => re.test(line));
+      const hitsAnyLevelThreeHeading = /^###\s+/.test(line);
       const hitsHigherHeading = /^##\s+/.test(line) && !/^###/.test(line);
-      if (hitsAnotherSection || hitsHigherHeading) break;
+      if (hitsAnotherSection || hitsAnyLevelThreeHeading || hitsHigherHeading) break;
       content.push(line);
     }
   }
