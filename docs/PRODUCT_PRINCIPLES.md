@@ -1,6 +1,6 @@
 # Árboris — Product Principles
 
-**Versión:** 0.3  
+**Versión:** 0.4  
 **Última actualización:** 16 septiembre 2026
 
 ## Established purpose
@@ -145,7 +145,9 @@ When a proposed feature, architecture decision, AI behavior, UX simplification, 
 
 The scientific/editorial source of truth for the six-species pilot is:
 
-`data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
+```text
+data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx
+```
 
 The Master Botánico 2.0 is the canonical representation of species knowledge for the pilot.
 
@@ -169,11 +171,24 @@ The current canonical dataset contains 24 botanical characters, of which 19 are 
 - one game character associated with each species;
 - a real-world treasure-hunt style exploration loop.
 
-The current technical priority is integration rather than expansion.
+## Current technical state after Hito 15
 
-Master 2.0, the eight canonical botanical JSON files, and the six derived species cards are already consolidated and validated. The immediate next technical stage is the generic identification engine that consumes the canonical species × character matrix without duplicating botanical knowledge in code.
+Master 2.0, the eight canonical botanical JSON files, the six derived species cards and the minimal canonical identification engine are consolidated and validated.
 
-After the engine is validated, work proceeds to adaptive next-character selection, evidence acquisition, visual character observation, and controlled retirement of legacy identification components.
+The current backbone is:
+
+```text
+Master Botánico 2.0
+→ data/botanical/
+→ data/species/
+→ tools/canonical-identification/
+```
+
+The immediate technical priority is Hito 16: restricted automatic extraction of concrete botanical characters from evidence, one character at a time.
+
+The following stage is Hito 17: integration from BioCLIP candidates and visual character observations into the canonical adaptive key.
+
+BioCLIP remains a candidate generator. Visual models may observe requested characters. Neither BioCLIP nor another visual model is allowed to dictate a definitive identification by itself.
 
 The following are not current priorities unless a demonstrated pilot blockage requires them:
 
