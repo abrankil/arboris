@@ -2,88 +2,228 @@
 
 ## Estado y decisión
 
-Los fondos actuales son referencias visuales y pruebas de parallax, no masters de producción. Esta especificación define el formato objetivo para los siguientes escenarios y para la reconstrucción gradual de los existentes. La dirección de arte corresponde a Alvaro; cualquier cambio de alcance de plataforma o producto debe ser aprobado por Alejandra como directora de proyecto.
+Los fondos actuales son referencias visuales y pruebas de parallax, no masters de producción.
 
-El objetivo es producir una sola fuente de escena capaz de ejecutarse en Android, Steam para PC y navegadores modernos sin mezclar escalado fraccional dentro de la imagen del juego.
+Esta especificación distingue dos cosas que no deben confundirse:
 
-## Especificación base
+1. **viewport lógico de presentación** — cómo se ve el juego en pantalla;
+2. **contenido espacial del mapa** — cuánto territorio jugable existe y cómo se almacena.
+
+La dirección de arte corresponde a Álvaro; cualquier cambio de alcance de plataforma o producto debe ser aprobado por Alejandra como directora de proyecto.
+
+El repositorio todavía no ha seleccionado renderer ni pathfinding. Esta especificación fija contratos de arte y presentación sin imponer una arquitectura de motor prematura.
+
+## 1. Viewport lógico
 
 | Elemento | Decisión |
 | --- | --- |
 | Orientación de exploración y minijuegos | Horizontal, 16:9 |
-| Lienzo lógico nativo | 480×270 px |
-| Escalado de mundo | Nearest-neighbor, solo múltiplos enteros |
-| Escalas de presentación previstas | 2× = 960×540, 3× = 1440×810, 4× = 1920×1080, 5× = 2400×1350 |
-| Tamaño de píxel visible | 1 píxel lógico; 2–5 píxeles físicos según la pantalla y escala elegida |
-| Ajuste de viewport | Mayor múltiplo entero que cabe; bandas o marco fuera del área de juego si sobra espacio |
-| Escalado fraccional | No usar para el mundo pixelado ni sus sprites |
-| Cámaras | Desplazamiento y parallax en píxeles lógicos enteros |
-| Color | sRGB; PNG RGBA como fuente de producción |
+| Viewport lógico nativo | 480×270 px |
+| Escalado de presentación | Nearest-neighbor, solo múltiplos enteros |
+| Escalas previstas | 2× = 960×540, 3× = 1440×810, 4× = 1920×1080, 5× = 2400×1350 |
+| Color | sRGB |
+| Cámara | posiciones enteras en píxeles lógicos cuando el renderer lo permita |
 
-La correspondencia 1:1 se refiere al píxel lógico del archivo y a la cuadrícula del motor. No puede significar un píxel físico por píxel lógico en todos los teléfonos, monitores y niveles de zoom web. La forma de conservar el estilo es mantener el lienzo lógico y escalarlo por enteros.
+**480×270 es el viewport, no el tamaño obligatorio de cada mapa ni de cada capa del mundo.**
 
-## Comportamiento por plataforma
+Un mapa puede ocupar una extensión lógica mayor que la pantalla y ser recorrido por cámara.
 
-| Plataforma | Modo de entrega | Regla de presentación |
-| --- | --- | --- |
-| Android | Juego en horizontal; UI nativa fuera del canvas cuando corresponda | En un dispositivo 1280×720, usar 2× y bandas laterales o un marco de UI. En 1920×1080, usar 4×. No estirar el mundo para llenar todo el panel. |
-| Steam / PC | Ventana redimensionable y pantalla completa | Elegir el mayor entero que cabe y mantener letterbox o pillarbox. Steam Deck 1280×800 usa 2× para el mundo 960×540 y reserva el espacio restante como marco o bandas. |
-| Web | Canvas lógico de 480×270 con CSS que preserve relación de aspecto | Usar `image-rendering: pixelated` y tamaño interno fijo. Si el contenedor no admite un entero, centrar el canvas con bandas; no usar `devicePixelRatio` ni zoom CSS fraccional para ampliar el mundo. |
+## 2. Comportamiento por plataforma
 
-La interfaz de formularios, fichas, mapas y texto no está obligada a usar el canvas de 480×270. Puede ser responsive, pero debe respetar la dirección visual y no escalar el mundo de exploración con reglas de interfaz.
+| Plataforma | Regla de presentación |
+| --- | --- |
+| Android | usar el mayor múltiplo entero que cabe; bandas o UI fuera del mundo si sobra espacio |
+| Steam / PC | ventana o fullscreen con escalado entero y letterbox/pillarbox cuando corresponda |
+| Web | canvas interno fijo y `image-rendering: pixelated`; evitar ampliación fraccional del mundo |
 
-## Capas y recursos
+La interfaz de formularios, fichas y texto puede ser responsive y no está obligada a usar el viewport del mundo.
 
-Cada escena jugable se construye con capas de 480×270 px que comparten origen `(0,0)` y registro espacial.
+## 3. Estructura del contenido del mapa
 
-1. `00-sky` — opaca; cielo con franjas y sin huecos al desplazarse.
-2. `01-background` — cordillera, nubes, valle y relieve lejano.
-3. `02-midground` — senderos, terrazas, agua, árboles y objetos jugables.
-4. `03-foreground` — rocas, pastos, chaguales y elementos que cruzan el borde inferior.
+El mapa jugable no se define como cuatro PNG de pantalla completa.
 
-Una capa que deba desplazarse más allá de la cámara se crea como mosaico. Usar piezas de 240×135 px para arte de 16:9 que se repite o se encadena, con un solape de 16 px cuando la composición lo requiera. Para atlases, usar páginas de 1024×1024 px; no convertir una escena completa a atlas por defecto.
+La estructura de producción debe poder separar, independientemente del renderer final:
 
-El tamaño total de una escena base de cuatro capas RGBA sin compresión es aproximadamente 2 MiB en memoria (`480 × 270 × 4 × 4`). Es adecuado como presupuesto inicial para Android y deja margen para personajes, UI y escenas vecinas. Medir en dispositivo antes de aumentar resolución o número de capas.
+```text
+MAP DATA
+- región transitable
+- elevación relativa
+- bloqueos
+- interacciones
+- puertos/conexiones
 
-PNG RGBA es el master y formato de revisión. La compresión de GPU se decide en el empaquetado, no durante la creación: ASTC como preferencia moderna de Android, ETC2 como compatibilidad Android y formatos de escritorio como BC/DXTC cuando el motor y Steam lo requieran. No sustituir el master PNG ni transparentar arte de píxel con una compresión con pérdida sin comparar visualmente.
+WORLD ART
+- terreno/suelo
+- agua
+- relieve y bordes
+- vegetación y props
+- estructuras territoriales
 
-## Personajes y escala dentro del mundo
+DISTANT ART
+- cordillera
+- cielo
+- masas lejanas
+- atmósfera
 
-Los sprites canónicos de colección son 125×125 px y conservan su función en herbario, fichas, selección de personaje y encuentros cercanos. No deben reducirse automáticamente para usarlos como avatar de exploración: eso crea escalado fraccional o una figura demasiado grande para un lienzo de 270 px de alto.
+OVERLAYS
+- foreground extremo
+- efectos
+- elementos que cruzan cámara
+```
 
-Para navegación continua, producir una familia de sprites específica a escala nativa de 48×64 px o 64×64 px, según la silueta de cada personaje. Es una derivación artística nueva, no una conversión automática del asset de colección. Mantener los rasgos diagnósticos y la ficha de especie; registrar el uso como `gameplaySprite` separado del `selectedDesign` actual.
+La implementación puede terminar usando TileMap, objetos, chunks, sprites, meshes o una combinación. La documentación actual no selecciona todavía cuál.
 
-En el lienzo de 480×270, un personaje de 64 px de alto ocupa aproximadamente una cuarta parte de la altura y permite leer suelo, vegetación y relieve. Los sprites de 125 px se reservan para composición de encuentro, menú o primer plano.
+## 4. Capas visuales
 
-## Cámara, parallax y movimiento
+La nomenclatura histórica se conserva como **orden compositivo**, no como obligación de que todo sea una imagen raster de 480×270:
 
-La cámara opera en píxeles lógicos enteros. Todas las posiciones, velocidades y amplitudes de parallax se redondean al píxel entero antes de dibujar. La amplitud se expresa en píxeles del lienzo nativo, no en porcentajes del tamaño físico de pantalla.
+1. `00-sky`
+2. `01-background`
+3. `02-world`
+4. `03-foreground`
 
-El primer ensayo de capas usaba amplitudes de 0, 4, 12 y 24 px. Mantenerlo como referencia de sensación, pero validar en el lienzo 480×270. El cielo no se mueve o se mueve mínimamente; fondo, plano medio y primer plano usan amplitudes crecientes. No aplicar blur por filtro en tiempo real para simular profundidad: resolverlo en el arte por clusters y bloques de píxel.
+`02-world` reemplaza el antiguo concepto de `02-midground` como PNG monolítico. Debe poder contener terreno, senderos, terrazas, agua, vegetación, props y estructuras en unidades reutilizables o chunks.
 
-## Entregables por escena
+Una capa puede materializarse como:
 
-- Brief con ecosistema, zona geográfica, especies ambientales, estación, hora y uso de UI.
-- Archivo fuente editable por capa, preferentemente `.pxo` cuando el trabajo se hace en Pixelorama.
-- PNG RGBA de cada capa a 480×270 px o mosaicos documentados.
-- Archivo de composición que registre orden de capas, offsets, bucles y paleta.
-- Preview 2× o 4× para revisión, nombrado como derivado y nunca como master.
-- Hoja de verificación con dimensiones, alpha, escalado de preview y revisión a zoom entero.
+- imagen repetible;
+- sprite/objeto;
+- tile/chunk;
+- grupo de assets;
+- composición generada por el renderer.
 
-## Criterios de aceptación
+No exigir que todas compartan exactamente la extensión del viewport si el mundo se desplaza.
 
-Una escena puede declararse lista para integración cuando:
+## 5. Chunks y mosaicos
 
-- cada capa comparte lienzo y registro, y el cielo cubre todo el desplazamiento;
-- el arte se lee a escala 1× lógica y a escalas enteras 2× y 4×;
-- no hay antialiasing ni filtrado bilinear en bordes, cámara o sprites;
-- la flora y el contexto respetan las referencias botánicas y ecológicas registradas;
-- el plano jugable mantiene contraste suficiente para personajes y controles;
-- Android 720p, PC 1080p, Steam Deck y navegador muestran el mundo con escalado entero y bandas correctas;
-- se prueba rendimiento y memoria en al menos un Android de gama media antes de ampliar el presupuesto de capas o texturas.
+No fijar todavía un tamaño canónico de chunk de producción.
 
-## Límites actuales
+La referencia histórica de piezas `240×135` se mantiene únicamente como ensayo de parallax/arte 16:9, no como estándar de almacenamiento del mapa.
 
-Expo y React Native son la base definida para la aplicación, pero el repositorio no ha seleccionado todavía un renderizador de juego que implemente este canvas, sus capas y la cámara. La especificación fija el contrato de los assets y del viewport; la elección del renderizador debe demostrar nearest-neighbor, posiciones enteras, parallax y exportación para Android, Steam y web antes de adoptarse.
+El tamaño de chunk definitivo debe decidirse después de probar:
 
-Los fondos presentes de 1672×941 px y los previews a 960×540 son material de referencia. No convertirlos automáticamente a 480×270: reconstruir o adaptar cada capa con revisión visual para preservar los bloques, la composición y la flora.
+- cámara;
+- carga/descarga;
+- colisiones;
+- navegación;
+- edición;
+- memoria en Android;
+- continuidad visual entre bordes.
+
+Para atlas, 1024×1024 puede mantenerse como punto de partida técnico, sujeto a medición real del renderer y del dispositivo.
+
+## 6. Relación entre blockout y arte
+
+Cada mapa debe conservar un blockout lógico independiente del arte.
+
+```text
+Contrato de Navegación
+→ blockout determinista
+→ assets/terreno/objetos
+→ composición visual
+```
+
+El arte puede ocultar la cuadrícula y naturalizar terrazas, pero no debe redefinir silenciosamente la transitabilidad.
+
+El blockout lógico no se rasteriza obligatoriamente dentro del PNG final.
+
+## 7. Isometría y elevación
+
+El lenguaje visual del piloto es isométrico y usa terrazas/celdas prismáticas para hacer legibles cambios de altura.
+
+Esto no obliga a un mundo 3D voxelado.
+
+El dato lógico puede usar:
+
+```text
+col
+row
+elevationBand
+walkability
+```
+
+El renderer traduce después esas bandas a desplazamiento vertical, sprites, bordes de terreno o geometría según la solución elegida.
+
+## 8. PNG y editables
+
+PNG RGBA continúa siendo formato de revisión y master apropiado para assets raster individuales.
+
+No se considera automáticamente master de mapa una captura compuesta de todo el escenario.
+
+Conservar, según el tipo de recurso:
+
+- `.pxo` o editable equivalente para arte pixelado;
+- PNG RGBA para sprites, tiles, props, fondos y overlays;
+- archivo de composición o datos del mapa cuando exista implementación;
+- preview compuesto para revisión.
+
+La compresión de GPU se decide al empaquetar, no en el master artístico.
+
+## 9. Personajes y escala dentro del mundo
+
+Los sprites canónicos de colección de 125×125 px se mantienen para galería, fichas, selección y encuentros cercanos.
+
+No reducirlos automáticamente para navegación.
+
+Para gameplay continuo se mantiene como propuesta producir una familia específica de aproximadamente 48×64 o 64×64 px, validada por silueta y lectura en el viewport 480×270.
+
+Es una derivación artística nueva, no una conversión automática.
+
+## 10. Cámara, parallax y movimiento
+
+La cámara usa el viewport 480×270 y puede desplazarse sobre un mundo mayor.
+
+Cuando el renderer lo permita, posiciones de cámara y sprites se cuantizan a píxeles lógicos enteros para evitar shimmer.
+
+Parallax se aplica principalmente a `00-sky`, `01-background` y foreground/overlays que lo justifiquen.
+
+El mundo jugable no debe desplazarse como una imagen decorativa independiente de su lógica espacial.
+
+Los valores históricos de amplitud `0, 4, 12, 24 px` se conservan solo como referencia experimental, no como regla definitiva.
+
+No aplicar blur de tiempo real para simular profundidad del pixel art; resolver jerarquía tonal y detalle en el arte.
+
+## 11. Entregables por mapa/prototipo
+
+Antes de integración, el paquete de una zona debe poder contener:
+
+- brief territorial/ambiental;
+- Contrato de Navegación;
+- blockout lógico verificable;
+- preview compuesto;
+- assets raster/editables utilizados;
+- definición de orden de capas y offsets;
+- referencias ambientales consultadas;
+- hoja de verificación visual/técnica.
+
+Cuando el renderer esté seleccionado se añadirá el archivo técnico de mapa correspondiente.
+
+## 12. Criterios de aceptación
+
+Una zona puede declararse lista para integración cuando:
+
+- conserva puertos, ruta y transitabilidad del blockout;
+- el mundo se lee a 1× lógico y a escalas enteras 2× y 4×;
+- no existe filtrado bilinear accidental en arte pixelado;
+- flora y contexto respetan evidencia registrada;
+- personajes se separan del plano jugable;
+- las uniones entre chunks/assets no producen discontinuidades visibles;
+- cámara y navegación funcionan sobre la misma geometría lógica;
+- Android, PC y web muestran escalado entero correcto;
+- rendimiento y memoria se miden en al menos un Android de gama media antes de ampliar presupuesto.
+
+## 13. Límites actuales
+
+Expo y React Native son la base de aplicación definida, pero el renderer del mundo de exploración sigue `OPEN`.
+
+La elección debe demostrar, como mínimo:
+
+- isometría compatible con el blockout;
+- nearest-neighbor;
+- cámara sobre mapas mayores que el viewport;
+- navegación/colliders reproducibles;
+- capas/orden de dibujo;
+- exportación Android, PC/Steam y web;
+- posibilidad de mantener datos lógicos separados del arte.
+
+Los fondos existentes y las pruebas de parallax siguen siendo material de referencia. No convertirlos automáticamente en mapas jugables.
