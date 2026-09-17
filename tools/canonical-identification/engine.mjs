@@ -13,6 +13,8 @@ const UNKNOWN_OBSERVATION_STATES = new Set([
 
 const POWER_SCORE = new Map([
   ['alto', 3],
+  ['medio-alto', 2.5],
+  ['medio_alto', 2.5],
   ['medio', 2],
   ['bajo', 1],
 ]);
@@ -20,6 +22,11 @@ const POWER_SCORE = new Map([
 const YES_VALUES = new Set(['si', 'sí', 'yes', 'true']);
 const LOW_COST = new Set(['bajo', 'nulo', 'nula']);
 const SAFE_VALUES = new Set(['seguro', 'bajo']);
+const CONTAINS_APPLIES_IF = /^([A-Z]{2}-\d{3})\s+contiene\s+(.+)$/i;
+
+function normalizeToken(value) {
+  return String(value).trim().toLowerCase();
+}
 
 function toStateSet(value) {
   if (value == null) return new Set();
@@ -28,7 +35,7 @@ function toStateSet(value) {
 }
 
 function hasUnknownObservationState(states) {
-  return [...states].some(state => UNKNOWN_OBSERVATION_STATES.has(state));
+  return [...states].some(state => UNKNOWN_OBSERVATION_STATES.has(normalizeToken(state)));
 }
 
 function intersects(left, right) {
@@ -36,6 +43,10 @@ function intersects(left, right) {
     if (right.has(value)) return true;
   }
   return false;
+}
+
+export function diagnosticPowerScore(value) {
+  return POWER_SCORE.get(normalizeToken(value)) ?? 0;
 }
 
 export function compatible(expectedStatesInput, observedStatesInput) {
@@ -75,6 +86,40 @@ export function normalizeEvidence(evidence = []) {
     observedStates: [...toStateSet(states)],
     source: 'unknown',
   }));
+}
+
+function evidenceByCharacter(normalizedEvidence) {
+  const byCharacter = new Map();
+
+  for (const item of normalizedEvidence) {
+    if (!byCharacter.has(item.characterId)) byCharacter.set(item.characterId, new Set());
+    const target = byCharacter.get(item.characterId);
+    for (const state of item.observedStates) target.add(state);
+  }
+
+  return byCharacter;
+}
+
+function parseAppliesIf(appliesIf) {
+  if (!appliesIf) return null;
+
+  const match = String(appliesIf).trim().match(CONTAINS_APPLIES_IF);
+  if (!match) return null;
+
+  return {
+    parentCharacterId: match[1].toUpperCase(),
+    requiredState: match[2].trim(),
+  };
+}
+
+function appliesIfSatisfied(character, evidenceIndex) {
+  const rule = parseAppliesIf(character.appliesIf);
+  if (!rule) return true;
+
+  const parentStates = evidenceIndex.get(rule.parentCharacterId) ?? new Set();
+  if (!parentStates.size || hasUnknownObservationState(parentStates)) return false;
+
+  return [...parentStates].some(state => normalizeToken(state) === normalizeToken(rule.requiredState));
 }
 
 export function filterCandidates(dataset, evidence = [], candidateIds = null) {
@@ -119,10 +164,10 @@ function averageRelationScore(dataset, candidateIds, characterId) {
   let score = 0;
 
   for (const relation of relations) {
-    score += POWER_SCORE.get(relation.diagnosticPower) ?? 0;
-    if (YES_VALUES.has(String(relation.imageDetectable).toLowerCase())) score += 1;
-    if (LOW_COST.has(String(relation.observationCost).toLowerCase())) score += 1;
-    if (SAFE_VALUES.has(String(relation.interactionSafety).toLowerCase())) score += 1;
+    score += diagnosticPowerScore(relation.diagnosticPower);
+    if (YES_VALUES.has(normalizeToken(relation.imageDetectable))) score += 1;
+    if (LOW_COST.has(normalizeToken(relation.observationCost))) score += 1;
+    if (SAFE_VALUES.has(normalizeToken(relation.interactionSafety))) score += 1;
   }
 
   return score / relations.length;
@@ -142,8 +187,10 @@ function partitionCandidateStates(dataset, candidateIds, characterId) {
   return groups;
 }
 
-function characterScore(dataset, candidateIds, characterId) {
-  const groups = partitionCandidateStates(dataset, candidateIds, characterId);
+function characterScore(dataset, candidateIds, character, evidenceIndex) {
+  if (!appliesIfSatisfied(character, evidenceIndex)) return null;
+
+  const groups = partitionCandidateStates(dataset, candidateIds, character.characterId);
   const knownGroups = [...groups.entries()].filter(([key]) => key !== '__unknown__');
 
   if (knownGroups.length < 2) return null;
@@ -152,21 +199,23 @@ function characterScore(dataset, candidateIds, characterId) {
   const unknownCount = groups.get('__unknown__')?.length ?? 0;
 
   return {
-    characterId,
+    characterId: character.characterId,
     largestKnownGroup,
     unknownCount,
     knownGroupCount: knownGroups.length,
-    relationScore: averageRelationScore(dataset, candidateIds, characterId),
+    relationScore: averageRelationScore(dataset, candidateIds, character.characterId),
   };
 }
 
 export function nextCharacter(dataset, evidence = [], candidateIds = null) {
-  const currentCandidateIds = candidateIds ?? filterCandidates(dataset, evidence).remaining;
-  const observedCharacterIds = new Set(normalizeEvidence(evidence).map(item => item.characterId));
+  const normalizedEvidence = normalizeEvidence(evidence);
+  const currentCandidateIds = candidateIds ?? filterCandidates(dataset, normalizedEvidence).remaining;
+  const observedCharacterIds = new Set(normalizedEvidence.map(item => item.characterId));
+  const evidenceIndex = evidenceByCharacter(normalizedEvidence);
 
   const scores = dataset.characters
     .filter(character => !observedCharacterIds.has(character.characterId))
-    .map(character => characterScore(dataset, currentCandidateIds, character.characterId))
+    .map(character => characterScore(dataset, currentCandidateIds, character, evidenceIndex))
     .filter(Boolean)
     .sort((left, right) => {
       if (left.largestKnownGroup !== right.largestKnownGroup) return left.largestKnownGroup - right.largestKnownGroup;
