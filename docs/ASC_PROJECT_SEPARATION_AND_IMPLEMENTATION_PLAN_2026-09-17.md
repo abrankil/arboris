@@ -84,6 +84,8 @@ Antes de implementar en una plataforma propia de Álvaro faltan:
 5. decisión sobre qué parte del ASC v0.1 actual constituye baseline transferible;
 6. resolución explícita de las decisiones OPEN que bloqueen la siguiente versión.
 
+La frontera de responsabilidad ASC ↔ Árboris ya está documentada como decisión organizacional en `docs/ASC_PROJECT_BOUNDARY.md`; por tanto, este punto deja de ser un vacío conceptual. Lo pendiente es formalizar su materialización en la plataforma/repositorio destino.
+
 ## 6. Redundancias
 
 No se identifica una segunda implementación de ASC.
@@ -94,7 +96,7 @@ La existencia simultánea de:
 - `ASC_V0_1_EXECUTABLE_SPEC.md`;
 - `tools/asc/README.md`;
 
-es una redundancia documental intencional porque cada archivo cumple una función diferente: autoridad normativa, especificación ejecutable y orientación operativa.
+es una redundancia documental intencional porque cada archivo cumple una función diferente: autoridad normativa, especificación de implementación y orientación operativa.
 
 No debe eliminarse sin una nueva decisión de autoridad.
 
@@ -109,7 +111,9 @@ Permanecen abiertos, conforme al estado actual de ASC:
 - métricas automáticas de fidelidad;
 - integración directa con renderer/blockout;
 - persistencia y versionado de resultados;
-- frontera definitiva del proyecto independiente ASC.
+- materialización física de la separación del proyecto ASC en su plataforma/repositorio destino.
+
+La frontera organizacional ASC ↔ Árboris no permanece OPEN: ya está establecida en `docs/ASC_PROJECT_BOUNDARY.md`. Lo que permanece OPEN es su implementación física y técnica en la plataforma destino.
 
 Ninguno de estos puntos debe cerrarse por conveniencia de implementación.
 
@@ -117,7 +121,7 @@ Ninguno de estos puntos debe cerrarse por conveniencia de implementación.
 
 ### Fase 0 — Documentación y separación
 
-Registrar la frontera de proyectos antes de iterar. Este documento cumple ese objetivo.
+Registrar la frontera de proyectos antes de iterar. Este documento y `docs/ASC_PROJECT_BOUNDARY.md` cumplen ese objetivo.
 
 No modificar código de ACE ni ASC como parte de esta fase.
 
