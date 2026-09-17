@@ -2,7 +2,7 @@
 
 ## Estado
 
-Modelo conceptual corregido para transformar territorios reales en espacios jugables reconocibles sin confundir escala territorial, evidencia, navegación, implementación y arte.
+Modelo conceptual corregido para transformar territorios reales en espacios jugables reconocibles sin confundir escala territorial, evidencia, navegación, interacción, implementación y arte.
 
 Este documento no fija todavía tamaño de celda, escala metro/celda, pathfinding, renderer ni esquema final de datos. Tampoco convierte una representación jugable en autoridad sobre el territorio real.
 
@@ -10,22 +10,54 @@ Este documento no fija todavía tamaño de celda, escala metro/celda, pathfindin
 
 Árboris no diseña mapas desde cero. **Destila territorios reales en espacios jugables reconocibles.**
 
-La corrección principal de este modelo es separar tres planos que antes aparecían mezclados:
+La arquitectura separa tres planos:
 
 ```text
 A. TERRITORIO
 Paisaje → Sector → Lugar → Unidad Espacial
 
 B. DERIVACIÓN JUGABLE
-Instancia Territorial → Contrato de Navegación → Blockout → Prototipo visual
+Instancia Territorial
+  → Contrato de Navegación
+  → Contrato de Cámara
+  → Contrato de Interacción/Aprendizaje
+  → Blockout
+  → Prototipo visual
 
 C. IMPLEMENTACIÓN
-celdas / tiles / objetos / navegación / renderer
+walkable envelope / celdas / tiles / objetos / navegación / renderer
 ```
 
 Estos planos se relacionan, pero no forman una sola jerarquía.
 
-## 1. Territorio, evidencia y derivación
+## 1. Rol del mapa isométrico dentro del producto
+
+Árboris combina exploración física real con una representación jugable digital del territorio.
+
+El mapa isométrico **no sustituye la salida a terreno ni convierte la observación botánica en una acción puramente virtual**. Su función principal es contextualizar, orientar, preparar búsquedas, sostener progresión, narrativa, pistas y devolución de aprendizaje.
+
+El ciclo de alto nivel es:
+
+```text
+MUNDO REAL
+salir a terreno
+→ observar
+→ fotografiar
+→ reunir evidencia
+→ identificar
+
+MUNDO ISOMÉTRICO
+representar el territorio
+→ orientar
+→ preparar la búsqueda
+→ ofrecer pistas/contexto
+→ registrar progresión
+→ devolver recompensa/aprendizaje
+```
+
+La relación entre locomoción física y movimiento del avatar queda desacoplada por defecto. Una futura integración GPS puede existir, pero no es requisito del modelo espacial actual y permanece `OPEN`.
+
+## 2. Territorio, evidencia y derivación
 
 ```text
 territorio real
@@ -33,7 +65,7 @@ territorio real
 → síntesis territorial trazable
 → Unidades Espaciales + rasgos territoriales
 → Instancia Territorial
-→ Contrato de Navegación
+→ contratos jugables
 → blockout determinista
 → Dirección de Arte
 → prototipo
@@ -43,7 +75,7 @@ territorio real
 
 La revisión puede cambiar la derivación jugable o artística sin reescribir la evidencia. La evidencia solo cambia cuando aparece nueva información o se corrige una fuente.
 
-## 2. Destilación Territorial
+## 3. Destilación Territorial
 
 La **Destilación Territorial** conserva identidad reconocible mientras simplifica el lugar para hacerlo jugable.
 
@@ -57,7 +89,7 @@ Toda destilación debe declarar:
 
 Una escena puede ser atractiva y aun así fallar si deja de sentirse como el lugar que representa.
 
-## 3. Jerarquía territorial
+## 4. Jerarquía territorial
 
 La jerarquía territorial contiene únicamente entidades que describen el lugar real o una síntesis territorial de ese lugar:
 
@@ -82,7 +114,7 @@ Segmento o zona reconocible del recorrido que mantiene identidad territorial y e
 
 Una Unidad Espacial no es un objeto individual, un tile ni una versión del juego.
 
-## 4. Rasgos territoriales
+## 5. Rasgos territoriales y afirmaciones territoriales
 
 Dentro de un Lugar o de una Unidad Espacial existen **rasgos territoriales**. Pueden ser puntuales, lineales o de área.
 
@@ -107,7 +139,25 @@ Esta distinción evita convertir cada objeto reconocible en una Unidad Espacial.
 
 Un rasgo puede funcionar además como `anchorElement` cuando sea decisivo para reconocer el lugar.
 
-## 5. Evidencia territorial
+La unidad primaria de certeza es la **afirmación territorial** (`claim`), no la Unidad Espacial completa. Una misma UE puede contener relaciones corroboradas y otras `OPEN`.
+
+Ejemplo conceptual:
+
+```text
+CLAIM-001
+statement: bridge crosses stream
+status: proposed | partially_corroborated | corroborated
+sources: [...]
+
+CLAIM-002
+statement: exact bridge bearing
+status: OPEN
+sources: []
+```
+
+Una UE puede mostrar un resumen agregado de evidencia, pero ese resumen nunca reemplaza el estado granular de sus claims/rasgos/relaciones.
+
+## 6. Evidencia territorial
 
 El modelo separa fuente, observación, interpretación y derivación.
 
@@ -127,11 +177,13 @@ Reglas:
 - una imagen generada nunca es evidencia territorial;
 - el Master Botánico aporta información de especies, no geometría del lugar.
 
-## 6. Estado de evidencia y estado de producción
+## 7. Estado de evidencia y estado de producción
 
 No usar un único estado para describir dos cosas distintas.
 
 ### Estado de evidencia
+
+Se aplica primariamente a claims, rasgos o relaciones concretas:
 
 ```text
 proposed
@@ -139,9 +191,11 @@ partially_corroborated
 corroborated
 ```
 
-Describe cuánto respaldo territorial tiene una Unidad Espacial o un rasgo.
+`OPEN` se usa cuando la afirmación todavía no puede formularse o cerrarse con evidencia suficiente.
 
 ### Estado de producción
+
+Se aplica a derivados jugables como Instancias, blockouts, mapas y prototipos:
 
 ```text
 unmodeled
@@ -150,11 +204,9 @@ tested
 approved
 ```
 
-Describe cuánto ha avanzado su traducción jugable.
+Una afirmación territorial puede estar `corroborated` mientras `MAP-001` sigue `blockout`. Del mismo modo, un blockout experimental puede usar una geometría provisional de una relación todavía `OPEN`, siempre que esa provisionalidad quede explícita.
 
-Una Unidad Espacial puede estar `corroborated` y todavía `unmodeled`, o seguir `proposed` mientras ya participa en un blockout experimental. Los dos ejes no deben pisarse.
-
-## 7. Master Territorial
+## 8. Master Territorial
 
 El **Master Territorial** sigue siendo un objetivo arquitectónico, no un archivo implementado.
 
@@ -162,6 +214,7 @@ Cuando exista, no debe mezclar hechos territoriales y decisiones de arte como si
 
 ```text
 evidencia / procedencia
+afirmaciones territoriales y su estado
 síntesis territorial
 Unidades Espaciales y rasgos
 relaciones espaciales
@@ -172,7 +225,7 @@ La Instancia Territorial, el blockout y el arte son derivados trazables del terr
 
 No crear todavía un Excel/JSON definitivo hasta que `IT-001 / MAP-001` demuestre qué campos son necesarios.
 
-## 8. Instancia Territorial
+## 9. Instancia Territorial
 
 La **Instancia Territorial** es una versión jugable de una o más Unidades Espaciales bajo una condición y un objetivo concretos.
 
@@ -187,7 +240,17 @@ Una Instancia referencia Unidades Espaciales y rasgos territoriales; no forma pa
 
 `MAP-*` queda reservado para blockouts, mapas o prototipos derivados.
 
-## 9. Marcos de coordenadas
+Cada Instancia puede declarar tres contratos separados:
+
+```text
+Navigation Contract
+Camera Contract
+Interaction / Learning Contract
+```
+
+No todos requieren el mismo nivel de detalle en cada fase, pero para una prueba jugable estructural deben existir al menos sus restricciones mínimas.
+
+## 10. Marcos de coordenadas
 
 Árboris debe distinguir el marco territorial del marco local de juego.
 
@@ -210,7 +273,6 @@ Define la lógica del blockout y la pantalla:
 - `screenLeft`;
 - `screenRight`;
 - origen local;
-- filas/columnas;
 - bandas de elevación relativa.
 
 No asumir que `screenUp = north`.
@@ -224,11 +286,9 @@ screenDown = entrada / dirección general hacia el mar / retorno
 
 La correspondencia exacta entre esos ejes y norte/sur/este/oeste geográficos permanece `OPEN` hasta corroborarla.
 
-## 10. Contrato de Navegación
+## 11. Contrato de Navegación
 
 El Contrato de Navegación define cómo se recorre una Instancia Territorial. Su autoridad no es una etiqueta como `corridor`, sino la conectividad explícita.
-
-Debe separar:
 
 ### Puertos de conexión
 
@@ -244,9 +304,19 @@ directionality: bidirectional | one_way
 worldBearing: optional / OPEN
 ```
 
-### Grafo / región transitable
+### Región transitable autoritativa
 
-Debe existir una representación determinista de qué zonas o celdas están conectadas y cuáles no.
+La autoridad geométrica de navegación es un **walkable envelope continuo** o una representación equivalente de región transitable.
+
+La grilla/celda es una discretización derivada para pruebas o implementación futura:
+
+```text
+walkable envelope
+→ rasterización/discretización de prueba
+→ celdas
+```
+
+No usar la matriz de celdas como fuente primaria de forma territorial si eso obliga a que senderos, claros o pendientes adopten geometría de tablero.
 
 ### Etiqueta de patrón
 
@@ -270,14 +340,89 @@ Separar también:
 
 ```text
 movementProfile: level | ascent | descent | mixed | transition
-experienceRole: tutorial | exploration | discovery | rest | transit
+experienceRole: tutorial | exploration | discovery | rest | transit | redistribution
 ```
 
 Esto evita mezclar topología, dirección, progresión y función narrativa en un solo campo `flow`.
 
-## 11. Celdas Espaciales
+## 12. Contrato de Cámara
 
-Las Celdas Espaciales son una discretización técnica del blockout, no una escala territorial ni un voxel físico del mundo real.
+La cámara forma parte del diseño espacial cuando las relaciones de pantalla son canónicas.
+
+Debe declarar al menos:
+
+```text
+profileId
+orientationPolicy
+rotationPolicy
+followPolicy
+panPolicy
+zoomPolicy
+screenRelationInvariants
+```
+
+Para `IT-001 / MAP-001`:
+
+```text
+profileId: PILOT_FIXED_ISOMETRIC
+orientationPolicy: fixed
+rotationPolicy: disabled
+followPolicy: allowed
+panPolicy: allowed
+zoomPolicy: testable / not canonical yet
+screenRelationInvariants:
+  screen_up   = cordillera / interior / progresión
+  screen_down = entrada / retorno
+  stream      = screen_right y nivel inferior tras el umbral
+worldCardinalMapping: OPEN
+```
+
+El contrato fija comportamiento, no grados exactos. Pitch, yaw, FOV y zoom definitivo permanecen `OPEN` hasta prueba técnica.
+
+## 13. Contrato de Interacción / Aprendizaje
+
+La navegación por sí sola no valida un espacio de Árboris. La Instancia debe reservar oportunidades para el loop educativo sin inventar evidencia botánica.
+
+Puede declarar:
+
+```text
+interactionSlots
+learningBeats
+safePauseAreas
+observationOpportunities
+contentBindings: optional / OPEN
+```
+
+Un `interactionSlot` define una oportunidad funcional, no una especie concreta.
+
+Para el piloto:
+
+```text
+UE-001 Umbral
+  role: orient / establish_place
+
+UE-002 Corredor
+  role: exploration
+  observationOpportunity: required
+  species: OPEN
+  microhabitat: OPEN
+
+UE-003 Claro
+  role: pause / reflection / progression
+  contentBinding: OPEN
+```
+
+La secuencia educativa mínima a probar en v0.3 es:
+
+```text
+orientar → notar → observar
+```
+
+Las fases posteriores pueden extenderla a formular hipótesis, comprobar y recompensar.
+
+## 14. Celdas Espaciales
+
+Las Celdas Espaciales son una discretización técnica derivada del blockout, no una escala territorial ni un voxel físico del mundo real.
 
 Para el piloto pueden representarse visualmente como prismas o celdas cúbicas en vista isométrica, pero el dato lógico mínimo puede seguir siendo 2D:
 
@@ -295,9 +440,11 @@ La altura se expresa como banda relativa mientras no exista equivalencia métric
 
 El prisma es una **forma de visualizar** la celda y sus cambios de nivel. No obliga a implementar navegación 3D apilada ni selecciona renderer.
 
-## 12. Blockout
+La rasterización debe poder regenerarse desde la región transitable autoritativa y no convertirse en una segunda fuente de verdad.
 
-El blockout es una representación técnica simplificada del Contrato de Navegación.
+## 15. Blockout
+
+El blockout es una representación técnica simplificada de los contratos de la Instancia.
 
 Debe probar como mínimo:
 
@@ -310,11 +457,16 @@ Debe probar como mínimo:
 - entrada/salida;
 - nodos de decisión;
 - relación con rasgos territoriales obligatorios;
+- oportunidades de interacción estructural;
+- legibilidad con la cámara prevista;
+- oclusión del personaje y de interacciones críticas;
 - legibilidad sin depender de etiquetas explicativas.
+
+Debe incluir un **player proxy** de escala provisional para verificar ancho aparente, lectura y oclusión. El proxy no fija todavía el sprite final.
 
 Si una estilización cambia la conectividad aprobada, la prueba falla aunque sea visualmente atractiva.
 
-## 13. Dirección de Arte
+## 16. Dirección de Arte
 
 Dirección de Arte recibe una estructura trazable y la convierte en paisaje reconocible.
 
@@ -329,7 +481,7 @@ atmósfera     → luz, estación, profundidad y color
 
 La estilización debe conservar estructura espacial y rasgos ancla. Puede simplificar detalle, pero no inventar evidencia.
 
-## 14. Iteración controlada
+## 17. Iteración controlada
 
 La producción real no es estrictamente lineal. Después del primer prototipo puede ser necesario ajustar:
 
@@ -337,20 +489,24 @@ La producción real no es estrictamente lineal. Después del primer prototipo pu
 - separación entre anclas;
 - forma de una terraza;
 - lectura de alturas;
-- composición y densidad visual.
+- composición y densidad visual;
+- cámara dentro de los límites del contrato;
+- ubicación de oportunidades de interacción no botánicas.
 
 La revisión vuelve al nivel que corresponda:
 
 ```text
 problema territorial → revisar evidencia/síntesis
 problema de navegación → revisar contrato/blockout
+problema de cámara → revisar Camera Contract / composición
+problema de interacción → revisar Interaction/Learning Contract
 problema visual → revisar dirección de arte
 problema técnico → revisar implementación
 ```
 
 No usar una corrección visual para alterar evidencia territorial ni una limitación del renderer para redefinir silenciosamente el lugar.
 
-## 15. Caso de validación inicial — Acceso Principal
+## 18. Caso de validación inicial — Acceso Principal
 
 Información experiencial declarada:
 
@@ -378,56 +534,105 @@ UE-003 Claro de picnic
   rasgos: apertura del recorrido, zonas de picnic, continuidad hacia interior
 ```
 
-El estado de evidencia de estas unidades y rasgos permanece `proposed` o `partially_corroborated` según la evidencia concreta disponible.
+El estado de evidencia se registra por afirmación/rasgo/relación concreta. La forma exacta del puente, su bearing y la geometría del claro permanecen `OPEN` mientras no exista corroboración suficiente.
 
 Primera Instancia Territorial:
 
 ```text
 IT-001 Acceso Principal — entrada inicial
+productionStatus: blockout
 ```
 
 Contrato local provisional:
 
 ```text
-patternLabel: corridor
-routeShape: OPEN
+Navigation Contract
+  patternLabel: corridor
+  routeShape: OPEN
 
-P-IN
-  localEdge: screen_down
-  state: open
-  priority: primary
-  progressionRole: entry
+  P-IN
+    localEdge: screen_down
+    state: open
+    priority: primary
+    progressionRole: entry
 
-P-OUT
-  localEdge: screen_up
-  state: open
-  priority: primary
-  progressionRole: exit
+  P-OUT
+    localEdge: screen_up
+    state: open
+    priority: primary
+    progressionRole: exit
 
-screenUp: cordillera / interior
-screenDown: entrada / dirección mar
-mainRoute: centro perceptual
-stream: derecha del camino, nivel inferior tras el umbral de acceso
-lateralContainment: ambas laderas
-worldCardinalMapping: OPEN
+  mainRoute: centro perceptual
+  stream: derecha del camino, nivel inferior tras el umbral de acceso
+  lateralContainment: ambas laderas
+  worldCardinalMapping: OPEN
+
+Camera Contract
+  profileId: PILOT_FIXED_ISOMETRIC
+  orientationPolicy: fixed
+  rotationPolicy: disabled
+  followPolicy: allowed
+  panPolicy: allowed
+  zoomPolicy: testable / OPEN
+
+Interaction / Learning Contract
+  UE-001: orient / establish_place
+  UE-002: exploration + observationOpportunity(required, content OPEN)
+  UE-003: pause / reflection / progression
 ```
 
 El primer blockout/prototipo derivado conserva el identificador `MAP-001`.
 
-## 16. Decisiones consolidadas
+## 19. MAP-001 v0.3 — modelo estructural requerido
+
+Antes de naturalización ambiental, v0.3 debe presentar tres vistas derivadas de una misma definición de Instancia:
+
+### Vista A — Navigation Model
+
+- walkable envelope autoritativo;
+- puertos;
+- blockers;
+- bandas de altura;
+- ruta principal;
+- interaction slots;
+- raster/celdas derivadas solo para verificación.
+
+### Vista B — Territorial Constraint Model
+
+- `UE-001 → UE-002 → UE-003`;
+- claims y relaciones obligatorias;
+- estado de evidencia;
+- geometría `OPEN` claramente separada de invariantes.
+
+### Vista C — Isometric Massing + Camera Test
+
+- masas de terreno continuas;
+- terrazas y depresión del estero;
+- proxies de puente/reja/casa;
+- player proxy;
+- cámara `PILOT_FIXED_ISOMETRIC`;
+- prueba de oclusión;
+- sin vegetación final, materiales finales, partículas ni detalle decorativo.
+
+Las tres vistas son representaciones de revisión. Ninguna debe convertirse manualmente en una fuente normativa independiente de las demás.
+
+## 20. Decisiones consolidadas
 
 1. El mapa es resultado, no fuente.
-2. La jerarquía territorial termina en Unidad Espacial; Instancia y Celda pertenecen a otros planos del modelo.
-3. Un puente, reja, casa, sendero o estero es primero un rasgo territorial; solo es Unidad Espacial si realmente constituye una experiencia espacial autónoma.
-4. Evidencia y estado de producción usan estados separados.
-5. El marco geográfico y el marco local de pantalla no se confunden.
-6. La conectividad explícita gobierna; las etiquetas de topología son atajos descriptivos.
-7. `elbow` es forma de ruta de un corredor; `hub` es función, no topología única.
-8. Las Celdas Espaciales son discretización 2D con elevación relativa; los prismas son su representación isométrica de trabajo.
-9. `IT-*` identifica Instancias Territoriales; `MAP-*` identifica derivados de mapa/blockout.
-10. Fundo Los Nogales se conserva como territorio núcleo del piloto y El Arrayán como rasgo/contexto cuando corresponda.
-11. La colocación fina de especies sigue sujeta a evidencia territorial `core`.
-12. La iteración puede volver a blockout o arte sin alterar silenciosamente la evidencia.
+2. El mapa isométrico complementa la exploración real; no reemplaza observación/fotografía/evidencia de campo.
+3. La jerarquía territorial termina en Unidad Espacial; Instancia y Celda pertenecen a otros planos del modelo.
+4. Un puente, reja, casa, sendero o estero es primero un rasgo territorial; solo es Unidad Espacial si realmente constituye una experiencia espacial autónoma.
+5. El estado de evidencia se registra primariamente por claim/rasgo/relación; el estado de producción pertenece a derivados jugables.
+6. El marco geográfico y el marco local de pantalla no se confunden.
+7. La conectividad explícita y el walkable envelope gobiernan; las etiquetas y celdas son derivados de lectura/implementación.
+8. `elbow` es forma de ruta de un corredor; `hub` es función, no topología única.
+9. Las Celdas Espaciales son discretización 2D con elevación relativa; los prismas son su representación isométrica de trabajo.
+10. La cámara es un contrato de diseño cuando las relaciones de pantalla son canónicas.
+11. Un blockout de Árboris debe probar interacción/aprendizaje además de locomoción.
+12. `IT-*` identifica Instancias Territoriales; `MAP-*` identifica derivados de mapa/blockout.
+13. Fundo Los Nogales se conserva como territorio núcleo del piloto y El Arrayán como rasgo/contexto cuando corresponda.
+14. La colocación fina de especies sigue sujeta a evidencia territorial `core`.
+15. La iteración puede volver a blockout, cámara, interacción o arte sin alterar silenciosamente la evidencia.
 
 ## Límites actuales
 
@@ -443,4 +648,7 @@ Quedan `OPEN` hasta validar `IT-001 / MAP-001`:
 - esquema JSON final;
 - distribución ecológica definitiva de especies;
 - equivalencia exacta entre elevación real y altura jugable;
-- mapeo exacto entre ejes de pantalla y cardinales geográficos.
+- mapeo exacto entre ejes de pantalla y cardinales geográficos;
+- pitch/yaw/FOV y zoom definitivo de cámara;
+- dimensiones finales del sprite de exploración;
+- relación futura entre GPS/locomoción física y avatar virtual.
