@@ -1,9 +1,15 @@
 # Árboris — START HERE
 
-Para incorporarse al proyecto desde GitHub, comenzar por:
+For coding or research agents, begin with:
+
+[`AGENTS.md`](AGENTS.md)
+
+For human/project orientation, use:
 
 [`docs/START_HERE.md`](docs/START_HERE.md)
 
-Ese documento explica qué archivos son canónicos, qué material es histórico, cómo navegar la capa botánica, qué debe consultar dirección de arte y qué debe leer una IA antes de modificar el proyecto.
+For database/data routing, use:
 
-Regla esencial: la fuente botánica vigente es `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`. Los JSON de `data/botanical/` y las fichas de `data/species/` son derivados generados.
+[`data/README.md`](data/README.md)
+
+The botanical editorial/scientific source of truth is `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`; normalized JSON under `data/botanical/` is the preferred machine-read layer for normal analysis.
