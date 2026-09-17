@@ -38,6 +38,27 @@ function intersects(left, right) {
   return false;
 }
 
+function normalizeCandidateIds(dataset, candidateIds = null) {
+  if (candidateIds == null) {
+    return dataset.species.map(species => species.speciesId);
+  }
+
+  const normalized = [];
+  const seen = new Set();
+
+  for (const speciesId of candidateIds) {
+    if (!dataset.speciesById.has(speciesId)) {
+      throw new Error(`Unknown candidate species_id ${speciesId}`);
+    }
+
+    if (seen.has(speciesId)) continue;
+    seen.add(speciesId);
+    normalized.push(speciesId);
+  }
+
+  return normalized;
+}
+
 export function compatible(expectedStatesInput, observedStatesInput) {
   const expectedStates = toStateSet(expectedStatesInput);
   const observedStates = toStateSet(observedStatesInput);
@@ -87,7 +108,7 @@ function isDocumentedVariability(dataset, speciesId, characterId, observedStates
 
 export function filterCandidates(dataset, evidence = [], candidateIds = null) {
   const normalizedEvidence = normalizeEvidence(evidence);
-  const startingCandidates = candidateIds ?? dataset.species.map(species => species.speciesId);
+  const startingCandidates = normalizeCandidateIds(dataset, candidateIds);
   const remaining = [];
   const eliminated = [];
 
@@ -179,14 +200,18 @@ function characterEvidenceStatus(dataset, evidence, characterId, candidateIds = 
   if (!characterEvidence.length) return 'visible';
 
   const otherEvidence = normalizedEvidence.filter(item => item.characterId !== characterId);
-  const candidatesBefore = candidateIds ?? filterCandidates(dataset, otherEvidence).remaining;
+  const candidatesBefore = candidateIds == null
+    ? filterCandidates(dataset, otherEvidence).remaining
+    : normalizeCandidateIds(dataset, candidateIds);
   const candidatesAfter = filterCandidates(dataset, characterEvidence, candidatesBefore).remaining;
 
   return candidatesAfter.length < candidatesBefore.length ? 'resolved' : 'attempted';
 }
 
 export function nextCharacter(dataset, evidence = [], candidateIds = null) {
-  const currentCandidateIds = candidateIds ?? filterCandidates(dataset, evidence).remaining;
+  const currentCandidateIds = candidateIds == null
+    ? filterCandidates(dataset, evidence).remaining
+    : normalizeCandidateIds(dataset, candidateIds);
   const observedCharacterIds = new Set(normalizeEvidence(evidence).map(item => item.characterId));
 
   const scores = dataset.characters
@@ -217,7 +242,9 @@ export function retryCharacter(dataset, evidence = [], characterId, candidateIds
   if (!dataset.charactersById.has(characterId)) return null;
   if (characterEvidenceStatus(dataset, evidence, characterId, candidateIds) !== 'attempted') return null;
 
-  const currentCandidateIds = candidateIds ?? filterCandidates(dataset, evidence).remaining;
+  const currentCandidateIds = candidateIds == null
+    ? filterCandidates(dataset, evidence).remaining
+    : normalizeCandidateIds(dataset, candidateIds);
   const score = characterScore(dataset, currentCandidateIds, characterId);
 
   return {
