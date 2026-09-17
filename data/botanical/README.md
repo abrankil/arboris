@@ -49,3 +49,16 @@ python tools/botanical-data/validate_species_ids.py
 ```
 
 Ver `docs/START_HERE.md` para la jerarquía completa de autoridad.
+
+## Capa complementaria del motor de identificación
+
+Además de los ocho JSON derivados del Master Botánico 2.0, el motor canónico puede consumir:
+
+- `character_variability.json`
+- `contexts.json`
+
+Estos dos archivos no son exportaciones del Master 2.0 y no forman parte de la comprobación de equivalencia del Master. Constituyen una capa canónica complementaria para excepciones de variabilidad natural y sus contextos.
+
+No reemplazan ni modifican `species_characters.json`. Una excepción solo neutraliza una contradicción cuando está documentada explícitamente para la especie, carácter, estado y contexto aplicables.
+
+Ver `docs/HITO15_SUPPORTED_CONTRACT.md` para el contrato normativo.

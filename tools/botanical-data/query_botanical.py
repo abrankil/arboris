@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """Compact read-only queries over Árboris canonical botanical JSON.
 
 This tool is intentionally a reader, not a second source of truth. It returns
@@ -344,6 +344,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     parser = build_parser()
     raw_args = sys.argv[1:]
     pretty = "--pretty" in raw_args
@@ -378,3 +381,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

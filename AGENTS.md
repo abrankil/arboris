@@ -32,17 +32,37 @@ Para orientación humana usar `docs/README.md`. Para datos usar `data/README.md`
 
 ## 3. Autoridad botánica
 
-Fuente editorial/científica:
+Fuente editorial/científica principal:
 
 ```text
 data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx
 ```
 
-Lectura normal de máquina:
+Lectura normal de máquina de los datos botánicos derivados del Master:
 
 ```text
-data/botanical/*.json
+data/botanical/metadata.json
+data/botanical/species.json
+data/botanical/characters.json
+data/botanical/species_characters.json
+data/botanical/sources.json
+data/botanical/glossary.json
+data/botanical/photos.json
+data/botanical/model_errors.json
 ```
+
+Estos ocho archivos son derivados reproducibles de Master Botánico 2.0. No corregirlos manualmente. Las correcciones botánicas correspondientes deben realizarse en el Master y luego regenerarse.
+
+ACE consume además una capa canónica complementaria:
+
+```text
+data/botanical/character_variability.json
+data/botanical/contexts.json
+```
+
+Estos archivos no son exportaciones de Master Botánico 2.0 y no forman parte de los ocho JSON reproducibles derivados del Master. No deben tratarse como si fueran datos regenerables desde él.
+
+Toda incorporación o corrección en esta capa complementaria debe conservar procedencia explícita y pasar la validación correspondiente de ACE. No usarla para introducir conocimiento botánico sin fuente ni para corregir indirectamente información gobernada por Master Botánico 2.0.
 
 Lectura profunda de una especie:
 
@@ -50,7 +70,7 @@ Lectura profunda de una especie:
 data/species/<especie>.json
 ```
 
-No corregir manualmente `data/botanical/*.json` ni `data/species/*.json`. Corregir el Master y regenerar.
+No corregir manualmente `data/species/*.json`. Corregir el Master y regenerar.
 
 Para consultas puntuales, preferir:
 
@@ -65,15 +85,22 @@ Regla de contexto: una pregunta puntual debe producir una lectura puntual. No ab
 
 ## 4. Routing por tarea
 
-### Identificación
+### Identificación / ACE
 
 Leer solo:
 
 1. sección pertinente de `docs/ARCHITECTURE.md`;
 2. `tools/canonical-identification/README.md`;
-3. código/test específico necesario.
+3. contratos Hito 15 pertinentes;
+4. código/test específico necesario.
 
-El conocimiento botánico vive en datos, no hardcodeado en el motor.
+ACE (Arboris Character Evidence Engine / Motor de Evidencia por Caracteres Árboris) es el motor canónico de identificación por caracteres discretos de Árboris.
+
+ACE evalúa evidencia por caracteres y opera sobre datos botánicos canónicos y su capa complementaria explícita. El conocimiento botánico vive en datos y fuentes autorizadas, no hardcodeado en el motor.
+
+ACE no es una fuente de verdad botánica, no es un clasificador de imágenes y no debe introducir conocimiento botánico por inferencia.
+
+El uso de ACE como denominación operativa del componente de identificación queda establecido para la documentación técnica correspondiente. La guía general de vocabulario del proyecto permanece fuera del alcance de Hito 15 y se actualizará por separado cuando corresponda.
 
 ### Producto / roadmap
 
@@ -135,6 +162,12 @@ Desde la raíz:
 
 ```powershell
 npm.cmd test
+```
+
+Para validar ACE de forma aislada:
+
+```powershell
+npm.cmd run test:canonical-identification
 ```
 
 Para validar ASC v0.1 de forma aislada:

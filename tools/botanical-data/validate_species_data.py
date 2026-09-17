@@ -394,8 +394,8 @@ def finish(errors, warnings):
 
     print("OK — 6 FICHAS CANÓNICAS SINCRONIZADAS.")
     print(
-        "Cada ficha reproduce exclusivamente datos derivados "
-        "de data/botanical/*.json."
+        "Cada ficha reproduce exclusivamente datos canónicos "
+        "derivados de Master Botánico 2.0."
     )
     print(
         "No existe conocimiento botánico adicional ni una segunda "
