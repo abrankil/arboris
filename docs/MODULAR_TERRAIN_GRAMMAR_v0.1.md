@@ -2,30 +2,51 @@
 
 **Fecha:** 2026-09-17  
 **Estado:** experimental / propuesta de trabajo  
-**Alcance:** plano jugable `02-world`; no reemplaza `ENVIRONMENT_PRODUCTION_SPEC.md` ni constituye canon final de arte, renderer o navegación.
+**Alcance:** plano jugable `02-world`; no reemplaza `ENVIRONMENT_PRODUCTION_SPEC.md` ni constituye canon final de arte, renderer, navegación o assets.
 
 ## 1. Propósito
 
-Este documento consolida las pruebas de generación realizadas para estudiar un sistema de terreno modular reutilizable en Árboris.
+Este documento consolida las pruebas de generación realizadas para estudiar un sistema de terreno modular reutilizable en Árboris y las correcciones surgidas del protocolo de auditoría actualizado.
 
-El objetivo no es definir aún un tileset final, sino separar con claridad:
+El objetivo no es definir aún un tileset final, sino separar:
 
-- qué comportamiento ya fue demostrado experimentalmente;
-- qué decisiones siguen siendo propuestas;
-- qué elementos permanecen abiertos;
-- qué debe validarse antes de avanzar a superficies, vegetación u otros overlays.
+- la lógica espacial autoritativa;
+- la geometría visual derivable;
+- las superficies;
+- los overlays;
+- las limitaciones observadas de las herramientas generativas;
+- las decisiones que todavía deben permanecer abiertas.
 
-La investigación parte de la necesidad ya establecida en `ENVIRONMENT_PRODUCTION_SPEC.md`: el plano jugable debe poder componerse con unidades reutilizables o chunks, sin confundir una captura visual con el master del mapa y sin convertir la cuadrícula técnica en autoridad espacial por encima del `walkableEnvelope`.
+La investigación parte de la especificación vigente: el plano jugable puede componerse mediante unidades reutilizables o chunks, pero la autoridad espacial sigue siendo el `walkableEnvelope` y el blockout lógico. La apariencia visual no debe convertirse en una segunda fuente de verdad.
 
-## 2. Resultado principal de la exploración
+## 2. Corrección principal tras auditoría
 
-La expresión inicial **"tiles cúbicos"** resultó demasiado restrictiva y tendió a producir cajas visibles, mundos voxelados o dioramas.
+La primera formulación de trabajo utilizó seis familias geométricas visuales (`G1–G6`) como si fueran entidades fundamentales del sistema.
 
-La formulación de trabajo que mejor sobrevivió las pruebas es:
+Las pruebas posteriores mostraron que esa formulación añadía complejidad innecesaria.
 
-> **módulos volumétricos discretos de terreno, alineados sobre una retícula regular, con huella superior estandarizada, alturas modulares, superficies intercambiables y overlays independientes.**
+Gran parte de esas formas pueden derivarse directamente de:
 
-La gramática conceptual de trabajo es:
+- elevación;
+- vecindad;
+- ausencia/presencia de terreno vecino;
+- conexiones transitables entre regiones o celdas.
+
+Por tanto, la gramática simplificada pasa a ser:
+
+```text
+WORLD LOGIC
+= WALKABLE ENVELOPE
++ ELEVATION
++ CONNECTIONS
+
+VISUAL TERRAIN
+= DERIVED GEOMETRY
++ SURFACE
++ OVERLAYS
+```
+
+Esta formulación reemplaza como hipótesis principal a:
 
 ```text
 TERRAIN CELL =
@@ -34,52 +55,19 @@ GEOMETRY
 + OVERLAY[0..N]
 ```
 
-con:
+cuando `GEOMETRY` era tratada como un inventario manual de piezas independientes.
+
+La simplificación no elimina modularidad; cambia su nivel de autoridad.
+
+## 3. Fuente de verdad y derivación
+
+La relación correcta de trabajo es:
 
 ```text
-GEOMETRY =
-TOP FOOTPRINT
-+ ELEVATION
-+ BODY / EDGE PROFILE
+FUENTE DE VERDAD ESPACIAL
+→ REGLAS DERIVADAS
+→ REPRESENTACIÓN VISUAL
 ```
-
-### Responsabilidades
-
-```text
-GEOMETRY
-- huella superior
-- altura/elevación
-- conectividad
-- borde/perfil volumétrico
-- relación con módulos vecinos
-
-SURFACE
-- estado visible del suelo
-- textura superficial
-- cobertura baja
-- desgaste / sendero
-
-OVERLAY
-- pastos
-- piedras
-- arbustos
-- árboles
-- otros elementos ambientales independientes
-```
-
-Reglas derivadas de esta separación:
-
-```text
-SURFACE no redefine GEOMETRY.
-OVERLAY no redefine ELEVATION.
-GRID gobierna ensamblaje; GRID no implica líneas visibles.
-```
-
-Los overlays pueden cruzar visualmente límites de celdas para naturalizar el mundo, siempre que su anclaje lógico y la geometría subyacente permanezcan consistentes.
-
-## 3. Relación con el sistema espacial vigente
-
-Esta gramática no reemplaza la autoridad espacial documentada.
 
 Se mantiene:
 
@@ -88,258 +76,336 @@ walkableEnvelope = autoridad espacial de navegación
 cells/tiles      = derivación técnica / arte / implementación
 ```
 
-Por lo tanto:
+La topología y la elevación deben gobernar la representación, no al revés.
 
-- la modularidad de arte no puede redefinir silenciosamente transitabilidad;
-- la naturalización visual no puede alterar puertos, rutas o interaction slots aprobados;
-- la implementación final puede usar tiles, chunks, sprites, meshes u otra combinación;
-- la escala definitiva de tile, chunk y sprite permanece abierta hasta validación de producción.
+### 3.1 Modelo lógico mínimo propuesto
 
-## 4. Aprendizajes visuales consolidados
+```text
+CELL / REGION
+- elevationBand
+- walkability
+- neighbours
+- surfaceRef (si corresponde)
 
-### 4.1 Modularidad visible vs. naturalización
+CONNECTION
+- from
+- to
+- traversable
+- elevationDelta
+- transitionRepresentation = OPEN
+```
 
-Las primeras pruebas mostraron que dibujar cada celda produce una lectura de tablero o maqueta.
+La forma concreta de implementar `CELL / REGION` sigue abierta. Puede materializarse mediante grid, regiones, chunks, tilemap u otra solución compatible con el renderer elegido.
 
-Las mejores pruebas mantuvieron el sistema modular estructuralmente, pero permitieron que superficies y overlays ocultaran seams innecesarios.
+## 4. Geometría visual derivada
+
+Las pruebas `08A–08D` produjeron seis categorías visuales útiles, pero la auditoría concluye que no todas deben existir como entidades lógicas separadas.
+
+La nueva lectura es:
+
+| Categoría histórica | Nuevo estado | Derivación |
+| --- | --- | --- |
+| G1 Flat | patrón visual derivado | vecino compatible a igual elevación / superficie continua |
+| G2 Straight Edge | patrón visual derivado | un lado sin vecino compatible o con vecino inferior |
+| G3 Outer Corner | patrón visual derivado | dos lados adyacentes expuestos |
+| G4 Inner Corner | patrón visual derivado | configuración cóncava de vecindad/elevación |
+| G5 Elevation Transition | **conexión lógica; representación abierta** | conexión transitable entre niveles con `elevationDelta` válido |
+| G6 Stackable Body | patrón visual derivado | diferencia de elevación mayor / cuerpo vertical acumulado |
+
+Estas categorías se conservan como vocabulario de revisión visual, no como seis fuentes de verdad independientes.
+
+## 5. Lección específica de G5
+
+La prueba `08D` buscó verificar si una única transición de elevación podía reproducirse como el mismo asset exacto bajo rotación.
+
+El generador produjo variantes estructuralmente distintas.
+
+La conclusión permitida es:
+
+```text
+LIMITACIÓN DE HERRAMIENTA:
+el generador no preservó de forma fiable una geometría exacta de transición bajo rotación.
+```
+
+No se deriva de esa prueba que:
+
+- Árboris necesite obligatoriamente un asset manual G5;
+- la transición deba implementarse como sprite;
+- el renderer deba usar una rampa concreta;
+- la arquitectura de navegación deba cambiar.
+
+Por protocolo, esas decisiones permanecen `PENDIENTE`.
+
+La representación final de una conexión entre elevaciones se decidirá cuando exista suficiente información sobre renderer, navegación, colisiones, escala y arte de producción.
+
+## 6. Superficies
+
+La separación de `SURFACE` sí sobrevivió la auditoría.
+
+Una superficie representa el estado visual/material del suelo y no modifica por sí sola la topología ni la elevación.
+
+Ejemplos experimentales:
+
+- suelo seco compacto;
+- suelo pedregoso;
+- cobertura herbácea dispersa;
+- mayor cobertura de matorral;
+- sendero natural desgastado.
+
+Regla:
+
+```text
+SURFACE no redefine ELEVATION.
+SURFACE no redefine WALKABILITY salvo regla lógica explícita fuera del arte.
+```
+
+El sendero funciona mejor como estado superficial:
+
+- compactación;
+- menor vegetación;
+- grava sutil;
+- desgaste irregular.
+
+No debe convertirse automáticamente en:
+
+- pavimento;
+- carretera elevada;
+- escalera manufacturada;
+- pieza arquitectónica especial.
+
+## 7. Overlays
+
+Los overlays permanecen conceptualmente separados de la lógica de terreno.
+
+Incluyen, según el caso:
+
+- pastos;
+- piedras;
+- arbustos;
+- árboles;
+- props ambientales.
+
+Reglas:
+
+```text
+OVERLAY no redefine ELEVATION.
+OVERLAY no redefine WALKABILITY salvo dato lógico explícito.
+OVERLAY puede cruzar visualmente límites de celdas/regiones.
+```
+
+El cruce visual de límites sirve para naturalizar el mundo sin convertir el overlay en autoridad geométrica.
+
+## 8. Modularidad visible vs. naturalización
+
+Las primeras pruebas mostraron que dibujar cada celda produce lectura de tablero, voxel o maqueta.
+
+Las mejores pruebas conservaron una lógica modular pero ocultaron seams innecesarios mediante continuidad superficial y overlays.
 
 Objetivo visual de trabajo:
 
 > El jugador debe percibir primero un paisaje natural; la modularidad debe inferirse por consistencia estructural, no por una rejilla dibujada.
 
-### 4.2 Senderos
+La cuadrícula, si existe, es una herramienta de construcción/implementación y no una obligación gráfica.
 
-Los senderos funcionan mejor como **estado superficial** del terreno:
-
-- suelo compactado;
-- vegetación reducida;
-- grava sutil;
-- desgaste irregular.
-
-No se consideran válidos como solución automática:
-
-- caminos adoquinados;
-- carreteras elevadas;
-- escaleras manufacturadas;
-- piezas arquitectónicas no previstas.
-
-### 4.3 Vegetación
+## 9. Vegetación e identidad ecológica
 
 La generación libre de ambientes secos tendió a introducir coníferas, agaves/yuccas, cactus genéricos, bonsáis o siluetas de sabana.
 
-Esto confirma que la identidad ecológica no debe dejarse a inferencia libre del generador. En fases posteriores deberá apoyarse en referencias vegetales canónicas y assets aprobados.
+Esto demuestra una limitación de la generación libre, no una propiedad del sistema espacial.
 
-Durante la validación geométrica se excluye vegetación para no ocultar mutaciones estructurales.
+La identidad ecológica deberá apoyarse en referencias vegetales canónicas y assets aprobados cuando se abra esa fase.
 
-### 4.4 Resolución de previews generadas
+No usar vegetación generada libremente para validar geometría, conectividad o elevación.
+
+## 10. Pixel art y resolución de previews
 
 Las herramientas de generación utilizadas no obedecieron de forma fiable solicitudes exactas de `1920×1080`.
 
-Conclusión: la resolución de una preview generada no certifica escala de producción ni pixel art real. Para esta fase conceptual, la resolución exacta no es criterio de aceptación geométrica.
+Conclusiones permitidas:
 
-Esto es consistente con `ENVIRONMENT_PRODUCTION_SPEC.md`, que separa viewport, extensión del mapa, escala lógica y master de assets.
+- la preview generada no certifica resolución lógica;
+- la apariencia pixelada no certifica pixel art de producción;
+- la preview no certifica escala de tile, sprite o chunk;
+- la preview no certifica geometría exacta.
 
-## 5. Geometry Lock — inventario experimental v0.1
+Esto es coherente con `ENVIRONMENT_PRODUCTION_SPEC.md`, que separa viewport, extensión de mapa, escala lógica y master de assets.
 
-La prueba `08A v2` produjo un kit visual de seis familias estructurales con proyección y escala coherentes.
+## 11. Evidencia experimental acumulada
 
-Inventario de trabajo:
+### Pruebas iniciales
 
-```text
-G1 — Flat
-G2 — Straight Edge
-G3 — Outer Corner
-G4 — Inner Corner
-G5 — Natural Elevation Transition
-G6 — Stackable Body
-```
+Demostraron que la palabra `cubic` inducía a mundos de cajas visibles y que la retícula dibujada dominaba demasiado la composición.
 
-### Estado actual
+### Pruebas de capas
 
-| Familia | Estado experimental | Observación |
-| --- | --- | --- |
-| G1 Flat | estable | huella superior y volumen reproducidos de forma consistente |
-| G2 Straight Edge | estable | borde expuesto reutilizable reconocido en ensamblajes |
-| G3 Outer Corner | estable | esquina convexa reproducida con suficiente consistencia |
-| G4 Inner Corner | provisionalmente estable | función topológica reconocible, requiere futura validación medible |
-| G5 Natural Elevation Transition | **abierto / no validado** | el generador reinterpreta la transición: masa erosionada, rampa o casi escalera |
-| G6 Stackable Body | estable | el cuerpo apilable conserva bien la lógica vertical |
+Separar terreno, surface y overlays produjo resultados visualmente más reutilizables.
 
-"Estable" aquí significa **estabilidad experimental de la familia**, no aprobación canónica ni asset final.
+### 08A v2
 
-## 6. Evidencia de reconstruibilidad
+Demostró que el generador puede materializar categorías visuales de terreno coherentes en una misma proyección.
 
-### 08A v2 — kit aislado
+### 08B
 
-Validó que el modelo puede materializar seis familias como bloques de terreno visuales, en vez de limitarse a producir diagramas o etiquetas.
+Demostró que una misma gramática visual puede construir una quebrada con elevaciones y bordes repetibles.
 
-### 08B — quebrada
+### 08C
 
-Usando el kit como referencia maestra, el modelo produjo una composición distinta con repetición visible de flats, bordes, esquinas y cuerpos apilables.
+Demostró que la gramática puede producir una topología distinta (meseta abierta) sin abandonar el lenguaje general.
 
-Resultado:
+### 08D
+
+Demostró que el generador no conserva de forma fiable una transición geométrica exacta bajo rotación.
+
+Interpretación correcta:
 
 ```text
-same grammar      = demostrado
-same exact assets = demostrado parcialmente
+same visual grammar      = demostrado
+same exact generated asset = no demostrado
 ```
 
-### 08C — meseta abierta
-
-Produjo una topología distinta de 08B conservando gran parte del vocabulario estructural.
-
-Esto demuestra reutilización de la **gramática** más allá de una única composición.
-
-Sin embargo, G5 mutó dentro de la misma prueba y apareció una transición similar a escalones, por lo que no puede considerarse congelada.
-
-## 7. Decisiones y estados según el manual de prompts
+## 12. Estados según protocolo actualizado
 
 ### EXISTENTE
 
-- el mundo jugable debe conservar blockout lógico independiente del arte;
-- la autoridad de navegación es el `walkableEnvelope`;
-- el lenguaje visual piloto es 2.5D/isométrico y puede usar terrazas/modularidad naturalizadas;
-- no existe aún selección definitiva de renderer/pathfinding;
-- escala de sprite/tile/chunk continúa `OPEN`;
-- una imagen generada pixelada no certifica pixel art de producción.
+- el blockout lógico es independiente del arte;
+- el `walkableEnvelope` es autoridad espacial de navegación;
+- el piloto usa lenguaje visual 2.5D/isométrico y terrazas/modularidad naturalizadas;
+- renderer y pathfinding definitivos no están seleccionados;
+- escala de sprite/tile/chunk sigue `OPEN`;
+- una imagen generada no certifica asset de producción.
 
 ### DERIVADA
 
-- separar `GEOMETRY`, `SURFACE` y `OVERLAY` favorece reutilización y evita hornear todas las combinaciones en assets únicos;
-- la retícula debe gobernar construcción sin obligar a una rejilla visible;
-- la composición debe adaptarse al kit, no deformar silenciosamente el kit para resolver cada mapa;
-- durante validación estructural, decoración y vegetación deben retirarse para no ocultar errores.
+- bordes, esquinas y cuerpos verticales pueden tratarse como representación derivada de elevación y vecindad;
+- separar `SURFACE` y `OVERLAY` evita duplicar geometría y favorece reutilización;
+- la retícula puede gobernar implementación sin aparecer visualmente;
+- las pruebas geométricas deben excluir decoración cuando esta pueda ocultar mutaciones.
 
 ### PROPUESTA
 
-- adoptar la gramática `GEOMETRY + SURFACE + OVERLAY` para el plano jugable;
-- usar huella superior estandarizada;
-- usar bandas discretas de elevación;
-- mantener provisionalmente G1–G6 como inventario geométrico de prueba;
-- modelar senderos como surface state;
-- permitir overlays con desborde visual entre celdas.
+- usar `elevationBand`, vecindad y `CONNECTIONS` como base mínima para derivar terreno visual;
+- modelar senderos como `surface state`;
+- permitir overlays que crucen límites visuales de celdas/regiones;
+- mantener las categorías históricas G1–G6 solo como vocabulario de revisión visual.
 
 Estas propuestas requieren aprobación/validación posterior y no son canon automático.
 
 ### PENDIENTE
 
-- dimensiones nativas exactas del footprint;
+- representación técnica exacta de cells/regions;
+- dimensiones nativas de cualquier tile/chunk;
 - unidad vertical exacta;
-- resolución nativa de tile;
 - pitch/yaw/proyección numérica;
-- conectores y reglas de vecindad;
-- rotaciones válidas por familia;
+- conectores de navegación definitivos;
+- representación de transiciones entre elevaciones;
+- rotaciones de assets si se usan;
 - colisiones;
 - orden de dibujo/oclusiones;
-- anclaje y footprint de overlays;
-- relación personaje/tile;
-- representación técnica de surfaces;
-- límite entre tilemap y distant art;
+- anclaje/footprint de overlays;
+- relación personaje/terreno;
+- formato técnico de surfaces;
+- límite entre world art y distant art;
 - agua y otros tipos de terreno;
-- implementación concreta en renderer;
-- definición final de G5.
+- implementación concreta en renderer.
 
-## 8. Auditoría consolidada
+### LIMITACIONES DE HERRAMIENTA OBSERVADAS
+
+- resolución exacta de preview no fiable;
+- tendencia a introducir texto aunque se prohíba cuando el prompt contiene códigos visibles;
+- tendencia a reinterpretar geometrías exactas como categorías visuales;
+- tendencia a introducir flora genérica de biomas secos si no se restringe con referencias.
+
+Estas limitaciones no deben convertirse por sí solas en requisitos de arquitectura.
+
+## 13. Auditoría consolidada
 
 ### Auditoría
 
-La arquitectura modular es coherente con la especificación de producción vigente y no reemplaza la autoridad espacial del blockout.
+La gramática simplificada es más coherente con la arquitectura vigente que el inventario rígido G1–G6.
 
-Las pruebas demuestran una gramática visual reutilizable y reconstruibilidad parcial. Todavía no demuestran que todas las familias puedan conservarse como assets geométricos exactos bajo composición libre.
+No introduce una segunda fuente de verdad espacial y conserva el `walkableEnvelope` como autoridad.
 
-El bloqueo actual se concentra en G5.
+### Atribución
+
+Los hallazgos de 08D pertenecen a la categoría **LIMITACIÓN DE HERRAMIENTA**, no a arquitectura ni canon.
+
+Las categorías G1–G6 pertenecen a **VOCABULARIO VISUAL EXPERIMENTAL**.
+
+La elevación y la conectividad pertenecen al **MODELO ESPACIAL / BLOCKOUT**.
 
 ### Inconsistencias
 
-1. **Terminología:** `cubic tile` no describe adecuadamente el sistema; usar `modular volumetric terrain tile` durante esta fase.
-2. **G5:** fue descrita como `ramp`, `step` y `transition`, permitiendo reinterpretación. Queda unificado provisionalmente como **Natural Elevation Transition** hasta resolver su geometría.
-3. **Naturalización vs. identidad del asset:** demasiada erosión libre puede destruir repetibilidad. Geometría maestra y tratamiento visual deben mantenerse separados.
-4. **Mapa vs. kit:** el principio obligatorio de prueba es:
+Corregida la inconsistencia de tratar patrones derivados como entidades lógicas independientes.
 
-```text
-THE MAP ADAPTS TO THE KIT.
-THE KIT DOES NOT ADAPT TO THE MAP.
-```
+Corregida la conclusión prematura de que G5 debía convertirse obligatoriamente en asset manual.
 
 ### Vacíos / omisiones
 
-La gramática todavía no dispone de una especificación matemática de módulos ni de conectores de borde.
+Permanece abierto cómo representar técnicamente las transiciones de altura y cómo derivará el renderer las formas visuales finales.
 
-Falta definir para cada familia:
+Estos vacíos se mantienen explícitos; no se rellenan mediante inferencia.
 
-```text
-top footprint
-height unit
-edge/port types
-allowed rotations
-valid neighbours
-```
+### Redundancias / simplificación
 
-G4 requiere validación medible posterior y G5 sigue abierta.
+Se elimina la necesidad conceptual de mantener seis familias geométricas como fuentes de verdad paralelas.
 
-### Redundancias
-
-Los prompts experimentales crecieron con prohibiciones repetidas y contexto innecesario. A partir de este checkpoint deben separarse:
+Se reduce el sistema a:
 
 ```text
-MODULAR TERRAIN GRAMMAR → reglas persistentes
-GENERATION TEST         → experimento puntual
+WORLD LOGIC
+→ DERIVED GEOMETRY
+→ SURFACE
+→ OVERLAYS
 ```
 
-Los prompts ya no deben actuar como documentación maestra.
+Esta simplificación preserva funcionalidad, evidencia y trazabilidad.
 
 ### Correcciones realizadas
 
-- retirada la expresión `cubic tiles` como término principal;
-- consolidada la separación Geometry / Surface / Overlay;
-- congeladas provisionalmente G1, G2, G3 y G6 como familias estables experimentales;
-- G4 queda provisionalmente estable;
-- G5 queda explícitamente abierta;
-- suspendido el avance a Surface/Overlay hasta resolver el gate geométrico;
-- retirada la resolución de preview como criterio de validación geométrica.
+- retirada la dependencia conceptual de `G1–G6` como núcleo lógico;
+- G1–G4 y G6 reclasificados como patrones visuales derivados;
+- G5 reclasificado como conexión lógica entre elevaciones con representación `OPEN`;
+- incorporada categoría `LIMITACIÓN DE HERRAMIENTA`;
+- retirada la recomendación de congelar manualmente G5 como consecuencia automática de 08D;
+- mantenida la separación Surface/Overlay.
 
 ### Nueva validación
 
-Después de estas correcciones:
+Después de la simplificación:
 
 - no aparece contradicción con `ENVIRONMENT_PRODUCTION_SPEC.md`;
-- no se reemplaza el `walkableEnvelope` por una grilla como fuente de verdad;
-- se distingue claramente evidencia experimental de decisión canónica;
-- se mantiene abierto todo parámetro que todavía no tiene evidencia suficiente;
-- el siguiente gate queda reducido a una sola pregunta verificable: la reproducibilidad de G5.
+- no se reemplaza `walkableEnvelope` por tiles como autoridad;
+- no se convierte una falla del generador en decisión arquitectónica;
+- se reduce complejidad conceptual;
+- los pendientes permanecen visibles.
 
-## 9. Gate siguiente — G5
+## 14. Próximo gate
 
-No avanzar todavía a superficies, vegetación ni biomas.
+El siguiente gate ya no debe intentar reproducir G5.
 
-La siguiente prueba debe responder:
+Debe responder:
 
-> ¿Puede `G5 — Natural Elevation Transition` existir como un único módulo estructural reproducible bajo rotación, sin convertirse en rampas, escaleras o variantes geométricas nuevas?
+> ¿Puede un blockout simple definido por elevación, vecindad y conexiones producir de forma consistente una representación visual con superficies continuas, bordes, esquinas y cuerpos verticales sin introducir geometría lógica adicional?
 
-### Resultado A — reproduce la misma geometría
-
-La `Geometry Grammar v0.1` puede considerarse **validada experimentalmente** y se abre el bloque `Surface Grammar v0.1`.
-
-### Resultado B — genera variaciones estructurales
-
-No seguir intentando estabilizar G5 solo mediante prompt.
-
-La conclusión será:
+La prueba debe mantener separado:
 
 ```text
-G5 debe definirse/congelarse como asset geométrico maestro.
-La IA puede aplicar tratamiento visual o textura,
-pero no decidir su estructura.
+INPUT LÓGICO
+→ representación derivada
 ```
 
-## 10. Regla de avance
+No debe pedir al generador que invente el modelo espacial.
 
-Hasta cerrar el gate G5:
+## 15. Regla de avance
 
-- no crear nuevas familias geométricas;
-- no añadir surfaces definitivas;
-- no añadir overlays de producción;
-- no ampliar a nuevos biomas;
-- no convertir este documento en canon final.
+Antes de abrir `Surface Grammar v0.1`, realizar una prueba de derivación desde blockout lógico.
 
-El propósito inmediato es terminar de demostrar qué parte del sistema puede ser generativa y qué parte debe ser determinista/autorizada por arte y diseño.
+No fijar todavía:
+
+- asset maestro de transición;
+- renderer;
+- métrica definitiva de tile;
+- colisiones finales;
+- biomas completos.
+
+El propósito inmediato es validar que la representación visual puede derivarse de una lógica espacial mínima sin convertirse en una segunda fuente de verdad.
