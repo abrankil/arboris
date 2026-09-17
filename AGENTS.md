@@ -1,12 +1,12 @@
-# Árboris — AI repository routing
+# Árboris — routing para agentes
 
-This file is an operational routing layer for coding and research agents. It does not replace normative project documents or scientific sources.
+Este archivo es el mapa operativo mínimo para IA. No reemplaza las fuentes normativas ni científicas.
 
-## 1. Default branch and review protocol
+## 1. Regla de trabajo
 
-Use `main` as the shared reference state unless the task explicitly names another branch.
+Usar `main` como referencia compartida salvo que la tarea nombre otra rama.
 
-Before approving or consolidating development work, follow `docs/DEVELOPMENT_MANUAL.md` and report:
+Antes de consolidar una decisión, aplicar `docs/DEVELOPMENT_MANUAL.md` y responder explícitamente:
 
 ```text
 AUDITORÍA
@@ -15,34 +15,44 @@ VACÍOS / OMISIONES
 REDUNDANCIAS
 ```
 
-Do not bulk-read the repository by default. Route first, then open only the minimum authoritative files needed for the task.
+No leer el repositorio completo por defecto. Clasificar la tarea y abrir solo la autoridad mínima necesaria.
 
-## 2. Authority vs. operational read path
+## 2. Mapa simple del repositorio
 
-Botanical editorial/scientific source of truth:
+```text
+data/      datos, fuentes científicas, vistas derivadas y canon de personajes
+docs/      documentación vigente + trazabilidad documental
+tools/     herramientas vigentes de build, validación e identificación
+species/   evidencia fotográfica de terreno; NO equivale a data/species/
+archive/   prototipos y experimentos históricos; ignorar por defecto
+.github/   CI e instrucciones de GitHub/Copilot
+```
+
+Para orientación humana usar `docs/README.md`. Para datos usar `data/README.md`. Para historia experimental usar `archive/README.md` solo cuando la tarea lo requiera.
+
+## 3. Autoridad botánica
+
+Fuente editorial/científica:
 
 ```text
 data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx
 ```
 
-For normal read-only reasoning, do **not** open the XLSX first. Prefer the reproducible normalized JSON in `data/botanical/`; use the XLSX when editing/regenerating canonical botanical knowledge or verifying export provenance.
-
-Generated views are read-only:
+Lectura normal de máquina:
 
 ```text
 data/botanical/*.json
-data/species/*.json
 ```
 
-Do not manually correct them. Correct the Master and regenerate.
+Lectura profunda de una especie:
 
-## 3. Minimal retrieval routes
+```text
+data/species/<especie>.json
+```
 
-### Botanical queries
+No corregir manualmente `data/botanical/*.json` ni `data/species/*.json`. Corregir el Master y regenerar.
 
-Read `data/README.md` first.
-
-When a local checkout or executable workspace is available, prefer the compact read-only query CLI for scoped questions:
+Para consultas puntuales, preferir:
 
 ```powershell
 python tools/botanical-data/query_botanical.py species SP-001
@@ -51,127 +61,87 @@ python tools/botanical-data/query_botanical.py relation SP-001 CH-003
 python tools/botanical-data/query_botanical.py compare CH-003
 ```
 
-The CLI reads canonical JSON and does not create another source of truth. It emits compact JSON by default; add `--pretty` only when human readability is useful.
+Regla de contexto: una pregunta puntual debe producir una lectura puntual. No abrir las seis fichas `data/species/*.json` para una comparación transversal si las tablas normalizadas bastan.
 
-When the CLI is unavailable, use the smallest dataset that answers the question:
+## 4. Routing por tarea
 
-- species identity/list → `data/botanical/species.json`
-- character definition/allowed states → `data/botanical/characters.json`
-- compare species by character → `data/botanical/species_characters.json` + `characters.json`
-- source metadata → `data/botanical/sources.json`
-- glossary → `data/botanical/glossary.json`
-- photo metadata → `data/botanical/photos.json`
-- known model errors → `data/botanical/model_errors.json`
-- one species with joined context → one matching file in `data/species/`
-- visual/character canon → `data/characters/` (not botanical authority)
+### Identificación
 
-Avoid loading all six `data/species/*.json` files for cross-species comparisons; they are denormalized convenience views and are much larger than the normalized tables.
+Leer solo:
 
-For payload/index strategy and future SQLite requirements, use `docs/DATA_ACCESS_PERFORMANCE.md`.
+1. sección pertinente de `docs/ARCHITECTURE.md`;
+2. `tools/canonical-identification/README.md`;
+3. código/test específico necesario.
 
-### Identification engine
+El conocimiento botánico vive en datos, no hardcodeado en el motor.
 
-Read, in order:
+### Producto / roadmap
 
-1. `docs/ARCHITECTURE.md` relevant section
-2. `tools/canonical-identification/README.md`
-3. `tools/canonical-identification/dataset.mjs`
-4. `tools/canonical-identification/engine.mjs`
-5. tests only when needed
+`README.md` → documento específico en `docs/` → `docs/ROADMAP.md` solo cuando se necesite estado/hito.
 
-Botanical knowledge belongs in data, not hardcoded engine rules.
+### Arte / personajes
 
-### General data model
+`docs/GRAPHIC_DIRECTION.md` + `docs/ART_STYLE_GUIDE.md` → documento específico → `data/characters/`.
 
-Use `docs/DATA_MODEL.md`. It is conceptual; it is not yet a physical SQLite schema.
+No tratar arte generado como evidencia botánica o territorial.
 
-### Product / roadmap
+### Ambientes / mapas
 
-Use `README.md`, then `docs/ROADMAP.md` only for the milestone or state needed. Do not infer current map/art state from old audit documents.
-
-### Environment / maps
-
-Read only the relevant chain:
-
-1. `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md`
-2. `docs/SPATIAL_MODEL.md`
-3. `docs/TERRITORIAL_MAPPING_PROTOCOL.md`
-4. `docs/MAP_TOPOLOGY_SYSTEM.md`
-5. `docs/MAP_TOPOLOGY_BLOCKOUT_TEST_PLAN.md`
-6. `docs/ENVIRONMENT_ART_DIRECTION.md`
-7. `docs/ART_STYLE_GUIDE.md`
-8. `docs/ENVIRONMENT_PRODUCTION_SPEC.md`
-
-Historical audit/sync documents are for traceability, not normative authority.
-
-### Character art
-
-Use `data/characters/` for current character records/assets and `docs/GRAPHIC_DIRECTION.md` / `docs/ART_STYLE_GUIDE.md` for methodology. Do not treat generated images or environment concept art as scientific evidence.
-
-## 4. IDs and joins
-
-Canonical botanical species IDs use `SP-001` … `SP-006`.
-
-Legacy/runtime filenames and some art records may use `SP001` … `SP006`. Treat the latter as compatibility identifiers, not a second botanical namespace.
-
-Preferred joins:
+Abrir únicamente la parte necesaria de esta cadena:
 
 ```text
-species.species_id
-↔ species_characters.species_id
-
-characters.caracter_id
-↔ species_characters.caracter_id
-
-sources.fuente_id
-↔ species_characters.fuente_id
+PILOT_ENVIRONMENT_VISUAL_CANON
+→ SPATIAL_MODEL
+→ TERRITORIAL_MAPPING_PROTOCOL
+→ MAP_TOPOLOGY_SYSTEM
+→ MAP_TOPOLOGY_BLOCKOUT_TEST_PLAN
+→ ENVIRONMENT_ART_DIRECTION
+→ ART_STYLE_GUIDE
+→ ENVIRONMENT_PRODUCTION_SPEC
 ```
 
-Do not join by common name when an ID exists.
+### Rendimiento / acceso a datos
 
-## 5. Context-budget rules for agents
+Usar `docs/DATA_ACCESS_PERFORMANCE.md`. Los benchmarks host son evidencia direccional; la arquitectura Android final permanece sujeta a medición Android real.
 
-1. Start with metadata/index files before large records.
-2. Prefer `query_botanical.py` for a scoped botanical lookup when execution is available.
-3. Fetch narrow line ranges or exact files when the question is scoped.
-4. For one species, use one `data/species/*.json` joined view rather than reconstructing all tables.
-5. For comparisons, use normalized tables rather than loading all joined species views.
-6. Load source/provenance records only when the task needs provenance.
-7. Do not load images/binaries unless the task needs visual inspection.
-8. Do not load historical docs unless a decision history is explicitly required.
-9. Preserve `OPEN` states; do not fill missing project decisions from general knowledge.
-10. Separate internal canon, external evidence, and inference.
+## 5. IDs y contexto
 
-## 6. Validation commands
+IDs botánicos canónicos: `SP-001` … `SP-006`.
 
-From repository root:
+`SP001` … `SP006` existe solo por compatibilidad histórica/runtime. No crear nuevos registros botánicos con ese formato.
+
+Preferir joins por ID. No completar decisiones `OPEN` mediante suposición.
+
+No cargar por defecto:
+
+- `archive/`;
+- documentos `*_AUDIT_*`, `*_SNAPSHOT_*`, `*_SYNC_*`, `*_CLOSEOUT_*`, `*_WORKLOG_*`;
+- imágenes/binarios;
+- fuentes/provenance si la tarea no los requiere.
+
+## 6. Validación
+
+Desde la raíz:
 
 ```powershell
 npm.cmd test
-npm.cmd run typecheck
 ```
 
-For botanical regeneration:
+`npm.cmd run typecheck` solo es gate ejecutable cuando exista `tsconfig.json`.
+
+Para regenerar botánica:
 
 ```powershell
 npm.cmd run build:botanical
 npm.cmd run verify:botanical
 ```
 
-For compact read-only botanical inspection:
+Regla final:
 
-```powershell
-python tools/botanical-data/query_botanical.py stats --pretty
+```text
+route first
+→ read minimum authority
+→ change one source of truth
+→ validate
+→ audit
 ```
-
-Do not regenerate canonical data unless the task actually changes the Master or export pipeline.
-
-## 7. Fast entry points
-
-Human/project orientation: `docs/START_HERE.md`.
-
-Machine/data routing: `data/README.md`.
-
-Data performance and future SQLite indexing: `docs/DATA_ACCESS_PERFORMANCE.md`.
-
-Current development continuity: `docs/DEVELOPMENT_SYNC_2026-09-17.md` (snapshot, non-normative).
