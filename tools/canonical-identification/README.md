@@ -1,6 +1,6 @@
 # Canonical identification engine
 
-Estado: Hito 15.5–15.7, cierre mínimo del motor canónico.
+Estado: Hito 15.5–15.7 cerrado; preparación mínima para Hito 16.
 
 Este módulo implementa el núcleo simple de identificación para el piloto Árboris. Consume exclusivamente los JSON canónicos derivados de Master Botánico 2.0.
 
@@ -29,12 +29,24 @@ No lee la clave histórica, no usa previews antiguas y no contiene botánica har
 - Solo una incompatibilidad explícita entre estados conocidos elimina una especie.
 - La selección del siguiente carácter es dinámica y usa datos canónicos.
 - El motor contiene comportamiento; el conocimiento está en `data/botanical/`.
+- El puntaje diagnóstico normaliza etiquetas simples del piloto, incluido `medio-alto`.
+- Las dependencias `aplica_si` se usan como compuerta mínima para no preguntar caracteres dependientes antes de satisfacer su carácter padre.
 
 ## Uso
 
 ```powershell
 node --test tools/canonical-identification/engine.test.mjs
 ```
+
+## Límites actuales
+
+La compuerta `aplica_si` soporta por ahora expresiones simples del tipo:
+
+```text
+CH-013 contiene capsula
+```
+
+No es un motor lógico general. Si aparecen nuevas formas de dependencia en el Master, deben agregarse explícitamente y cubrirse con pruebas.
 
 ## Fuera de alcance
 
