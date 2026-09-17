@@ -8,10 +8,12 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
-    "test": "npm run verify:botanical && npm run verify:data-access && npm run test:canonical-identification",
+    "test": "npm run verify:botanical && npm run verify:data-access && npm run verify:reference-db && npm run test:canonical-identification",
     "verify:botanical": "python tools/botanical-data/validate_master_export.py && python tools/botanical-data/validate_species_ids.py && python tools/botanical-data/validate_species_data.py",
     "verify:data-access": "python tools/botanical-data/test_query_botanical.py",
+    "verify:reference-db": "python tools/botanical-data/test_reference_sqlite.py",
     "build:botanical": "python tools/botanical-data/export_master.py && python tools/botanical-data/build_species_data.py",
+    "build:reference-db": "python tools/botanical-data/build_reference_sqlite.py --force",
     "query:botanical": "python tools/botanical-data/query_botanical.py",
     "test:canonical-identification": "node --test tools/canonical-identification/engine.test.mjs",
     "test:legacy-key": "node --test tools/botanical-key-validation/*.test.mjs"
