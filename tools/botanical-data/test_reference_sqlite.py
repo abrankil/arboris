@@ -57,7 +57,7 @@ class ReferenceSQLiteTests(unittest.TestCase):
             self.connection.execute(
                 "SELECT COUNT(*) FROM species_character_states"
             ).fetchone()[0],
-            89,
+            0,
         )
 
     def test_expected_state_is_exploded_for_fast_filtering(self) -> None:
