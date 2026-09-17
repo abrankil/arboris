@@ -102,7 +102,7 @@ build/reference-benchmark.md
 
 El workflow `.github/workflows/reference-data-benchmark.yml` vuelve a ejecutarlo cuando cambian datos botánicos o las capas de acceso relevantes y publica el reporte como artifact temporal.
 
-El benchmark host es direccional y **no** sustituye el benchmark final con Hermes + `expo-sqlite` en Android. La decisión vigente para el motor de identificación del piloto es mantener JSON + índices en memoria; SQLite permanece como prototipo de profiling/escalamiento.
+El benchmark host es evidencia direccional y no un gate de rendimiento. **No** sustituye el benchmark final con Hermes + `expo-sqlite` en Android. La baseline vigente del motor de identificación del piloto es JSON + índices en memoria; SQLite permanece como prototipo de profiling/escalamiento.
 
 La estrategia completa y los resultados medidos están en `docs/DATA_ACCESS_PERFORMANCE.md`.
 
