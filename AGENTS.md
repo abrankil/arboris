@@ -100,6 +100,12 @@ PILOT_ENVIRONMENT_VISUAL_CANON
 → ENVIRONMENT_PRODUCTION_SPEC
 ```
 
+### ASC / generación de escenas
+
+Para compilar prompts de escenas, blockouts o prototipos generativos, leer primero `docs/ARBORIS_SCENE_COMPILER.md` y después solo las autoridades de dominio necesarias. ASC compila restricciones y contratos; no sustituye evidencia, canon, navegación, renderer ni autoridad artística.
+
+Nunca usar un resultado generativo para cerrar por sí mismo una decisión `OPEN` ni como corroboración botánica o territorial.
+
 ### Rendimiento / acceso a datos
 
 Usar `docs/DATA_ACCESS_PERFORMANCE.md`. Los benchmarks host son evidencia direccional; la arquitectura Android final permanece sujeta a medición Android real.
