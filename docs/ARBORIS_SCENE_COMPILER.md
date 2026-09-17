@@ -310,3 +310,7 @@ Permanecen `OPEN` hasta validación específica:
 - persistencia/versionado específico de resultados ASC.
 
 No crear estas capas por anticipación si una prueba concreta todavía no las necesita.
+
+## 15. Guía operativa de vocabulario
+
+[`ASC_VOCABULARY_GUIDE.md`](ASC_VOCABULARY_GUIDE.md) es la referencia rápida aprobada provisionalmente para términos, órdenes de trabajo y tratamientos de información de ASC. Es didáctica y no reemplaza este documento normativo.
