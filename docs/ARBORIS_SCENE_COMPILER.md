@@ -1,22 +1,28 @@
-# Árboris Scene Compiler (ASC)
+# ASC — Perfil de integración con Árboris
 
-**Estado:** normativo  
+**Estado:** normativo para el uso de ASC dentro de Árboris  
 **Nombre operativo:** ASC  
-**Nombre completo:** Arboris Scene Compiler / Compilador de Escenas Árboris  
-**Ámbito:** compilación de instrucciones para generación de escenas, blockouts y prototipos visuales a partir del canon, contratos y evidencia de Árboris.
+**Desarrollador de ASC:** Álvaro  
+**Ámbito de este documento:** integración de ASC con Árboris para compilación de instrucciones, escenas, blockouts y prototipos visuales a partir del canon, contratos y evidencia de Árboris.
+
+Este documento regula cómo Árboris usa ASC. No define todo el producto ASC ni subordina el desarrollo general de ASC a Árboris.
 
 ## 1. Definición
 
-ASC es la capa de compilación de Árboris que transforma información estructurada del proyecto en una instrucción ejecutable por un modelo o herramienta generativa.
+ASC es un sistema de compilación en desarrollo independiente, desarrollado por Álvaro. Puede utilizarse con Árboris o con otros proyectos.
+
+En Árboris, ASC se usa como capa de compilación que transforma información estructurada del proyecto en una instrucción ejecutable por un modelo o herramienta generativa.
+
+Árboris es el primer proyecto real/piloto donde se está probando, validando y aplicando ASC. Una vez que ASC alcance estado utilizable o terminado según su propio desarrollo, Árboris podrá funcionar como primer proyecto de aplicación, sin convertir por eso a ASC en una pieza interna exclusiva de Árboris.
 
 ASC **no es el modelo generativo**, **no es el renderer**, **no es el motor de navegación** y **no es una fuente de verdad territorial, botánica o científica**.
 
 ```text
-EVIDENCIA / INPUT
+EVIDENCIA / INPUT DE ÁRBORIS
         ↓
 CANON ÁRBORIS
         ↓
-CONTRATOS
+CONTRATOS DE ÁRBORIS
 territorial · navegación · cámara · interacción · visual
         ↓
 RESTRICCIONES
@@ -39,9 +45,34 @@ AUDITORÍA
 
 El `HANDOFF CHECK` es obligatorio cuando una herramienta intermedia pueda reformular, resumir, adaptar o transformar el prompt antes de llegar al ejecutor.
 
+### 1.1 Autoría, independencia y autoridad
+
+La autoridad sobre el desarrollo general de ASC corresponde a Álvaro, salvo acuerdos posteriores explícitos.
+
+La autoridad sobre decisiones de producto de Árboris corresponde a la dirección del proyecto Árboris. En el estado actual, Alejandra actúa como dirección de proyecto de Árboris y Álvaro como dirección/desarrollo de ASC y dirección de arte cuando ese rol haya sido definido para Árboris.
+
+La relación correcta es:
+
+```text
+ASC
+sistema independiente desarrollado por Álvaro
+puede servir a múltiples proyectos
+
+ÁRBORIS
+primer proyecto piloto / caso de uso real
+consume ASC bajo sus propios contratos y autoridades
+
+INTERSECCIÓN
+las pruebas hechas en Árboris pueden informar el desarrollo de ASC
+y también producir hallazgos útiles para Árboris,
+pero ambas lecturas deben registrarse por separado
+```
+
+Ningún resultado de ASC puede imponer automáticamente una decisión sobre Árboris. Ninguna necesidad específica de Árboris puede convertirse automáticamente en requisito general de ASC sin decisión de Álvaro.
+
 ## 2. Terminología obligatoria
 
-- **ASC:** sistema de compilación.
+- **ASC:** sistema de compilación independiente desarrollado por Álvaro. En este repositorio se documenta su perfil de uso con Árboris.
 - **prompt ASC:** instrucción compilada que ASC entrega al ejecutor generativo.
 - **prompt efectivo:** instrucción que realmente recibe el ejecutor después de cualquier adaptación de la herramienta o proveedor.
 - **handoff:** transferencia del prompt ASC al ejecutor.
@@ -50,6 +81,9 @@ El `HANDOFF CHECK` es obligatorio cuando una herramienta intermedia pueda reform
 - **resultado ASC:** salida producida mediante una ejecución iniciada desde un prompt ASC. No constituye evidencia por sí misma.
 - **prueba ASC:** experimento controlado para evaluar compilación, traducción o representación.
 - **contrato de entrada:** conjunto explícito de relaciones, restricciones y estados que ASC debe preservar.
+- **caso de uso Árboris:** aplicación de ASC a una necesidad, contrato, escena o prueba de Árboris.
+- **hallazgo ASC:** aprendizaje sobre compilación, handoff, ejecutor, metodología o capacidades/limitaciones del sistema ASC.
+- **hallazgo Árboris:** aprendizaje sobre necesidades, contratos, representación, arte, navegación o validación del proyecto Árboris.
 
 No llamar "modelo de Árboris" al ejecutor generativo cuando se quiera describir ASC. Deben distinguirse ambos componentes.
 
@@ -73,16 +107,16 @@ Cuando la instrucción sea ambigua entre **compilar** y **ejecutar**, conservar 
 
 ## 3. Autoridad y precedencia
 
-ASC compila; no decide la verdad del proyecto.
+ASC compila; no decide la verdad del proyecto consumidor.
 
 Antes de compilar, debe identificarse la **autoridad del dominio** aplicable. No existe una regla universal donde cualquier imagen o fuente externa prevalezca sobre el canon interno. La autoridad depende del tipo de información: botánica, territorial, navegación, arte, producto, etc.
 
-Orden operativo general:
+En Árboris, el orden operativo general es:
 
 ```text
-autoridad del dominio + evidencia válida
+autoridad del dominio de Árboris + evidencia válida
 → contrato específico de la prueba/escena
-→ reglas ASC
+→ reglas ASC aplicables
 → decisiones artísticas autorizadas
 → ejecutor generativo
 ```
@@ -90,6 +124,8 @@ autoridad del dominio + evidencia válida
 Una salida generativa nunca puede corregir, completar ni reemplazar una autoridad superior por mera plausibilidad visual.
 
 Ante contradicción, prevalece la autoridad del dominio y la contradicción debe registrarse.
+
+Cuando una prueba de Árboris revele una necesidad de ASC, registrarla como hallazgo o propuesta para ASC; no convertirla automáticamente en requisito general del sistema ASC.
 
 ## 4. Estados de información para compilación
 
@@ -157,23 +193,27 @@ La posición posterior en un recorrido no implica mayor elevación. Un nivel de 
 
 Antes de producir un prompt ASC, identificar:
 
-1. **Pregunta experimental.** Qué propiedad concreta se intenta comprobar.
-2. **Objetivo de la generación.** Qué se está probando y qué no.
-3. **Fuentes de autoridad.** Documentos, datos, imágenes o contratos permitidos.
-4. **Relaciones obligatorias.** Elementos que la salida debe preservar.
-5. **Estados OPEN.** Información que no puede cerrarse por inferencia.
-6. **Prohibiciones.** Elementos que el generador no debe introducir.
-7. **Grado de libertad artística.** Qué puede variar sin alterar la prueba.
-8. **Contrato de cámara/salida.** Cuando corresponda.
-9. **Variable experimental.** Qué cambia respecto de la prueba anterior.
-10. **Constantes.** Qué debe permanecer idéntico entre versiones comparables.
-11. **Criterios de validación.** Cómo se decidirá PASS / PARTIAL / FAIL / INCONCLUSIVE.
-12. **Modo de ejecución.** `compile-only` o `compile-and-execute`.
+1. **Proyecto consumidor.** Árboris u otro proyecto.
+2. **Pregunta experimental.** Qué propiedad concreta se intenta comprobar.
+3. **Objetivo de la generación.** Qué se está probando y qué no.
+4. **Fuentes de autoridad.** Documentos, datos, imágenes o contratos permitidos.
+5. **Relaciones obligatorias.** Elementos que la salida debe preservar.
+6. **Estados OPEN.** Información que no puede cerrarse por inferencia.
+7. **Prohibiciones.** Elementos que el generador no debe introducir.
+8. **Grado de libertad artística.** Qué puede variar sin alterar la prueba.
+9. **Contrato de cámara/salida.** Cuando corresponda.
+10. **Variable experimental.** Qué cambia respecto de la prueba anterior.
+11. **Constantes.** Qué debe permanecer idéntico entre versiones comparables.
+12. **Criterios de validación.** Cómo se decidirá PASS / PARTIAL / FAIL / INCONCLUSIVE.
+13. **Modo de ejecución.** `compile-only` o `compile-and-execute`.
+14. **Lectura de resultados.** Separar hallazgos para ASC y hallazgos para el proyecto consumidor.
 
 ## 8. Forma recomendada de un prompt ASC
 
 ```text
 [IDENTIDAD DE LA PRUEBA]
+
+[PROYECTO CONSUMIDOR]
 
 [PREGUNTA EXPERIMENTAL]
 
@@ -249,7 +289,7 @@ Una imagen, mapa, fotografía o croquis puede ser input ASC, pero debe distingui
 - lo que puede derivarse de forma segura;
 - lo que permanece desconocido.
 
-En traducción territorial, el flujo preferido es:
+En traducción territorial, el flujo preferido para Árboris es:
 
 ```text
 fuente territorial
@@ -284,6 +324,16 @@ Una salida visual puede validar, entre otras cosas:
 No puede validar por sí sola que una relación territorial real sea verdadera.
 
 Cuando la prueba pretenda validar topología, la conectividad debe evaluarse contra el contrato o `walkableEnvelope`; la apariencia de un sendero no certifica transitabilidad por sí sola.
+
+Cada resultado debe poder leerse en dos planos cuando corresponda:
+
+```text
+LECTURA ASC
+qué demuestra o no demuestra sobre compilación, handoff, método o ejecutor
+
+LECTURA DEL PROYECTO CONSUMIDOR
+qué demuestra o no demuestra sobre Árboris u otro proyecto
+```
 
 ## 12. Clases de pruebas ASC
 
@@ -357,6 +407,7 @@ Las versiones sucesivas deben cambiar una hipótesis o restricción identificabl
 Cada prueba debe registrar al menos:
 
 - identificador;
+- proyecto consumidor;
 - pregunta experimental;
 - objetivo;
 - input;
@@ -370,6 +421,7 @@ Cada prueba debe registrar al menos:
 - hallazgos;
 - PASS / PARTIAL / FAIL / INCONCLUSIVE por criterio;
 - atribución del fallo o éxito;
+- lectura separada para ASC y para el proyecto consumidor;
 - decisiones que permanecen `OPEN`.
 
 Usar `docs/ASC_TEST_RECORD_TEMPLATE.md` como plantilla de registro mientras no exista un formato serializado definitivo.
@@ -408,9 +460,13 @@ Los hallazgos deben atribuirse al nivel correcto. Como mínimo considerar:
 - ejecutor generativo;
 - representación visual;
 - herramienta/proveedor;
-- referencia o fuente de entrada.
+- referencia o fuente de entrada;
+- necesidad específica del proyecto consumidor;
+- decisión general de ASC.
 
 No trasladar automáticamente una limitación del ejecutor a la arquitectura de Árboris.
+
+No trasladar automáticamente una necesidad de Árboris al desarrollo general de ASC.
 
 Una conclusión no puede ser más amplia que la evidencia del gate.
 
@@ -430,11 +486,14 @@ Una imagen atractiva no constituye un PASS si viola relaciones obligatorias.
 ## 19. Principios operativos
 
 ```text
+ASC es independiente de Árboris
+Árboris es el primer proyecto piloto de ASC
 compilar antes de generar
 verificar handoff antes de interpretar
 separar dato de representación
 preservar OPEN antes de inventar
 validar estructura antes de decorar
+separar hallazgo ASC de hallazgo Árboris
 cambiar una variable por vez cuando el gate dependa de causalidad
 el grafo manda sobre la apariencia
 la evidencia manda sobre la plausibilidad
@@ -446,6 +505,7 @@ un resultado correcto aislado no demuestra estabilidad
 
 Permanecen `OPEN` hasta validación específica:
 
+- nombre completo definitivo de ASC fuera del contexto Árboris, si Álvaro decide modificarlo;
 - formato serializado definitivo de los contratos ASC;
 - automatización del compilador como código;
 - proveedor o modelo generativo definitivo;
