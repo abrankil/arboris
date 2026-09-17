@@ -134,7 +134,7 @@ Existen archivos históricos que todavía se conservan por trazabilidad o compat
 
 - `data/source/Base_botanica_Pokedex_flora_Master.xlsx` — Master anterior.
 - `data/source/Fichas_especies_arboris.xlsx` — material editorial/descriptivo anterior.
-- `data/botanical/species_pilot.json` — export legacy `pilot-master-v0.1`.
+- `data/botanical/legacy/species_pilot.json` — export legacy `pilot-master-v0.1`.
 - `docs/BOTANICAL_KEY_PILOT.md` — referencia histórica/metodológica de la clave, no fuente botánica.
 - componentes legacy de clave/adaptador — pendientes de auditoría y retirada controlada en hitos posteriores.
 

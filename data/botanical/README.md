@@ -15,17 +15,23 @@ Archivos vigentes:
 
 Estos archivos son derivados reproducibles de:
 
-`data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
+```text
+data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx
+```
 
 No deben editarse manualmente para corregir botánica.
 
 `metadata.json` registra versión del Master, esquema, archivo fuente y SHA-256.
 
-## Archivo legacy todavía presente
+## Legacy
 
-`species_pilot.json` pertenece al pipeline anterior (`pilot-master-v0.1`) y referencia el Master antiguo. Se conserva temporalmente por compatibilidad/auditoría hasta la retirada controlada del legado en Hito 15.9.
+Los derivados históricos anteriores a Master Botánico 2.0 fueron movidos a:
 
-**No utilizar `species_pilot.json` como fuente vigente.** Para especies usar `species.json`.
+```text
+data/botanical/legacy/
+```
+
+No son fuente vigente, no participan en el motor canónico y no deben usarse para nuevas decisiones botánicas.
 
 ## Semántica importante
 
