@@ -12,7 +12,10 @@ async function readJson(path) {
 
 function listFromValue(value) {
   if (value == null || value === '') return [];
-  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+  if (Array.isArray(value)) {
+    return value.filter(Boolean).map(String);
+  }
+
   return String(value)
     .split('|')
     .map(item => item.trim())
@@ -23,29 +26,64 @@ function uniqueSorted(values) {
   return [...new Set(values)].sort();
 }
 
-function buildVariabilityIndex(variabilityEntries) {
-  const bySpecies = new Map();
+function buildContextIndex(contexts) {
+  const contextsById = new Map();
 
-  for (const entry of variabilityEntries) {
-    const speciesId = entry.species_id;
-    const characterId = entry.caracter_id;
+  for (const context of contexts) {
+    const contextId = context.contexto_id;
 
-    if (!bySpecies.has(speciesId)) bySpecies.set(speciesId, new Map());
-    const byCharacter = bySpecies.get(speciesId);
-    if (!byCharacter.has(characterId)) byCharacter.set(characterId, []);
+    if (!contextId) {
+      throw new Error(
+        'Context entry is missing contexto_id',
+      );
+    }
 
-    byCharacter.get(characterId).push({
-      speciesId,
-      characterId,
-      alternativeState: entry.estado_alternativo,
-      contextId: entry.contexto_id ?? null,
-      frequency: entry.frecuencia ?? null,
-      notes: entry.nota ?? null,
-      raw: entry,
+    if (contextsById.has(contextId)) {
+      throw new Error(
+        `Duplicate context ${contextId}`,
+      );
+    }
+
+    contextsById.set(contextId, {
+      contextId,
+      description: context.descripcion ?? null,
+      raw: context,
     });
   }
 
-  return bySpecies;
+  return contextsById;
+}
+
+function buildSourceIndex(sources) {
+  const sourcesById = new Map();
+
+  for (const source of sources) {
+    const sourceId = source.fuente_id;
+
+    if (!sourceId) {
+      throw new Error(
+        'Source entry is missing fuente_id',
+      );
+    }
+
+    if (sourcesById.has(sourceId)) {
+      throw new Error(
+        `Duplicate source ${sourceId}`,
+      );
+    }
+
+    sourcesById.set(sourceId, {
+      sourceId,
+      type: source.tipo ?? null,
+      reference: source.referencia ?? null,
+      priorityUse: source.uso_prioritario ?? null,
+      url: source.url ?? null,
+      notes: source.notas ?? null,
+      raw: source,
+    });
+  }
+
+  return sourcesById;
 }
 
 function buildRelationIndex(relations) {
@@ -55,17 +93,24 @@ function buildRelationIndex(relations) {
     const speciesId = relation.species_id;
     const characterId = relation.caracter_id;
 
-    if (!bySpecies.has(speciesId)) bySpecies.set(speciesId, new Map());
+    if (!bySpecies.has(speciesId)) {
+      bySpecies.set(speciesId, new Map());
+    }
+
     const byCharacter = bySpecies.get(speciesId);
 
     if (byCharacter.has(characterId)) {
-      throw new Error(`Duplicate species-character relation ${speciesId} / ${characterId}`);
+      throw new Error(
+        `Duplicate species-character relation ${speciesId} / ${characterId}`,
+      );
     }
 
     byCharacter.set(characterId, {
       speciesId,
       characterId,
-      expectedStates: uniqueSorted(listFromValue(relation.estado_esperado)),
+      expectedStates: uniqueSorted(
+        listFromValue(relation.estado_esperado),
+      ),
       variability: relation.variabilidad ?? null,
       sourceId: relation.fuente_id ?? null,
       imageDetectable: relation.detectable_imagen ?? null,
@@ -82,31 +127,159 @@ function buildRelationIndex(relations) {
   return bySpecies;
 }
 
-export async function loadCanonicalDataset(options = {}) {
-  const botanicalDir = options.botanicalDir ?? DEFAULT_BOTANICAL_DIR;
+function validateVariabilityEntries(
+  variabilityEntries,
+  speciesById,
+  charactersById,
+  contextsById,
+  sourcesById,
+  relationsBySpecies,
+) {
+  for (const entry of variabilityEntries) {
+    const speciesId = entry.species_id;
+    const characterId = entry.caracter_id;
+    const alternativeState = entry.estado_alternativo;
+    const contextId = entry.contexto_id ?? null;
+    const sourceId = entry.fuente_id ?? null;
 
-  const [metadata, species, characters, speciesCharacters, characterVariability] = await Promise.all([
+    if (!speciesId || !speciesById.has(speciesId)) {
+      throw new Error(
+        `Variability references unknown species_id ${speciesId}`,
+      );
+    }
+
+    if (!characterId || !charactersById.has(characterId)) {
+      throw new Error(
+        `Variability references unknown or inactive caracter_id ${characterId}`,
+      );
+    }
+
+    if (
+      !relationsBySpecies
+        .get(speciesId)
+        ?.has(characterId)
+    ) {
+      throw new Error(
+        `Variability references missing canonical relation ${speciesId} / ${characterId}`,
+      );
+    }
+
+    if (!alternativeState) {
+      throw new Error(
+        `Variability entry ${speciesId} / ${characterId} is missing estado_alternativo`,
+      );
+    }
+
+    const character = charactersById.get(characterId);
+
+    if (
+      character.allowedStates.length > 0
+      && !character.allowedStates.includes(
+        String(alternativeState),
+      )
+    ) {
+      throw new Error(
+        `Variability entry ${speciesId} / ${characterId} references invalid estado_alternativo ${alternativeState}`,
+      );
+    }
+
+    if (contextId && !contextsById.has(contextId)) {
+      throw new Error(
+        `Variability entry ${speciesId} / ${characterId} references unknown contexto_id ${contextId}`,
+      );
+    }
+
+    if (!sourceId) {
+      throw new Error(
+        `Variability entry ${speciesId} / ${characterId} is missing fuente_id`,
+      );
+    }
+
+    if (!sourcesById.has(sourceId)) {
+      throw new Error(
+        `Variability entry ${speciesId} / ${characterId} references unknown fuente_id ${sourceId}`,
+      );
+    }
+  }
+}
+
+function buildVariabilityIndex(variabilityEntries) {
+  const bySpecies = new Map();
+
+  for (const entry of variabilityEntries) {
+    const speciesId = entry.species_id;
+    const characterId = entry.caracter_id;
+
+    if (!bySpecies.has(speciesId)) {
+      bySpecies.set(speciesId, new Map());
+    }
+
+    const byCharacter = bySpecies.get(speciesId);
+
+    if (!byCharacter.has(characterId)) {
+      byCharacter.set(characterId, []);
+    }
+
+    byCharacter.get(characterId).push({
+      speciesId,
+      characterId,
+      alternativeState: entry.estado_alternativo,
+      contextId: entry.contexto_id ?? null,
+      frequency: entry.frecuencia ?? null,
+      sourceId: entry.fuente_id,
+      notes: entry.nota ?? null,
+      raw: entry,
+    });
+  }
+
+  return bySpecies;
+}
+
+export async function loadCanonicalDataset(options = {}) {
+  const botanicalDir =
+    options.botanicalDir ?? DEFAULT_BOTANICAL_DIR;
+
+  const [
+    metadata,
+    species,
+    characters,
+    speciesCharacters,
+    characterVariability,
+    contexts,
+    sources,
+  ] = await Promise.all([
     readJson(join(botanicalDir, 'metadata.json')),
     readJson(join(botanicalDir, 'species.json')),
     readJson(join(botanicalDir, 'characters.json')),
     readJson(join(botanicalDir, 'species_characters.json')),
     readJson(join(botanicalDir, 'character_variability.json')),
+    readJson(join(botanicalDir, 'contexts.json')),
+    readJson(join(botanicalDir, 'sources.json')),
   ]);
 
-  const computableStatus = metadata.computable_status ?? 'activo';
+  const computableStatus =
+    metadata.computable_status ?? 'activo';
+
   const activeCharacters = characters
-    .filter(character => character.estado_piloto === computableStatus)
+    .filter(
+      character =>
+        character.estado_piloto === computableStatus,
+    )
     .map(character => ({
       characterId: character.caracter_id,
       group: character.grupo ?? null,
       name: character.nombre_caracter,
       dataType: character.tipo_dato ?? null,
-      allowedStates: uniqueSorted(listFromValue(character.estados_permitidos)),
+      allowedStates: uniqueSorted(
+        listFromValue(character.estados_permitidos),
+      ),
       imageObservable: character.observable_foto ?? null,
       fieldObservable: character.observable_campo ?? null,
-      phenologyDependency: character.dependencia_fenologica ?? null,
+      phenologyDependency:
+        character.dependencia_fenologica ?? null,
       baseRisk: character.riesgo_base ?? null,
-      baseInvasiveness: character.invasividad_base ?? null,
+      baseInvasiveness:
+        character.invasividad_base ?? null,
       description: character.descripcion ?? null,
       pilotStatus: character.estado_piloto,
       appliesIf: character.aplica_si ?? null,
@@ -127,24 +300,75 @@ export async function loadCanonicalDataset(options = {}) {
     raw: item,
   }));
 
-  const activeCharacterIds = new Set(activeCharacters.map(character => character.characterId));
-  const activeRelations = speciesCharacters.filter(relation => activeCharacterIds.has(relation.caracter_id));
-  const relationsBySpecies = buildRelationIndex(activeRelations);
-  const variabilityBySpecies = buildVariabilityIndex(characterVariability);
+  const speciesById = new Map(
+    normalizedSpecies.map(
+      item => [item.speciesId, item],
+    ),
+  );
+
+  const charactersById = new Map(
+    activeCharacters.map(
+      item => [item.characterId, item],
+    ),
+  );
+
+  const activeCharacterIds = new Set(
+    activeCharacters.map(
+      character => character.characterId,
+    ),
+  );
+
+  const activeRelations =
+    speciesCharacters.filter(
+      relation =>
+        activeCharacterIds.has(
+          relation.caracter_id,
+        ),
+    );
+
+  const relationsBySpecies =
+    buildRelationIndex(activeRelations);
+
+  const contextsById =
+    buildContextIndex(contexts);
+
+  const sourcesById =
+    buildSourceIndex(sources);
+
+  validateVariabilityEntries(
+    characterVariability,
+    speciesById,
+    charactersById,
+    contextsById,
+    sourcesById,
+    relationsBySpecies,
+  );
+
+  const variabilityBySpecies =
+    buildVariabilityIndex(
+      characterVariability,
+    );
 
   return {
     metadata,
     species: normalizedSpecies,
     characters: activeCharacters,
     relations: activeRelations,
-    speciesById: new Map(normalizedSpecies.map(item => [item.speciesId, item])),
-    charactersById: new Map(activeCharacters.map(item => [item.characterId, item])),
+    contexts,
+    sources,
+    speciesById,
+    charactersById,
+    contextsById,
+    sourcesById,
     relationsBySpecies,
     variabilityBySpecies,
     stats: {
       species: normalizedSpecies.length,
       activeCharacters: activeCharacters.length,
       activeRelations: activeRelations.length,
+      contexts: contextsById.size,
+      sources: sourcesById.size,
+      variabilityEntries: characterVariability.length,
       masterVersion: metadata.master_version ?? null,
       schemaVersion: metadata.schema_version ?? null,
       sourceFile: metadata.source_file ?? null,
@@ -152,10 +376,28 @@ export async function loadCanonicalDataset(options = {}) {
   };
 }
 
-export function getRelation(dataset, speciesId, characterId) {
-  return dataset.relationsBySpecies.get(speciesId)?.get(characterId) ?? null;
+export function getRelation(
+  dataset,
+  speciesId,
+  characterId,
+) {
+  return (
+    dataset.relationsBySpecies
+      .get(speciesId)
+      ?.get(characterId)
+    ?? null
+  );
 }
 
-export function getVariability(dataset, speciesId, characterId) {
-  return dataset.variabilityBySpecies.get(speciesId)?.get(characterId) ?? [];
+export function getVariability(
+  dataset,
+  speciesId,
+  characterId,
+) {
+  return (
+    dataset.variabilityBySpecies
+      .get(speciesId)
+      ?.get(characterId)
+    ?? []
+  );
 }

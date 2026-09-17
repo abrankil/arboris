@@ -1,41 +1,55 @@
-# Canonical identification engine
+# ACE — Arboris Character Evidence Engine
+Un carácter queda resolved para efectos de retry cuando su evidencia reduce efectivamente el conjunto de candidatos. En ese caso deja de ser elegible para retry.
 
-Estado: Hito 15.5–15.7, cierre mínimo del motor canónico.
+Este concepto de resolved es deliberadamente distinto de una dimensión evaluable utilizada para determinar supported.
 
-Este módulo implementa el núcleo simple de identificación para el piloto Árboris. Consume exclusivamente los JSON canónicos derivados de Master Botánico 2.0.
+## candidateIds
 
-## Fuente de datos
+Cuando no se proporciona candidateIds, ACE parte del conjunto canónico de especies.
 
-```text
-data/botanical/metadata.json
-data/botanical/species.json
-data/botanical/characters.json
-data/botanical/species_characters.json
-```
+Una lista explícita:
 
-No lee la clave histórica, no usa previews antiguas y no contiene botánica hardcodeada de especies.
+- elimina duplicados conservando el orden de primera aparición;
+- rechaza explícitamente identificadores de especie desconocidos;
+- acepta [] como conjunto candidato vacío válido.
 
-## Archivos
+No se realizan conversiones históricas o implícitas de identificadores.
 
-- `dataset.mjs` — carga y normaliza el dataset canónico mínimo.
-- `engine.mjs` — evalúa compatibilidad, filtra candidatos, selecciona siguiente carácter y entrega un estado cauteloso.
-- `engine.test.mjs` — pruebas del comportamiento esperado.
+## Unicidad de relaciones
 
-## Reglas
+Entre las relaciones canónicas computables, la combinación:
 
-- Solo participan caracteres activos/computables.
-- Un dato esperado desconocido no elimina candidatos.
-- Una observación desconocida o no observable no elimina candidatos.
-- Solo una incompatibilidad explícita entre estados conocidos elimina una especie.
-- La selección del siguiente carácter es dinámica y usa datos canónicos.
-- El motor contiene comportamiento; el conocimiento está en `data/botanical/`.
+(species_id, caracter_id)
 
-## Uso
+debe ser única.
 
-```powershell
+Cualquier duplicado es un error fatal de carga, incluso si ambas filas contienen exactamente los mismos valores.
+
+## Integridad de la capa complementaria
+
+Al cargar character_variability.json, ACE comprueba que:
+
+- species_id corresponda a una especie existente;
+- caracter_id corresponda a un carácter activo;
+- exista la relación canónica especie–carácter;
+- estado_alternativo sea un estado permitido para el carácter;
+- contexto_id, cuando exista, corresponda a un contexto registrado;
+- fuente_id esté presente y corresponda a una fuente existente.
+
+Las referencias rotas producen errores explícitos y no se ignoran silenciosamente.
+
+## Pruebas
+
+Desde la raíz del repositorio:
+
 node --test tools/canonical-identification/engine.test.mjs
-```
+
+Al cierre de esta corrección de Hito 15, la suite contiene 24 pruebas automatizadas.
 
 ## Fuera de alcance
 
-Esta etapa no implementa UI, BioCLIP real, visión artificial, SQLite, sincronización ni política final de descubrimiento. Es el núcleo verificable para cerrar Hito 15 y preparar la integración posterior.
+ACE no implementa UI, clasificación visual de fotografías, extracción automática de caracteres mediante visión artificial, SQLite, sincronización ni política final de descubrimiento.
+
+La visión artificial puede producir evidencia para caracteres en una etapa posterior, pero no sustituye las reglas epistemológicas y de compatibilidad de ACE.
+
+ACE tampoco constituye la autoridad botánica del proyecto: consume datos y evidencia estructurada y aplica sobre ellos los contratos del motor.
