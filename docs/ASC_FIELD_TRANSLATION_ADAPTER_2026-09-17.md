@@ -171,9 +171,7 @@ No new top-level ASC field is introduced by this adapter.
     "Do not use comparative references as sole authority for the appearance of the territory core.",
     "Do not modify the botanical master through this adapter."
   ],
-  "artisticFreedom": [
-    "Translate directly observed environmental structure into scene-language constraints while preserving the evidence boundary."
-  ],
+  "artisticFreedom": [],
   "cameraFormat": [],
   "readingPriorities": [
     "Prioritize provenance and evidence boundaries.",
@@ -204,7 +202,7 @@ The current candidate should therefore be tested by removing, one at a time:
 5. execution separation;
 6. generated-output prohibition.
 
-Expected result: each removal either weakens traceability or permits an inference that the current contract explicitly blocks.
+Expected result: each removal either weakens traceability or permits an inference that the current contract explicitly blocks. The executable reduction checks currently cover the spatial OPEN constraint, the generated-output prohibition, and the fail-closed behavior for an unauthorized key. Artistic freedom is explicitly empty because field evidence is not itself an authorization for an artistic decision.
 
 Conversely, fields that merely restate information already guaranteed by ASC v0.1 should not be duplicated in the adapter.
 
@@ -225,6 +223,6 @@ Those remain separate artifacts and require their own evidence and review.
 
 ## 9. Next validation
 
-The next technical test is to instantiate the candidate JSON as a fixture, compile it with `tools/asc/compile_asc.mjs`, compare two identical compilations byte-for-byte, then mutate each OPEN-sensitive field and verify that the compiler output changes only where expected.
+The executable test is recorded in `tools/asc/real_scene_translation.test.mjs`. It validates the fixture, checks deterministic compilation, checks preservation of selected OPEN items, performs reduction mutations, verifies fail-closed behavior for an unauthorized key, and confirms that artistic freedom remains empty.
 
 No generative execution is required for this validation.
