@@ -302,7 +302,7 @@ la salida generativa no se autocertifica
 Permanecen `OPEN` hasta validación específica:
 
 - formato serializado definitivo de los contratos ASC;
-- automatización del compilador como código;
+- automatización completa del compilador más allá del compilador determinista v0.1 `compile-only`;
 - proveedor o modelo generativo definitivo;
 - estrategia de prompts por proveedor/modelo;
 - métricas automáticas de fidelidad topológica;
@@ -314,3 +314,14 @@ No crear estas capas por anticipación si una prueba concreta todavía no las ne
 ## 15. Guía operativa de vocabulario
 
 [`ASC_VOCABULARY_GUIDE.md`](ASC_VOCABULARY_GUIDE.md) es la referencia rápida aprobada provisionalmente para términos, órdenes de trabajo y tratamientos de información de ASC. Es didáctica y no reemplaza este documento normativo.
+
+## 16. Implementación ejecutable v0.1
+
+Existe una implementación mínima y versionada de ASC para el modo `compile-only`:
+
+- especificación: [`ASC_V0_1_EXECUTABLE_SPEC.md`](ASC_V0_1_EXECUTABLE_SPEC.md);
+- implementación y pruebas: `tools/asc/`.
+
+ASC v0.1 recibe un contrato JSON ya preparado y autorizado, valida su forma y produce un `prompt ASC` textual determinista. **No** decide autoridad, no evalúa suficiencia de evidencia, no cierra `OPEN` y no ejecuta herramientas generativas.
+
+La existencia de esta implementación no convierte su JSON v0.1 en el formato serializado definitivo de contratos ASC ni cierra las decisiones `OPEN` de la sección anterior.

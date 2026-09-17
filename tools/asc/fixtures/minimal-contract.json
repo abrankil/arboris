@@ -1,0 +1,33 @@
+{
+  "version": "0.1",
+  "executionMode": "compile-only",
+  "testId": "ASC-COMPILER-TEST-001",
+  "objective": "Verificar compilación determinista sin cerrar decisiones OPEN.",
+  "authorizedSources": [
+    "docs/ARBORIS_SCENE_COMPILER.md"
+  ],
+  "structuralContract": [
+    "Preservar separación entre compilador, ejecutor y resultado."
+  ],
+  "mandatoryRelations": [
+    "ASC produce prompt ASC; el ejecutor produce el resultado."
+  ],
+  "open": [
+    "Proveedor generativo definitivo."
+  ],
+  "doNotInfer": [
+    "No seleccionar proveedor por plausibilidad o conveniencia."
+  ],
+  "prohibited": [
+    "No presentar el resultado generativo como evidencia automática."
+  ],
+  "artisticFreedom": [],
+  "cameraFormat": [],
+  "readingPriorities": [
+    "Priorizar trazabilidad y preservación de restricciones."
+  ],
+  "validationCriteria": [
+    "El mismo input produce exactamente el mismo prompt.",
+    "Los elementos OPEN permanecen explícitos en la salida."
+  ]
+}

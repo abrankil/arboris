@@ -22,7 +22,7 @@ No leer el repositorio completo por defecto. Clasificar la tarea y abrir solo la
 ```text
 data/      datos, fuentes científicas, vistas derivadas y canon de personajes
 docs/      documentación vigente + trazabilidad documental
-tools/     herramientas vigentes de build, validación e identificación
+tools/     herramientas vigentes de build, validación, identificación y compilación ASC
 species/   evidencia fotográfica de terreno; NO equivale a data/species/
 archive/   prototipos y experimentos históricos; ignorar por defecto
 .github/   CI e instrucciones de GitHub/Copilot
@@ -104,6 +104,8 @@ PILOT_ENVIRONMENT_VISUAL_CANON
 
 Para compilar prompts de escenas, blockouts o prototipos generativos, leer primero `docs/ARBORIS_SCENE_COMPILER.md` y después solo las autoridades de dominio necesarias. ASC compila restricciones y contratos; no sustituye evidencia, canon, navegación, renderer ni autoridad artística.
 
+Para desarrollar o ejecutar el compilador ASC v0.1, leer después `docs/ASC_V0_1_EXECUTABLE_SPEC.md` y `tools/asc/README.md`. La implementación v0.1 es `compile-only`: valida la forma de un contrato preparado y genera texto determinista; no decide autoridad/evidencia ni ejecuta modelos generativos.
+
 Nunca usar un resultado generativo para cerrar por sí mismo una decisión `OPEN` ni como corroboración botánica o territorial.
 
 ### Rendimiento / acceso a datos
@@ -133,6 +135,12 @@ Desde la raíz:
 
 ```powershell
 npm.cmd test
+```
+
+Para validar ASC v0.1 de forma aislada:
+
+```powershell
+npm.cmd run test:asc
 ```
 
 `npm.cmd run typecheck` solo es gate ejecutable cuando exista `tsconfig.json`.
