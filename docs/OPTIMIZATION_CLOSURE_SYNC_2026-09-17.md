@@ -174,47 +174,27 @@ La variación de valores absolutos entre corridas de GitHub-hosted runners se co
 
 ## 5. Integridad después de optimizar
 
-CI asociado al commit de benchmark:
+Evidencia de CI relevante:
 
 ```text
-workflow: CI
+benchmark commit CI
 run: 35179413121
 resultado: SUCCESS
-```
 
-CI de la sincronización general posterior:
-
-```text
-workflow: CI
+sincronización general CI
 run: 35179586889
-commit: 470925ee67891be889e5668fb12e40f49eaf13f3
 resultado: SUCCESS
-```
 
-CI del cierre documental posterior:
-
-```text
-workflow: CI
+cierre documental CI
 run: 35179690007
-commit: 7b54449360c876ae9912034deb6465e5452a6865
 resultado: SUCCESS
-```
 
-CI del cierre consolidado inmediatamente anterior:
-
-```text
-workflow: CI
+cierre consolidado CI
 run: 35179759966
-commit: 5cbbe86850e4d9fc76993863b8d964c41d0aa083
 resultado: SUCCESS
-```
 
-CI de la consolidación final previa a la verificación remota de ramas:
-
-```text
-workflow: CI
+consolidación final previa
 run: 35179835439
-commit: f88b0691ed4e2fe0a5d1612dfb91727f32781935
 resultado: SUCCESS
 ```
 
@@ -373,7 +353,7 @@ consulta compacta                         CLOSED / PASS
 benchmark host de routing                 CLOSED / PASS
 benchmark host JSON vs SQLite             CLOSED / PASS
 integridad CI post-optimización            CLOSED / PASS
-sincronización remota de ramas            verificación post-commit requerida
+sincronización remota de ramas            verificar externamente contra HEAD final
 benchmark Android real                    OPEN
 ```
 
