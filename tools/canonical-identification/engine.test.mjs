@@ -5,6 +5,7 @@ import { loadCanonicalDataset, getRelation } from './dataset.mjs';
 import {
   assessIdentification,
   compatible,
+  diagnosticPowerScore,
   filterCandidates,
   nextCharacter,
 } from './engine.mjs';
@@ -41,6 +42,32 @@ function findExplicitConflict(dataset) {
   return null;
 }
 
+function syntheticApplicabilityDataset() {
+  const characters = [
+    { characterId: 'CH-013', name: 'Tipo de fruto diagnóstico' },
+    { characterId: 'CH-023', name: 'Cápsula tricoca', appliesIf: 'CH-013 contiene capsula' },
+  ];
+
+  return {
+    species: [
+      { speciesId: 'SP-A' },
+      { speciesId: 'SP-B' },
+    ],
+    characters,
+    charactersById: new Map(characters.map(character => [character.characterId, character])),
+    relationsBySpecies: new Map([
+      ['SP-A', new Map([
+        ['CH-013', { expectedStates: ['capsula'] }],
+        ['CH-023', { expectedStates: ['presente'] }],
+      ])],
+      ['SP-B', new Map([
+        ['CH-013', { expectedStates: ['capsula'] }],
+        ['CH-023', { expectedStates: ['ausente'] }],
+      ])],
+    ]),
+  };
+}
+
 test('loads the Master 2.0 canonical identification dataset', async () => {
   dataset = await loadCanonicalDataset();
 
@@ -60,6 +87,15 @@ test('compatibility preserves uncertainty and only rejects explicit conflicts', 
   assert.equal(compatible(['serrado'], ['not_observable']).compatible, true);
   assert.equal(compatible(['serrado', 'dentado'], ['dentado']).compatible, true);
   assert.equal(compatible(['serrado'], ['entero']).compatible, false);
+});
+
+test('diagnostic power normalizes pilot labels without adding a rules engine', () => {
+  assert.equal(diagnosticPowerScore('alto'), 3);
+  assert.equal(diagnosticPowerScore('medio-alto'), 2.5);
+  assert.equal(diagnosticPowerScore('medio_alto'), 2.5);
+  assert.equal(diagnosticPowerScore('medio'), 2);
+  assert.equal(diagnosticPowerScore('bajo'), 1);
+  assert.equal(diagnosticPowerScore('sin_dato'), 0);
 });
 
 test('filtering eliminates only candidates with explicit state conflicts', async () => {
@@ -100,6 +136,22 @@ test('nextCharacter chooses an active unobserved character', async () => {
   assert.ok(next);
   assert.ok(dataset.charactersById.has(next.characterId));
   assert.notEqual(next.characterId, 'CH-017');
+});
+
+test('nextCharacter respects minimal applies_if dependencies', () => {
+  const synthetic = syntheticApplicabilityDataset();
+
+  const withoutParentEvidence = nextCharacter(synthetic, [], ['SP-A', 'SP-B']);
+  assert.equal(withoutParentEvidence, null);
+
+  const parentUnknown = nextCharacter(synthetic, { 'CH-013': 'not_observable' }, ['SP-A', 'SP-B']);
+  assert.equal(parentUnknown, null);
+
+  const parentSatisfied = nextCharacter(synthetic, { 'CH-013': 'capsula' }, ['SP-A', 'SP-B']);
+  assert.equal(parentSatisfied.characterId, 'CH-023');
+
+  const parentNotSatisfied = nextCharacter(synthetic, { 'CH-013': 'drupa' }, ['SP-A', 'SP-B']);
+  assert.equal(parentNotSatisfied, null);
 });
 
 test('assessment returns cautious result states', async () => {
