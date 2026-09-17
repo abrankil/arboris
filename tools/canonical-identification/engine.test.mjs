@@ -84,6 +84,33 @@ test('filtering eliminates only candidates with explicit state conflicts', async
   assert.equal(result.eliminated[0].conflicts[0].reason, 'explicit_state_conflict');
 });
 
+test('candidateIds are deduplicated while preserving first-seen order', async () => {
+  dataset ??= await loadCanonicalDataset();
+
+  const result = filterCandidates(dataset, [], ['SP-002', 'SP-001', 'SP-002']);
+
+  assert.deepEqual(result.remaining, ['SP-002', 'SP-001']);
+  assert.deepEqual(result.eliminated, []);
+});
+
+test('unknown candidateIds are rejected explicitly', async () => {
+  dataset ??= await loadCanonicalDataset();
+
+  assert.throws(
+    () => filterCandidates(dataset, [], ['SP-001', 'SP-999']),
+    /unknown candidate species_id SP-999/i,
+  );
+});
+
+test('an explicit empty candidateIds list remains empty', async () => {
+  dataset ??= await loadCanonicalDataset();
+
+  const result = filterCandidates(dataset, [], []);
+
+  assert.deepEqual(result.remaining, []);
+  assert.deepEqual(result.eliminated, []);
+});
+
 test('unknown evidence never removes candidates', async () => {
   dataset ??= await loadCanonicalDataset();
 
