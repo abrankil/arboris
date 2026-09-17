@@ -1,16 +1,28 @@
-# Árboris — Guía de vocabulario ASC
+# ASC — Guía de vocabulario para uso con Árboris
 
 **Estado:** aprobada provisionalmente como guía operativa  
-**Ámbito:** fundamentos de uso cotidiano del Arboris Scene Compiler (ASC)  
-**Autoridad normativa:** [`ARBORIS_SCENE_COMPILER.md`](ARBORIS_SCENE_COMPILER.md)
+**Ámbito:** fundamentos de uso cotidiano de ASC cuando se aplica a Árboris  
+**Autoridad normativa en este repositorio:** [`ARBORIS_SCENE_COMPILER.md`](ARBORIS_SCENE_COMPILER.md)
 
 Esta guía es una referencia rápida y didáctica. No reemplaza la definición normativa de ASC. Si existe una discrepancia, prevalece `ARBORIS_SCENE_COMPILER.md`.
 
-## 1. Cuando trabajamos con ASC
+## 1. Relación ASC / Árboris
 
 | Término | Qué significa | Ejemplo correcto |
 | --- | --- | --- |
-| **ASC** | Arboris Scene Compiler. Sistema que transforma canon, evidencia, contratos y restricciones en instrucciones ejecutables por una herramienta generativa. | “Pásalo por ASC.” |
+| **ASC** | Sistema de compilación independiente desarrollado por Álvaro. Puede aplicarse a Árboris o a otros proyectos. | “Árboris usa ASC como caso piloto.” |
+| **Desarrollo de ASC** | Trabajo propio de Álvaro para construir y validar ASC como sistema general. | “Este hallazgo puede informar el desarrollo de ASC.” |
+| **Proyecto consumidor** | Proyecto que usa ASC para compilar instrucciones. En este repositorio, el consumidor es Árboris. | “El proyecto consumidor define sus fuentes de autoridad.” |
+| **Caso de uso Árboris** | Aplicación de ASC a una necesidad, escena, contrato o prueba de Árboris. | “MAP-001 es un caso de uso posible para ASC.” |
+| **Hallazgo ASC** | Aprendizaje sobre compilación, handoff, método, ejecutor o límites de ASC. | “El handoff debilitó una restricción: hallazgo ASC.” |
+| **Hallazgo Árboris** | Aprendizaje sobre necesidades, contratos, arte, navegación o representación de Árboris. | “La transitabilidad requiere una regla más precisa: hallazgo Árboris.” |
+
+Regla: ASC puede aprender desde Árboris, pero Árboris no define automáticamente el producto general ASC. ASC puede servir a Árboris, pero no queda absorbido como componente exclusivo de Árboris.
+
+## 2. Cuando trabajamos con ASC
+
+| Término | Qué significa | Ejemplo correcto |
+| --- | --- | --- |
 | **prompt ASC** | Instrucción compilada que ASC prepara para el ejecutor generativo. | “Muéstrame el prompt ASC antes de ejecutarlo.” |
 | **prompt efectivo** | Instrucción que realmente recibe el ejecutor después de cualquier adaptación o reformulación intermedia. | “Compara el prompt ASC con el prompt efectivo.” |
 | **handoff** | Transferencia del prompt ASC al ejecutor. | “El problema apareció durante el handoff.” |
@@ -22,7 +34,7 @@ Esta guía es una referencia rápida y didáctica. No reemplaza la definición n
 | **criterio crítico** | Condición cuyo fallo invalida el gate estructural. | “La conectividad es criterio crítico.” |
 | **criterio secundario** | Condición que puede quedar parcial sin invalidar la hipótesis principal. | “La textura es secundaria en esta prueba.” |
 
-## 2. Órdenes de trabajo con ASC
+## 3. Órdenes de trabajo con ASC
 
 | Orden | Qué hace | Ejemplo |
 | --- | --- | --- |
@@ -31,7 +43,7 @@ Esta guía es una referencia rápida y didáctica. No reemplaza la definición n
 | **Audita ASC** | Revisa contrato, prompt ASC, prompt efectivo y/o resultado contra fuentes y criterios de validación. | “Audita ASC este resultado.” |
 | **Usa X como input ASC** | Permite que X alimente la compilación, sin convertirlo automáticamente en autoridad o verdad. | “Usa este mapa como input ASC.” |
 
-## 3. Tratamientos de información en ASC
+## 4. Tratamientos de información en ASC
 
 | Tratamiento | Qué significa | Ejemplo |
 | --- | --- | --- |
@@ -40,7 +52,7 @@ Esta guía es una referencia rápida y didáctica. No reemplaza la definición n
 | **PROHIBIDO INFERIR** | El ejecutor no puede completar ese vacío por plausibilidad. | “No inferir otras construcciones.” |
 | **ART-PROVISIONAL** | Solución visual temporal permitida para una prueba. No se convierte en evidencia ni canon. | “Usar una pendiente de tierra ART-PROVISIONAL.” |
 
-## 4. Tipos de prueba
+## 5. Tipos de prueba
 
 | Tipo | Qué comprueba | Prioridad |
 | --- | --- | --- |
@@ -49,7 +61,7 @@ Esta guía es una referencia rápida y didáctica. No reemplaza la definición n
 
 No usar una prueba visual para cerrar una relación estructural todavía no validada.
 
-## 5. Estados de resultado
+## 6. Estados de resultado
 
 | Estado | Uso |
 | --- | --- |
@@ -61,7 +73,9 @@ No usar una prueba visual para cerrar una relación estructural todavía no vali
 ## Regla de lectura
 
 ```text
-ASC compila; no decide la verdad del proyecto.
+ASC es independiente de Árboris.
+Árboris es el primer proyecto piloto/caso de uso real de ASC.
+ASC compila; no decide la verdad del proyecto consumidor.
 El handoff no puede debilitar el contrato.
 La plausibilidad visual no es evidencia.
 Si no está respaldado, permanece OPEN.
