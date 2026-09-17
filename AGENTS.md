@@ -42,7 +42,18 @@ Do not manually correct them. Correct the Master and regenerate.
 
 Read `data/README.md` first.
 
-Use the smallest dataset that answers the question:
+When a local checkout or executable workspace is available, prefer the compact read-only query CLI for scoped questions:
+
+```powershell
+python tools/botanical-data/query_botanical.py species SP-001
+python tools/botanical-data/query_botanical.py character CH-003
+python tools/botanical-data/query_botanical.py relation SP-001 CH-003
+python tools/botanical-data/query_botanical.py compare CH-003
+```
+
+The CLI reads canonical JSON and does not create another source of truth. It emits compact JSON by default; add `--pretty` only when human readability is useful.
+
+When the CLI is unavailable, use the smallest dataset that answers the question:
 
 - species identity/list → `data/botanical/species.json`
 - character definition/allowed states → `data/botanical/characters.json`
@@ -55,6 +66,8 @@ Use the smallest dataset that answers the question:
 - visual/character canon → `data/characters/` (not botanical authority)
 
 Avoid loading all six `data/species/*.json` files for cross-species comparisons; they are denormalized convenience views and are much larger than the normalized tables.
+
+For payload/index strategy and future SQLite requirements, use `docs/DATA_ACCESS_PERFORMANCE.md`.
 
 ### Identification engine
 
@@ -119,13 +132,15 @@ Do not join by common name when an ID exists.
 ## 5. Context-budget rules for agents
 
 1. Start with metadata/index files before large records.
-2. Fetch narrow line ranges or exact files when the question is scoped.
-3. For one species, use one `data/species/*.json` joined view rather than reconstructing all tables.
-4. For comparisons, use normalized tables rather than loading all joined species views.
-5. Do not load images/binaries unless the task needs visual inspection.
-6. Do not load historical docs unless a decision history is explicitly required.
-7. Preserve `OPEN` states; do not fill missing project decisions from general knowledge.
-8. Separate internal canon, external evidence, and inference.
+2. Prefer `query_botanical.py` for a scoped botanical lookup when execution is available.
+3. Fetch narrow line ranges or exact files when the question is scoped.
+4. For one species, use one `data/species/*.json` joined view rather than reconstructing all tables.
+5. For comparisons, use normalized tables rather than loading all joined species views.
+6. Load source/provenance records only when the task needs provenance.
+7. Do not load images/binaries unless the task needs visual inspection.
+8. Do not load historical docs unless a decision history is explicitly required.
+9. Preserve `OPEN` states; do not fill missing project decisions from general knowledge.
+10. Separate internal canon, external evidence, and inference.
 
 ## 6. Validation commands
 
@@ -143,6 +158,12 @@ npm.cmd run build:botanical
 npm.cmd run verify:botanical
 ```
 
+For compact read-only botanical inspection:
+
+```powershell
+python tools/botanical-data/query_botanical.py stats --pretty
+```
+
 Do not regenerate canonical data unless the task actually changes the Master or export pipeline.
 
 ## 7. Fast entry points
@@ -150,5 +171,7 @@ Do not regenerate canonical data unless the task actually changes the Master or 
 Human/project orientation: `docs/START_HERE.md`.
 
 Machine/data routing: `data/README.md`.
+
+Data performance and future SQLite indexing: `docs/DATA_ACCESS_PERFORMANCE.md`.
 
 Current development continuity: `docs/DEVELOPMENT_SYNC_2026-09-17.md` (snapshot, non-normative).
