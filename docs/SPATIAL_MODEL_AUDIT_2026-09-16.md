@@ -163,7 +163,7 @@ La especificación afirmaba que cada escena se construía con cuatro capas de 48
 Corrección:
 
 ```text
-480×270 = viewport lógico
+480×270 = viewport lógico histórico
 map/world extent = independiente
 ```
 
@@ -366,3 +366,112 @@ v0.4b concept art
 ```
 
 La siguiente fase no debe intentar “mejorar” la visión mediante nueva invención conceptual. Debe descomponer la referencia aprobada en decisiones producibles: masas de terreno, agua, sendero, estructuras, vegetación contextual, cámara, escala, oclusión y requisitos de assets, manteniendo separados arte, datos y evidencia.
+
+## 11. Auditoría de resolución portrait y nueva base de producción
+
+La revisión de la recomendación `270×480` detectó un problema técnico: aunque conserva bien una relación 9:16, el ancho lógico de 270 px no escala limpiamente mediante múltiplos enteros sobre varios anchos físicos frecuentes de Android.
+
+Ejemplo:
+
+```text
+720 / 270  = 2.66...
+1080 / 270 = 4
+1440 / 270 = 5.33...
+```
+
+Esto obliga a desperdiciar ancho, introducir escalado fraccional o mantener políticas diferentes entre familias de dispositivos.
+
+Se comparó con una base de 360 px de ancho lógico:
+
+```text
+720 / 360  = 2×
+1080 / 360 = 3×
+1440 / 360 = 4×
+```
+
+### AUDITORÍA
+
+**Hallazgo:** `portrait-first` sigue siendo coherente con el diseño del piloto, pero `270 px` de ancho no es la mejor base técnica disponible para escalado entero en Android.
+
+**Impacto:** una base inadecuada puede producir márgenes innecesarios, shimmer, reescalado fraccional o inconsistencias entre dispositivos antes incluso de haber definido el renderer.
+
+**Corrección aprobada:** usar `360×H` como nueva base de producción portrait, con altura lógica adaptativa inicial `640–800`.
+
+### INCONSISTENCIAS
+
+La especificación anterior estaba en transición entre tres estados:
+
+```text
+480×270 landscape histórico
+→ 270×480 portrait inicial
+→ necesidad real de Android portrait adaptable
+```
+
+Se resuelve estableciendo `360×H` como única base operativa actual para nuevas pruebas de entorno. Los formatos anteriores quedan como históricos/comparativos y no gobiernan composición.
+
+### VACÍOS / OMISIONES
+
+Permanecen `OPEN` hasta pruebas reales:
+
+- resolución lógica definitiva;
+- política para dispositivos donde los insets impidan usar el múltiplo entero ideal;
+- escala final del jugador;
+- tamaño de tile/chunk;
+- renderer;
+- pathfinding;
+- adaptación landscape secundaria;
+- presupuesto final de detalle del pixel art.
+
+La nueva base no cierra estos asuntos; solamente reduce incertidumbre suficiente para producir el siguiente vertical slice.
+
+### REDUNDANCIAS
+
+`ENVIRONMENT_PRODUCTION_SPEC.md` queda como **única autoridad técnica** sobre viewport, escalado, entregables y matriz de prueba.
+
+`PILOT_ENVIRONMENT_VISUAL_CANON.md` conserva autoridad sobre composición y relaciones visuales del territorio.
+
+`ART_STYLE_GUIDE.md` conserva autoridad sobre apariencia/pixel art, pero no debe duplicar resoluciones concretas del viewport.
+
+Los documentos de auditoría registran decisiones e historia y no son fuente normativa para tamaños.
+
+### Nueva base operativa
+
+```text
+orientation: portrait-first
+logicalViewport: 360 × H
+H test range: 640–800
+base test: 360×640
+intermediate: 360×720 / 360×780
+high test: 360×800
+
+pixel scaling targets:
+720 physical width  → 2×
+1080 physical width → 3×
+1440 physical width → 4×
+```
+
+### Gate siguiente
+
+El siguiente test no debe ser otra ilustración conceptual completa. Debe ser un **vertical slice de producción real** que pruebe la nueva base:
+
+```text
+360×640 + 360×800
+puente
+puerta abierta
+camino
+estero en L
+ladera/terraza
+player proxy
+oclusiones
+pixel art a 1× lógico
+```
+
+Resultado de esta revisión:
+
+```text
+portraitDirection: PASS
+270×480 as production base: SUPERSEDED
+360×H as production base: APPROVED FOR TESTING
+finalResolution: OPEN
+nextGate: production vertical slice at 360×H
+```
