@@ -1,7 +1,7 @@
 # Árboris — Sincronización de desarrollo 2026-09-17
 
 **Estado:** snapshot de coordinación / no normativo  
-**Propósito:** registrar el estado compartido del desarrollo antes de sincronizar la rama espacial con `main`.
+**Propósito:** registrar el estado compartido del desarrollo ya sincronizado en `main` y el gate vigente antes del siguiente vertical slice.
 
 Este documento resume decisiones ya tomadas y gates vigentes. No reemplaza las fuentes normativas. Cuando exista conflicto, gobierna el documento de autoridad indicado en cada sección.
 
@@ -108,7 +108,7 @@ pilotVisionAlignment: approved
 productionStatus: visual_prototype
 ```
 
-La aprobación de v0.4b corresponde a visión, composición y naturalización general. No convierte detalles generados en evidencia territorial o botánica.
+La aprobación de v0.4b corresponde a visión espacial, composición, relaciones territoriales y naturalización general. No convierte detalles generados en evidencia territorial o botánica y **no fija todavía el estilo gráfico final**.
 
 Siguen `OPEN`, entre otros:
 
@@ -139,6 +139,30 @@ Los tiles cúbicos/prismáticos expresan modularidad y altura, pero no obligan a
 
 Una imagen generada con apariencia pixelada es referencia; no demuestra pixel art de producción hasta existir a resolución lógica real y poder revisarse a 1×.
 
+### Estado de las muestras visuales recientes
+
+La muestra de vertical slice aprobada por Alejandra sirve como **referencia de trabajo para composición, lectura espacial y descomposición de producción**, pero no representa el estilo gráfico final que se busca para Árboris.
+
+La auditoría de la muestra de producción posterior dio resultado general `REVISE`:
+
+```text
+territorial sequence: PASS
+stream L-shape: PASS
+bridge placement: PASS
+main-route readability: PASS
+2.5D direction: PASS
+
+gate state: REVISE — debe leerse abierta
+house immediacy: REVISE minor
+pixel-art production validation: NOT TESTED
+tile seams/repetition: NOT TESTED
+occlusion system: NOT TESTED
+botanical fidelity: NOT VALIDATED
+waterfall geometry: PROVISIONAL
+```
+
+Esto no invalida la visión aprobada. Define qué debe comprobar el siguiente vertical slice antes de producir assets finales.
+
 ## 6. Base de viewport Android
 
 Autoridad: `docs/ENVIRONMENT_PRODUCTION_SPEC.md`.
@@ -154,7 +178,7 @@ intermediate: 360×720 / 360×780
 high test: 360×800
 ```
 
-Motivo: 360 px de ancho permite escalas enteras directas en anchos físicos 720, 1080 y 1440 mediante 2×, 3× y 4×.
+Motivo: 360 px de ancho permite escalas enteras directas en anchos físicos 720, 1080 y 1440 mediante 2×, 3× y 4× antes de considerar insets/safe areas.
 
 Esto es una base aprobada para pruebas, no la resolución final irreversible.
 
@@ -230,3 +254,17 @@ SPATIAL_MODEL_AUDIT_2026-09-16
 ```
 
 Este snapshot también es histórico/no normativo y puede quedar obsoleto a medida que avance el proyecto.
+
+## 9. Estado de sincronización Git
+
+Al cierre de esta sincronización:
+
+```text
+main
+= rama compartida de referencia
+
+art/spatial-model-audit-2026-09-16
+= debe mantenerse alineada con main mientras siga existiendo como rama histórica de trabajo
+```
+
+Las imágenes generadas durante exploración visual no se promueven automáticamente a assets canónicos ni a evidencia. Su incorporación al repositorio debe hacerse solo cuando exista una decisión explícita de conservarlas como referencia o asset de producción.
