@@ -17,9 +17,11 @@ arquitectura / datos
 
 desarrollo seguro
 → DEVELOPMENT_MANUAL.md
+→ GENERAL_VOCABULARY_GUIDE.md   # referencia rápida, no normativa
 
 compilación de escenas / prompts generativos
 → ARBORIS_SCENE_COMPILER.md
+→ ASC_VOCABULARY_GUIDE.md       # referencia rápida, no normativa
 
 arte / personajes
 → GRAPHIC_DIRECTION.md
@@ -38,11 +40,18 @@ ambientes / mapas
 → ENVIRONMENT_PRODUCTION_SPEC.md
 ```
 
+## Guías de vocabulario
+
+- [`GENERAL_VOCABULARY_GUIDE.md`](GENERAL_VOCABULARY_GUIDE.md): vocabulario transversal para desarrollo, territorio, revisión, GitHub y trabajo diario. Es una guía operativa aprobada provisionalmente; las autoridades normativas de cada dominio siguen prevaleciendo.
+- [`ASC_VOCABULARY_GUIDE.md`](ASC_VOCABULARY_GUIDE.md): referencia rápida para términos, órdenes y tratamientos de información de ASC. La autoridad normativa sigue siendo `ARBORIS_SCENE_COMPILER.md`.
+
 ## Para Alejandra
 
 Si la tarea es decisión de producto, alcance, arquitectura, datos o estado del desarrollo, partir por los documentos de producto/arquitectura y luego abrir solo la autoridad específica del tema.
 
-Si la tarea consiste en generar o auditar una escena mediante IA/herramienta generativa, usar `ARBORIS_SCENE_COMPILER.md` como autoridad de compilación y abrir después únicamente los contratos y documentos de dominio necesarios.
+Para consultas rápidas de terminología transversal se puede abrir `GENERAL_VOCABULARY_GUIDE.md`, sin tratarla como sustituto del documento normativo correspondiente.
+
+Si la tarea consiste en generar o auditar una escena mediante IA/herramienta generativa, usar `ARBORIS_SCENE_COMPILER.md` como autoridad de compilación y abrir después únicamente los contratos y documentos de dominio necesarios. `ASC_VOCABULARY_GUIDE.md` sirve como recordatorio operativo.
 
 ## Para Álvaro
 
@@ -60,6 +69,7 @@ Los prototipos y experimentos de código históricos están fuera del camino pri
 1. clasificar la tarea
 2. abrir el documento de autoridad
 3. añadir solo dependencias necesarias
-4. evitar históricos salvo que la tarea requiera historia
-5. aplicar DEVELOPMENT_MANUAL antes de consolidar cambios
+4. usar las guías de vocabulario solo como referencia rápida
+5. evitar históricos salvo que la tarea requiera historia
+6. aplicar DEVELOPMENT_MANUAL antes de consolidar cambios
 ```
