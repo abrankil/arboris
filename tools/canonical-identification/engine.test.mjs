@@ -7,6 +7,7 @@ import {
   compatible,
   filterCandidates,
   nextCharacter,
+  retryCharacter,
 } from './engine.mjs';
 
 let dataset;
@@ -126,18 +127,29 @@ test('an attempted unresolved character can be requested again explicitly', asyn
   const evidence = [
     { characterId: first.characterId, observedStates: ['not_observable'] },
   ];
-  const engine = await import('./engine.mjs');
-
-  assert.equal(
-    typeof engine.retryCharacter,
-    'function',
-    'engine must expose an explicit retry operation for attempted unresolved characters',
-  );
-
-  const retry = engine.retryCharacter(dataset, evidence, first.characterId);
+  const retry = retryCharacter(dataset, evidence, first.characterId);
 
   assert.ok(retry);
   assert.equal(retry.characterId, first.characterId);
+});
+
+test('a character that actually reduced the candidate set cannot be retried', async () => {
+  dataset ??= await loadCanonicalDataset();
+
+  const conflict = findExplicitConflict(dataset);
+  assert.ok(conflict, 'expected at least one explicit conflict in the canonical matrix');
+
+  const candidateIds = [conflict.left.speciesId, conflict.right.speciesId];
+  const evidence = [{
+    characterId: conflict.character.characterId,
+    observedStates: [conflict.left.relation.expectedStates[0]],
+  }];
+
+  const filtered = filterCandidates(dataset, evidence, candidateIds);
+  assert.equal(filtered.remaining.length, 1, 'test setup must actually reduce the candidate set');
+
+  const retry = retryCharacter(dataset, evidence, conflict.character.characterId, candidateIds);
+  assert.equal(retry, null);
 });
 
 test('documented natural variability keeps a contradicting candidate as inconclusive, not eliminated', async () => {
