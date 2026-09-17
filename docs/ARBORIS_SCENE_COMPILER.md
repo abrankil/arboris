@@ -44,33 +44,63 @@ AUDITORÍA
 
 No llamar "modelo de Árboris" al ejecutor generativo cuando se quiera describir ASC. Deben distinguirse ambos componentes.
 
+### Uso operativo en conversación
+
+Para reducir ambigüedad, estas expresiones tienen significado estable:
+
+```text
+"compila con ASC" / "pásalo por ASC"
+→ construir el prompt ASC; no ejecutar generación salvo que también se pida.
+
+"ejecuta con ASC" / "genera con ASC"
+→ compilar primero y luego ejecutar el prompt con la herramienta generativa disponible.
+
+"audita ASC" / "audita el resultado ASC"
+→ revisar prompt y/o resultado contra contrato, fuentes y criterios de validación.
+
+"usa X como evidencia/input ASC"
+→ X puede alimentar la compilación; no adquiere automáticamente autoridad ni permite completar vacíos.
+```
+
+Cuando la instrucción sea ambigua entre **compilar** y **ejecutar**, conservar la distinción y no tratar la salida generativa como si fuera parte del compilador.
+
 ## 3. Autoridad y precedencia
 
 ASC compila; no decide la verdad del proyecto.
 
-Orden de autoridad:
+Antes de compilar, debe identificarse la **autoridad del dominio** aplicable. No existe una regla universal donde cualquier imagen o fuente externa prevalezca sobre el canon interno. La autoridad depende del tipo de información: botánica, territorial, navegación, arte, producto, etc.
+
+Orden operativo general:
 
 ```text
-fuente/evidencia válida
-→ documento o dato canónico de Árboris
+autoridad del dominio + evidencia válida
 → contrato específico de la prueba/escena
 → reglas ASC
 → decisiones artísticas autorizadas
 → modelo generativo
 ```
 
-Una salida generativa nunca puede corregir, completar ni reemplazar una fuente superior por mera plausibilidad visual.
+Ejemplos:
 
-Ante contradicción, prevalece la fuente de mayor autoridad y la contradicción debe registrarse.
+- conocimiento botánico: usar las fuentes/datos canónicos definidos por Árboris; ASC no crea conocimiento botánico paralelo;
+- relaciones territoriales: preservar claims, procedencia y estados de evidencia definidos por el modelo territorial;
+- navegación: respetar el Navigation Contract y la región transitable autoritativa;
+- arte: respetar la autoridad de dirección gráfica y producción correspondiente.
 
-## 4. Estados de información
+Una salida generativa nunca puede corregir, completar ni reemplazar una autoridad superior por mera plausibilidad visual.
 
-Toda información relevante que llegue a ASC debe poder clasificarse, según corresponda, como:
+Ante contradicción, prevalece la autoridad del dominio y la contradicción debe registrarse.
+
+## 4. Estados de información para compilación
+
+Toda información relevante que llegue a ASC debe recibir un **tratamiento de compilación**, según corresponda:
 
 - **KNOWN / respaldado:** puede trasladarse a la compilación.
 - **OPEN:** no existe evidencia o decisión suficiente; debe permanecer abierto.
 - **PROHIBIDO INFERIR:** el ejecutor no puede completar el vacío.
 - **ART-PROVISIONAL:** decisión visual permitida para la prueba, sin valor de evidencia.
+
+Estos tratamientos son propios de ASC y **no reemplazan los estados del dominio**. Si una entrada territorial contiene `claimState`, `evidenceStatus` o `productionStatus`, ASC debe preservarlos y derivar su tratamiento de compilación sin reescribirlos. Lo mismo aplica a estados canónicos de otros sistemas.
 
 `OPEN` nunca significa "rellenar con una solución probable".
 
@@ -135,6 +165,7 @@ Antes de producir un prompt ASC, identificar:
 6. **Grado de libertad artística.** Qué puede variar sin alterar la prueba.
 7. **Contrato de cámara/salida.** Cuando corresponda.
 8. **Criterios de validación.** Cómo se decidirá PASS / PARTIAL / FAIL.
+9. **Modo de ejecución.** `compile-only` o `compile-and-execute`.
 
 ## 8. Forma recomendada de un prompt ASC
 
@@ -164,6 +195,8 @@ Antes de producir un prompt ASC, identificar:
 
 No todas las secciones deben aparecer literalmente en el prompt final si el ejecutor funciona mejor con otra redacción, pero su información no puede perderse durante la compilación.
 
+ASC puede adaptar redacción, orden y nivel de detalle al ejecutor concreto, pero **no puede debilitar restricciones para obtener una imagen más atractiva**.
+
 ## 9. Uso de fuentes visuales y territoriales
 
 Una imagen, mapa, fotografía o croquis puede ser input ASC, pero debe distinguirse entre:
@@ -186,6 +219,8 @@ fuente territorial
 
 No usar una imagen generada como corroboración independiente de la fuente que originó esa misma generación.
 
+Cuando una fuente visual no permite determinar altimetría, escala, geometría exacta, orientación o transitabilidad, esas propiedades deben seguir `OPEN` aunque el ejecutor sea capaz de representarlas de forma plausible.
+
 ## 10. Resultados generativos
 
 Todo resultado ASC debe considerarse por defecto **propuesta o evidencia experimental**, nunca evidencia territorial, botánica o científica.
@@ -203,6 +238,8 @@ Una salida visual puede validar, entre otras cosas:
 No puede validar por sí sola que una relación territorial real sea verdadera.
 
 Los textos, escalas, coordenadas, leyendas, nombres o mediciones inventados por el generador tampoco adquieren autoridad por aparecer impresos en la imagen.
+
+Cuando la prueba pretenda validar topología, la conectividad debe evaluarse contra el contrato o `walkableEnvelope`; la apariencia de un sendero en una imagen no certifica transitabilidad por sí sola.
 
 ## 11. Pruebas ASC
 
@@ -230,6 +267,8 @@ Cada prueba debe registrar al menos:
 - hallazgos;
 - PASS / PARTIAL / FAIL por criterio relevante;
 - decisiones que permanecen `OPEN`.
+
+Cuando se compare una serie de pruebas, debe registrarse **qué variable cambió** entre versiones para evitar atribuir mejoras a factores no controlados.
 
 ## 12. Auditoría obligatoria
 
