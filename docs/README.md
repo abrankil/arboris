@@ -18,6 +18,9 @@ arquitectura / datos
 desarrollo seguro
 → DEVELOPMENT_MANUAL.md
 
+compilación de escenas / prompts generativos
+→ ARBORIS_SCENE_COMPILER.md
+
 arte / personajes
 → GRAPHIC_DIRECTION.md
 → ART_STYLE_GUIDE.md
@@ -39,9 +42,11 @@ ambientes / mapas
 
 Si la tarea es decisión de producto, alcance, arquitectura, datos o estado del desarrollo, partir por los documentos de producto/arquitectura y luego abrir solo la autoridad específica del tema.
 
+Si la tarea consiste en generar o auditar una escena mediante IA/herramienta generativa, usar `ARBORIS_SCENE_COMPILER.md` como autoridad de compilación y abrir después únicamente los contratos y documentos de dominio necesarios.
+
 ## Para Álvaro
 
-Si la tarea es arte, personajes, ambientes o composición visual, partir por `GRAPHIC_DIRECTION.md` / `ART_STYLE_GUIDE.md` y después abrir solo la guía o canon específico del activo.
+Si la tarea es arte, personajes, ambientes o composición visual, partir por `GRAPHIC_DIRECTION.md` / `ART_STYLE_GUIDE.md` y después abrir solo la guía o canon específico del activo. Si la propuesta visual se genera mediante ASC, las reglas de `ARBORIS_SCENE_COMPILER.md` controlan la traducción de evidencia/contratos al prompt, sin reemplazar la autoridad artística.
 
 ## Documentos históricos
 
