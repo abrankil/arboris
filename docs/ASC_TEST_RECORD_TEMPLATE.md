@@ -1,7 +1,7 @@
-# Árboris — Plantilla de registro de prueba ASC
+# ASC — Plantilla de registro de prueba
 
 **Estado:** plantilla operativa provisional  
-**Autoridad normativa:** `docs/ARBORIS_SCENE_COMPILER.md`
+**Autoridad normativa en este repositorio:** `docs/ARBORIS_SCENE_COMPILER.md`
 
 Usar esta plantilla mientras el formato serializado definitivo de pruebas ASC permanezca `OPEN`.
 
@@ -10,9 +10,12 @@ Usar esta plantilla mientras el formato serializado definitivo de pruebas ASC pe
 ```text
 TEST ID:
 DATE:
+PROJECT CONSUMER: Árboris | otro
 TEST TYPE: ASC-STRUCTURAL TEST | ASC-VISUAL TEST
 MODE: compile-only | compile-and-execute
 EXECUTOR / PROVIDER:
+ASC DEVELOPER / AUTHORITY: Álvaro
+PROJECT CONSUMER AUTHORITY:
 ```
 
 ## Pregunta experimental
@@ -32,7 +35,8 @@ Qué NO se prueba:
 ## Fuentes y autoridad
 
 ```text
-Autoridad(es) de dominio:
+Autoridad(es) de ASC:
+Autoridad(es) del proyecto consumidor:
 Input autorizado:
 Referencias auxiliares:
 ```
@@ -140,7 +144,23 @@ Marcar solo los niveles respaldados por la evidencia:
 [ ] representación visual
 [ ] herramienta / proveedor
 [ ] fuente / referencia de entrada
+[ ] necesidad específica del proyecto consumidor
+[ ] decisión general de ASC
 [ ] desconocido
+```
+
+## Lectura separada
+
+### Hallazgo ASC
+
+```text
+Qué demuestra o no demuestra sobre ASC como sistema independiente:
+```
+
+### Hallazgo del proyecto consumidor
+
+```text
+Qué demuestra o no demuestra sobre Árboris u otro proyecto consumidor:
 ```
 
 ## Auditoría obligatoria
