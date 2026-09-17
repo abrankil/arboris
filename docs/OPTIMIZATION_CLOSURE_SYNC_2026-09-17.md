@@ -200,12 +200,21 @@ commit: 7b54449360c876ae9912034deb6465e5452a6865
 resultado: SUCCESS
 ```
 
-CI del commit inmediatamente anterior a esta consolidación final:
+CI del cierre consolidado inmediatamente anterior:
 
 ```text
 workflow: CI
 run: 35179759966
 commit: 5cbbe86850e4d9fc76993863b8d964c41d0aa083
+resultado: SUCCESS
+```
+
+CI de la consolidación final previa a la verificación remota de ramas:
+
+```text
+workflow: CI
+run: 35179835439
+commit: f88b0691ed4e2fe0a5d1612dfb91727f32781935
 resultado: SUCCESS
 ```
 
