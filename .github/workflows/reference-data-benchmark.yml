@@ -6,7 +6,9 @@ on:
     branches: [main]
     paths:
       - 'data/botanical/**'
+      - 'data/species/**'
       - 'tools/botanical-data/benchmark_reference_access.mjs'
+      - 'tools/botanical-data/benchmark_ai_routing.mjs'
       - 'tools/botanical-data/build_reference_sqlite.py'
       - 'tools/canonical-identification/dataset.mjs'
       - '.github/workflows/reference-data-benchmark.yml'
@@ -36,18 +38,26 @@ jobs:
       - name: Build derived SQLite reference database
         run: python tools/botanical-data/build_reference_sqlite.py --force
 
-      - name: Run controlled host benchmark
+      - name: Run controlled reference-data benchmark
         run: >-
           node tools/botanical-data/benchmark_reference_access.mjs
           --json build/reference-benchmark.json
           --markdown build/reference-benchmark.md
 
-      - name: Upload benchmark report
+      - name: Run AI/data routing benchmark
+        run: >-
+          node tools/botanical-data/benchmark_ai_routing.mjs
+          --json build/ai-routing-benchmark.json
+          --markdown build/ai-routing-benchmark.md
+
+      - name: Upload benchmark reports
         uses: actions/upload-artifact@v4
         with:
           name: reference-data-benchmark
           path: |
             build/reference-benchmark.json
             build/reference-benchmark.md
+            build/ai-routing-benchmark.json
+            build/ai-routing-benchmark.md
           if-no-files-found: error
           retention-days: 14
