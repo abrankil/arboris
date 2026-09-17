@@ -29,6 +29,21 @@ Important distinction:
 - `species/*.json` is the preferred joined view for one-species deep reads;
 - `characters/` records visual/game character design and is not botanical authority.
 
+## Fastest read-only path
+
+When an executable checkout is available, use the compact query CLI instead of opening whole tables for a scoped question:
+
+```powershell
+python tools/botanical-data/query_botanical.py species SP-001
+python tools/botanical-data/query_botanical.py character CH-003
+python tools/botanical-data/query_botanical.py relation SP-001 CH-003
+python tools/botanical-data/query_botanical.py compare CH-003
+```
+
+The CLI reads the canonical JSON directly and returns only the requested slice. It does not persist data or create a second source of truth.
+
+Use `--pretty` for human-readable output; compact JSON is the default to reduce model/context payload.
+
 ## Minimal file by question
 
 | Question | Read first | Add only if needed |
@@ -69,7 +84,13 @@ Important distinction:
 
 Do not open all six files in `species/`.
 
-Use:
+Prefer the CLI when available:
+
+```powershell
+python tools/botanical-data/query_botanical.py compare CH-003
+```
+
+Otherwise use:
 
 ```text
 species.json
@@ -82,6 +103,8 @@ Join on IDs.
 ### One-species reasoning
 
 Use the matching joined view in `species/`. It already collects identity, character definitions, relations, sources, photo metadata, glossary context and relevant model errors.
+
+For a narrow relation, prefer the CLI instead of the full joined view.
 
 ### Provenance verification
 
@@ -132,4 +155,4 @@ From the canonical export contract:
 - operational answers such as unknown / not observable / not applicable are not botanical states of a species;
 - only characters matching the active computable status participate in the canonical identification engine.
 
-See `botanical/README.md`, `docs/DATA_MODEL.md` and `docs/ARCHITECTURE.md` when deeper semantics are needed.
+See `botanical/README.md`, `docs/DATA_MODEL.md`, `docs/ARCHITECTURE.md` and `docs/DATA_ACCESS_PERFORMANCE.md` when deeper semantics or performance/index strategy are needed.
