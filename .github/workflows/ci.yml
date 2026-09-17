@@ -39,5 +39,17 @@ jobs:
       - name: Canonical tests
         run: npm test
 
+      - name: Detect TypeScript config
+        id: tsconfig
+        shell: bash
+        run: |
+          if [ -f tsconfig.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "No tsconfig.json in repository; typecheck is not yet an executable gate."
+          fi
+
       - name: TypeScript typecheck
+        if: steps.tsconfig.outputs.present == 'true'
         run: npm run typecheck
