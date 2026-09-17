@@ -33,13 +33,16 @@ Orden recomendado:
 
 1. `README.md` — visión general del producto.
 2. `docs/GRAPHIC_DIRECTION.md` — autoridad, método y flujo gráfico.
-3. `docs/ART_DIRECTION_AUDIT_2026-09-16.md` — estado del departamento, decisiones concretas y siguiente ejecución.
-4. `docs/SPATIAL_MODEL.md` — modelo conceptual para transformar territorio real en espacio jugable.
-5. `docs/TERRITORIAL_MAPPING_PROTOCOL.md` — procedimiento para levantar evidencia, definir Unidades Espaciales y construir blockouts.
-6. `data/species/` — ficha completa de cada una de las seis especies piloto.
-7. `species/<especie>/photos/` — fotografías reales disponibles.
-8. `data/characters/` — canon gráfico/jugable y assets de personajes.
-9. `docs/ART_STYLE_GUIDE.md` — contrato visual y técnico.
+3. `docs/ART_DEPARTMENT_HANDOFF_2026-09-16.md` — estado operativo y continuidad del departamento de arte.
+4. `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md` — orientación, composición, densidad y reglas duras del escenario piloto.
+5. `docs/ART_DIRECTION_AUDIT_2026-09-16.md` — auditoría del departamento y decisiones concretas.
+6. `docs/SPATIAL_MODEL.md` — modelo conceptual para transformar territorio real en espacio jugable.
+7. `docs/TERRITORIAL_MAPPING_PROTOCOL.md` — procedimiento para levantar evidencia, definir Unidades Espaciales y construir blockouts.
+8. `docs/ENVIRONMENT_ART_DIRECTION.md` — reglas de entorno y uso de referencias ambientales.
+9. `data/species/` — ficha completa de cada una de las seis especies piloto.
+10. `species/<especie>/photos/` — fotografías reales disponibles.
+11. `data/characters/` — canon gráfico/jugable y assets de personajes.
+12. `docs/ART_STYLE_GUIDE.md` — contrato visual y técnico.
 
 Modelo simple de trabajo:
 
@@ -76,11 +79,26 @@ Estado operativo actual de Dirección de Arte:
 
 - personajes base: canon operativo cerrado;
 - derivados de personajes: pendientes;
-- escenarios: marco definido, evidencia `core` pendiente;
+- escenarios: modelo y reglas definidos; primer lote de evidencia `core` ambiental ya clasificado;
+- orientación visual del piloto: fijada en `PILOT_ENVIRONMENT_VISUAL_CANON.md`;
 - topología de mapas: sistema definido, pruebas de blockout pendientes;
 - modelo espacial: consolidado conceptualmente, implementación pendiente;
 - Master Territorial: concepto arquitectónico, formato aún `OPEN`;
 - `PILOT-ENV-006`: abierto; los conteos ponderan presencia, la colocación exige observaciones territorializadas.
+
+Para el escenario piloto, la lectura de pantalla vigente es:
+
+```text
+arriba = cordillera / interior / objetivo final
+abajo  = entrada / dirección hacia el mar / retorno
+centro = camino principal
+estero = derecha del camino y en nivel inferior
+laterales = laderas norte y sur como cierre territorial
+```
+
+La referencia al mar es direccional; no implica mostrar el océano.
+
+Los escenarios deben mantenerse limpios: pocos elementos reconocibles, espacio negativo suficiente y lectura clara de camino, desniveles, estero y laderas. No llenar cada tile por decoración.
 
 Durante la próxima fase, Dirección de Arte no rediseña el canon base. Trabaja solo en derivados de personajes, blockouts de mapa y pruebas ambientales pequeñas. Toda colocación de especies en el mapa debe distinguir entre peso de presencia y evidencia territorial.
 
@@ -88,9 +106,10 @@ La siguiente ejecución recomendada para mapas es:
 
 ```text
 IT-001 Acceso Principal
-→ corroborar evidencia
 → MAP-001 blockout corridor
-→ prototipo visual
+→ aplicar canon de orientación de pantalla
+→ validar camino central + estero derecho/inferior + laderas aterrazadas
+→ prototipo visual limpio
 → pass / revise / fail
 ```
 
