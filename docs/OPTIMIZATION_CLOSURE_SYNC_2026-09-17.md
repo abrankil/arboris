@@ -182,6 +182,15 @@ run: 35179413121
 resultado: SUCCESS
 ```
 
+CI de la sincronización general posterior:
+
+```text
+workflow: CI
+run: 35179586889
+commit: 470925ee67891be889e5668fb12e40f49eaf13f3
+resultado: SUCCESS
+```
+
 Gates ejecutados:
 
 ```text
@@ -337,7 +346,7 @@ consulta compacta                         CLOSED / PASS
 benchmark host de routing                 CLOSED / PASS
 benchmark host JSON vs SQLite             CLOSED / PASS
 integridad CI post-optimización            CLOSED / PASS
-sincronización remota de ramas            verificar después del commit de cierre
+sincronización remota de ramas            verificar contra HEAD final después de este commit
 benchmark Android real                    OPEN
 ```
 
