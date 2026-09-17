@@ -1,37 +1,35 @@
 # Árboris — Empezar aquí
 
 **Actualizado:** 17 septiembre 2026  
-**Rama de referencia compartida:** `main`
+**Rama compartida:** `main`
 
-Este documento orienta a personas e IAs que llegan al repositorio sin contexto previo. No reemplaza la documentación técnica: indica qué leer, qué documentos gobiernan cada decisión y cuál es el gate vigente.
+Este documento es un router. No intenta resumir todo Árboris.
 
-## 1. Regla principal
+Para agentes de IA/código, leer primero `AGENTS.md`. Para consultas de datos, leer `data/README.md`.
 
-La fuente científica/editorial única del piloto es:
+## 1. Autoridad botánica
 
-`data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
+Fuente editorial/científica única:
 
-Flujo de autoridad botánica:
+```text
+data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx
+```
+
+Flujo:
 
 ```text
 Master Botánico 2.0
-        ↓
-data/botanical/
-        ↓
-data/species/
-        ↓
-tools/canonical-identification/
-        ↓
-consumidores: identificación, interfaz, IA y dirección de arte
+→ data/botanical/*.json
+→ data/species/*.json
+→ tools/canonical-identification/
+→ runtime / UI / IA / arte
 ```
 
-Los JSON y fichas por especie son derivados reproducibles. No se editan para corregir botánica: la corrección entra primero al Master 2.0 y luego se regenera.
+Regla operativa: para **leer y razonar**, preferir los JSON derivados; abrir el XLSX cuando haya que corregir, regenerar o verificar procedencia. Los JSON y fichas generadas no se corrigen manualmente.
 
-## 2. Protocolo obligatorio de desarrollo
+## 2. Protocolo obligatorio
 
-Leer `docs/DEVELOPMENT_MANUAL.md` antes de revisar, aprobar o consolidar trabajo.
-
-Toda revisión debe responder explícitamente:
+Antes de aprobar o consolidar desarrollo, aplicar `docs/DEVELOPMENT_MANUAL.md`:
 
 ```text
 AUDITORÍA
@@ -40,43 +38,50 @@ VACÍOS / OMISIONES
 REDUNDANCIAS
 ```
 
-Un hallazgo crítico bloquea avance hasta resolución o aceptación explícita de dirección de proyecto.
+Mantener `OPEN` lo que aún no tenga evidencia o decisión suficiente.
 
-El snapshot coordinado más reciente es `docs/DEVELOPMENT_SYNC_2026-09-17.md`. Es histórico/no normativo y sirve para retomar contexto; las fuentes normativas siguen siendo los documentos especializados.
+## 3. Router por tarea
 
-## 3. Si trabajas en arte / entorno
+### Datos botánicos / identificación
 
-Orden recomendado:
+1. `data/README.md`
+2. `data/botanical/metadata.json`
+3. dataset mínimo requerido en `data/botanical/`
+4. una ficha en `data/species/` solo si la tarea es de una especie concreta
+5. `docs/DATA_MODEL.md` para semántica conceptual
+6. `docs/ARCHITECTURE.md` para límites entre datos, evidencia, motor e IA
+7. `tools/canonical-identification/` si la tarea toca el motor
 
-1. `docs/DEVELOPMENT_MANUAL.md`
-2. `docs/GRAPHIC_DIRECTION.md`
-3. `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md`
-4. `docs/SPATIAL_MODEL.md`
-5. `docs/TERRITORIAL_MAPPING_PROTOCOL.md`
-6. `docs/MAP_TOPOLOGY_SYSTEM.md`
-7. `docs/MAP_TOPOLOGY_BLOCKOUT_TEST_PLAN.md`
-8. `docs/ENVIRONMENT_ART_DIRECTION.md`
-9. `docs/ART_STYLE_GUIDE.md`
-10. `docs/ENVIRONMENT_PRODUCTION_SPEC.md`
-11. `docs/DEVELOPMENT_SYNC_2026-09-17.md` — snapshot de continuidad
-12. `data/species/`, fotografías reales y `data/characters/` según la tarea.
+No cargar las seis fichas de `data/species/` para comparaciones: usar `species.json`, `characters.json` y `species_characters.json`.
 
-Modelo de trabajo:
+### Producto / estado general
 
-```text
-qué es real
-→ qué evidencia tengo
-→ qué relaciones debo conservar
-→ cómo se juega
-→ cómo se ve
-→ qué pruebo
-```
+1. `README.md`
+2. `docs/ROADMAP.md`
+3. `docs/DEVELOPMENT_SYNC_2026-09-17.md` solo si se necesita continuidad reciente; es snapshot no normativo
 
-Una decisión artística no modifica la botánica. Una imagen generada no constituye evidencia territorial ni botánica.
+### Arte de personajes
 
-## 4. Arquitectura espacial vigente
+1. `docs/GRAPHIC_DIRECTION.md`
+2. `docs/ART_STYLE_GUIDE.md`
+3. registro relevante en `data/characters/`
+4. asset aprobado correspondiente
+5. ficha botánica/fotos reales solo cuando la decisión requiera evidencia morfológica
 
-No tratar territorio, juego e implementación como una sola jerarquía.
+### Entorno / mapas
+
+1. `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md`
+2. `docs/SPATIAL_MODEL.md`
+3. `docs/TERRITORIAL_MAPPING_PROTOCOL.md`
+4. `docs/MAP_TOPOLOGY_SYSTEM.md`
+5. `docs/MAP_TOPOLOGY_BLOCKOUT_TEST_PLAN.md`
+6. `docs/ENVIRONMENT_ART_DIRECTION.md`
+7. `docs/ART_STYLE_GUIDE.md`
+8. `docs/ENVIRONMENT_PRODUCTION_SPEC.md`
+
+Los documentos `*_AUDIT_*`, handoffs y snapshots sirven para trazabilidad; no desplazan a las fuentes normativas anteriores.
+
+## 4. Bases espaciales vigentes
 
 ```text
 TERRITORIO
@@ -94,21 +99,17 @@ IMPLEMENTACIÓN
 walkable envelope / celdas / tiles / objetos / renderer
 ```
 
-La autoridad geométrica de navegación es el `walkableEnvelope` continuo. Celdas y tiles son derivaciones técnicas.
+`walkableEnvelope` es la autoridad geométrica de navegación. Celdas/tiles son derivaciones técnicas.
 
-El Master Territorial sigue siendo una intención arquitectónica; su formato final permanece `OPEN`.
-
-## 5. Estado vigente de IT-001 / MAP-001
-
-Unidades espaciales:
+Para `IT-001 / MAP-001`:
 
 ```text
-UE-001 Umbral de acceso
-UE-002 Corredor inicial
-UE-003 Claro de picnic
+screen_up   = cordillera / interior / progresión
+screen_down = entrada / retorno
+worldCardinalMapping = OPEN
 ```
 
-Secuencia estructural aprobada:
+Secuencia territorial aprobada:
 
 ```text
 entrada inferior
@@ -117,136 +118,72 @@ entrada inferior
 → casa del conserje a la izquierda
 → camino principal
 → claro de picnic
-→ continuidad hacia interior / cordillera
+→ interior / cordillera
 ```
 
-Relación del estero:
+El estero cruza bajo el puente, forma el giro visual en `L` en el umbral y post-umbral continúa a la derecha del camino y en nivel inferior.
 
-- cruza el sector inferior bajo el puente;
-- forma allí un giro visual en `L`;
-- luego continúa hacia interior/cordillera;
-- post-umbral queda a la derecha del camino y en nivel inferior;
-- el descenso posterior hacia Santiago existe territorialmente, pero queda fuera del alcance actual.
+## 5. Producción ambiental vigente
 
-No inferir cardinales geográficos de pantalla:
+Base de prueba móvil:
 
 ```text
-screen_up   = cordillera / interior / progresión
-screen_down = entrada / retorno
-worldCardinalMapping = OPEN
-```
-
-`MAP-001 v0.3` pasó revisión estructural y visual. `MAP-001 v0.4b` tiene dirección conceptual y alineación con la visión del piloto aprobadas. El prototipo visual no es evidencia.
-
-## 6. Lenguaje gráfico y producción móvil
-
-Apariencia: `docs/ART_STYLE_GUIDE.md`.  
-Composición territorial del piloto: `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md`.  
-Viewport/escalado/producción técnica: `docs/ENVIRONMENT_PRODUCTION_SPEC.md`.
-
-Bases actuales:
-
-```text
-2.5D isométrico
-pixel art de producción
-terrazas/modularidad naturalizadas
-mundo continuo
-baja/media densidad visual
 Android portrait-first
-```
-
-Base de viewport aprobada para pruebas:
-
-```text
 logicalViewport: 360 × H
 H test range: 640–800
 base: 360×640
-intermediate: 360×720 / 360×780
 high: 360×800
 ```
 
-Es una base de producción para pruebas, no resolución final irreversible.
+Es base de prueba, no resolución final irreversible.
 
-Siguen `OPEN`: resolución final, renderer, pathfinding, tamaño final de sprite, relación sprite/tile, tamaño de tile/chunk, escala métrica y adaptación landscape secundaria.
+Próximo gate ambiental: vertical slice real de producción con puente, puerta abierta, camino, estero en L, terraza/ladera, player proxy, oclusiones y pixel art evaluado a 1× lógico.
 
-Los formatos `480×270` y `270×480` son históricos/transitorios y no gobiernan la composición móvil principal.
+El concepto `MAP-001 v0.4b` está aprobado como visión espacial/compositiva del piloto; no fija el estilo gráfico final y no es evidencia territorial/botánica.
 
-## 7. Próximo gate del frente ambiental
+## 6. IDs
 
-No corresponde otra ilustración conceptual completa.
-
-El siguiente entregable es un vertical slice real de producción:
+Botánica nueva:
 
 ```text
-360×640 + 360×800
-puente
-puerta abierta
-camino
-estero en L
-ladera / terraza
-player proxy
-oclusiones
-pixel art evaluado a 1× lógico
+SP-001 … SP-006
+CH-xxx
+F-xxx
 ```
 
-Debe comprobar legibilidad, ancho útil de la isometría portrait, oclusión, seams/repetición modular, safe areas, escalado y rendimiento/memoria en Android.
+`SP001 … SP006` permanece por compatibilidad en archivos/runtime/arte históricos. No usarlo como nuevo namespace botánico.
 
-## 8. Si trabajas en desarrollo general
+## 7. Histórico / legado
 
-Orden recomendado:
-
-1. `README.md`
-2. `docs/DEVELOPMENT_MANUAL.md`
-3. `docs/START_HERE.md`
-4. `docs/ROADMAP.md`
-5. `docs/HITO15_CLOSEOUT_2026-09-16.md`
-6. `docs/ARCHITECTURE.md`
-7. `docs/DATA_MODEL.md`
-8. `docs/SPATIAL_MODEL.md` si la tarea toca mapas/escenarios
-9. `data/botanical/metadata.json`
-10. `data/botanical/`, `data/species/` y `tools/canonical-identification/`
-
-Master 2.0, export canónico, validaciones, IDs, fichas por especie y motor canónico mínimo están cerrados. No implementar conocimiento botánico hardcodeado nuevo.
-
-Para el frente espacial, no fijar por conveniencia tamaño de tile, escala metro/celda, renderer, pathfinding, geometría exacta ni colocación fina de especies sin el gate correspondiente.
-
-## 9. Datos validados del piloto
-
-- 6 especies.
-- 24 caracteres botánicos totales.
-- 19 caracteres activos/computables.
-- 4 caracteres retirados.
-- 1 carácter pendiente de revisión.
-- 89 relaciones especie–carácter.
-- 21 fuentes.
-- 53 términos de glosario.
-- 45 fotografías.
-- 2 errores de modelo documentados.
-
-Los nuevos componentes botánicos usan IDs canónicos `SP-001`…`SP-006`. Los IDs `SP001`…`SP006` permanecen por compatibilidad histórica en arte/runtime.
-
-## 10. Archivos históricos que pueden confundir
-
-No usar como autoridad vigente cuando contradigan fuentes actuales:
+No usar como autoridad vigente cuando contradiga fuentes actuales:
 
 - `data/source/Base_botanica_Pokedex_flora_Master.xlsx`
 - `data/source/Fichas_especies_arboris.xlsx`
-- `data/botanical/legacy/species_pilot.json`
+- `data/botanical/legacy/`
 - `docs/BOTANICAL_KEY_PILOT.md`
-- componentes legacy de clave/adaptador pendientes de retirada controlada.
+- documentos de auditoría/snapshot salvo para reconstruir decisiones
 
-`docs/SPATIAL_MODEL_AUDIT_2026-09-16.md` y `docs/DEVELOPMENT_SYNC_2026-09-17.md` son documentos históricos/de trazabilidad, no fuentes normativas.
+## 8. Validación
 
-## 11. Comprobación de la capa botánica y motor
-
-Desde la raíz del repositorio:
+Desde raíz:
 
 ```powershell
 npm.cmd test
+npm.cmd run typecheck
 ```
 
-La salida canónica debe mantenerse reproducible. Las fichas de `data/species/` no se editan manualmente.
+Regeneración botánica solo cuando corresponda:
 
-## 12. Regla para navegar el repositorio
+```powershell
+npm.cmd run build:botanical
+npm.cmd run verify:botanical
+```
 
-Usar `main` como estado compartido de referencia. Las ramas de trabajo y experimentos no definen el estado vigente salvo que la tarea indique explícitamente trabajar sobre ellas.
+## 9. Regla de navegación
+
+1. clasificar la tarea;
+2. abrir el router mínimo;
+3. leer solo las fuentes autoritativas necesarias;
+4. evitar históricos, binarios y vistas denormalizadas salvo necesidad;
+5. ejecutar pruebas pertinentes;
+6. mantener separadas autoridad, derivación, hipótesis y arte.
