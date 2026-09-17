@@ -26,9 +26,31 @@ Archivos vigentes del pipeline:
 - `build_species_data.py` — genera las 6 fichas completas de `data/species/` desde los JSON canónicos.
 - `validate_species_data.py` — comprueba que las fichas de `data/species/` reproduzcan exclusivamente los JSON canónicos.
 
+## Consulta compacta de solo lectura
+
+`query_botanical.py` reduce el payload necesario para consultas puntuales de humanos, agentes y herramientas. Lee directamente los JSON canónicos y no escribe datos.
+
+Ejemplos:
+
+```powershell
+python tools/botanical-data/query_botanical.py stats --pretty
+python tools/botanical-data/query_botanical.py species SP-001 --pretty
+python tools/botanical-data/query_botanical.py character CH-003 --pretty
+python tools/botanical-data/query_botanical.py relation SP-001 CH-003 --with-source --pretty
+python tools/botanical-data/query_botanical.py compare CH-003 SP-001 SP-002 SP-006 --pretty
+python tools/botanical-data/query_botanical.py photos SP-001
+python tools/botanical-data/query_botanical.py errors SP-002
+```
+
+El JSON compacto es la salida predeterminada para reducir contexto. `--pretty` cambia solo el formato de presentación.
+
+La estrategia de rendimiento y los requisitos futuros de índices SQLite están en `docs/DATA_ACCESS_PERFORMANCE.md`.
+
 ## Regla de edición
 
 No corregir botánica editando JSON derivados. Toda corrección debe entrar al Master 2.0 y propagarse mediante el flujo anterior.
+
+`query_botanical.py` es una interfaz de lectura, no una fuente de verdad ni un generador de conocimiento.
 
 ## Herramientas legacy
 
