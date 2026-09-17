@@ -14,27 +14,30 @@ La dirección de arte corresponde a Álvaro; cualquier cambio de alcance de plat
 
 El repositorio todavía no ha seleccionado renderer ni pathfinding. Esta especificación fija contratos de arte y presentación sin imponer una arquitectura de motor prematura.
 
-## 1. Viewport lógico
+## 1. Base de producción portrait — piloto
 
-La exploración principal se diseña **portrait-first para Android**. La auditoría de producción descarta `480×270` horizontal como autoridad móvil principal: puede mantenerse como referencia histórica/compatibilidad landscape, pero no debe gobernar composición, escala ni pruebas de `MAP-001`.
+La exploración principal se diseña **portrait-first para Android**.
 
-Para el piloto se adopta un viewport lógico vertical de **ancho base fijo y altura visible adaptativa**:
+La auditoría posterior a la primera propuesta `270×480` determinó que ese ancho lógico conserva bien la relación 9:16, pero produce escalas enteras poco convenientes en varios anchos físicos frecuentes de Android. Como nueva base de producción se adopta **360 px de ancho lógico**, porque permite correspondencia entera directa con anchos físicos de 720, 1080 y 1440 px mediante escalas 2×, 3× y 4× respectivamente.
 
-| Elemento | Decisión |
+Esta decisión es una **base de prueba aprobada**, no una resolución final irreversible del producto.
+
+| Elemento | Base de producción |
 | --- | --- |
 | Orientación primaria de exploración | Vertical / portrait |
-| Ancho lógico de referencia | 270 px |
-| Altura lógica mínima de prueba | 480 px |
-| Altura lógica adaptativa inicial | 480–600 px |
-| Caso base de revisión | 270×480 px |
-| Caso alto de revisión | 270×600 px |
-| Escalado de presentación | Nearest-neighbor, múltiplos enteros para el mundo pixelado |
+| Ancho lógico de referencia | 360 px |
+| Altura lógica mínima de prueba | 640 px |
+| Altura lógica adaptativa inicial | 640–800 px |
+| Caso base de revisión | 360×640 px |
+| Caso intermedio | 360×720 px |
+| Caso alto de revisión | 360×800 px |
+| Escalado de presentación | Nearest-neighbor, preferentemente múltiplos enteros para el mundo pixelado |
 | Color | sRGB |
 | Cámara | posiciones enteras en píxeles lógicos cuando el renderer lo permita |
 
-`270×480` es el **mínimo/caso base de prueba**, no una resolución física de dispositivo ni un lienzo obligatorio para cada mapa.
+`360×640` es el **caso base 9:16 de producción**, no una resolución física exigida al dispositivo ni un lienzo obligatorio para cada mapa.
 
-La altura no debe fijarse artificialmente a 480 si el dispositivo puede mostrar más mundo sin cambiar la escala de píxel. Para la primera validación, el mundo puede extender su viewport vertical hasta 600 px lógicos. Ese rango cubre desde una relación 9:16 aproximada hasta teléfonos altos cercanos a 9:20 sin convertir cada relación de aspecto en un layout distinto.
+La altura no debe fijarse artificialmente a 640 si el dispositivo puede mostrar más mundo sin alterar la escala lógica. Para el piloto se prueba inicialmente una altura visible de hasta 800 px lógicos, equivalente a una pantalla alta cercana a 20:9.
 
 La política inicial de cálculo es:
 
@@ -43,33 +46,66 @@ availableWidthPx  = ancho físico utilizable después de insets/safe area
 availableHeightPx = alto físico utilizable después de insets/safe area
 
 scale = min(
-  floor(availableWidthPx / 270),
-  floor(availableHeightPx / 480)
+  floor(availableWidthPx / 360),
+  floor(availableHeightPx / 640)
 )
 
-visibleLogicalWidth  = 270
+visibleLogicalWidth  = 360
 visibleLogicalHeight = clamp(
   floor(availableHeightPx / scale),
-  480,
-  600
+  640,
+  800
 )
 ```
 
-La fórmula es contrato de prueba, no implementación definitiva del renderer. Debe validarse en dispositivos reales antes de consolidarse.
+La fórmula es contrato de prueba, no implementación definitiva del renderer. Si un dispositivo no permite una escala entera útil, la estrategia alternativa debe validarse por nitidez, ausencia de shimmer y costo visual antes de adoptarse.
 
 Un mapa puede ocupar una extensión lógica mucho mayor que el viewport y ser recorrido por cámara.
+
+### Bases que quedan establecidas desde esta revisión
+
+```text
+PLATAFORMA PRIMARIA
+Android portrait
+
+VIEWPORT LÓGICO DE PRODUCCIÓN
+360 × H
+H inicial validable: 640–800
+
+COMPOSICIÓN
+screen_up   = interior / cordillera / progresión
+screen_down = entrada / retorno
+
+LENGUAJE VISUAL
+2.5D isométrico
+pixel art de producción
+terrazas/modularidad naturalizadas
+
+AUTORIDAD ESPACIAL
+walkableEnvelope continuo
+celdas/tiles = derivación técnica
+
+CÁMARA PILOTO
+orientación fija
+rotación deshabilitada
+follow/pan permitidos
+zoom definitivo OPEN
+
+ESCALA
+sprite, tile, chunk y métrica territorial = OPEN hasta prueba
+```
 
 ## 2. Comportamiento por plataforma
 
 | Plataforma | Regla de presentación |
 | --- | --- |
-| Android | portrait-first; aplicar safe areas/insets, elegir el mayor múltiplo entero compatible con un mínimo de 270×480 y mostrar altura adicional hasta el rango validado; UI puede ocupar el espacio restante |
+| Android | portrait-first; aplicar safe areas/insets, elegir el mayor múltiplo entero compatible con el viewport base `360×640` y mostrar altura adicional hasta el rango validado; UI puede ocupar espacio adicional cuando corresponda |
 | Steam / PC | soportar ventana portrait para paridad con móvil; landscape puede existir como modo secundario/compatibilidad, no como autoridad de composición del piloto |
 | Web | canvas lógico portrait basado en el mismo contrato; `image-rendering: pixelated`; evitar escalado fraccional del mundo cuando sea posible |
 
 La interfaz de formularios, fichas y texto puede ser responsive y no está obligada a usar la misma cuadrícula lógica que el mundo.
 
-El viewport histórico `480×270` se conserva únicamente para ensayos landscape, fondos previos, capturas comparativas o futuros modos secundarios. No debe usarse para validar la composición móvil principal.
+Los viewports históricos `480×270` y `270×480` se conservan únicamente como ensayos previos, capturas comparativas o referencias de transición. No deben usarse para validar la composición móvil principal.
 
 ## 3. Estructura del contenido del mapa
 
@@ -189,7 +225,27 @@ El renderer traduce después esas bandas a desplazamiento vertical, sprites, bor
 
 La naturalización debe evitar que la modularidad se perciba como una suma de bloques flotantes o repetidos.
 
-## 8. PNG y editables
+## 8. Pixel art de producción
+
+Desde esta base, `pixel art` deja de ser solamente una referencia estética y pasa a ser un criterio de producción comprobable para los assets del mundo.
+
+La prueba debe verificar:
+
+- lectura real a 1× lógico;
+- clusters de píxel intencionales;
+- ausencia de antialiasing accidental;
+- ausencia de detalle que solo funcione ampliado;
+- contraste suficiente de personaje, ruta, agua y anclas territoriales;
+- escalado nearest-neighbor;
+- repetición visible de módulos/tiles;
+- seams entre assets;
+- oclusión legible.
+
+Una imagen generada con apariencia pixelada no certifica pixel art de producción. Debe tratarse como referencia hasta que el asset exista a resolución lógica real y pueda inspeccionarse a 1×.
+
+El aumento de ancho desde 270 a 360 px no autoriza a aumentar indiscriminadamente el detalle. La densidad visual sigue gobernada por el canon del piloto: pocos elementos, jerarquía clara y espacio negativo suficiente.
+
+## 9. PNG y editables
 
 PNG RGBA continúa siendo formato de revisión y master apropiado para assets raster individuales.
 
@@ -204,9 +260,9 @@ Conservar, según el tipo de recurso:
 
 La compresión de GPU se decide al empaquetar, no en el master artístico.
 
-Las previews de revisión deben incluir, como mínimo, el caso base `270×480`; cuando la composición dependa de cuánto territorio extra aparece en dispositivos altos, incluir también `270×600`.
+Las previews de revisión deben incluir, como mínimo, el caso base `360×640`; cuando la composición dependa de cuánto territorio extra aparece en dispositivos altos, incluir también `360×800`.
 
-## 9. Personajes y escala dentro del mundo
+## 10. Personajes y escala dentro del mundo
 
 Los sprites canónicos de colección de 125×125 px se mantienen para galería, fichas, selección y encuentros cercanos.
 
@@ -218,17 +274,17 @@ La relación personaje/tile tampoco se fija todavía.
 
 El **player proxy provisional** se utiliza para comprobar:
 
-- lectura a 270×480;
-- lectura a 270×600;
+- lectura a `360×640`;
+- lectura a `360×800`;
 - ancho aparente de ruta/puente/puerta;
 - oclusión por vegetación y estructuras;
 - separación de silueta respecto del terreno.
 
 El proxy no fija el sprite final.
 
-## 10. Cámara, parallax y movimiento
+## 11. Cámara, parallax y movimiento
 
-La cámara usa el contrato portrait de `270×H`, con `H` adaptativo dentro del rango validado, y puede desplazarse sobre un mundo mayor.
+La cámara usa el contrato portrait de `360×H`, con `H` adaptativo dentro del rango validado, y puede desplazarse sobre un mundo mayor.
 
 Para `IT-001 / MAP-001`, la prueba estructural mantiene:
 
@@ -258,7 +314,7 @@ Los valores históricos de amplitud `0, 4, 12, 24 px` se conservan solo como ref
 
 No aplicar blur de tiempo real para simular profundidad del pixel art; resolver jerarquía tonal y detalle en el arte.
 
-## 11. Entregables por mapa/prototipo
+## 12. Entregables por mapa/prototipo
 
 Antes de integración, el paquete de una zona debe poder contener:
 
@@ -269,8 +325,8 @@ Antes de integración, el paquete de una zona debe poder contener:
 - Interaction/Learning Contract cuando corresponda;
 - blockout lógico verificable;
 - player proxy en pruebas estructurales;
-- preview portrait base `270×480`;
-- preview portrait alto `270×600` cuando corresponda;
+- preview portrait base `360×640`;
+- preview portrait alto `360×800` cuando corresponda;
 - assets raster/editables utilizados;
 - definición de orden de capas y offsets;
 - referencias ambientales consultadas;
@@ -278,7 +334,7 @@ Antes de integración, el paquete de una zona debe poder contener:
 
 Cuando el renderer esté seleccionado se añadirá el archivo técnico de mapa correspondiente.
 
-## 12. Criterios de aceptación
+## 13. Criterios de aceptación
 
 Una zona puede declararse lista para integración cuando:
 
@@ -286,8 +342,8 @@ Una zona puede declararse lista para integración cuando:
 - conserva invariantes de cámara aprobados;
 - no introduce oclusiones críticas del personaje o interacciones obligatorias;
 - mantiene utilizables los interaction slots requeridos;
-- se entiende correctamente en el viewport base `270×480`;
-- sigue siendo legible al extenderse a `270×600` sin reencuadrar de forma contradictoria;
+- se entiende correctamente en el viewport base `360×640`;
+- sigue siendo legible al extenderse a `360×800` sin reencuadrar de forma contradictoria;
 - el mundo se lee a 1× lógico y a escalas enteras de presentación;
 - no existe filtrado bilinear accidental en arte pixelado;
 - flora y contexto respetan evidencia registrada;
@@ -300,22 +356,22 @@ Una zona puede declararse lista para integración cuando:
 - el paquete de zona puede operar offline una vez descargado;
 - rendimiento y memoria se miden en al menos un Android de gama media antes de ampliar presupuesto.
 
-## 13. Matriz mínima de prueba de viewport
+## 14. Matriz mínima de prueba de viewport
 
-Antes de fijar la resolución definitiva del mundo de exploración, probar al menos:
+Antes de convertir esta base en resolución definitiva, probar al menos:
 
 ```text
-A — 270×480
-caso base portrait
+A — 360×640
+caso base 9:16
 
-B — 270×540
-caso intermedio
+B — 360×720
+caso intermedio 18:9
 
-C — 270×585
-referencia de relación cercana a 19.5:9
+C — 360×780
+caso cercano a 19.5:9
 
-D — 270×600
-caso alto cercano a 20:9
+D — 360×800
+caso alto 20:9
 ```
 
 Estas dimensiones son **viewports lógicos de prueba**, no resolución física exigida al dispositivo.
@@ -333,7 +389,35 @@ La comparación debe medir:
 
 Si un viewport más alto solo añade espacio vacío o empeora la composición, puede reservarse parte del alto para UI. Si mejora orientación y progresión sin romper escala, el mundo puede ocuparlo.
 
-## 14. Límites actuales
+## 15. Gate de consolidación de la base
+
+La base `360×H` puede pasar de **base de producción** a **resolución consolidada** solo después de completar una prueba real que incluya:
+
+```text
+MAP-001 vertical slice
++ player proxy
++ puente
++ puerta abierta
++ camino
++ estero en L
++ ladera/terraza
++ oclusión
++ ejecución a 1×
++ escalado 2× / 3× / 4× cuando corresponda
+```
+
+El gate debe responder explícitamente:
+
+- ¿el personaje se lee sin ampliar artificialmente?
+- ¿la isometría conserva suficiente ancho útil en portrait?
+- ¿la progresión vertical mejora la orientación?
+- ¿los elementos ancla caben sin compresión lateral excesiva?
+- ¿el pixel art mantiene clusters limpios a 1×?
+- ¿el sistema funciona en al menos un Android de 720 px, uno de 1080 px y, si está disponible, uno de 1440 px de ancho físico?
+
+Hasta superar ese gate, `360×H` es la base recomendada y operativa, no una verdad técnica irreversible.
+
+## 16. Límites actuales
 
 Expo y React Native son la base de aplicación definida, pero el renderer del mundo de exploración sigue `OPEN`.
 
