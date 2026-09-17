@@ -3,7 +3,7 @@
 **Estado:** normativo para el uso de ASC dentro de Árboris  
 **Nombre operativo:** ASC  
 **Desarrollador de ASC:** Álvaro  
-**Ámbito de este documento:** integración de ASC con Árboris para compilación de instrucciones, escenas, blockouts y prototipos visuales a partir del canon, contratos y evidencia de Árboris.
+**Ámbito de este documento:** integración de ASC con Árboris para compilación de instrucciones, escenas, blockouts, diagramas y prototipos visuales a partir del canon, contratos y evidencia de Árboris.
 
 Este documento regula cómo Árboris usa ASC. No define todo el producto ASC ni subordina el desarrollo general de ASC a Árboris.
 
@@ -18,15 +18,16 @@ En Árboris, ASC se usa como capa de compilación que transforma información es
 ASC **no es el modelo generativo**, **no es el renderer**, **no es el motor de navegación** y **no es una fuente de verdad territorial, botánica o científica**.
 
 ```text
-EVIDENCIA / INPUT DE ÁRBORIS
+EVIDENCIA / INPUT DEL PROYECTO CONSUMIDOR
         ↓
-CANON ÁRBORIS
+CANON / AUTORIDAD DEL DOMINIO
         ↓
-CONTRATOS DE ÁRBORIS
-territorial · navegación · cámara · interacción · visual
+CONTRATO
         ↓
-RESTRICCIONES
-known / OPEN / prohibido inferir
+ESTRUCTURA FORMAL CUANDO CORRESPONDA
+nodos · relaciones · cantidades · estados · restricciones
+        ↓
+REGLAS DERIVADAS
         ↓
 ASC — COMPILACIÓN
         ↓
@@ -81,6 +82,8 @@ Ningún resultado de ASC puede imponer automáticamente una decisión sobre Árb
 - **resultado ASC:** salida producida mediante una ejecución iniciada desde un prompt ASC. No constituye evidencia por sí misma.
 - **prueba ASC:** experimento controlado para evaluar compilación, traducción o representación.
 - **contrato de entrada:** conjunto explícito de relaciones, restricciones y estados que ASC debe preservar.
+- **estructura formal:** representación explícita y auditable de relaciones normativas antes de su representación visual. Puede expresarse como nodos/aristas, matriz, tabla de relaciones, estados o estructura equivalente.
+- **grafo de proceso:** estructura formal de un proceso compuesta por nodos y aristas dirigidas; la diagramación visual es una representación derivada de ese grafo.
 - **caso de uso Árboris:** aplicación de ASC a una necesidad, contrato, escena o prueba de Árboris.
 - **hallazgo ASC:** aprendizaje sobre compilación, handoff, ejecutor, metodología o capacidades/limitaciones del sistema ASC.
 - **hallazgo Árboris:** aprendizaje sobre necesidades, contratos, representación, arte, navegación o validación del proyecto Árboris.
@@ -97,7 +100,7 @@ No llamar "modelo de Árboris" al ejecutor generativo cuando se quiera describir
 → compilar, verificar handoff cuando corresponda y luego ejecutar.
 
 "audita ASC" / "audita el resultado ASC"
-→ revisar contrato, prompt ASC, prompt efectivo y/o resultado según el alcance de la prueba.
+→ revisar contrato, estructura formal si existe, prompt ASC, prompt efectivo y/o resultado según el alcance de la prueba.
 
 "usa X como evidencia/input ASC"
 → X puede alimentar la compilación; no adquiere automáticamente autoridad ni permite completar vacíos.
@@ -109,13 +112,14 @@ Cuando la instrucción sea ambigua entre **compilar** y **ejecutar**, conservar 
 
 ASC compila; no decide la verdad del proyecto consumidor.
 
-Antes de compilar, debe identificarse la **autoridad del dominio** aplicable. No existe una regla universal donde cualquier imagen o fuente externa prevalezca sobre el canon interno. La autoridad depende del tipo de información: botánica, territorial, navegación, arte, producto, etc.
+Antes de compilar, debe identificarse la **autoridad del dominio** aplicable. No existe una regla universal donde cualquier imagen o fuente externa prevalezca sobre el canon interno. La autoridad depende del tipo de información: botánica, territorial, navegación, arte, producto, proceso, etc.
 
 En Árboris, el orden operativo general es:
 
 ```text
 autoridad del dominio de Árboris + evidencia válida
-→ contrato específico de la prueba/escena
+→ contrato específico de la prueba/escena/artefacto
+→ estructura formal cuando las relaciones sean normativas
 → reglas ASC aplicables
 → decisiones artísticas autorizadas
 → ejecutor generativo
@@ -144,116 +148,169 @@ Estos tratamientos son propios de ASC y **no reemplazan los estados del dominio*
 
 ASC debe impedir que una salida generativa se convierta accidentalmente en nueva autoridad.
 
-Salvo autorización explícita del contrato, no se deben inventar:
+Salvo autorización explícita del contrato, no se deben inventar relaciones, conexiones, bifurcaciones, estados, cantidades, altimetría, pendientes, hidrología, infraestructura, especies, distribución botánica, hitos territoriales, dimensiones, orientación, transitabilidad ni otras propiedades no respaldadas.
 
-- conexiones o bifurcaciones;
-- altimetría, pendientes o desniveles;
-- hidrología;
-- infraestructura;
-- especies o distribución botánica;
-- hitos territoriales;
-- dimensiones, escalas o distancias;
-- orientación cardinal;
-- microhábitats;
-- accesibilidad o transitabilidad;
-- relaciones espaciales no respaldadas.
-
-Si un dato es necesario para producir la escena pero permanece `OPEN`, ASC debe omitirlo, neutralizarlo mediante placeholder, tratarlo como `ART-PROVISIONAL` cuando el contrato lo autorice o declarar la limitación. No debe resolverlo silenciosamente.
+Si un dato es necesario para producir el artefacto pero permanece `OPEN`, ASC debe omitirlo, neutralizarlo mediante placeholder, tratarlo como `ART-PROVISIONAL` cuando el contrato lo autorice o declarar la limitación. No debe resolverlo silenciosamente.
 
 ## 6. Separación de capas
 
-ASC debe mantener separadas, como mínimo, las siguientes capas cuando sean relevantes:
+ASC debe mantener separadas las capas relevantes del dominio y distinguir siempre **estructura** de **representación**.
+
+En escenas territoriales pueden ser relevantes:
 
 ```text
 EVIDENCIA
-qué está respaldado
-
 TERRITORIO
-qué entidades y relaciones existen
-
 TOPOLOGÍA / NAVEGACIÓN
-qué conecta con qué y qué es caminable
-
 ELEVACIÓN
-altura relativa, independiente del orden del grafo
-
 CÁMARA
-cómo se observa la escena
-
 INTERACCIÓN / APRENDIZAJE
-qué función jugable cumple cada espacio
-
 ARTE
-cómo se representa visualmente lo ya autorizado
 ```
 
-La posición posterior en un recorrido no implica mayor elevación. Un nivel de altura no equivale a un nodo topológico. La adyacencia tampoco equivale automáticamente a una conexión transitable; cuando la transitabilidad sea relevante debe declararse explícitamente.
+En diagramas y artefactos relacionales pueden ser relevantes:
 
-## 7. Compilación mínima
+```text
+CONTENIDO
+NODOS / ENTIDADES
+RELACIONES / ARISTAS
+ESTADOS / CONDICIONES
+REGLAS DERIVADAS
+LAYOUT
+TRATAMIENTO VISUAL
+```
+
+Una relación normativa no debe quedar definida únicamente por la apariencia final.
+
+## 7. Regla general de estructura antes de representación
+
+Cuando el resultado deba preservar relaciones exactas, ASC debe compilar primero una estructura formal auditable y solo después una representación visual.
+
+Regla:
+
+```text
+FUENTE DE VERDAD
+→ ESTRUCTURA FORMAL
+→ REGLAS DERIVADAS
+→ REPRESENTACIÓN
+```
+
+Esto se aplica, entre otros casos, a:
+
+- topología territorial;
+- conectividad;
+- matrices de elevación;
+- diagramas de flujo;
+- árboles de decisión;
+- procesos con retornos o bifurcaciones;
+- jerarquías;
+- cantidades exactas;
+- dependencias entre componentes.
+
+Para un diagrama de proceso, el contrato mínimo debe poder expresarse como:
+
+```text
+NODE <id>
+EDGE <from> -> <to>
+CONDITION <si corresponde>
+OPTIONAL <si corresponde>
+```
+
+Ejemplo:
+
+```text
+NODE Diseñar
+NODE Prototipar
+NODE Implementar
+
+EDGE Diseñar -> Implementar
+EDGE Diseñar -> Prototipar
+EDGE Prototipar -> Implementar
+OPTIONAL Prototipar
+```
+
+La salida visual puede elegir posiciones, tamaños, rutas gráficas y tratamiento artístico dentro de la libertad autorizada, pero no puede añadir, eliminar, invertir ni fusionar relaciones normativas.
+
+### 7.1 Gate de estructura
+
+Antes del prompt visual:
+
+```text
+CONTRATO
+↓
+ESTRUCTURA FORMAL
+↓
+STRUCTURE CHECK
+↓
+PASS?
+  NO → STOP / CORREGIR
+  SÍ → COMPILAR REPRESENTACIÓN
+```
+
+El `STRUCTURE CHECK` verifica:
+
+- conjunto exacto de nodos/entidades cuando sea crítico;
+- conjunto exacto de relaciones/aristas;
+- dirección de cada relación;
+- condiciones y bifurcaciones;
+- opcionalidad;
+- cantidades exactas;
+- ausencia de relaciones no autorizadas.
+
+## 8. Compilación mínima
 
 Antes de producir un prompt ASC, identificar:
 
-1. **Proyecto consumidor.** Árboris u otro proyecto.
-2. **Pregunta experimental.** Qué propiedad concreta se intenta comprobar.
-3. **Objetivo de la generación.** Qué se está probando y qué no.
-4. **Fuentes de autoridad.** Documentos, datos, imágenes o contratos permitidos.
-5. **Relaciones obligatorias.** Elementos que la salida debe preservar.
-6. **Estados OPEN.** Información que no puede cerrarse por inferencia.
-7. **Prohibiciones.** Elementos que el generador no debe introducir.
-8. **Grado de libertad artística.** Qué puede variar sin alterar la prueba.
-9. **Contrato de cámara/salida.** Cuando corresponda.
-10. **Variable experimental.** Qué cambia respecto de la prueba anterior.
-11. **Constantes.** Qué debe permanecer idéntico entre versiones comparables.
-12. **Criterios de validación.** Cómo se decidirá PASS / PARTIAL / FAIL / INCONCLUSIVE.
-13. **Modo de ejecución.** `compile-only` o `compile-and-execute`.
-14. **Lectura de resultados.** Separar hallazgos para ASC y hallazgos para el proyecto consumidor.
+1. Proyecto consumidor.
+2. Pregunta experimental u objetivo verificable.
+3. Objetivo de la generación.
+4. Fuentes de autoridad.
+5. Relaciones obligatorias.
+6. Estructura formal, cuando corresponda.
+7. Estados OPEN.
+8. Prohibiciones.
+9. Grado de libertad artística.
+10. Contrato de cámara/salida cuando corresponda.
+11. Variable experimental.
+12. Constantes.
+13. Criterios de validación.
+14. Modo `compile-only` o `compile-and-execute`.
+15. Lectura separada de resultados para ASC y proyecto consumidor.
 
-## 8. Forma recomendada de un prompt ASC
+## 9. Forma recomendada de un prompt ASC
 
 ```text
-[IDENTIDAD DE LA PRUEBA]
-
+[IDENTIDAD DE LA PRUEBA / ARTEFACTO]
 [PROYECTO CONSUMIDOR]
-
-[PREGUNTA EXPERIMENTAL]
-
-[OBJETIVO]
-
+[PREGUNTA / OBJETIVO]
 [INPUT / FUENTES AUTORIZADAS]
-
-[CONTRATO ESTRUCTURAL]
-
+[CONTRATO]
+[ESTRUCTURA FORMAL]
 [RELACIONES OBLIGATORIAS]
-
 [VARIABLE QUE CAMBIA]
-
 [CONSTANTES]
-
 [OPEN / NO INFERIR]
-
 [PROHIBIDO]
-
 [LIBERTAD ARTÍSTICA AUTORIZADA]
-
 [CÁMARA / FORMATO]
-
 [PRIORIDADES DE LECTURA]
-
 [CRITERIOS DE VALIDACIÓN]
 ```
 
 No todas las secciones deben aparecer literalmente en el prompt final si el ejecutor funciona mejor con otra redacción, pero su información no puede perderse durante la compilación.
 
-ASC puede adaptar redacción, orden y nivel de detalle al ejecutor concreto, pero **no puede debilitar restricciones ni introducir elementos prohibidos para obtener una salida más atractiva o fácil de generar**.
+ASC puede adaptar redacción, orden y nivel de detalle al ejecutor concreto, pero no puede debilitar restricciones ni introducir elementos prohibidos para obtener una salida más atractiva o fácil de generar.
 
-## 9. Handoff y fidelidad de ejecución
+## 10. Handoff y fidelidad de ejecución
 
 Cuando el proveedor, interfaz o herramienta pueda reescribir el prompt, una prueba estructural no se considera válida hasta revisar el handoff.
 
-El registro mínimo es:
+Registro mínimo:
 
 ```text
-CONTRATO DE ENTRADA
+CONTRATO
+↓
+ESTRUCTURA FORMAL si corresponde
 ↓
 PROMPT ASC
 ↓
@@ -262,40 +319,22 @@ PROMPT EFECTIVO
 RESULTADO
 ```
 
-El `HANDOFF CHECK` debe verificar al menos:
+El `HANDOFF CHECK` debe verificar al menos restricciones críticas, cantidades exactas, prohibiciones, OPEN, relaciones formales y ausencia de degradación de instrucciones exactas a aproximadas.
 
-- restricciones críticas preservadas;
-- cantidades exactas preservadas cuando sean parte del gate;
-- prohibiciones preservadas;
-- ningún `OPEN` cerrado por reformulación;
-- ningún elemento nuevo incorporado por la adaptación;
-- ninguna instrucción cuantitativa degradada de exacta a aproximada.
+Si el handoff falla en una restricción crítica, el resultado puede estudiarse como comportamiento del ejecutor, pero no valida la hipótesis estructural original.
 
-Ejemplos de fallos de handoff:
+## 11. Uso de fuentes visuales y territoriales
 
-```text
-"exactamente 9 regiones" → "aproximadamente 9 regiones"
-"sin caminos" → "caminos de tierra"
-"sin vegetación" → "vegetación dispersa"
-```
-
-Si el handoff falla en una restricción crítica, el resultado puede estudiarse como comportamiento del ejecutor, pero **no valida la hipótesis estructural original**.
-
-## 10. Uso de fuentes visuales y territoriales
-
-Una imagen, mapa, fotografía o croquis puede ser input ASC, pero debe distinguirse entre:
-
-- lo visible o explícitamente declarado en la fuente;
-- lo que puede derivarse de forma segura;
-- lo que permanece desconocido.
+Una imagen, mapa, fotografía o croquis puede ser input ASC, pero debe distinguirse entre lo visible o explícitamente declarado, lo derivable de forma segura y lo desconocido.
 
 En traducción territorial, el flujo preferido para Árboris es:
 
 ```text
 fuente territorial
 → extracción de relaciones respaldadas
-→ Territorial Translation Contract
-→ Navigation / Camera / Interaction Contract cuando corresponda
+→ contrato territorial
+→ contratos de navegación / cámara / interacción cuando corresponda
+→ estructura formal
 → ASC
 → prompt
 → blockout o prototipo
@@ -303,220 +342,148 @@ fuente territorial
 
 No usar una imagen generada como corroboración independiente de la fuente que originó esa misma generación.
 
-Cuando una fuente visual no permite determinar altimetría, escala, geometría exacta, orientación o transitabilidad, esas propiedades deben seguir `OPEN` aunque el ejecutor sea capaz de representarlas de forma plausible.
+## 12. Resultados generativos
 
-`docs/SCENE_REFERENCE_BRIEF_TEMPLATE.md` puede alimentar ASC cuando corresponda, pero no sustituye los contratos de dominio.
+Todo resultado ASC debe considerarse por defecto propuesta o evidencia experimental, nunca evidencia territorial, botánica o científica.
 
-## 11. Resultados generativos
+Una salida visual puede validar legibilidad, composición, traducción de un grafo, jerarquía, representación de alturas, cámara, densidad o lenguaje artístico. No puede validar por sí sola que una relación real sea verdadera.
 
-Todo resultado ASC debe considerarse por defecto **propuesta o evidencia experimental**, nunca evidencia territorial, botánica o científica.
+Cuando exista estructura formal, la auditoría del resultado debe comenzar comparando esa estructura con la estructura representada en la salida. La estética se evalúa después.
 
-Una salida visual puede validar, entre otras cosas:
-
-- legibilidad;
-- composición;
-- traducción de un grafo;
-- jerarquía de rutas;
-- relación visual entre alturas;
-- comportamiento de cámara;
-- densidad y lenguaje artístico.
-
-No puede validar por sí sola que una relación territorial real sea verdadera.
-
-Cuando la prueba pretenda validar topología, la conectividad debe evaluarse contra el contrato o `walkableEnvelope`; la apariencia de un sendero no certifica transitabilidad por sí sola.
-
-Cada resultado debe poder leerse en dos planos cuando corresponda:
+Cada resultado debe poder leerse en dos planos:
 
 ```text
 LECTURA ASC
-qué demuestra o no demuestra sobre compilación, handoff, método o ejecutor
+qué demuestra sobre compilación, estructura, handoff, método o ejecutor
 
 LECTURA DEL PROYECTO CONSUMIDOR
-qué demuestra o no demuestra sobre Árboris u otro proyecto
+qué demuestra sobre Árboris u otro proyecto
 ```
 
-## 12. Clases de pruebas ASC
-
-Separar, cuando corresponda, dos familias de prueba:
+## 13. Clases de pruebas ASC
 
 ### ASC-STRUCTURAL TEST
 
 Comprueba si el ejecutor preserva información y relaciones obligatorias.
 
-Prioridad de revisión:
+Prioridad:
 
 ```text
-topología
-→ conectividad
-→ elevación
+estructura formal
+→ relaciones / conectividad
+→ estados / condiciones
 → cantidades exactas
 → ausencia de invención
 → representación
 ```
 
-La estética no puede compensar un fallo estructural.
+La estética no compensa un fallo estructural.
 
 ### ASC-VISUAL TEST
 
 Comprueba cómo se representa información cuya estructura ya está suficientemente controlada.
 
-Puede evaluar:
+Puede evaluar naturalización, jerarquía visual, densidad, composición, superficies y lenguaje gráfico.
 
-- naturalización;
-- jerarquía visual;
-- densidad;
-- composición;
-- tratamiento de superficies;
-- lenguaje gráfico.
+No debe cerrar relaciones estructurales todavía no validadas.
 
-No debe utilizarse para cerrar relaciones estructurales todavía no validadas.
+## 14. Criterios críticos y secundarios
 
-## 13. Criterios críticos y secundarios
+Toda prueba debe clasificar criterios antes de ejecutar.
 
-Toda prueba debe clasificar sus criterios antes de ejecutar.
+Un criterio crítico fallido impide `PASS` aunque la salida sea visualmente buena.
 
-### Críticos
+Estados de resultado:
 
-Un fallo crítico produce `FAIL` estructural aunque la imagen sea visualmente atractiva.
+- PASS
+- PARTIAL
+- FAIL
+- INCONCLUSIVE
 
-Ejemplos:
+## 15. Control experimental
 
-- topología;
-- conectividad;
-- elevación relativa cuando sea parte del contrato;
-- número exacto de entidades cuando sea parte del gate;
-- prohibiciones de invención;
-- correspondencia con autoridad superior.
+Cuando se comparen ejecuciones, registrar variable que cambia y constantes. No atribuir causalidad si cambiaron varias variables simultáneamente.
 
-### Secundarios
+Cuando la hipótesis dependa del comportamiento del ejecutor, considerar replicación. Una sola imagen puede demostrar que algo ocurrió una vez, pero no necesariamente que el comportamiento sea estable.
 
-Pueden quedar `PARTIAL` sin invalidar la hipótesis estructural si el objetivo no depende de ellos.
+## 16. Atribución de fallos
 
-Ejemplos:
-
-- naturalización;
-- textura;
-- iluminación;
-- composición secundaria;
-- acabado visual.
-
-## 14. Protocolo experimental
-
-Las versiones sucesivas deben cambiar una hipótesis o restricción identificable. No generar variantes únicamente por estética cuando el objetivo declarado es validar estructura.
-
-Cada prueba debe registrar al menos:
-
-- identificador;
-- proyecto consumidor;
-- pregunta experimental;
-- objetivo;
-- input;
-- restricciones;
-- variable modificada;
-- constantes;
-- prompt ASC;
-- prompt efectivo cuando sea observable;
-- estado del handoff;
-- resultado;
-- hallazgos;
-- PASS / PARTIAL / FAIL / INCONCLUSIVE por criterio;
-- atribución del fallo o éxito;
-- lectura separada para ASC y para el proyecto consumidor;
-- decisiones que permanecen `OPEN`.
-
-Usar `docs/ASC_TEST_RECORD_TEMPLATE.md` como plantilla de registro mientras no exista un formato serializado definitivo.
-
-## 15. Replicación y estabilidad
-
-Una sola salida puede demostrar que un fallo es posible, pero no demuestra estabilidad ni reproducibilidad de un comportamiento correcto.
-
-Cuando una decisión vaya a apoyarse en consistencia del ejecutor:
-
-- repetir la prueba con el mismo contrato;
-- registrar qué se mantuvo constante;
-- distinguir éxito aislado de comportamiento repetible;
-- no convertir una sola generación favorable en garantía del sistema.
-
-El número de repeticiones se define por el riesgo de la decisión; no existe todavía un número canónico universal.
-
-## 16. Comparación con baseline
-
-Cuando se quiera evaluar cuánto aporta ASC como método y no solo si una escena puede generarse, usar comparación controlada cuando sea viable:
+Un fallo debe atribuirse provisionalmente a una o más capas:
 
 ```text
-A — prompt convencional
-B — prompt ASC
+PROJECT / CANON
+CONTRACT
+FORMAL STRUCTURE
+ASC COMPILATION
+HANDOFF
+EXECUTOR / TOOL
+VISUAL REPRESENTATION
+EXPERIMENT DESIGN
+UNKNOWN
 ```
 
-Mantener el mismo ejecutor, objetivo y condiciones relevantes. La comparación es experimental y no convierte automáticamente a ASC en superior por una sola salida.
+No convertir una limitación del ejecutor en requisito arquitectónico del proyecto consumidor.
 
-## 17. Atribución de resultados
+## 17. Regla para artefactos editoriales con texto
 
-Los hallazgos deben atribuirse al nivel correcto. Como mínimo considerar:
+Cuando el artefacto contenga texto normativo o abundante, la fidelidad textual es un criterio estructural si el contenido debe preservarse literalmente.
 
-- contrato / diseño experimental;
-- compilación ASC;
-- handoff / adaptación;
-- ejecutor generativo;
-- representación visual;
-- herramienta/proveedor;
-- referencia o fuente de entrada;
-- necesidad específica del proyecto consumidor;
-- decisión general de ASC.
-
-No trasladar automáticamente una limitación del ejecutor a la arquitectura de Árboris.
-
-No trasladar automáticamente una necesidad de Árboris al desarrollo general de ASC.
-
-Una conclusión no puede ser más amplia que la evidencia del gate.
-
-## 18. Auditoría obligatoria
-
-Toda consolidación de reglas ASC, contratos, pruebas que cambien el modelo de trabajo o conclusiones que pretendan convertirse en canon debe aplicar `docs/DEVELOPMENT_MANUAL.md` y responder explícitamente:
+Preferencia de producción:
 
 ```text
-AUDITORÍA
-INCONSISTENCIAS
-VACÍOS / OMISIONES
-REDUNDANCIAS
+CONTENIDO AUTORIZADO
+→ ESTRUCTURA / LAYOUT
+→ COMPOSICIÓN VISUAL
+→ CAPA TEXTUAL DETERMINISTA cuando sea posible
 ```
 
-Una imagen atractiva no constituye un PASS si viola relaciones obligatorias.
+Un generador visual puede explorar composición, pero un error ortográfico o alteración semántica bloquea validación cuando la fidelidad textual sea crítica.
 
-## 19. Principios operativos
+## 18. Protocolo experimental mínimo
 
 ```text
-ASC es independiente de Árboris
-Árboris es el primer proyecto piloto de ASC
-compilar antes de generar
-verificar handoff antes de interpretar
-separar dato de representación
-preservar OPEN antes de inventar
-validar estructura antes de decorar
-separar hallazgo ASC de hallazgo Árboris
-cambiar una variable por vez cuando el gate dependa de causalidad
-el grafo manda sobre la apariencia
-la evidencia manda sobre la plausibilidad
-la salida generativa no se autocertifica
-un resultado correcto aislado no demuestra estabilidad
+1. identificar proyecto consumidor y autoridad
+2. formular pregunta
+3. registrar contrato
+4. construir estructura formal si corresponde
+5. ejecutar STRUCTURE CHECK
+6. definir variable y constantes
+7. clasificar criterios críticos/secundarios
+8. compilar prompt ASC
+9. ejecutar HANDOFF CHECK
+10. generar si los gates pasan
+11. auditar estructura antes que estética
+12. atribuir fallos
+13. separar hallazgo ASC de hallazgo del proyecto consumidor
+14. replicar cuando corresponda
+15. documentar
 ```
+
+## 19. Principios de cierre
+
+- ASC es independiente de Árboris.
+- Árboris es su primer proyecto piloto/caso de uso real.
+- ASC compila; no decide la verdad del proyecto consumidor.
+- Mantener `OPEN` es preferible a inventar.
+- Una relación normativa debe existir como estructura antes de depender de su apariencia.
+- Fuente de verdad → estructura → derivación → representación.
+- La estética no compensa un fallo estructural.
+- Un resultado generativo no adquiere autoridad por plausibilidad.
+- Separar hallazgo ASC de hallazgo Árboris.
+- Una limitación del ejecutor no debe convertirse automáticamente en arquitectura.
 
 ## 20. Límites actuales
 
-Permanecen `OPEN` hasta validación específica:
+Permanecen `OPEN`:
 
 - nombre completo definitivo de ASC fuera del contexto Árboris, si Álvaro decide modificarlo;
-- formato serializado definitivo de los contratos ASC;
-- automatización del compilador como código;
-- proveedor o modelo generativo definitivo;
-- estrategia de prompts por proveedor/modelo;
-- métricas automáticas de fidelidad topológica;
-- integración directa con renderer o herramientas de blockout;
-- persistencia/versionado específico de resultados ASC;
-- número estándar de repeticiones por clase de prueba.
+- formato serializado definitivo de contratos y estructuras formales;
+- automatización de ASC como código;
+- proveedor/modelo definitivo;
+- estrategia de prompt por proveedor/modelo;
+- métricas automáticas de fidelidad estructural;
+- integración con renderer/blockout;
+- persistencia/versionado de resultados;
+- número estándar de repeticiones por tipo de prueba.
 
-No crear estas capas por anticipación si una prueba concreta todavía no las necesita.
-
-## 21. Guía operativa de vocabulario
-
-[`ASC_VOCABULARY_GUIDE.md`](ASC_VOCABULARY_GUIDE.md) es la referencia rápida aprobada provisionalmente para términos, órdenes de trabajo y tratamientos de información de ASC. Es didáctica y no reemplaza este documento normativo.
+No crear capas adicionales hasta que una necesidad demostrada las justifique.
