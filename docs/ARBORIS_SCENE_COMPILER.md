@@ -221,6 +221,8 @@ No usar una imagen generada como corroboración independiente de la fuente que o
 
 Cuando una fuente visual no permite determinar altimetría, escala, geometría exacta, orientación o transitabilidad, esas propiedades deben seguir `OPEN` aunque el ejecutor sea capaz de representarlas de forma plausible.
 
+`docs/SCENE_REFERENCE_BRIEF_TEMPLATE.md` es una plantilla de **entrada/revisión de referencias ambientales y decisiones de arte**. Puede alimentar ASC cuando corresponda, pero no sustituye el contrato territorial, de navegación, cámara o interacción. Sus estados `OBSERVED`, `RECURRENT`, `APPROVED_ART_RULE` y `OPEN` conservan su semántica propia; ASC los consume sin redefinirlos.
+
 ## 10. Resultados generativos
 
 Todo resultado ASC debe considerarse por defecto **propuesta o evidencia experimental**, nunca evidencia territorial, botánica o científica.
