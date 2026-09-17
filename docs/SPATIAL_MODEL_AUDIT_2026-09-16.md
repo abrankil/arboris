@@ -299,3 +299,70 @@ v0.3 structural model
 ```
 
 `v0.4` sigue siendo una traducción artística/prototipo. No constituye evidencia territorial y no puede modificar claims, topología o incertidumbre `OPEN` por conveniencia visual.
+
+## 10. Corrección conceptual y aprobación — MAP-001 v0.4b
+
+Durante la revisión de la primera naturalización se detectó una confusión conceptual en la relación puente/estero. Se corrigió la lectura del umbral de acceso:
+
+```text
+entrada inferior
+→ puente que cruza el Estero El Arrayán
+→ puerta principal
+→ casa del conserje a la izquierda
+→ corredor hacia interior
+```
+
+En el umbral, el Estero El Arrayán describe una relación visual en forma de `L`: cruza el sector inferior bajo el puente y luego gira para continuar hacia la cordillera/interior. Después del giro recupera la relación canónica de derecha del camino y nivel inferior.
+
+La continuación aguas abajo hacia Santiago se reconoce como parte de la realidad territorial, pero queda fuera del alcance de representación de `MAP-001` en esta fase.
+
+**Decisión de dirección de proyecto:** Alejandra confirma que el arte conceptual corregido de `MAP-001 v0.4b` corresponde a la visión del piloto.
+
+Resultado:
+
+```text
+MAP-001 v0.4b
+conceptDirection: approved
+pilotVisionAlignment: approved
+productionStatus: visual_prototype
+```
+
+### Qué consolida la aprobación
+
+- composición general del acceso;
+- mundo isométrico continuo y naturalizado;
+- camino principal como eje perceptual;
+- puente antes de puerta principal;
+- estero en `L` en el umbral;
+- continuidad del estero hacia cordillera/interior;
+- estero a la derecha y más bajo post-umbral;
+- casa del conserje a la izquierda del recorrido;
+- laderas contenedoras;
+- escala humana legible;
+- balance visual entre roca, agua, suelo y vegetación;
+- dirección estética compatible con la visión del piloto.
+
+### Qué NO consolida
+
+La imagen aprobada no se convierte en evidencia territorial ni botánica. Siguen `OPEN` o sujetos a fuentes externas:
+
+- bearing y métrica exactos del puente;
+- geometría medida del giro en `L`;
+- trazado aguas abajo hacia Santiago;
+- footprint exacto del claro;
+- especies concretas representadas en vegetación generada;
+- microhábitats y colocación fina de especies;
+- escala métrica final;
+- sprite final de exploración;
+- cámara definitiva;
+- renderer y pathfinding.
+
+### Gate de avance
+
+```text
+v0.4b concept art
+→ pilot vision alignment: APPROVED
+→ siguiente fase: traducir la visión aprobada a especificación de producción verificable
+```
+
+La siguiente fase no debe intentar “mejorar” la visión mediante nueva invención conceptual. Debe descomponer la referencia aprobada en decisiones producibles: masas de terreno, agua, sendero, estructuras, vegetación contextual, cámara, escala, oclusión y requisitos de assets, manteniendo separados arte, datos y evidencia.
