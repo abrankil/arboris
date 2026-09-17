@@ -2,8 +2,8 @@
 """Compact read-only queries over Árboris canonical botanical JSON.
 
 This tool is intentionally a reader, not a second source of truth. It returns
-small payloads for humans and AI agents without requiring them to load all
-canonical tables or the denormalized species cards.
+small payloads for humans and AI agents and lazily opens only the canonical
+tables required by the requested command.
 """
 
 from __future__ import annotations
@@ -30,10 +30,81 @@ CANONICAL_FILES = (
 )
 
 
-def read_json(name: str) -> Any:
-    path = BOTANICAL_DIR / name
-    with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+class CanonicalStore:
+    """Small lazy-loading facade over canonical JSON tables."""
+
+    def __init__(self, botanical_dir: Path = BOTANICAL_DIR) -> None:
+        self.botanical_dir = botanical_dir
+        self._cache: dict[str, Any] = {}
+        self._indexes: dict[str, Any] = {}
+
+    def read(self, name: str) -> Any:
+        if name not in self._cache:
+            path = self.botanical_dir / name
+            with path.open("r", encoding="utf-8") as handle:
+                self._cache[name] = json.load(handle)
+        return self._cache[name]
+
+    @property
+    def metadata(self) -> dict[str, Any]:
+        return self.read("metadata.json")
+
+    @property
+    def species(self) -> list[dict[str, Any]]:
+        return self.read("species.json")
+
+    @property
+    def characters(self) -> list[dict[str, Any]]:
+        return self.read("characters.json")
+
+    @property
+    def relations(self) -> list[dict[str, Any]]:
+        return self.read("species_characters.json")
+
+    @property
+    def sources(self) -> list[dict[str, Any]]:
+        return self.read("sources.json")
+
+    @property
+    def photos(self) -> list[dict[str, Any]]:
+        return self.read("photos.json")
+
+    @property
+    def model_errors(self) -> list[dict[str, Any]]:
+        return self.read("model_errors.json")
+
+    @property
+    def species_by_id(self) -> dict[str, dict[str, Any]]:
+        if "species_by_id" not in self._indexes:
+            self._indexes["species_by_id"] = {
+                row["species_id"]: row for row in self.species
+            }
+        return self._indexes["species_by_id"]
+
+    @property
+    def characters_by_id(self) -> dict[str, dict[str, Any]]:
+        if "characters_by_id" not in self._indexes:
+            self._indexes["characters_by_id"] = {
+                row["caracter_id"]: row for row in self.characters
+            }
+        return self._indexes["characters_by_id"]
+
+    @property
+    def relations_by_pair(self) -> dict[tuple[str, str], dict[str, Any]]:
+        if "relations_by_pair" not in self._indexes:
+            self._indexes["relations_by_pair"] = {
+                (row["species_id"], row["caracter_id"]): row
+                for row in self.relations
+            }
+        return self._indexes["relations_by_pair"]
+
+    @property
+    def sources_by_id(self) -> dict[str, dict[str, Any]]:
+        if "sources_by_id" not in self._indexes:
+            self._indexes["sources_by_id"] = {
+                row["fuente_id"]: row for row in self.sources
+            }
+        return self._indexes["sources_by_id"]
 
 
 def normalize_species_id(value: str) -> str:
@@ -42,32 +113,6 @@ def normalize_species_id(value: str) -> str:
     if legacy:
         return f"SP-{legacy.group(1)}"
     return value
-
-
-def load_dataset() -> dict[str, Any]:
-    metadata = read_json("metadata.json")
-    species = read_json("species.json")
-    characters = read_json("characters.json")
-    relations = read_json("species_characters.json")
-    sources = read_json("sources.json")
-    photos = read_json("photos.json")
-    model_errors = read_json("model_errors.json")
-
-    return {
-        "metadata": metadata,
-        "species": species,
-        "characters": characters,
-        "relations": relations,
-        "sources": sources,
-        "photos": photos,
-        "model_errors": model_errors,
-        "species_by_id": {row["species_id"]: row for row in species},
-        "characters_by_id": {row["caracter_id"]: row for row in characters},
-        "relations_by_pair": {
-            (row["species_id"], row["caracter_id"]): row for row in relations
-        },
-        "sources_by_id": {row["fuente_id"]: row for row in sources},
-    }
 
 
 def species_summary(row: dict[str, Any]) -> dict[str, Any]:
@@ -118,130 +163,130 @@ def fail(message: str, exit_code: int = 2) -> None:
     raise SystemExit(exit_code)
 
 
-def command_stats(dataset: dict[str, Any]) -> dict[str, Any]:
+def command_stats(store: CanonicalStore) -> dict[str, Any]:
     file_sizes = {
-        name: (BOTANICAL_DIR / name).stat().st_size for name in CANONICAL_FILES
+        name: (store.botanical_dir / name).stat().st_size for name in CANONICAL_FILES
     }
     return {
-        "master_version": dataset["metadata"].get("master_version"),
-        "schema_version": dataset["metadata"].get("schema_version"),
-        "source_file": dataset["metadata"].get("source_file"),
+        "master_version": store.metadata.get("master_version"),
+        "schema_version": store.metadata.get("schema_version"),
+        "source_file": store.metadata.get("source_file"),
         "counts": {
-            "species": len(dataset["species"]),
-            "characters": len(dataset["characters"]),
-            "species_characters": len(dataset["relations"]),
-            "sources": len(dataset["sources"]),
-            "photos": len(dataset["photos"]),
-            "model_errors": len(dataset["model_errors"]),
+            "species": len(store.species),
+            "characters": len(store.characters),
+            "species_characters": len(store.relations),
+            "sources": len(store.sources),
+            "photos": len(store.photos),
+            "model_errors": len(store.model_errors),
         },
         "canonical_json_bytes": sum(file_sizes.values()),
         "file_bytes": file_sizes,
     }
 
 
-def command_species(dataset: dict[str, Any], species_id: str | None) -> Any:
+def command_species(store: CanonicalStore, species_id: str | None) -> Any:
     if species_id is None:
-        return [species_summary(row) for row in dataset["species"]]
+        return [species_summary(row) for row in store.species]
 
     species_id = normalize_species_id(species_id)
-    row = dataset["species_by_id"].get(species_id)
+    row = store.species_by_id.get(species_id)
     if row is None:
         fail(f"unknown species_id: {species_id}")
     return row
 
 
-def command_character(dataset: dict[str, Any], character_id: str | None) -> Any:
+def command_character(store: CanonicalStore, character_id: str | None) -> Any:
     if character_id is None:
-        return [character_summary(row) for row in dataset["characters"]]
+        return [character_summary(row) for row in store.characters]
 
     character_id = character_id.strip().upper()
-    row = dataset["characters_by_id"].get(character_id)
+    row = store.characters_by_id.get(character_id)
     if row is None:
         fail(f"unknown character_id: {character_id}")
     return row
 
 
 def command_relation(
-    dataset: dict[str, Any], species_id: str, character_id: str, with_source: bool
+    store: CanonicalStore, species_id: str, character_id: str, with_source: bool
 ) -> dict[str, Any]:
     species_id = normalize_species_id(species_id)
     character_id = character_id.strip().upper()
 
-    species = dataset["species_by_id"].get(species_id)
-    character = dataset["characters_by_id"].get(character_id)
+    species = store.species_by_id.get(species_id)
+    character = store.characters_by_id.get(character_id)
     if species is None:
         fail(f"unknown species_id: {species_id}")
     if character is None:
         fail(f"unknown character_id: {character_id}")
 
-    relation = dataset["relations_by_pair"].get((species_id, character_id))
+    relation = store.relations_by_pair.get((species_id, character_id))
     result = {
         "species": species_summary(species),
         "character": character_summary(character),
         "relation": relation_summary(relation),
     }
     if with_source and relation is not None:
-        result["source"] = dataset["sources_by_id"].get(relation.get("fuente_id"))
+        result["source"] = store.sources_by_id.get(relation.get("fuente_id"))
     return result
 
 
 def command_compare(
-    dataset: dict[str, Any],
+    store: CanonicalStore,
     character_id: str,
     species_ids: list[str],
     with_source: bool,
 ) -> dict[str, Any]:
     character_id = character_id.strip().upper()
-    character = dataset["characters_by_id"].get(character_id)
+    character = store.characters_by_id.get(character_id)
     if character is None:
         fail(f"unknown character_id: {character_id}")
 
     selected_ids = (
         [normalize_species_id(item) for item in species_ids]
         if species_ids
-        else [row["species_id"] for row in dataset["species"]]
+        else [row["species_id"] for row in store.species]
     )
 
     rows = []
     for species_id in selected_ids:
-        species = dataset["species_by_id"].get(species_id)
+        species = store.species_by_id.get(species_id)
         if species is None:
             fail(f"unknown species_id: {species_id}")
-        relation = dataset["relations_by_pair"].get((species_id, character_id))
+        relation = store.relations_by_pair.get((species_id, character_id))
         item: dict[str, Any] = {
             "species": species_summary(species),
             "relation": relation_summary(relation),
         }
         if with_source and relation is not None:
-            item["source"] = dataset["sources_by_id"].get(relation.get("fuente_id"))
+            item["source"] = store.sources_by_id.get(relation.get("fuente_id"))
         rows.append(item)
 
     return {"character": character_summary(character), "rows": rows}
 
 
-def command_source(dataset: dict[str, Any], source_id: str) -> dict[str, Any]:
+def command_source(store: CanonicalStore, source_id: str) -> dict[str, Any]:
     source_id = source_id.strip().upper()
-    row = dataset["sources_by_id"].get(source_id)
+    row = store.sources_by_id.get(source_id)
     if row is None:
         fail(f"unknown source_id: {source_id}")
     return row
 
 
-def command_photos(dataset: dict[str, Any], species_id: str | None) -> list[dict[str, Any]]:
-    rows = dataset["photos"]
+def command_photos(store: CanonicalStore, species_id: str | None) -> list[dict[str, Any]]:
+    rows = store.photos
     if species_id is not None:
         canonical_id = normalize_species_id(species_id)
-        if canonical_id not in dataset["species_by_id"]:
+        if canonical_id not in store.species_by_id:
             fail(f"unknown species_id: {canonical_id}")
         rows = [row for row in rows if row.get("species_id") == canonical_id]
     return rows
 
 
-def command_errors(dataset: dict[str, Any], species_id: str | None) -> list[dict[str, Any]]:
-    rows = dataset["model_errors"]
+def command_errors(store: CanonicalStore, species_id: str | None) -> list[dict[str, Any]]:
+    rows = store.model_errors
     if species_id is not None:
         canonical_id = normalize_species_id(species_id)
-        if canonical_id not in dataset["species_by_id"]:
+        if canonical_id not in store.species_by_id:
             fail(f"unknown species_id: {canonical_id}")
         rows = [row for row in rows if row.get("species_id_real") == canonical_id]
     return rows
@@ -303,28 +348,24 @@ def main() -> None:
     raw_args = sys.argv[1:]
     pretty = "--pretty" in raw_args
     args = parser.parse_args([item for item in raw_args if item != "--pretty"])
-    dataset = load_dataset()
+    store = CanonicalStore()
 
     if args.command == "stats":
-        result = command_stats(dataset)
+        result = command_stats(store)
     elif args.command == "species":
-        result = command_species(dataset, args.species_id)
+        result = command_species(store, args.species_id)
     elif args.command == "character":
-        result = command_character(dataset, args.character_id)
+        result = command_character(store, args.character_id)
     elif args.command == "relation":
-        result = command_relation(
-            dataset, args.species_id, args.character_id, args.with_source
-        )
+        result = command_relation(store, args.species_id, args.character_id, args.with_source)
     elif args.command == "compare":
-        result = command_compare(
-            dataset, args.character_id, args.species_ids, args.with_source
-        )
+        result = command_compare(store, args.character_id, args.species_ids, args.with_source)
     elif args.command == "source":
-        result = command_source(dataset, args.source_id)
+        result = command_source(store, args.source_id)
     elif args.command == "photos":
-        result = command_photos(dataset, args.species_id)
+        result = command_photos(store, args.species_id)
     elif args.command == "errors":
-        result = command_errors(dataset, args.species_id)
+        result = command_errors(store, args.species_id)
     else:
         fail(f"unsupported command: {args.command}")
 
