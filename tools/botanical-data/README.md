@@ -44,13 +44,52 @@ python tools/botanical-data/query_botanical.py errors SP-002
 
 El JSON compacto es la salida predeterminada para reducir contexto. `--pretty` cambia solo el formato de presentación.
 
-La estrategia de rendimiento y los requisitos futuros de índices SQLite están en `docs/DATA_ACCESS_PERFORMANCE.md`.
+Prueba de contrato:
+
+```powershell
+python tools/botanical-data/test_query_botanical.py
+```
+
+## Prototipo SQLite derivado
+
+`build_reference_sqlite.py` genera una base SQLite **derivada** para medir y validar consultas runtime sin convertir SQLite en fuente editorial.
+
+Salida predeterminada:
+
+```text
+build/arboris_reference.sqlite3
+```
+
+`build/` ya está excluido de Git, por lo que la base generada no se versiona como binario.
+
+Construcción:
+
+```powershell
+npm.cmd run build:reference-db
+```
+
+Validación de equivalencia básica e índices críticos:
+
+```powershell
+npm.cmd run verify:reference-db
+```
+
+El prototipo materializa estados esperados en `species_character_states` y prueba índices orientados a:
+
+- lookup por carácter;
+- filtrado carácter + estado;
+- fotos por especie/individuo;
+- errores de modelo por especie real.
+
+El esquema físico definitivo de SQLite sigue `OPEN`. Este prototipo existe para medir y aprender antes de fijarlo.
+
+La estrategia completa de rendimiento está en `docs/DATA_ACCESS_PERFORMANCE.md`.
 
 ## Regla de edición
 
 No corregir botánica editando JSON derivados. Toda corrección debe entrar al Master 2.0 y propagarse mediante el flujo anterior.
 
-`query_botanical.py` es una interfaz de lectura, no una fuente de verdad ni un generador de conocimiento.
+`query_botanical.py` es una interfaz de lectura. `build_reference_sqlite.py` produce un artefacto runtime regenerable. Ninguno constituye una fuente de verdad ni un generador de conocimiento.
 
 ## Herramientas legacy
 
