@@ -1,7 +1,7 @@
 # Árboris — Sincronización de desarrollo 2026-09-17
 
 **Estado:** snapshot de coordinación / no normativo  
-**Propósito:** registrar el estado compartido del desarrollo ya sincronizado en `main` y el gate vigente antes del siguiente vertical slice.
+**Propósito:** registrar el estado compartido del desarrollo ya sincronizado en `main`, los gates vigentes y el cierre de la fase de optimización de acceso a datos para agentes.
 
 Este documento resume decisiones ya tomadas y gates vigentes. No reemplaza las fuentes normativas. Cuando exista conflicto, gobierna el documento de autoridad indicado en cada sección.
 
@@ -193,11 +193,11 @@ Siguen `OPEN`:
 
 Los viewports `480×270` y `270×480` quedan como referencias históricas/transitorias y no gobiernan la composición móvil principal.
 
-## 7. Próximo gate
+## 7. Próximo gate visual
 
 No corresponde otra ilustración conceptual completa.
 
-El próximo entregable debe ser un vertical slice real de producción:
+El próximo entregable visual debe ser un vertical slice real de producción:
 
 ```text
 360×640 + 360×800
@@ -249,6 +249,12 @@ ART_STYLE_GUIDE
 ENVIRONMENT_PRODUCTION_SPEC
 → viewport, escalado y producción técnica de escenarios
 
+DATA_ACCESS_PERFORMANCE
+→ estrategia y decisiones de rendimiento de datos
+
+OPTIMIZATION_CLOSURE_SYNC_2026-09-17
+→ snapshot de evidencia reproducible del cierre de optimización; no normativo
+
 SPATIAL_MODEL_AUDIT_2026-09-16
 → historial de decisiones; no normativo
 ```
@@ -257,44 +263,79 @@ Este snapshot también es histórico/no normativo y puede quedar obsoleto a medi
 
 ## 9. Estado de sincronización Git
 
-Al cierre de esta sincronización:
+`main` es la única rama compartida de referencia para nuevas decisiones.
 
-```text
-main
-= rama compartida de referencia
+`art/spatial-model-audit-2026-09-16` se conserva como rama histórica y debe mantenerse alineada con `main`, sin volver a operar como segunda fuente de verdad.
 
-art/spatial-model-audit-2026-09-16
-= rama histórica de trabajo, alineada con main
-```
+Las imágenes generadas durante exploración visual no se promueven automáticamente a assets canónicos ni a evidencia.
 
-Las imágenes generadas durante exploración visual no se promueven automáticamente a assets canónicos ni a evidencia. Su incorporación al repositorio debe hacerse solo cuando exista una decisión explícita de conservarlas como referencia o asset de producción.
+## 10. Cierre de auditoría territorial/documental previo
 
-## 10. Cierre de auditoría de sincronización
+El cierre territorial/documental anterior permanece válido como historial, pero sus SHA exactos quedaron superados por la fase de optimización de datos posterior.
 
-La sincronización remota fue auditada antes de continuar desarrollo.
+Continúan vigentes sus conclusiones:
 
 ```text
 AUDITORÍA
 PASS
 
 INCONSISTENCIAS
-No se detectan divergencias entre main y art/spatial-model-audit-2026-09-16 al inicio del cierre.
-La aprobación conceptual del piloto y el estilo gráfico final están correctamente separados.
+La aprobación conceptual del piloto y el estilo gráfico final permanecen separados.
 
 VACÍOS / OMISIONES
-Los prototipos y muestras visuales generados durante exploración no están todos promovidos como assets del repositorio. Esto es intencional mientras no exista una selección explícita de qué imagen conservar.
-No puede inferirse desde GitHub si existen archivos locales no commiteados en computadores personales; este cierre certifica el estado remoto del repositorio, no working trees locales.
+GitHub no certifica archivos locales sin commit en computadores personales.
+Los prototipos visuales no promovidos permanecen fuera del canon de assets.
 
 REDUNDANCIAS
-La rama art/spatial-model-audit-2026-09-16 ya no contiene trabajo exclusivo respecto de main y es redundante funcionalmente. Se conserva por trazabilidad histórica; no debe volver a operar como segunda fuente de verdad.
+La rama histórica es redundante funcionalmente y se conserva solo por trazabilidad.
 ```
 
-Estado remoto verificado inmediatamente antes de este cierre:
+## 11. Cierre de optimización de acceso a datos y agentes
+
+Evidencia completa: `docs/OPTIMIZATION_CLOSURE_SYNC_2026-09-17.md`.
+
+Benchmark reproducible medido en GitHub Actions:
 
 ```text
-main HEAD: ab7eaca4fe6c5800c5bfc688225ecc0436f101ae
-art/spatial-model-audit-2026-09-16 HEAD: ab7eaca4fe6c5800c5bfc688225ecc0436f101ae
-compare status: identical
+benchmark run: 35179413141
+commit medido: f464d0137557adc4e8663c38399fa8ced132526b
+resultado: SUCCESS
+
+CI run: 35179413121
+resultado: SUCCESS
 ```
 
-Después de este commit, `main` vuelve a ser la única rama de referencia para nuevas decisiones. Si la rama histórica se mantiene, debe fast-forwardearse al mismo commit y no recibir cambios independientes.
+Prueba de routing transversal `CH-003`:
+
+```text
+lectura amplia de 6 fichas       246,702 bytes
+ruta normalizada                  55,284 bytes
+resultado compacto                 1,174 bytes
+
+reducción broad → normalized       4.462x
+reducción broad → compact result 210.138x
+
+parse + query broad median        1,238.426 µs
+parse + query normalized median     324.864 µs
+speedup host observado              3.812x
+```
+
+Estos números prueban reducción de costo de recuperación y procesamiento host. No constituyen una medición directa de velocidad privada de pensamiento de un modelo.
+
+La misma corrida volvió a confirmar el patrón del benchmark JSON vs SQLite: SQLite es más barato para apertura + primera consulta host; JSON + índices en memoria sigue siendo sustancialmente más rápido en el loop caliente del pequeño dataset piloto.
+
+Decisión de cierre:
+
+```text
+AGENTS.md routing                        PASS / CLOSED
+compact botanical query CLI              PASS / CLOSED
+normalized cross-species read path        PASS / CLOSED
+AI routing host benchmark                 PASS / CLOSED
+JSON-vs-SQLite host benchmark             PASS / CLOSED
+canonical CI after optimizations          PASS / CLOSED
+pilot engine JSON + in-memory indexes     APPROVED BASELINE
+SQLite migration for pilot engine         NOT JUSTIFIED
+Android Hermes/expo-sqlite benchmark      OPEN
+```
+
+El siguiente trabajo de rendimiento requiere una superficie Android ejecutable o una nueva necesidad real de escala. No corresponde añadir más índices, formatos o bases por anticipación.
