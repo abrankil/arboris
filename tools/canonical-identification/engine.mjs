@@ -172,6 +172,19 @@ function characterScore(dataset, candidateIds, characterId) {
   };
 }
 
+function characterEvidenceStatus(dataset, evidence, characterId, candidateIds = null) {
+  const normalizedEvidence = normalizeEvidence(evidence);
+  const characterEvidence = normalizedEvidence.filter(item => item.characterId === characterId);
+
+  if (!characterEvidence.length) return 'visible';
+
+  const otherEvidence = normalizedEvidence.filter(item => item.characterId !== characterId);
+  const candidatesBefore = candidateIds ?? filterCandidates(dataset, otherEvidence).remaining;
+  const candidatesAfter = filterCandidates(dataset, characterEvidence, candidatesBefore).remaining;
+
+  return candidatesAfter.length < candidatesBefore.length ? 'resolved' : 'attempted';
+}
+
 export function nextCharacter(dataset, evidence = [], candidateIds = null) {
   const currentCandidateIds = candidateIds ?? filterCandidates(dataset, evidence).remaining;
   const observedCharacterIds = new Set(normalizeEvidence(evidence).map(item => item.characterId));
@@ -197,6 +210,21 @@ export function nextCharacter(dataset, evidence = [], candidateIds = null) {
     ...best,
     character,
     candidates: currentCandidateIds,
+  };
+}
+
+export function retryCharacter(dataset, evidence = [], characterId, candidateIds = null) {
+  if (!dataset.charactersById.has(characterId)) return null;
+  if (characterEvidenceStatus(dataset, evidence, characterId, candidateIds) !== 'attempted') return null;
+
+  const currentCandidateIds = candidateIds ?? filterCandidates(dataset, evidence).remaining;
+  const score = characterScore(dataset, currentCandidateIds, characterId);
+
+  return {
+    characterId,
+    character: dataset.charactersById.get(characterId),
+    candidates: currentCandidateIds,
+    ...(score ?? {}),
   };
 }
 
