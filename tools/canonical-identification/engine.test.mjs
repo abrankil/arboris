@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import test from 'node:test';
 
 import { loadCanonicalDataset, getRelation } from './dataset.mjs';
@@ -52,6 +55,29 @@ test('loads the Master 2.0 canonical identification dataset', async () => {
   assert.ok(dataset.speciesById.has('SP-001'));
   assert.ok(dataset.speciesById.has('SP-006'));
   assert.ok(!dataset.charactersById.has('CH-017'));
+});
+
+test('canonical dataset rejects duplicate species-character relations', async () => {
+  const sourceDir = resolve('data', 'botanical');
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'arboris-duplicate-relation-'));
+  const botanicalDir = join(temporaryRoot, 'botanical');
+
+  try {
+    await cp(sourceDir, botanicalDir, { recursive: true });
+
+    const relationsPath = join(botanicalDir, 'species_characters.json');
+    const relations = JSON.parse(await readFile(relationsPath, 'utf8'));
+    const duplicate = { ...relations[0] };
+    relations.push(duplicate);
+    await writeFile(relationsPath, `${JSON.stringify(relations, null, 2)}\n`, 'utf8');
+
+    await assert.rejects(
+      () => loadCanonicalDataset({ botanicalDir }),
+      new RegExp(`duplicate species-character relation ${duplicate.species_id} / ${duplicate.caracter_id}`, 'i'),
+    );
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
 });
 
 test('compatibility preserves uncertainty and only rejects explicit conflicts', () => {
