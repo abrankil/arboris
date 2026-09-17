@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run verify:botanical && npm run verify:data-access && npm run test:canonical-identification",
     "verify:botanical": "python tools/botanical-data/validate_master_export.py && python tools/botanical-data/validate_species_ids.py && python tools/botanical-data/validate_species_data.py",
-    "verify:data-access": "python tools/botanical-data/query_botanical.py stats",
+    "verify:data-access": "python tools/botanical-data/test_query_botanical.py",
     "build:botanical": "python tools/botanical-data/export_master.py && python tools/botanical-data/build_species_data.py",
     "query:botanical": "python tools/botanical-data/query_botanical.py",
     "test:canonical-identification": "node --test tools/canonical-identification/engine.test.mjs",
