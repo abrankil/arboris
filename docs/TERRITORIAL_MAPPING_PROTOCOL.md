@@ -91,18 +91,43 @@ subjectRef
 relation
 objectRef
 sourceRefs
-status: proposed | partially_corroborated | corroborated | OPEN
+claimState: open | asserted
+evidenceStatus: proposed | partially_corroborated | corroborated   # solo si asserted
 limitations
 ```
+
+Reglas:
+
+- `claimState: open` = la afirmación o parámetro todavía no puede cerrarse;
+- `claimState: asserted` = existe una afirmación concreta que puede evaluarse;
+- `evidenceStatus` solo se asigna a claims `asserted`;
+- no usar `OPEN` como si fuera un nivel de corroboración.
 
 Ejemplos:
 
 ```text
-CLAIM-001: bridge crosses stream
-CLAIM-002: gate follows bridge in the access sequence
-CLAIM-003: caretaker house is left of the route after the threshold
-CLAIM-004: exact bridge bearing = OPEN
-CLAIM-005: exact picnic clearing footprint = OPEN
+CLAIM-001
+statement: bridge crosses stream
+claimState: asserted
+evidenceStatus: proposed
+
+CLAIM-002
+statement: gate follows bridge in the access sequence
+claimState: asserted
+evidenceStatus: proposed
+
+CLAIM-003
+statement: caretaker house is left of the route after the threshold
+claimState: asserted
+evidenceStatus: proposed
+
+CLAIM-004
+statement: exact bridge bearing
+claimState: open
+
+CLAIM-005
+statement: exact picnic clearing footprint
+claimState: open
 ```
 
 Una Unidad Espacial puede resumir la madurez de sus claims, pero ese resumen no reemplaza el estado granular.
@@ -180,13 +205,7 @@ localOrigin
 worldCardinalMapping
 ```
 
-Para `MAP-001`:
-
-```text
-screenUp   = cordillera / interior / progresión
-screenDown = entrada / dirección general hacia el mar / retorno
-worldCardinalMapping = OPEN
-```
+Las relaciones visuales concretas del piloto se consultan en `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md`.
 
 No etiquetar un borde como `north`, `south`, `east` o `west` si esa correspondencia geográfica no está corroborada.
 
@@ -321,7 +340,7 @@ zoomPolicy
 screenRelationInvariants
 ```
 
-Para `MAP-001`:
+Para el piloto se usa el perfil de prueba:
 
 ```text
 profileId: PILOT_FIXED_ISOMETRIC
@@ -330,14 +349,9 @@ rotationPolicy: disabled
 followPolicy: allowed
 panPolicy: allowed
 zoomPolicy: testable / OPEN
-screenRelationInvariants:
-  screen_up   = cordillera / interior / progresión
-  screen_down = entrada / retorno
-  stream      = screen_right y nivel inferior tras el umbral
-worldCardinalMapping: OPEN
 ```
 
-No fijar todavía grados, FOV ni zoom final.
+Los invariantes visuales concretos de `MAP-001` se toman de `docs/PILOT_ENVIRONMENT_VISUAL_CANON.md`. No fijar todavía grados, FOV ni zoom final.
 
 ## 12. Definir Interaction / Learning Contract
 
@@ -511,16 +525,16 @@ UE-003 Claro de picnic
 Claims mínimos actuales:
 
 ```text
-bridge crosses stream
-bridge precedes gate
-gate precedes main path
-house is left of route after threshold
-main path remains dominant
-stream remains right + lower after threshold
-clearing occurs later toward interior
-slopes contain corridor laterally
-exact bridge bearing = OPEN
-exact clearing footprint = OPEN
+bridge crosses stream                  asserted / proposed
+bridge precedes gate                   asserted / proposed
+gate precedes main path                asserted / proposed
+house is left of route after threshold asserted / proposed
+main path remains dominant             asserted / proposed
+stream remains right + lower after threshold asserted / proposed
+clearing occurs later toward interior  asserted / proposed
+slopes contain corridor laterally      asserted / proposed
+exact bridge bearing                   open
+exact clearing footprint               open
 ```
 
 Instancia:
@@ -545,7 +559,7 @@ A — Navigation Model
   walkable envelope + puertos + blockers + alturas + interaction slots
 
 B — Territorial Constraint Model
-  UE + rasgos + claims + estados de evidencia + OPEN
+  UE + rasgos + claims + claimState/evidenceStatus + OPEN
 
 C — Isometric Massing + Camera Test
   terreno continuo + proxies territoriales + player proxy + oclusión
@@ -568,4 +582,4 @@ Este protocolo no autoriza todavía:
 - cerrar distribución de especies sin evidencia `core` territorializada;
 - modificar el Master Botánico desde Dirección de Arte;
 - asumir cardinales geográficos desde la orientación de pantalla;
-- vincular obligatoriamente movimiento físico/GPS con avatar virtual.
+- usar una oportunidad de observación como justificación de ubicación de una especie.
