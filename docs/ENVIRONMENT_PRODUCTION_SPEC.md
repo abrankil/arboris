@@ -16,32 +16,64 @@ El repositorio todavía no ha seleccionado renderer ni pathfinding. Esta especif
 
 ## 1. Viewport lógico
 
+La exploración principal se diseña **portrait-first para Android**. La auditoría de producción descarta `480×270` horizontal como autoridad móvil principal: puede mantenerse como referencia histórica/compatibilidad landscape, pero no debe gobernar composición, escala ni pruebas de `MAP-001`.
+
+Para el piloto se adopta un viewport lógico vertical de **ancho base fijo y altura visible adaptativa**:
+
 | Elemento | Decisión |
 | --- | --- |
-| Orientación de exploración y minijuegos | Horizontal, 16:9 |
-| Viewport lógico nativo | 480×270 px |
-| Escalado de presentación | Nearest-neighbor, solo múltiplos enteros |
-| Escalas previstas | 2× = 960×540, 3× = 1440×810, 4× = 1920×1080, 5× = 2400×1350 |
+| Orientación primaria de exploración | Vertical / portrait |
+| Ancho lógico de referencia | 270 px |
+| Altura lógica mínima de prueba | 480 px |
+| Altura lógica adaptativa inicial | 480–600 px |
+| Caso base de revisión | 270×480 px |
+| Caso alto de revisión | 270×600 px |
+| Escalado de presentación | Nearest-neighbor, múltiplos enteros para el mundo pixelado |
 | Color | sRGB |
 | Cámara | posiciones enteras en píxeles lógicos cuando el renderer lo permita |
 
-**480×270 es el viewport, no el tamaño obligatorio de cada mapa ni de cada capa del mundo.**
+`270×480` es el **mínimo/caso base de prueba**, no una resolución física de dispositivo ni un lienzo obligatorio para cada mapa.
 
-Un mapa puede ocupar una extensión lógica mayor que la pantalla y ser recorrido por cámara.
+La altura no debe fijarse artificialmente a 480 si el dispositivo puede mostrar más mundo sin cambiar la escala de píxel. Para la primera validación, el mundo puede extender su viewport vertical hasta 600 px lógicos. Ese rango cubre desde una relación 9:16 aproximada hasta teléfonos altos cercanos a 9:20 sin convertir cada relación de aspecto en un layout distinto.
+
+La política inicial de cálculo es:
+
+```text
+availableWidthPx  = ancho físico utilizable después de insets/safe area
+availableHeightPx = alto físico utilizable después de insets/safe area
+
+scale = min(
+  floor(availableWidthPx / 270),
+  floor(availableHeightPx / 480)
+)
+
+visibleLogicalWidth  = 270
+visibleLogicalHeight = clamp(
+  floor(availableHeightPx / scale),
+  480,
+  600
+)
+```
+
+La fórmula es contrato de prueba, no implementación definitiva del renderer. Debe validarse en dispositivos reales antes de consolidarse.
+
+Un mapa puede ocupar una extensión lógica mucho mayor que el viewport y ser recorrido por cámara.
 
 ## 2. Comportamiento por plataforma
 
 | Plataforma | Regla de presentación |
 | --- | --- |
-| Android | usar el mayor múltiplo entero que cabe; bandas o UI fuera del mundo si sobra espacio |
-| Steam / PC | ventana o fullscreen con escalado entero y letterbox/pillarbox cuando corresponda |
-| Web | canvas interno fijo y `image-rendering: pixelated`; evitar ampliación fraccional del mundo |
+| Android | portrait-first; aplicar safe areas/insets, elegir el mayor múltiplo entero compatible con un mínimo de 270×480 y mostrar altura adicional hasta el rango validado; UI puede ocupar el espacio restante |
+| Steam / PC | soportar ventana portrait para paridad con móvil; landscape puede existir como modo secundario/compatibilidad, no como autoridad de composición del piloto |
+| Web | canvas lógico portrait basado en el mismo contrato; `image-rendering: pixelated`; evitar escalado fraccional del mundo cuando sea posible |
 
-La interfaz de formularios, fichas y texto puede ser responsive y no está obligada a usar el viewport del mundo.
+La interfaz de formularios, fichas y texto puede ser responsive y no está obligada a usar la misma cuadrícula lógica que el mundo.
+
+El viewport histórico `480×270` se conserva únicamente para ensayos landscape, fondos previos, capturas comparativas o futuros modos secundarios. No debe usarse para validar la composición móvil principal.
 
 ## 3. Estructura del contenido del mapa
 
-El mapa jugable no se define como cuatro PNG de pantalla completa.
+El mapa jugable no se define como PNG de pantalla completa ni por una relación de aspecto fija.
 
 La estructura de producción debe poder separar, independientemente del renderer final:
 
@@ -83,7 +115,7 @@ La implementación puede terminar usando TileMap, objetos, chunks, sprites, mesh
 
 ## 4. Capas visuales
 
-La nomenclatura histórica se conserva como **orden compositivo**, no como obligación de que todo sea una imagen raster de 480×270:
+La nomenclatura histórica se conserva como **orden compositivo**, no como obligación de que todo sea una imagen raster del tamaño del viewport:
 
 1. `00-sky`
 2. `01-background`
@@ -94,17 +126,18 @@ La nomenclatura histórica se conserva como **orden compositivo**, no como oblig
 
 Una capa puede materializarse como imagen repetible, sprite/objeto, tile/chunk, grupo de assets o composición generada por el renderer.
 
-No exigir que todas compartan exactamente la extensión del viewport si el mundo se desplaza.
+No exigir que todas compartan exactamente la extensión del viewport si el mundo se desplaza o si la altura visible cambia entre dispositivos.
 
 ## 5. Chunks, mosaicos y paquetes offline
 
 No fijar todavía un tamaño canónico de chunk de producción.
 
-La referencia histórica de piezas `240×135` se mantiene únicamente como ensayo de parallax/arte 16:9, no como estándar de almacenamiento del mapa.
+La referencia histórica de piezas `240×135` se mantiene únicamente como ensayo de parallax/arte 16:9, no como estándar de almacenamiento del mapa ni como base del viewport móvil.
 
 El tamaño de chunk definitivo debe decidirse después de probar:
 
 - cámara;
+- viewport vertical adaptativo;
 - carga/descarga;
 - colisiones;
 - navegación;
@@ -131,11 +164,13 @@ El arte puede ocultar la cuadrícula y naturalizar terrazas, pero no debe redefi
 
 El blockout lógico no se rasteriza obligatoriamente dentro del PNG final.
 
+Para el piloto, las relaciones `screen_up = interior/cordillera` y `screen_down = entrada/retorno` deben comprobarse en portrait y en el rango vertical de prueba completo, no solo en una captura fija.
+
 ## 7. Isometría, elevación y autoridad geométrica
 
-El lenguaje visual del piloto es isométrico y usa terrazas/celdas prismáticas para hacer legibles cambios de altura.
+El lenguaje visual del piloto es isométrico/2.5D y usa terrazas/celdas prismáticas para hacer legibles cambios de altura.
 
-Esto no obliga a un mundo 3D voxelado.
+Esto no obliga a un mundo 3D voxelado ni a cubos visibles como apariencia final.
 
 La autoridad geométrica de navegación es el `walkableEnvelope`; una grilla puede derivarse para implementación o pruebas.
 
@@ -152,6 +187,8 @@ cells[]:
 
 El renderer traduce después esas bandas a desplazamiento vertical, sprites, bordes de terreno o geometría según la solución elegida.
 
+La naturalización debe evitar que la modularidad se perciba como una suma de bloques flotantes o repetidos.
+
 ## 8. PNG y editables
 
 PNG RGBA continúa siendo formato de revisión y master apropiado para assets raster individuales.
@@ -167,23 +204,33 @@ Conservar, según el tipo de recurso:
 
 La compresión de GPU se decide al empaquetar, no en el master artístico.
 
+Las previews de revisión deben incluir, como mínimo, el caso base `270×480`; cuando la composición dependa de cuánto territorio extra aparece en dispositivos altos, incluir también `270×600`.
+
 ## 9. Personajes y escala dentro del mundo
 
 Los sprites canónicos de colección de 125×125 px se mantienen para galería, fichas, selección y encuentros cercanos.
 
 No reducirlos automáticamente para navegación.
 
-Para gameplay continuo se mantiene como propuesta producir una familia específica de aproximadamente 48×64 o 64×64 px, validada por silueta y lectura en el viewport 480×270.
+Las dimensiones del sprite de exploración siguen `OPEN`. Las referencias históricas de aproximadamente `48×64` o `64×64` se mantienen solo como hipótesis de preproducción y deben validarse por silueta, lectura, oclusión y densidad en portrait.
 
-Es una derivación artística nueva, no una conversión automática.
+La relación personaje/tile tampoco se fija todavía.
 
-Durante `MAP-001 v0.3` debe existir un **player proxy provisional** para validar escala perceptual, ancho aparente, oclusión y relación con estructuras. El proxy no fija el sprite final.
+El **player proxy provisional** se utiliza para comprobar:
+
+- lectura a 270×480;
+- lectura a 270×600;
+- ancho aparente de ruta/puente/puerta;
+- oclusión por vegetación y estructuras;
+- separación de silueta respecto del terreno.
+
+El proxy no fija el sprite final.
 
 ## 10. Cámara, parallax y movimiento
 
-La cámara usa el viewport 480×270 y puede desplazarse sobre un mundo mayor.
+La cámara usa el contrato portrait de `270×H`, con `H` adaptativo dentro del rango validado, y puede desplazarse sobre un mundo mayor.
 
-Para `IT-001 / MAP-001`, la prueba estructural usa:
+Para `IT-001 / MAP-001`, la prueba estructural mantiene:
 
 ```text
 profileId: PILOT_FIXED_ISOMETRIC
@@ -192,9 +239,14 @@ rotationPolicy: disabled
 followPolicy: allowed
 panPolicy: allowed
 zoomPolicy: testable / OPEN
+
+screen_up: cordillera / interior / progresión
+screen_down: entrada / retorno
 ```
 
 Pitch, yaw, FOV y zoom definitivo permanecen `OPEN`.
+
+La cámara debe conservar los mismos invariantes cuando el viewport gana altura. No usar el espacio adicional para cambiar arbitrariamente orientación, topología o escala de los assets.
 
 Cuando el renderer lo permita, posiciones de cámara y sprites se cuantizan a píxeles lógicos enteros para evitar shimmer.
 
@@ -217,7 +269,8 @@ Antes de integración, el paquete de una zona debe poder contener:
 - Interaction/Learning Contract cuando corresponda;
 - blockout lógico verificable;
 - player proxy en pruebas estructurales;
-- preview compuesto;
+- preview portrait base `270×480`;
+- preview portrait alto `270×600` cuando corresponda;
 - assets raster/editables utilizados;
 - definición de orden de capas y offsets;
 - referencias ambientales consultadas;
@@ -233,30 +286,79 @@ Una zona puede declararse lista para integración cuando:
 - conserva invariantes de cámara aprobados;
 - no introduce oclusiones críticas del personaje o interacciones obligatorias;
 - mantiene utilizables los interaction slots requeridos;
-- el mundo se lee a 1× lógico y a escalas enteras 2× y 4×;
+- se entiende correctamente en el viewport base `270×480`;
+- sigue siendo legible al extenderse a `270×600` sin reencuadrar de forma contradictoria;
+- el mundo se lee a 1× lógico y a escalas enteras de presentación;
 - no existe filtrado bilinear accidental en arte pixelado;
 - flora y contexto respetan evidencia registrada;
 - personajes se separan del plano jugable;
 - las uniones entre chunks/assets no producen discontinuidades visibles;
 - cámara y navegación funcionan sobre la misma geometría lógica;
-- Android, PC y web muestran escalado entero correcto;
+- safe areas/insets no ocultan interacción o navegación crítica;
+- Android muestra escalado entero o una estrategia equivalente validada sin shimmer;
+- PC y web preservan la composición portrait del piloto o declaran explícitamente su adaptación secundaria;
 - el paquete de zona puede operar offline una vez descargado;
 - rendimiento y memoria se miden en al menos un Android de gama media antes de ampliar presupuesto.
 
-## 13. Límites actuales
+## 13. Matriz mínima de prueba de viewport
+
+Antes de fijar la resolución definitiva del mundo de exploración, probar al menos:
+
+```text
+A — 270×480
+caso base portrait
+
+B — 270×540
+caso intermedio
+
+C — 270×585
+referencia de relación cercana a 19.5:9
+
+D — 270×600
+caso alto cercano a 20:9
+```
+
+Estas dimensiones son **viewports lógicos de prueba**, no resolución física exigida al dispositivo.
+
+La comparación debe medir:
+
+- legibilidad del personaje;
+- cantidad de mundo visible;
+- lectura de camino/estero/laderas;
+- oclusión;
+- tamaño aparente de estructuras;
+- espacio disponible para UI;
+- repetición visible de tiles/assets;
+- costo de render y memoria.
+
+Si un viewport más alto solo añade espacio vacío o empeora la composición, puede reservarse parte del alto para UI. Si mejora orientación y progresión sin romper escala, el mundo puede ocuparlo.
+
+## 14. Límites actuales
 
 Expo y React Native son la base de aplicación definida, pero el renderer del mundo de exploración sigue `OPEN`.
 
 La elección debe demostrar, como mínimo:
 
+- portrait-first en Android;
+- viewport lógico variable en altura o estrategia equivalente;
 - isometría compatible con el blockout;
-- nearest-neighbor;
+- nearest-neighbor o preservación de píxel equivalente;
 - cámara sobre mapas mayores que el viewport;
 - navegación/colliders reproducibles;
 - capas/orden de dibujo;
+- manejo de safe areas/insets;
 - exportación Android, PC/Steam y web;
 - posibilidad de mantener datos lógicos separados del arte;
 - empaquetado offline por área;
 - preservación de Camera/Interaction Contracts.
 
-Los fondos existentes y las pruebas de parallax siguen siendo material de referencia. No convertirlos automáticamente en mapas jugables.
+Quedan `OPEN` hasta pruebas reales:
+
+- rango definitivo de altura lógica;
+- política exacta cuando la resolución física no permite un múltiplo entero conveniente;
+- orientación secundaria landscape;
+- tamaño del sprite de exploración;
+- tamaño de tile/chunk;
+- renderer y pathfinding.
+
+Los fondos existentes y las pruebas de parallax 16:9 siguen siendo material histórico/de referencia. No convertirlos automáticamente en mapas jugables ni en autoridad sobre el viewport móvil.
