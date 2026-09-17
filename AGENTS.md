@@ -121,6 +121,8 @@ No cargar por defecto:
 
 ## 6. Validación
 
+En Pull Requests, completar `.github/PULL_REQUEST_TEMPLATE.md`. El workflow `Audit Protocol Check` ejecuta `tools/audit-check.js` y, por política del proyecto, debe pasar antes del merge.
+
 Desde la raíz:
 
 ```powershell
