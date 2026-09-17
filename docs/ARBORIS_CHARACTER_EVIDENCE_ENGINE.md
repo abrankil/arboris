@@ -30,13 +30,21 @@ Un observador humano puede producir evidencia por carácter. En el futuro, un si
 ## 2. Terminología obligatoria
 
 - **ACE:** Arboris Character Evidence Engine; motor canónico de evaluación de evidencia por caracteres para identificación.
+
 - **evidencia por carácter:** observación estructurada asociada a un carácter botánico y a uno o más estados observados.
+
 - **carácter:** dimensión botánica discreta definida por el canon de datos de Árboris.
+
 - **estado:** valor permitido para un carácter.
+
 - **candidato:** especie que permanece compatible con la evidencia evaluada bajo las reglas vigentes.
-- **dimensión diagnóstica independiente:** carácter resuelto que aporta una dimensión distinta de evidencia; observaciones repetidas del mismo `characterId` no crean dimensiones adicionales.
+
+- **dimensión evaluable independiente:** carácter evaluable que aporta una dimensión distinta de evidencia para determinar soporte; observaciones repetidas del mismo `characterId` no crean dimensiones adicionales.
+
 - **variabilidad natural documentada:** estado alternativo permitido para una relación especie-carácter bajo un contexto documentado. Puede volver una contradicción inconclusa; no crea una coincidencia positiva por sí sola.
+
 - **contexto:** condición explícitamente catalogada que permite interpretar una entrada de variabilidad documentada.
+
 - **CV:** Computer Vision / Visión por Computador. Técnicas que procesan imágenes para extraer o inferir información visual. CV puede producir propuestas de evidencia; no decide por sí mismo la identificación canónica.
 
 ## 3. Autoridad y precedencia
@@ -72,7 +80,7 @@ Una predicción CV no equivale automáticamente a un carácter resuelto. La pol�
 
 ACE razona sobre caracteres, no sobre fotografías completas como una única señal de especie.
 
-Varias fotografías pueden aportar evidencia para un mismo carácter. Varias observaciones del mismo carácter continúan representando una sola dimensión diagnóstica independiente para efectos del soporte de identificación.
+Varias fotografías pueden aportar evidencia para un mismo carácter. Varias observaciones del mismo carácter continúan representando una sola dimensión evaluable independiente para efectos del soporte de identificación.
 
 La unidad conceptual es:
 
@@ -90,9 +98,13 @@ La forma serializada exacta de cada flujo está gobernada por los contratos ejec
 ACE mantiene un conjunto explícito de especies candidatas.
 
 - `candidateIds = null` representa el conjunto de especies canónicas disponibles.
+
 - una lista explícita limita el universo inicial a esos identificadores;
+
 - duplicados se normalizan preservando la primera aparición;
+
 - un identificador de especie desconocido es error explícito;
+
 - `[]` representa válidamente un conjunto vacío.
 
 ACE no convierte identificadores históricos ni inventa equivalencias de especies.
@@ -109,9 +121,9 @@ Cuando un contrato específico usa `resolved` con una semántica más estricta, 
 
 ACE no debe declarar soporte suficiente por la mera existencia de un único candidato.
 
-El estado `supported` requiere evidencia suficiente conforme a `HITO15_SUPPORTED_CONTRACT.md`. En particular, observaciones repetidas del mismo carácter cuentan como una sola dimensión diagnóstica independiente.
+El estado `supported` requiere evidencia suficiente conforme a `HITO15_SUPPORTED_CONTRACT.md`. En particular, observaciones repetidas del mismo carácter cuentan como una sola dimensión evaluable independiente.
 
-El poder diagnóstico de un carácter puede utilizarse para ordenar o priorizar preguntas, pero no reduce el mínimo de dimensiones independientes exigido para declarar soporte.
+El poder diagnóstico de un carácter puede utilizarse para ordenar o priorizar preguntas, pero no reduce el mínimo de dimensiones evaluables independientes exigido para declarar soporte.
 
 La incertidumbre es una salida válida del sistema. ACE debe preservar resultados tentativos, ambiguos o no resueltos cuando la evidencia disponible no permite una conclusión más fuerte.
 
@@ -146,10 +158,15 @@ ACE no debe incorporar conocimiento botánico oculto en código, prompts o heur�
 Permanecen fuera de alcance hasta decisión y contrato específicos:
 
 - identificación automática de especie directamente desde una imagen;
+
 - selección de un modelo CV definitivo;
+
 - entrenamiento o fine-tuning de modelos visuales;
+
 - umbrales de confianza para aceptar evidencia producida por CV;
+
 - fusión probabilística entre múltiples observadores visuales;
+
 - conversión automática de una predicción visual en identificación `supported`.
 
 ## 12. Implementación ejecutable
