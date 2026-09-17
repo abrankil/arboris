@@ -15,6 +15,7 @@
     "build:botanical": "python tools/botanical-data/export_master.py && python tools/botanical-data/build_species_data.py",
     "build:reference-db": "python tools/botanical-data/build_reference_sqlite.py --force",
     "benchmark:reference-data": "python tools/botanical-data/build_reference_sqlite.py --force && node tools/botanical-data/benchmark_reference_access.mjs --json build/reference-benchmark.json --markdown build/reference-benchmark.md",
+    "benchmark:ai-routing": "node tools/botanical-data/benchmark_ai_routing.mjs --json build/ai-routing-benchmark.json --markdown build/ai-routing-benchmark.md",
     "query:botanical": "python tools/botanical-data/query_botanical.py",
     "test:canonical-identification": "node --test tools/canonical-identification/engine.test.mjs",
     "test:legacy-key": "node --test tools/botanical-key-validation/*.test.mjs"
