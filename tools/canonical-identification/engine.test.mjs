@@ -102,6 +102,42 @@ test('nextCharacter chooses an active unobserved character', async () => {
   assert.notEqual(next.characterId, 'CH-017');
 });
 
+test('documented natural variability keeps a contradicting candidate as inconclusive, not eliminated', async () => {
+  dataset ??= await loadCanonicalDataset();
+
+  // SP-002 (Litre) expects CH-008 = "presente", pero
+  // data/botanical/character_variability.json documenta que en
+  // contexto "hojas_de_sombra" el estado "ausente" es una variación
+  // natural conocida (frecuencia baja), no un conflicto real.
+  // Confirma que la regla de variabilidad documentada se aplica
+  // correctamente: el motor lee character_variability.json y trata
+  // esta discrepancia como inconcluyente, no como conflicto.
+  const result = filterCandidates(dataset, [
+    { characterId: 'CH-008', observedStates: ['ausente'], context: 'hojas_de_sombra' },
+  ], ['SP-002']);
+
+  assert.deepEqual(result.remaining, ['SP-002']);
+  assert.equal(result.eliminated.length, 0);
+});
+
+test('the same contradiction without a documented context still eliminates the candidate', async () => {
+  dataset ??= await loadCanonicalDataset();
+
+  // Caso de control: misma especie, mismo carácter, mismo estado
+  // observado, pero sin el contexto documentado en
+  // character_variability.json. Esto confirma que la regla de
+  // variabilidad no afloja el caso general: sigue siendo un
+  // conflicto explícito y elimina al candidato.
+  const result = filterCandidates(dataset, [
+    { characterId: 'CH-008', observedStates: ['ausente'] },
+  ], ['SP-002']);
+
+  assert.deepEqual(result.remaining, []);
+  assert.equal(result.eliminated.length, 1);
+  assert.equal(result.eliminated[0].speciesId, 'SP-002');
+  assert.equal(result.eliminated[0].conflicts[0].reason, 'explicit_state_conflict');
+});
+
 test('assessment returns cautious result states', async () => {
   dataset ??= await loadCanonicalDataset();
 

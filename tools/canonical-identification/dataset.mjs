@@ -23,6 +23,31 @@ function uniqueSorted(values) {
   return [...new Set(values)].sort();
 }
 
+function buildVariabilityIndex(variabilityEntries) {
+  const bySpecies = new Map();
+
+  for (const entry of variabilityEntries) {
+    const speciesId = entry.species_id;
+    const characterId = entry.caracter_id;
+
+    if (!bySpecies.has(speciesId)) bySpecies.set(speciesId, new Map());
+    const byCharacter = bySpecies.get(speciesId);
+    if (!byCharacter.has(characterId)) byCharacter.set(characterId, []);
+
+    byCharacter.get(characterId).push({
+      speciesId,
+      characterId,
+      alternativeState: entry.estado_alternativo,
+      contextId: entry.contexto_id ?? null,
+      frequency: entry.frecuencia ?? null,
+      notes: entry.nota ?? null,
+      raw: entry,
+    });
+  }
+
+  return bySpecies;
+}
+
 function buildRelationIndex(relations) {
   const bySpecies = new Map();
 
@@ -55,11 +80,12 @@ function buildRelationIndex(relations) {
 export async function loadCanonicalDataset(options = {}) {
   const botanicalDir = options.botanicalDir ?? DEFAULT_BOTANICAL_DIR;
 
-  const [metadata, species, characters, speciesCharacters] = await Promise.all([
+  const [metadata, species, characters, speciesCharacters, characterVariability] = await Promise.all([
     readJson(join(botanicalDir, 'metadata.json')),
     readJson(join(botanicalDir, 'species.json')),
     readJson(join(botanicalDir, 'characters.json')),
     readJson(join(botanicalDir, 'species_characters.json')),
+    readJson(join(botanicalDir, 'character_variability.json')),
   ]);
 
   const computableStatus = metadata.computable_status ?? 'activo';
@@ -99,6 +125,7 @@ export async function loadCanonicalDataset(options = {}) {
   const activeCharacterIds = new Set(activeCharacters.map(character => character.characterId));
   const activeRelations = speciesCharacters.filter(relation => activeCharacterIds.has(relation.caracter_id));
   const relationsBySpecies = buildRelationIndex(activeRelations);
+  const variabilityBySpecies = buildVariabilityIndex(characterVariability);
 
   return {
     metadata,
@@ -108,6 +135,7 @@ export async function loadCanonicalDataset(options = {}) {
     speciesById: new Map(normalizedSpecies.map(item => [item.speciesId, item])),
     charactersById: new Map(activeCharacters.map(item => [item.characterId, item])),
     relationsBySpecies,
+    variabilityBySpecies,
     stats: {
       species: normalizedSpecies.length,
       activeCharacters: activeCharacters.length,
@@ -121,4 +149,8 @@ export async function loadCanonicalDataset(options = {}) {
 
 export function getRelation(dataset, speciesId, characterId) {
   return dataset.relationsBySpecies.get(speciesId)?.get(characterId) ?? null;
+}
+
+export function getVariability(dataset, speciesId, characterId) {
+  return dataset.variabilityBySpecies.get(speciesId)?.get(characterId) ?? [];
 }

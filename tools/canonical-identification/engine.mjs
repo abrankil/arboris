@@ -1,4 +1,4 @@
-import { getRelation } from './dataset.mjs';
+import { getRelation, getVariability } from './dataset.mjs';
 
 const UNKNOWN_OBSERVATION_STATES = new Set([
   'unknown',
@@ -67,6 +67,7 @@ export function normalizeEvidence(evidence = []) {
       characterId: item.characterId ?? item.character_id,
       observedStates: [...toStateSet(item.observedStates ?? item.observed_states ?? item.states ?? item.state)],
       source: item.source ?? 'unknown',
+      context: item.context ?? null,
     })).filter(item => item.characterId);
   }
 
@@ -75,6 +76,13 @@ export function normalizeEvidence(evidence = []) {
     observedStates: [...toStateSet(states)],
     source: 'unknown',
   }));
+}
+
+function isDocumentedVariability(dataset, speciesId, characterId, observedStates, context) {
+  if (!context) return false;
+
+  return getVariability(dataset, speciesId, characterId)
+    .some(entry => entry.contextId === context && observedStates.has(entry.alternativeState));
 }
 
 export function filterCandidates(dataset, evidence = [], candidateIds = null) {
@@ -90,6 +98,10 @@ export function filterCandidates(dataset, evidence = [], candidateIds = null) {
       const relation = getRelation(dataset, speciesId, item.characterId);
       const expectedStates = relation?.expectedStates ?? [];
       const result = compatible(expectedStates, item.observedStates);
+
+      if (!result.compatible && isDocumentedVariability(dataset, speciesId, item.characterId, toStateSet(item.observedStates), item.context)) {
+        continue;
+      }
 
       if (!result.compatible) {
         conflicts.push({
