@@ -171,9 +171,13 @@ El proyecto utiliza:
 - Expo Router
 - SQLite mediante `expo-sqlite`
 
-El trabajo actual se concentra en integrar y validar los componentes ya desarrollados antes de ampliar el sistema.
+La integración canónica **Master Botánico 2.0 → JSON normalizado → fichas por especie → motor adaptativo** quedó cerrada como base mínima en el Hito 15. El motor vigente consume datos canónicos y no debe volver a introducir conocimiento botánico hardcodeado.
 
-El siguiente objetivo de integración es conectar el **Master Botánico 2.0** con la clave botánica adaptativa mediante datos derivados reproducibles.
+La siguiente etapa técnica del frente de identificación es el **Hito 16 — extracción automática de caracteres botánicos**: observadores visuales restringidos por carácter que puedan responder con un estado permitido, incertidumbre o `NO_OBSERVABLE`, sin sentenciar directamente una especie.
+
+En paralelo, los frentes de entorno, mapas y producción visual continúan sus propios gates de validación documentados en `docs/START_HERE.md` y `docs/ROADMAP.md`.
+
+Para consultas de datos y agentes, comenzar por `AGENTS.md` y `data/README.md`; la estrategia de rendimiento está en `docs/DATA_ACCESS_PERFORMANCE.md`.
 
 ## Dirección de Árboris
 

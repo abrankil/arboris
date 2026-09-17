@@ -1,144 +1,109 @@
-# Árboris — Cierre Hito 15
+# Hito 15 — Cierre del motor canónico de identificación
 
-**Fecha:** 16 septiembre 2026  
-**Estado:** cerrado como base canónica mínima  
-**Alcance:** integración botánica canónica con motor de identificación simple, verificable y offline-first.
+Fecha de cierre técnico: 2026-09-17
 
-## 1. Decisión de cierre
+Estado: cierre técnico validado; integración con `main` en proceso de cierre.
 
-Hito 15 se considera cerrado cuando existe un núcleo que conecta la matriz canónica de Master Botánico 2.0 con una lógica genérica de identificación, sin duplicar conocimiento botánico en código.
+## Objetivo
 
-El cierre no significa que exista todavía UI final, BioCLIP integrado, visión automática, persistencia completa ni política final de descubrimiento. Esas piezas corresponden a los hitos posteriores.
+Consolidar un motor canónico de identificación botánica que opere directamente sobre los datos canónicos de Árboris, preserve la incertidumbre y aplique reglas explícitas y reproducibles para filtrado, selección de caracteres y evaluación de resultados.
 
-## 2. Fuente de verdad
+## Fuente de datos
 
-La fuente científica/editorial sigue siendo:
+El motor utiliza como base los datos canónicos derivados del Master Botánico 2.0.
 
-```text
-data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx
-```
+Los ocho JSON reproducibles derivados del Master mantienen su propia validación de equivalencia.
 
-El motor consume únicamente derivados canónicos de esa fuente:
+La variabilidad natural utilizada por el motor se representa mediante una capa canónica complementaria:
 
-```text
-data/botanical/metadata.json
-data/botanical/species.json
-data/botanical/characters.json
-data/botanical/species_characters.json
-```
+- `data/botanical/character_variability.json`
+- `data/botanical/contexts.json`
 
-No usa `species_pilot.json`, claves hardcodeadas, previews antiguas ni fichas manuales.
+Estos archivos no son exportaciones del Master Botánico 2.0 y no modifican ni reemplazan `species_characters.json`.
 
-## 3. Implementación mínima
+El contrato normativo de esta capa está documentado en:
 
-Nuevo módulo:
+- `docs/HITO15_SUPPORTED_CONTRACT.md`
 
-```text
-tools/canonical-identification/
-  dataset.mjs
-  engine.mjs
-  engine.test.mjs
-  README.md
-```
+## Contratos cerrados
 
-Responsabilidades:
+### A/B — Evaluación `supported` y variabilidad natural
 
-- `dataset.mjs` carga y normaliza el dataset canónico mínimo.
-- `engine.mjs` evalúa compatibilidad, filtra candidatos, selecciona el siguiente carácter y entrega estado de identificación.
-- `engine.test.mjs` verifica el comportamiento mínimo esperado.
+Quedaron establecidas las siguientes reglas:
 
-## 4. Reglas implementadas
+- `supported` requiere un único candidato restante.
+- Requiere al menos dos dimensiones diagnósticas independientes y resueltas.
+- Repetir evidencia del mismo carácter no crea una dimensión diagnóstica adicional.
+- No existe atajo por poder diagnóstico de un único carácter.
+- Una contradicción cubierta por variabilidad natural documentada se considera inconcluyente para ese candidato.
+- Una contradicción sin excepción documentada continúa siendo un conflicto explícito.
+- No existe un umbral genérico de discrepancias toleradas.
 
-- Solo participan caracteres activos/computables.
-- Los caracteres retirados o pendientes no participan en el motor.
-- Un dato esperado desconocido no elimina candidatos.
-- `unknown`, `not_observable` y equivalentes no eliminan candidatos.
-- Una especie se elimina solo si existe incompatibilidad explícita entre estados conocidos.
-- La selección del siguiente carácter es dinámica y depende de la matriz canónica.
-- El resultado no fuerza identificación definitiva.
+Primer caso incorporado:
 
-Estados de salida:
+- especie: `SP-002` — `Lithraea caustica`
+- carácter: `CH-008`
+- estado alternativo: `ausente`
+- contexto: `hojas_de_sombra`
+- frecuencia: `baja`
 
-```text
-unresolved
-ambiguous
-tentative
-supported
-```
+### C — Estado de caracteres y reintentos
 
-## 5. Simplicidad y rendimiento
+Contrato:
 
-La implementación usa funciones puras y estructuras en memoria:
+- `docs/HITO15_CHARACTER_RETRY_CONTRACT.md`
 
-- sin framework nuevo;
-- sin base de datos;
-- sin servidor;
-- sin motor de reglas externo;
-- sin dependencias adicionales;
-- sin conocimiento botánico hardcodeado.
+El motor distingue entre carácter visible, intentado y resuelto.
 
-Para el piloto de seis especies, esta estrategia es suficiente, rápida y fácil de auditar. La extensión futura debe justificarse con una necesidad real del piloto, no por anticipación teórica.
+Un carácter intentado pero no resuelto no se vuelve a ofrecer automáticamente. Puede reintentarse explícitamente. Un carácter resuelto es terminal y no puede reintentarse.
 
-## 6. Validación ejecutada
+### D — Robustez de `candidateIds`
 
-Comando de validación:
+Contrato:
 
-```powershell
-npm.cmd test
-```
+- `docs/HITO15_CANDIDATE_IDS_CONTRACT.md`
 
-Resultado reportado localmente:
+Reglas:
 
-```text
-verify:botanical
-- MASTER 2.0 EXPORTADO VÁLIDO
-- IDs canónicos válidos y únicos
-- 6 fichas canónicas sincronizadas
+- `null` representa todas las especies canónicas.
+- Las listas explícitas se deduplican conservando el primer orden observado.
+- Un ID desconocido produce error explícito.
+- `[]` representa correctamente un conjunto vacío.
+- La normalización es compartida por las operaciones del motor.
+- No se realiza conversión histórica `SP001` → `SP-001` dentro del motor canónico.
 
-test:canonical-identification
-- tests 6
-- pass 6
-- fail 0
-```
+### E — Unicidad de relaciones especie–carácter
 
-Esto valida que la capa botánica canónica y el motor mínimo pasan juntos.
+Contrato:
 
-## 7. Estado de subfases
+- `docs/HITO15_RELATION_UNIQUENESS_CONTRACT.md`
 
-| Subfase | Estado | Criterio |
-| --- | --- | --- |
-| 15.1 Master 2.0 canónico | cerrado | Fuente única definida. |
-| 15.2 Export Master → JSON | cerrado | 8 JSON canónicos. |
-| 15.3 Validación estricta | cerrado | 0 errores / 0 advertencias. |
-| 15.4 IDs canónicos | cerrado | `SP-00X` válidos y compatibilidad histórica documentada. |
-| 15.4B Fichas por especie | cerrado | 6 fichas generadas y validadas. |
-| 15.5 Motor genérico | cerrado mínimo | `engine.mjs` consume matriz canónica. |
-| 15.6 Selección adaptativa | cerrado mínimo | `nextCharacter()` selecciona carácter activo no observado. |
-| 15.7 Evidencia mínima | cerrado mínimo | `filterCandidates()` acepta evidencia simple por `characterId`. |
-| 15.8 Contrato visión/BioCLIP | cerrado como contrato | BioCLIP y visión quedan fuera del núcleo, preparados para hitos posteriores. |
-| 15.9 Legado | cerrado como demarcación | Componentes legacy marcados, no eliminados masivamente. |
-| 15.10 Documentación | cerrado | Estado y límites documentados. |
+La pareja `(species_id, caracter_id)` debe ser única entre las relaciones canónicas computables.
 
-## 8. Qué queda fuera
+Cualquier duplicado es un error fatal, incluso cuando ambas relaciones sean idénticas. El motor no aplica merge, last-write-wins ni first-write-wins.
 
-No se implementa todavía:
+## Validación integrada
 
-- extracción automática de caracteres desde imagen;
-- integración real con BioCLIP;
-- interfaz de usuario;
-- persistencia de sesiones;
-- SQLite;
-- sincronización offline/online;
-- política final de descubrimiento/desbloqueo;
-- retiro físico completo de todos los archivos legacy.
+Gate ejecutado:
 
-## 9. Siguiente paso lógico
+`npm.cmd test`
 
-Después de Hito 15, el desarrollo técnico debe avanzar a:
+Resultado:
 
-```text
-Hito 16 — Extracción automática de caracteres botánicos
-Hito 17 — Integración visión → caracteres → clave adaptativa
-```
+- validación Master Botánico 2.0: 0 advertencias, 0 errores
+- validación de IDs: 6 especies, 0 conflictos
+- fichas canónicas: 6 sincronizadas, 0 advertencias, 0 errores
+- acceso a datos: 5/5 tests
+- base de referencia: 6/6 tests
+- motor canónico de identificación: 15/15 tests
+- Arboris Scene Compiler: 7/7 tests
 
-El próximo trabajo debe tomar el motor canónico como núcleo estable y agregar evidencia visual de forma restringida, carácter por carácter, sin permitir que un modelo visual dicte una identificación definitiva.
+El gate integrado finalizó sin fallos.
+
+## Resultado del Hito 15
+
+El motor canónico queda técnicamente validado respecto de los contratos A/B, C, D y E.
+
+El cierre definitivo en Git queda condicionado únicamente a completar la integración actualmente abierta con `main`, revisar el estado final del repositorio y registrar el merge correspondiente.
+
+No se inicia Hito 16 antes de completar ese cierre de integración.

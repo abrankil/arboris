@@ -1,245 +1,278 @@
-# Árboris — Sistema de topología y conectividad de mapas
+# Árboris — Sistema de conectividad y patrones de mapas
 
 ## Estado
 
-**Marco de diseño provisional consolidado.** Este documento fija las decisiones estructurales obtenidas de las pruebas visuales de escenarios isométricos realizadas en septiembre de 2026.
+Marco provisional corregido para describir navegación de mapas conectados sin confundir cardinales geográficos, bordes de pantalla, forma de ruta, función jugable, cámara, interacción y conectividad.
 
-No define todavía tamaño de mapa, cantidad de tiles, costes de movimiento, pathfinding, renderer ni formato final de datos. Esas decisiones permanecen `OPEN` hasta probar blockouts deterministas y prototipos reales.
+No define todavía tamaño de mapa, cantidad de tiles, costes de movimiento, pathfinding, renderer ni formato final de datos.
 
 ## 1. Principio central
 
 Los mapas jugables de Árboris deben percibirse como **fragmentos conectados de un territorio continuo**, no como islas flotantes, dioramas aislados ni arenas autocontenidas.
 
-La experiencia buscada es de exploración territorial: el jugador entra a una zona, recorre senderos y microambientes, encuentra puntos de interés y puede continuar hacia otras zonas por uno o más bordes del mapa.
+La autoridad del sistema es la **conectividad explícita + walkable envelope continuo**. Las etiquetas como `corridor` o `junction` y las matrices de celdas son derivados descriptivos/de prueba.
 
-La inspiración funcional proviene de juegos de exploración por zonas conectadas, mientras que la claridad isométrica y la lectura de alturas pueden tomar aprendizajes de RPG tácticos. El resultado debe desarrollar un lenguaje propio de Árboris.
+## 2. Región transitable y discretización
 
-## 2. Regla de cuadrícula
-
-La cuadrícula es **estructura lógica**, no protagonista visual.
-
-El mapa puede usar una lógica de tiles para:
-
-- click-to-move;
-- pathfinding;
-- altura;
-- transitabilidad;
-- interacción;
-- puntos de observación;
-- futuras reglas de terreno.
-
-En reposo, la grilla puede integrarse visualmente al suelo. Puede enfatizarse cuando el jugador selecciona movimiento, destino o interacción.
-
-**Regla:** mundo continuo en apariencia; tiles discretos en funcionamiento.
-
-## 3. Conectividad cardinal
-
-Cada fragmento puede conectarse hacia cualquiera de los cuatro sentidos cardinales:
-
-- `north`;
-- `south`;
-- `east`;
-- `west`.
-
-No todos los mapas deben abrir los cuatro bordes.
-
-Cada conexión declara un rol independiente:
-
-- `none` — sin conexión transitable;
-- `primary` — progresión principal;
-- `secondary` — exploración o rama secundaria;
-- `return` — ruta principalmente asociada al regreso;
-- `conditional` — conexión existente pero condicionada por estado o progresión futura.
-
-La cantidad de conexiones y su rol deben responder a la función del mapa, no a simetría visual.
-
-## 4. Topologías iniciales
-
-`mapTopology` describe la forma general de conectividad. No reemplaza la declaración individual de cada conexión.
-
-### `corridor`
-
-Dos bordes conectados con una ruta dominante. Puede ser recto o responder al relieve.
-
-### `elbow`
-
-Dos bordes conectados en cambio de dirección. El giro debe surgir de la geografía y no de un ángulo artificial impuesto visualmente.
-
-### `junction`
-
-Tres bordes conectados. Debe existir jerarquía clara entre progresión principal y ramas secundarias.
-
-### `crossroad`
-
-Cuatro bordes conectados. Es un nodo de navegación de mayor complejidad y no debe convertirse en la topología por defecto.
-
-### `pocket`
-
-Zona de entrada y retorno o desvío corto. Adecuada para miradores, observaciones, hallazgos, coleccionables o eventos ambientales.
-
-### `hub`
-
-Nodo local de mayor permanencia o redistribución. Su uso debe justificarse por gameplay; no debe aparecer solo porque la IA genere una explanada central.
-
-## 5. Topología ≠ jerarquía de ruta
-
-Una topología no determina automáticamente qué dirección es principal.
-
-Ejemplo conceptual:
+El mundo puede discretizarse para pruebas o implementación, pero la forma transitable no nace obligatoriamente de una grilla.
 
 ```text
-mapTopology: junction
-connections:
-  north: primary
-  south: return
-  east: secondary
-  west: none
+walkable envelope / región transitable
+        ↓
+rasterización o discretización reproducible
+        ↓
+celdas/tiles cuando sean útiles
 ```
 
-La topología describe conectividad; los roles describen función jugable.
+La grilla puede sostener en el futuro pathfinding, elevación relativa, interacción, puntos de observación u otras reglas técnicas. No debe obligar a que senderos, claros, cauces o pendientes adopten una geometría artificial de tablero.
 
-## 6. Cardinalidad del mundo vs. bordes de pantalla
+**Regla:** mundo continuo en apariencia y relaciones; discretización derivada en funcionamiento cuando sea necesaria.
 
-En documentación y lógica del juego se mantienen `north`, `south`, `east`, `west`.
+`click-to-move`, navegación directa, GPS u otro control permanecen decisiones de implementación/producto; este sistema no selecciona uno.
 
-En imágenes isométricas generadas o blockouts visuales, los ejes pueden proyectarse diagonalmente. Para evitar ambigüedad durante generación asistida se puede describir temporalmente la conexión como:
+## 3. Puertos de conexión
 
-- `upper-left edge`;
-- `upper-right edge`;
-- `lower-left edge`;
-- `lower-right edge`.
+Cada conexión de borde se declara como puerto local del mapa:
 
-El mapeo entre bordes de pantalla y cardinales del mundo debe definirse explícitamente en cada blockout o herramienta. No asumir que un generador visual conservará orientación cardinal por texto.
+```text
+id
+localEdge: screen_up | screen_down | screen_left | screen_right
+state: open | closed | conditional
+priority: primary | secondary | none
+progressionRole: entry | exit | return | optional | none
+directionality: bidirectional | one_way
+worldBearing: optional / OPEN
+```
 
-## 7. Contrato mínimo de blockout
+Esto evita llamar `north` a un borde solo porque aparece arriba en pantalla.
 
-Antes de estilizar un mapa deben existir decisiones deterministas sobre:
+Una conexión abierta debe llegar realmente al borde mediante región transitable continua.
 
-- topología;
-- conexiones abiertas;
-- rol de cada conexión;
-- tiles transitables y no transitables;
-- cambios de altura;
-- transiciones entre niveles;
+## 4. Cardinalidad geográfica
+
+`north`, `south`, `east` y `west` se reservan para orientación territorial cuando exista evidencia suficiente.
+
+La proyección isométrica y la orientación artística pueden hacer que un cardinal geográfico no coincida con una dirección de pantalla.
+
+Para el piloto:
+
+```text
+screen_up   = cordillera / interior / progresión
+screen_down = entrada / dirección general hacia el mar / retorno
+worldCardinalMapping = OPEN
+```
+
+## 5. Patrones derivados de conectividad
+
+### `corridor`
+Dos puertos abiertos y una ruta dominante entre ellos.
+
+### `junction`
+Tres puertos abiertos con al menos una diferencia clara de prioridad o función.
+
+### `crossroad`
+Cuatro puertos abiertos. No implica que las cuatro ramas sean equivalentes.
+
+### `pocket`
+Un acceso principal con espacio terminal o desvío que obliga a regresar por el mismo acceso.
+
+Estas etiquetas resumen conectividad; no sustituyen los puertos ni la región transitable.
+
+## 6. Forma de ruta
+
+La geometría visual de la ruta se describe por separado:
+
+```text
+straight
+bend
+meander
+unknown
+```
+
+La categoría histórica `elbow` se normaliza como:
+
+```text
+patternLabel: corridor
+routeShape: bend
+```
+
+Un corredor puede ser recto, curvo o serpentear sin cambiar su conectividad.
+
+## 7. Función espacial
+
+`hub` no define una topología única. Describe una función de permanencia o redistribución.
+
+Registrar esa función como `experienceRole` o atributo de la Unidad Espacial/Instancia, por ejemplo:
+
+```text
+experienceRole: rest | transit | tutorial | exploration | discovery | redistribution
+```
+
+Un hub puede tener tres, cuatro o más conexiones; por eso no debe competir con `junction` o `crossroad` como categoría geométrica.
+
+## 8. Progresión y movimiento
+
+Separar de la conectividad:
+
+```text
+movementProfile: level | ascent | descent | mixed | transition
+progressionRole: entry | exit | return | optional | none
+```
+
+Una ruta puede ser bidireccional físicamente y cumplir rol de `return` en una dirección de progreso. Por eso `return` no debe funcionar como sustituto de estado de conexión.
+
+## 9. Cámara e invariantes de pantalla
+
+Cuando un mapa depende de relaciones visuales persistentes, la navegación se valida junto con un Camera Contract.
+
+Para `MAP-001`, el perfil provisional es:
+
+```text
+profileId: PILOT_FIXED_ISOMETRIC
+orientationPolicy: fixed
+rotationPolicy: disabled
+followPolicy: allowed
+panPolicy: allowed
+zoomPolicy: testable / OPEN
+```
+
+El contrato de cámara conserva las relaciones canónicas de pantalla; no define todavía grados, FOV o renderer.
+
+## 10. Interacción y aprendizaje
+
+El sistema topológico no define contenido botánico, pero una Instancia puede reservar `interactionSlots` y `observationOpportunities` sobre la región transitable.
+
+Estos slots no equivalen a colocar una especie concreta. Permiten verificar que el mapa puede sostener el loop de Árboris sin inventar microhábitat o distribución.
+
+## 11. Contrato mínimo de blockout
+
+Antes de estilizar deben existir decisiones deterministas sobre:
+
+- puertos abiertos/cerrados;
+- prioridad y función de cada puerto;
+- walkable envelope;
 - ruta principal;
 - rutas secundarias cuando existan;
-- zonas de interés o detour cuando corresponda.
+- cambios de elevación relativa;
+- transiciones entre niveles;
+- bloqueos;
+- nodos de decisión;
+- rasgos territoriales obligatorios;
+- interaction slots requeridos;
+- cámara prevista;
+- player proxy para lectura/oclusiones.
 
-Una conexión abierta debe llegar realmente al borde del fragmento mediante tiles transitables contiguos. No basta con sugerir visualmente un sendero.
+Las paredes, roca, vegetación densa o agua pueden traducir visualmente un bloqueo, pero no modificar silenciosamente el contrato.
 
-Las paredes, roca alta, vegetación densa u otros bloqueos pueden traducir visualmente un tile no transitable, pero no deben modificar silenciosamente la topología aprobada.
-
-## 8. Vegetación, especies y navegación
+## 12. Vegetación, especies y navegación
 
 No toda vegetación equivale a bloqueo.
 
-Se distinguen al menos tres funciones conceptuales:
+Se mantienen tres funciones conceptuales:
 
-- vegetación bloqueante: árboles, masas densas u objetos que impiden el paso;
-- vegetación transitable: hierbas, plantas bajas, piedras pequeñas u otros elementos dentro de una casilla caminable;
-- vegetación contextual: elementos fuera del espacio jugable o usados para profundidad y continuidad visual.
+- vegetación bloqueante;
+- vegetación transitable;
+- vegetación contextual.
 
-La distribución final debe apoyarse en referencias ambientales reales. Las imágenes generadas no constituyen evidencia botánica o ecológica.
-
-Toda colocación de especies en el mapa debe distinguir entre peso de presencia y evidencia territorial.
+La distribución final debe apoyarse en referencias reales. Las imágenes generadas no constituyen evidencia botánica o ecológica.
 
 ```text
-peso de presencia = prioridad visual o probabilidad contextual basada en conteos disponibles
-evidencia territorial = observación, fotografía o registro asociado a una unidad espacial concreta
+peso de presencia = prioridad visual basada en conteos disponibles
+evidencia territorial = observación o registro asociado a una unidad concreta
 ```
 
-Un peso alto de presencia puede orientar qué especies conviene representar primero. No permite fijar ubicación exacta, microhábitat o agrupación espacial si falta evidencia territorial. Si no hay unidad territorial asociada, la colocación queda como prueba visual o estado `OPEN`.
+Un peso alto no permite fijar microhábitat ni posición exacta sin evidencia territorial.
 
-## 9. Flujo correcto de producción conceptual
-
-La topología no debe ser inventada por el generador de imágenes.
-
-Flujo recomendado:
+## 13. Flujo de producción
 
 ```text
 función jugable
-→ contrato de topología
-→ blockout determinista de tiles
+→ puertos + walkable envelope + prioridades
+→ Camera Contract + Interaction/Learning Contract cuando correspondan
+→ blockout determinista
 → referencias ambientales
-→ estilización / exploración visual asistida
-→ validación contra blockout
+→ estilización
+→ validación contra contratos
 → revisión de dirección de arte
 → asset de producción
 ```
 
-Esto reemplaza el flujo anterior en el que un prompt textual pedía simultáneamente topología, relieve, vegetación y estilo.
+La IA puede interpretar arte y ambiente, pero no decidir silenciosamente conectividad, transitabilidad, especies reales ni reglas ecológicas.
 
-## 10. Uso de IA generativa
+## 14. Dirección visual provisional
 
-La IA puede ayudar a:
+Se mantiene la baseline ya validada:
 
-- interpretar visualmente un blockout;
-- proponer erosión, roca, suelo y agrupación vegetal;
-- explorar estilo, atmósfera y composición;
-- generar variantes controladas.
-
-La IA no debe decidir silenciosamente:
-
-- qué bordes están conectados;
-- qué ruta es principal;
-- qué tiles son caminables;
-- la topología definitiva;
-- especies botánicas como dato real;
-- reglas ecológicas.
-
-Si una imagen generada contradice el blockout, se considera una exploración fallida de topología aunque sea visualmente atractiva.
-
-## 11. Dirección visual provisional validada
-
-Las pruebas actuales apoyan provisionalmente:
-
-- vista isométrica ortográfica;
-- escenario como fragmento de mundo continuo;
+- vista isométrica ortográfica/provisional;
+- mundo continuo;
 - relieve estratificado con alturas legibles;
-- senderos y terrazas integrados al paisaje;
-- cuadrícula sutil;
+- senderos y terrazas integrados;
+- cuadrícula sutil o ausente en arte final;
 - ilustración estilizada, no fotorealista;
-- texturas pintadas y contorno discreto;
 - vegetación en manchas irregulares;
-- continuidad de paisaje más allá del encuadre.
+- continuidad más allá del encuadre.
 
-Estas decisiones son una **baseline visual provisional**, no un estilo final cerrado.
+Estas decisiones son provisionales y no seleccionan renderer.
 
-## 12. Criterios de validación
+## 15. Validación
 
-Cada prueba debe revisarse al menos en:
+Cada prueba debe revisar al menos:
 
-1. fidelidad a la topología definida;
-2. legibilidad de navegación;
-3. continuidad de mundo;
-4. lectura de alturas;
-5. integración de la cuadrícula;
-6. naturalidad del relieve;
-7. coherencia ambiental;
-8. claridad de conexiones;
-9. identidad Árboris.
+1. puertos correctos;
+2. conectividad preservada;
+3. walkable envelope preservado;
+4. ausencia de conexiones inventadas;
+5. ruta principal legible;
+6. continuidad de mundo;
+7. lectura de elevación;
+8. naturalidad del relieve;
+9. invariantes de cámara preservados;
+10. player proxy legible y sin oclusión crítica;
+11. interaction slots utilizables;
+12. coherencia ambiental;
+13. identidad Árboris.
 
-La fidelidad topológica es condición previa: una imagen no puede aprobarse como referencia de mapa si altera conexiones obligatorias.
+La calidad visual no compensa un error de conectividad o de contrato.
 
-## 13. Estado de las pruebas actuales
+## 16. Matriz de pruebas corregida
 
-Las generaciones realizadas confirman que el lenguaje visual conectado es viable, pero también muestran que los prompts puramente textuales no garantizan topologías exactas.
+Las pruebas estructurales mínimas quedan:
 
-Conclusión de fase:
+```text
+TEST-MAP-01 corridor / straight or mild meander
+TEST-MAP-02 corridor / bend
+TEST-MAP-03 junction / 3 ports
+TEST-MAP-04 crossroad / 4 ports
+TEST-MAP-05 pocket / 1 access + return
+```
 
-**VALIDADO:** mundo conectado + navegación por tiles + isometría ambiental estilizada.
+`hub` se prueba más adelante como función de experiencia sobre una conectividad explícita, no como patrón topológico independiente.
 
-**NO VALIDADO:** generación textual como fuente fiable de topología exacta.
+## 17. MAP-001
 
-## 14. Próximo paso
+Para `IT-001 / MAP-001`:
 
-Crear blockouts deterministas para, al menos:
+```text
+patternLabel: corridor
+routeShape: OPEN
 
-- corredor;
-- codo;
-- junction de tres conexiones;
-- cruce de cuatro conexiones.
+P-IN:
+  localEdge: screen_down
+  state: open
+  priority: primary
+  progressionRole: entry
 
-Luego usar esos blockouts como referencia visual obligatoria en una nueva ronda de estilización externa y comprobar si el generador conserva exactamente las conexiones aprobadas.
+P-OUT:
+  localEdge: screen_up
+  state: open
+  priority: primary
+  progressionRole: exit
 
-No aumentar todavía la complejidad del esquema ni definir tamaños estándar de mapas hasta completar esa prueba.
+screen_up: cordillera / interior
+screen_down: entrada / dirección mar
+worldCardinalMapping: OPEN
+```
+
+No existen conexiones laterales autorizadas en esta fase.
+
+La matriz de prueba de MAP-001 es una discretización verificable del `walkableEnvelope`, no su geometría territorial maestra.

@@ -1,9 +1,15 @@
-# Árboris — START HERE
+# Árboris — entrada rápida
 
-Para incorporarse al proyecto desde GitHub, comenzar por:
+El repositorio tiene cinco puertas de entrada:
 
-[`docs/START_HERE.md`](docs/START_HERE.md)
+```text
+IA / automatización   → AGENTS.md
+personas / proyecto   → docs/README.md
+datos                 → data/README.md
+validación / calidad  → docs/DEVELOPMENT_MANUAL.md
+histórico             → archive/README.md
+```
 
-Ese documento explica qué archivos son canónicos, qué material es histórico, cómo navegar la capa botánica, qué debe consultar dirección de arte y qué debe leer una IA antes de modificar el proyecto.
+No cargar el repositorio completo por defecto. Abrir primero el mapa correspondiente y después solo las fuentes necesarias para la tarea.
 
-Regla esencial: la fuente botánica vigente es `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`. Los JSON de `data/botanical/` y las fichas de `data/species/` son derivados generados.
+`archive/` no gobierna el desarrollo vigente.

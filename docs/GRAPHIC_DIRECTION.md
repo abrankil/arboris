@@ -28,6 +28,7 @@ La dirección de arte debe distinguir con claridad autoridad científica, eviden
 | Correcciones de diseño | Dirección artística de Álvaro y aportes atribuidos a Alejandra | Una elección para el personaje no se convierte automáticamente en regla botánica universal. |
 | Apariencia vigente | `selectedDesign` en `data/characters/` y PNG aprobado | La última limpieza manual aceptada gobierna los píxeles y la paleta. |
 | Técnica visual | [Guía de arte](ART_STYLE_GUIDE.md) | Fuente única para personajes, escenarios, interfaz y entregas. |
+| Orientación/composición del escenario piloto | [`PILOT_ENVIRONMENT_VISUAL_CANON.md`](PILOT_ENVIRONMENT_VISUAL_CANON.md) | Regla obligatoria para `IT-001 / MAP-001` y primeros fragmentos derivados. |
 | Inventario y pendientes | [Estado de personajes](CHARACTER_DESIGN_STATUS.md), [índice de personajes](../data/characters/index.json), [catálogo ambiental](assets/backgrounds/README.md) | Distinguir recurso aprobado, ensayo, derivado y pendiente. |
 
 Jerarquía botánica para arte:
@@ -112,6 +113,37 @@ Decisión vigente: **Pixelify Sans + Nunito Sans**.
 | Nunito Sans | Cuerpo, descripciones, botones secundarios, navegación y metadatos | Aporta legibilidad y lectura accesible en pantallas pequeñas. |
 
 El logotipo se mantiene como diseño independiente.
+
+## Canon espacial del escenario piloto
+
+Para `IT-001 / MAP-001`, la lectura de pantalla queda fijada así:
+
+```text
+arriba de pantalla = cordillera / interior / objetivo final
+abajo de pantalla  = entrada / dirección hacia el mar / retorno
+centro             = camino principal recorrible
+derecha del camino = Estero El Arrayán, en nivel inferior
+laterales          = laderas norte y sur que contienen el recorrido
+```
+
+La referencia al mar expresa dirección territorial; no obliga a mostrar el océano.
+
+El lenguaje espacial es isométrico y usa Celdas Espaciales cúbicas o prismáticas para construir terrazas y cambios de altura. Las laderas deben sentirse como relieve continuo, no como islas flotantes. Pueden existir accesos puntuales a senderos secundarios solo cuando la topología real los respalde.
+
+### Densidad y limpieza
+
+Decisión de proyecto: **no es necesario poblar intensamente los escenarios**. La dirección visual prioriza:
+
+```text
+pocos elementos reconocibles
++ espacio negativo
++ lectura clara de camino y desniveles
++ anclas territoriales bien ubicadas
+```
+
+No llenar cada tile por decoración. Una zona simple de suelo, roca o vegetación baja puede ser correcta si mejora legibilidad y reconocimiento del lugar.
+
+La especificación detallada y los criterios de fallo están en [`PILOT_ENVIRONMENT_VISUAL_CANON.md`](PILOT_ENVIRONMENT_VISUAL_CANON.md).
 
 ## Flujo de una tarea gráfica
 
