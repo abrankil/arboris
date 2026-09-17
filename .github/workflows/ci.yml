@@ -34,7 +34,7 @@ jobs:
         run: python -m pip install --upgrade pip openpyxl
 
       - name: Install Node dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Canonical tests
         run: npm test
