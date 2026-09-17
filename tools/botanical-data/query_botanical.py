@@ -254,7 +254,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--pretty",
         action="store_true",
-        help="pretty-print JSON; default output is compact to reduce context size",
+        help="pretty-print JSON; may be placed before or after the command",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -300,7 +300,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     parser = build_parser()
-    args = parser.parse_args()
+    raw_args = sys.argv[1:]
+    pretty = "--pretty" in raw_args
+    args = parser.parse_args([item for item in raw_args if item != "--pretty"])
     dataset = load_dataset()
 
     if args.command == "stats":
@@ -326,7 +328,7 @@ def main() -> None:
     else:
         fail(f"unsupported command: {args.command}")
 
-    if args.pretty:
+    if pretty:
         json.dump(result, sys.stdout, ensure_ascii=False, indent=2)
     else:
         json.dump(result, sys.stdout, ensure_ascii=False, separators=(",", ":"))
