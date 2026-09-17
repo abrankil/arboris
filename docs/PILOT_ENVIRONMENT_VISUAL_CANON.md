@@ -191,16 +191,29 @@ Esta aprobación consolida como dirección visual deseada:
 - balance entre vegetación, roca, agua y suelo expuesto;
 - sensación de precordillera chilena reconocible sin convertir el escenario en una copia fotográfica literal.
 
-La aprobación es **direccional**, no evidencial:
+La aprobación es **direccional**, no evidencial y tampoco fija todavía el estilo gráfico final:
 
 ```text
 arte conceptual aprobado
-= referencia de visión / tono / composición / naturalización
+= referencia de visión espacial / tono / composición / naturalización
 ≠ evidencia territorial
 ≠ geometría medida
 ≠ distribución botánica validada
 ≠ asset final de producción
+≠ estilo gráfico final cerrado
 ```
+
+La aprobación no cierra todavía:
+
+- tratamiento final del pixel art ambiental;
+- densidad y tamaño de clusters;
+- paleta final de entorno;
+- visibilidad o naturalización exacta de los tiles/prismas;
+- tamaño definitivo de sprite y tiles;
+- iluminación, shaders o efectos finales;
+- grado exacto de detalle de roca, agua, vegetación y estructuras.
+
+Las muestras gráficas posteriores pueden usarse para probar producción sin asumir que su renderizado representa la apariencia final de Árboris. Lo que deben conservar es la estructura espacial, la lectura territorial y las restricciones del piloto.
 
 Ningún detalle ornamental o botánico presente en una imagen generada se vuelve canónico por aparecer en ella. Las especies, microhábitats, posiciones exactas y métricas siguen gobernadas por sus fuentes correspondientes.
 
@@ -254,5 +267,6 @@ Antes de generar otra imagen conceptual del entorno, comprobar explícitamente:
 9. ¿las conexiones secundarias están justificadas?
 10. ¿la imagen conserva continuidad territorial?
 11. ¿la imagen sigue la visión aprobada sin convertir detalles generados en evidencia?
+12. ¿la prueba distingue entre dirección conceptual aprobada y estilo gráfico final todavía `OPEN`?
 
 Si alguna respuesta crítica es no, la propuesta no debe presentarse como interpretación válida del piloto.
