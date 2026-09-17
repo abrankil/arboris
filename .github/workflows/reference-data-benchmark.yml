@@ -1,0 +1,53 @@
+name: Reference data benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'data/botanical/**'
+      - 'tools/botanical-data/benchmark_reference_access.mjs'
+      - 'tools/botanical-data/build_reference_sqlite.py'
+      - 'tools/canonical-identification/dataset.mjs'
+      - '.github/workflows/reference-data-benchmark.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build derived SQLite reference database
+        run: python tools/botanical-data/build_reference_sqlite.py --force
+
+      - name: Run controlled host benchmark
+        run: >-
+          node tools/botanical-data/benchmark_reference_access.mjs
+          --json build/reference-benchmark.json
+          --markdown build/reference-benchmark.md
+
+      - name: Upload benchmark report
+        uses: actions/upload-artifact@v4
+        with:
+          name: reference-data-benchmark
+          path: |
+            build/reference-benchmark.json
+            build/reference-benchmark.md
+          if-no-files-found: error
+          retention-days: 14
