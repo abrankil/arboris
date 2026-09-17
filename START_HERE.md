@@ -1,15 +1,11 @@
-# Árboris — START HERE
+# Árboris — entrada rápida
 
-For coding or research agents, begin with:
+Antes de trabajar en el repositorio:
 
-[`AGENTS.md`](AGENTS.md)
+1. lee `AGENTS.md` para routing operativo de IA;
+2. usa `docs/START_HERE.md` para orientación general;
+3. usa `data/README.md` para consultas de datos;
+4. usa `docs/DATA_ACCESS_PERFORMANCE.md` para arquitectura de acceso, benchmark JSON vs SQLite y gates de rendimiento;
+5. aplica `docs/DEVELOPMENT_MANUAL.md` antes de consolidar decisiones.
 
-For human/project orientation, use:
-
-[`docs/START_HERE.md`](docs/START_HERE.md)
-
-For database/data routing, use:
-
-[`data/README.md`](data/README.md)
-
-The botanical editorial/scientific source of truth is `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`; normalized JSON under `data/botanical/` is the preferred machine-read layer for normal analysis.
+No cargues el repositorio completo por defecto. Abre solo las fuentes necesarias para la tarea.
