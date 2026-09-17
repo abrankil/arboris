@@ -56,8 +56,13 @@ function buildRelationIndex(relations) {
     const characterId = relation.caracter_id;
 
     if (!bySpecies.has(speciesId)) bySpecies.set(speciesId, new Map());
+    const byCharacter = bySpecies.get(speciesId);
 
-    bySpecies.get(speciesId).set(characterId, {
+    if (byCharacter.has(characterId)) {
+      throw new Error(`Duplicate species-character relation ${speciesId} / ${characterId}`);
+    }
+
+    byCharacter.set(characterId, {
       speciesId,
       characterId,
       expectedStates: uniqueSorted(listFromValue(relation.estado_esperado)),
