@@ -23,9 +23,13 @@
     "test:legacy-key": "node --test tools/botanical-key-validation/*.test.mjs",
     "materialize:map001": "node tools/map-blockout/materialize_map001.mjs data/maps/map-001-blockout-candidate-001.json --out-dir build/map001-blockout",
     "test:map-blockout": "node --test tools/map-blockout/*.test.mjs",
-    "validate:tile-grammar": "node tools/tile-grammar/validate_candidate.mjs data/tiles/tile-grammar-candidate-v0.1.json",
+    "validate:tile-grammar": "node tools/tile-grammar/validate_candidate_v02.mjs data/tiles/tile-grammar-candidate-v0.2.json",
     "test:tile-grammar": "node --test tools/tile-grammar/*.test.mjs",
-    "stress:tile-grammar": "node tools/tile-grammar/stress_test_007.mjs"
+    "stress:tile-grammar": "node tools/tile-grammar/stress_test_008.mjs",
+    "validate:tile-grammar:v01": "node tools/tile-grammar/validate_candidate.mjs data/tiles/tile-grammar-candidate-v0.1.json",
+    "validate:tile-grammar:v02": "node tools/tile-grammar/validate_candidate_v02.mjs data/tiles/tile-grammar-candidate-v0.2.json",
+    "stress:tile-grammar:v01": "node tools/tile-grammar/stress_test_007.mjs",
+    "stress:tile-grammar:v02": "node tools/tile-grammar/stress_test_008.mjs"
   },
   "dependencies": {
     "expo": "~57.0.23",

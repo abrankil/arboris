@@ -1,0 +1,25 @@
+{
+  "testId": "TILE-GRAMMAR-MIXED-SEMANTICS-TEST-008",
+  "runtime": "v22.16.0",
+  "candidate": "TILE-GRAMMAR-CANDIDATE-v0.2",
+  "mixedEdgePolicy": "UNRESOLVED_NON_CONNECTABLE",
+  "fixtureCount": 17,
+  "counts": {
+    "CORRECT": 17
+  },
+  "decision": "KEEP",
+  "productionStandard": "NOT_ESTABLISHED",
+  "mixedFixtures": {
+    "MIXED-PASS-01": "PASS — mixed surface exposes concrete land edge",
+    "MIXED-PASS-02": "PASS — mixed surface exposes concrete water bank edge",
+    "MIXED-FAIL-01": "FAIL EDGE_COMPATIBILITY — mixed edge ↔ land",
+    "MIXED-FAIL-02": "FAIL EDGE_COMPATIBILITY — mixed edge ↔ water",
+    "MIXED-FAIL-03": "FAIL EDGE_COMPATIBILITY — mixed edge ↔ mixed"
+  },
+  "openPreserved": {
+    "tileSize": "OPEN",
+    "metricScale": "OPEN",
+    "renderer": "OPEN",
+    "pathfinding": "OPEN"
+  }
+}

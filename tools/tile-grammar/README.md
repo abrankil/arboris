@@ -1,27 +1,42 @@
-# Tile Grammar Candidate v0.1
+# Tile Grammar Candidates
 
 Executable candidate grammar for logical 2D cells represented as working isometric prisms.
 
-The validator is deliberately fail-closed. It validates structural properties only; it does not certify final art, renderer behavior, metric scale, pathfinding, territorial geometry, or pixel-art production quality.
+The validators are deliberately fail-closed. They validate structural properties only; they do not certify final art, renderer behavior, metric scale, pathfinding, territorial geometry, or pixel-art production quality.
+
+## Current candidate
+
+`TILE-GRAMMAR-CANDIDATE-v0.2` changes the semantics of `mixed`:
+
+```text
+surface.composition=mixed
+→ allowed
+
+edge.content=mixed
+→ UNRESOLVED_NON_CONNECTABLE
+→ never a wildcard
+```
+
+A mixed surface can connect through a concrete edge declared as `land` or `water`. An unresolved mixed edge cannot certify adjacency with `land`, `water`, or another `mixed` edge.
+
+v0.1 remains in the repository for historical reproducibility of TEST-007.
 
 ## Commands
 
 ```bash
 npm run test:tile-grammar
 npm run validate:tile-grammar
+npm run stress:tile-grammar
+
+npm run validate:tile-grammar:v01
+npm run stress:tile-grammar:v01
 ```
 
 ## Compatibility rule
 
-Two adjacent cells are compatible only when their shared edges agree on:
+Adjacent cells are compatible only when their shared edges agree on reversed `bandEndpoints`, `routePort`, traversal, compatible profiles, and resolved edge content.
 
-- reversed `bandEndpoints`;
-- `routePort` state;
-- traversal state;
-- compatible edge profiles;
-- compatible edge content.
-
-`land ↔ water` is accepted only as a closed `bank ↔ bank` interface. A hard blocker is always non-walkable, carries no route, and exposes only closed edges.
+`land ↔ water` is accepted only as a closed `bank ↔ bank` interface. A hard blocker is non-walkable, carries no route, and exposes closed edges.
 
 ## Authority
 
@@ -32,4 +47,4 @@ walkableEnvelope / gameplay contracts
 → working isometric prism
 ```
 
-`tileSize`, metric scale, renderer, real-world elevation, and final pixel-art resolution remain `OPEN`.
+`tileSize`, metric scale, renderer, pathfinding, real-world elevation, and final pixel-art resolution remain `OPEN`.

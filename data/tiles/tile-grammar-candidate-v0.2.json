@@ -1,0 +1,600 @@
+{
+  "schemaVersion": "0.2",
+  "grammarId": "TILE-GRAMMAR-CANDIDATE-v0.2",
+  "status": "candidate",
+  "authority": {
+    "logicalCell": "DERIVED_FROM_WALKABLE_ENVELOPE_OR_CONTRACTS",
+    "prismRepresentation": "WORKING_VISUALIZATION_ONLY",
+    "territorialVoxel": false,
+    "metricScale": "OPEN",
+    "tileSize": "OPEN",
+    "renderer": "OPEN"
+  },
+  "patch": [
+    [
+      "C01",
+      "C02",
+      "C03"
+    ],
+    [
+      "C04",
+      "C05",
+      "C06"
+    ],
+    [
+      "C07",
+      "C08",
+      "C09"
+    ]
+  ],
+  "tiles": [
+    {
+      "cellId": "C01",
+      "surface": {
+        "composition": "land"
+      },
+      "walkability": "walkable",
+      "blocker": "none",
+      "route": {
+        "kind": "none",
+        "ports": []
+      },
+      "elevation": {
+        "mode": "flat",
+        "reference": "RELATIVE_ONLY"
+      },
+      "edges": {
+        "grid_up": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_right": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_down": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_left": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "open",
+          "routePort": false
+        }
+      },
+      "visualTreatment": {
+        "status": "ART_PROVISIONAL",
+        "hint": "raised grass"
+      }
+    },
+    {
+      "cellId": "C02",
+      "surface": {
+        "composition": "land"
+      },
+      "walkability": "walkable",
+      "blocker": "none",
+      "route": {
+        "kind": "none",
+        "ports": []
+      },
+      "elevation": {
+        "mode": "flat",
+        "reference": "RELATIVE_ONLY"
+      },
+      "edges": {
+        "grid_up": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_right": {
+          "content": "land",
+          "profile": "cliff",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_down": {
+          "content": "land",
+          "profile": "blocked",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_left": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "open",
+          "routePort": false
+        }
+      },
+      "visualTreatment": {
+        "status": "ART_PROVISIONAL",
+        "hint": "elevation edge"
+      }
+    },
+    {
+      "cellId": "C03",
+      "surface": {
+        "composition": "land"
+      },
+      "walkability": "non_walkable",
+      "blocker": "hard",
+      "route": {
+        "kind": "none",
+        "ports": []
+      },
+      "elevation": {
+        "mode": "mixed",
+        "reference": "RELATIVE_ONLY"
+      },
+      "edges": {
+        "grid_up": {
+          "content": "land",
+          "profile": "blocked",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_right": {
+          "content": "land",
+          "profile": "blocked",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_down": {
+          "content": "land",
+          "profile": "blocked",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_left": {
+          "content": "land",
+          "profile": "blocked",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "closed",
+          "routePort": false
+        }
+      },
+      "visualTreatment": {
+        "status": "ART_PROVISIONAL",
+        "hint": "rock"
+      }
+    },
+    {
+      "cellId": "C04",
+      "surface": {
+        "composition": "land"
+      },
+      "walkability": "walkable",
+      "blocker": "none",
+      "route": {
+        "kind": "none",
+        "ports": []
+      },
+      "elevation": {
+        "mode": "slope",
+        "reference": "RELATIVE_ONLY"
+      },
+      "edges": {
+        "grid_up": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_right": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_down": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_left": {
+          "content": "land",
+          "profile": "slope",
+          "bandEndpoints": [
+            1,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        }
+      },
+      "visualTreatment": {
+        "status": "ART_PROVISIONAL",
+        "hint": "slope +1 to 0"
+      }
+    },
+    {
+      "cellId": "C05",
+      "surface": {
+        "composition": "land"
+      },
+      "walkability": "walkable",
+      "blocker": "none",
+      "route": {
+        "kind": "path",
+        "ports": [
+          "grid_right",
+          "grid_down"
+        ]
+      },
+      "elevation": {
+        "mode": "flat",
+        "reference": "RELATIVE_ONLY"
+      },
+      "edges": {
+        "grid_up": {
+          "content": "land",
+          "profile": "blocked",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_right": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": true
+        },
+        "grid_down": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": true
+        },
+        "grid_left": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        }
+      },
+      "visualTreatment": {
+        "status": "ART_PROVISIONAL",
+        "hint": "path corner"
+      }
+    },
+    {
+      "cellId": "C06",
+      "surface": {
+        "composition": "mixed"
+      },
+      "walkability": "mixed",
+      "blocker": "none",
+      "route": {
+        "kind": "path",
+        "ports": [
+          "grid_left"
+        ]
+      },
+      "elevation": {
+        "mode": "mixed",
+        "reference": "RELATIVE_ONLY"
+      },
+      "edges": {
+        "grid_up": {
+          "content": "land",
+          "profile": "blocked",
+          "bandEndpoints": [
+            1,
+            1
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_right": {
+          "content": "water",
+          "profile": "bank",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_down": {
+          "content": "water",
+          "profile": "bank",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_left": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": true
+        }
+      },
+      "visualTreatment": {
+        "status": "ART_PROVISIONAL",
+        "hint": "soil-water bank"
+      }
+    },
+    {
+      "cellId": "C07",
+      "surface": {
+        "composition": "land"
+      },
+      "walkability": "walkable",
+      "blocker": "none",
+      "route": {
+        "kind": "none",
+        "ports": []
+      },
+      "elevation": {
+        "mode": "flat",
+        "reference": "RELATIVE_ONLY"
+      },
+      "edges": {
+        "grid_up": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_right": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_down": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_left": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        }
+      },
+      "visualTreatment": {
+        "status": "ART_PROVISIONAL",
+        "hint": "flat ground"
+      }
+    },
+    {
+      "cellId": "C08",
+      "surface": {
+        "composition": "land"
+      },
+      "walkability": "walkable",
+      "blocker": "none",
+      "route": {
+        "kind": "path",
+        "ports": [
+          "grid_up"
+        ]
+      },
+      "elevation": {
+        "mode": "flat",
+        "reference": "RELATIVE_ONLY"
+      },
+      "edges": {
+        "grid_up": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": true
+        },
+        "grid_right": {
+          "content": "land",
+          "profile": "bank",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_down": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        },
+        "grid_left": {
+          "content": "land",
+          "profile": "level",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "open",
+          "routePort": false
+        }
+      },
+      "visualTreatment": {
+        "status": "ART_PROVISIONAL",
+        "hint": "straight path"
+      }
+    },
+    {
+      "cellId": "C09",
+      "surface": {
+        "composition": "water"
+      },
+      "walkability": "non_walkable",
+      "blocker": "none",
+      "route": {
+        "kind": "none",
+        "ports": []
+      },
+      "elevation": {
+        "mode": "flat",
+        "reference": "RELATIVE_ONLY"
+      },
+      "edges": {
+        "grid_up": {
+          "content": "water",
+          "profile": "bank",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_right": {
+          "content": "water",
+          "profile": "level",
+          "bandEndpoints": [
+            -1,
+            -1
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_down": {
+          "content": "water",
+          "profile": "level",
+          "bandEndpoints": [
+            -1,
+            -1
+          ],
+          "traversal": "closed",
+          "routePort": false
+        },
+        "grid_left": {
+          "content": "water",
+          "profile": "bank",
+          "bandEndpoints": [
+            0,
+            0
+          ],
+          "traversal": "closed",
+          "routePort": false
+        }
+      },
+      "visualTreatment": {
+        "status": "ART_PROVISIONAL",
+        "hint": "water depression"
+      }
+    }
+  ],
+  "policies": {
+    "mixedEdge": "UNRESOLVED_NON_CONNECTABLE"
+  }
+}
