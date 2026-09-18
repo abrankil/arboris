@@ -450,7 +450,7 @@ sha256:
 COMPILER
 tools/asc/compile_asc.mjs
 sha256:
-d9ab96577b62652d640d96e153e9e1340ed6630e86e751113e182f59dd9e5eb
+f4c2097eea61593a5a71fc51806dfc3df203a5df95f6baf5489e58be1d59fa63
 
 NODE24 PROMPT A
 sha256:
@@ -466,6 +466,8 @@ PASS
 CROSS-RUNTIME OUTPUT EQUIVALENCE
 Node 22 ↔ Node 24: PASS
 ```
+
+Corrección 2026-09-18: SHA-256 recalculado sobre `tools/asc/compile_asc.mjs` y verificado contra el contenido de `HEAD`.
 
 Por tanto, para este contrato y esta implementación exacta del compilador:
 
