@@ -1,0 +1,77 @@
+name: MAP-001 Tile Grammar Pre-integration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/map001-tilegrammar-preintegration.yml'
+      - 'tools/integration/**'
+      - 'data/integration/**'
+      - 'data/maps/map-001-blockout-candidate-002.json'
+      - 'data/tiles/tile-grammar-candidate-v0.2.json'
+      - 'data/baselines/map001-tilegrammar-node24-baseline-001.json'
+      - 'tools/tile-grammar/validate_tile_grammar_v02.mjs'
+      - 'docs/SPATIAL_MODEL.md'
+      - 'package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preintegration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Runtime
+        run: node --version
+
+      - name: Pre-integration tests
+        run: npm run test:map001-tilegrammar-preintegration
+
+      - name: Execute A
+        run: npm run run:map001-tilegrammar-preintegration -- --output build/preintegration/report.a.json
+
+      - name: Execute B
+        run: npm run run:map001-tilegrammar-preintegration -- --output build/preintegration/report.b.json
+
+      - name: Determinism and decision gate
+        shell: bash
+        run: |
+          diff -u build/preintegration/report.a.json build/preintegration/report.b.json
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const report = JSON.parse(fs.readFileSync('build/preintegration/report.a.json', 'utf8'));
+          if (report.executionStatus !== 'COMPLETED') throw new Error('executionStatus must be COMPLETED');
+          if (report.semanticDecision !== 'PASS') throw new Error('semanticDecision must be PASS');
+          if (report.graph.walkableCellCount !== 17) throw new Error('expected 17 walkable cells');
+          if (report.graph.orthogonalSharedAdjacencies !== 16) throw new Error('expected 16 shared adjacencies');
+          if (report.validation.tilesPassed !== 17 || report.validation.tilesTotal !== 17) throw new Error('expected 17/17 tile validations');
+          if (report.validation.sharedEdgesPassed !== 16 || report.validation.sharedEdgesTotal !== 16) throw new Error('expected 16/16 shared-edge validations');
+          if (report.executableFixture.inferredWaterBankEdges !== 0) throw new Error('water/bank inference detected');
+          if (report.executableFixture.inferredBlockerEdges !== 0) throw new Error('blocker inference detected');
+          if (report.executableFixture.routeOverlayDerived !== false) throw new Error('path overlay inference detected');
+          if (report.provenanceIntegrity.pass !== true) throw new Error('provenance integrity failed');
+          EOF
+
+      - name: Hash evidence
+        shell: bash
+        run: |
+          sha256sum build/preintegration/report.a.json | tee build/preintegration/report.sha256.txt
+          sha256sum data/integration/map001-tilegrammar-preintegration-test-001.contract.json | tee build/preintegration/contract.sha256.txt
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: map001-tilegrammar-preintegration-test-001
+          path: build/preintegration/
+          retention-days: 30
