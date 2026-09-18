@@ -6,14 +6,17 @@ on:
       - fix/expo-sdk57-alignment
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  generate-lock:
+  align:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout branch
         uses: actions/checkout@v4
+        with:
+          ref: fix/expo-sdk57-alignment
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -21,13 +24,16 @@ jobs:
           node-version: '24'
           cache: npm
 
-      - name: Update Expo dependency metadata
+      - name: Align Expo dependency versions
         run: npm install --package-lock-only --ignore-scripts expo@~57.0.24 expo-constants@~57.0.19 expo-image-picker@~57.0.19 expo-router@~57.0.22
 
-      - name: Upload updated package files
-        uses: actions/upload-artifact@v4
-        with:
-          name: expo-lock-alignment
-          path: |
-            package.json
-            package-lock.json
+      - name: Remove temporary workflow
+        run: rm .github/workflows/tmp-expo-lock-alignment.yml
+
+      - name: Commit generated dependency alignment
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json .github/workflows/tmp-expo-lock-alignment.yml
+          git commit -m "fix(deps): align Expo SDK 57 package versions"
+          git push origin HEAD:fix/expo-sdk57-alignment
