@@ -1,25 +1,33 @@
-# MAP-001 deterministic blockout tool
+# MAP-001 deterministic blockout tools
 
-Materializes the provisional test geometry defined in `data/maps/map-001-blockout-candidate-001.json` and validates the current topology, territorial relations, OPEN preservation, and the two required viewport tests.
+Two candidates are retained for reproducibility.
 
-This tool does **not** establish territorial geometry, meters, bearings, pathfinding, renderer behavior, or Interaction/Learning slots.
+Candidate 001 is the original provisional materialization. Candidate 002 is the current pre-integration rectification.
 
-## Validate and materialize
+Candidate 002 explicitly records:
+
+```text
+walkableEnvelope = NOT_MATERIALIZED
+test raster = TEST_ONLY
+interaction structural contract = DEFINED
+interaction spatial binding = OPEN
+water/blocker edge rasterization = OPEN
+```
+
+It does not establish territorial geometry, meters, bearings, pathfinding, renderer behavior, shoreline edge signatures, blocker edge signatures, or concrete interaction-cell placement.
+
+## Commands
 
 ```bash
 npm run materialize:map001
-```
-
-Outputs:
-
-```text
-build/map001-blockout/map001-blockout-360x640.svg
-build/map001-blockout/map001-blockout-360x800.svg
-build/map001-blockout/validation.json
-```
-
-## Tests
-
-```bash
 npm run test:map-blockout
+
+npm run materialize:map001:v01
+npm run materialize:map001:v02
+npm run test:map-blockout:v01
+npm run test:map-blockout:v02
 ```
+
+Candidate 002 outputs to `build/map001-blockout-v02/`.
+
+The raster remains a provisional verification fixture and must not be promoted to the authoritative `walkableEnvelope`.

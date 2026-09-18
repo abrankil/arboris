@@ -21,15 +21,19 @@
     "test:asc": "node --test tools/asc/*.test.mjs",
     "test:canonical-identification": "node --test tools/canonical-identification/engine.test.mjs",
     "test:legacy-key": "node --test tools/botanical-key-validation/*.test.mjs",
-    "materialize:map001": "node tools/map-blockout/materialize_map001.mjs data/maps/map-001-blockout-candidate-001.json --out-dir build/map001-blockout",
-    "test:map-blockout": "node --test tools/map-blockout/*.test.mjs",
+    "materialize:map001": "node tools/map-blockout/materialize_map001_v02.mjs data/maps/map-001-blockout-candidate-002.json --out-dir build/map001-blockout-v02",
+    "test:map-blockout": "npm run test:map-blockout:v01 && npm run test:map-blockout:v02",
     "validate:tile-grammar": "node tools/tile-grammar/validate_candidate_v02.mjs data/tiles/tile-grammar-candidate-v0.2.json",
     "test:tile-grammar": "node --test tools/tile-grammar/*.test.mjs",
     "stress:tile-grammar": "node tools/tile-grammar/stress_test_008.mjs",
     "validate:tile-grammar:v01": "node tools/tile-grammar/validate_candidate.mjs data/tiles/tile-grammar-candidate-v0.1.json",
     "validate:tile-grammar:v02": "node tools/tile-grammar/validate_candidate_v02.mjs data/tiles/tile-grammar-candidate-v0.2.json",
     "stress:tile-grammar:v01": "node tools/tile-grammar/stress_test_007.mjs",
-    "stress:tile-grammar:v02": "node tools/tile-grammar/stress_test_008.mjs"
+    "stress:tile-grammar:v02": "node tools/tile-grammar/stress_test_008.mjs",
+    "materialize:map001:v01": "node tools/map-blockout/materialize_map001.mjs data/maps/map-001-blockout-candidate-001.json --out-dir build/map001-blockout-v01",
+    "materialize:map001:v02": "node tools/map-blockout/materialize_map001_v02.mjs data/maps/map-001-blockout-candidate-002.json --out-dir build/map001-blockout-v02",
+    "test:map-blockout:v01": "node --test tools/map-blockout/materialize_map001.test.mjs",
+    "test:map-blockout:v02": "node --test tools/map-blockout/materialize_map001_v02.test.mjs"
   },
   "dependencies": {
     "expo": "~57.0.23",
