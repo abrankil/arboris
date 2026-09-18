@@ -56,13 +56,29 @@ Para reducir ambigüedad, estas expresiones tienen significado estable:
 → compilar primero y luego ejecutar el prompt con la herramienta generativa disponible.
 
 "audita ASC" / "audita el resultado ASC"
-→ revisar prompt y/o resultado contra contrato, fuentes y criterios de validación.
+→ auditar el prompt ASC y/o el resultado producido por el ejecutor contra contrato, fuentes y criterios de validación. La auditoría es una operación externa a la función de compilación de ASC; ASC no se autocertifica ni emite por sí mismo PASS / PARTIAL / FAIL.
 
 "usa X como evidencia/input ASC"
 → X puede alimentar la compilación; no adquiere automáticamente autoridad ni permite completar vacíos.
 ```
 
 Cuando la instrucción sea ambigua entre **compilar** y **ejecutar**, conservar la distinción y no tratar la salida generativa como si fuera parte del compilador.
+
+### Regla operativa para “iterar con ASC”
+
+En el flujo metodológico de Árboris, **iterar con ASC** significa:
+
+1. reunir la información autorizada pertinente;
+2. preservar contratos, restricciones y estados `OPEN`;
+3. compilar esa información mediante ASC;
+4. producir un prompt ASC;
+5. entregarlo a un ejecutor externo cuando la tarea requiera ejecución;
+6. obtener un resultado ASC;
+7. probar y/o auditar ese resultado según corresponda.
+
+ASC no sustituye los verbos `INVESTIGAR`, `ANALIZAR`, `DEFINIR`, `DISEÑAR`, `PROTOTIPAR`, `IMPLEMENTAR`, `PROBAR`, `AUDITAR`, `CORREGIR`, `ITERAR`, `VALIDAR`, `INTEGRAR`, `CERRAR`, `REANUDAR` o `DOCUMENTAR`. Interviene específicamente cuando información ya autorizada debe transformarse en instrucciones ejecutables para un generador externo.
+
+Los estados `PASS`, `PARTIAL` y `FAIL` pertenecen a una prueba o auditoría del artefacto correspondiente. No son decisiones emitidas por la función de compilación de ASC.
 
 ## 3. Autoridad y precedencia
 
@@ -273,6 +289,8 @@ Cada prueba debe registrar al menos:
 Cuando se compare una serie de pruebas, debe registrarse **qué variable cambió** entre versiones para evitar atribuir mejoras a factores no controlados.
 
 ## 12. Auditoría obligatoria
+
+ASC no es el auditor. La auditoría es una operación del ciclo de trabajo aplicada al prompt, resultado, contrato, prueba u otro artefacto pertinente.
 
 Toda consolidación de reglas ASC, contratos, pruebas que cambien el modelo de trabajo o conclusiones que pretendan convertirse en canon debe aplicar `docs/DEVELOPMENT_MANUAL.md` y responder explícitamente:
 
