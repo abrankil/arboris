@@ -5,10 +5,10 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/map001-walkable-envelope.yml'
+      - 'data/baselines/map001-walkable-envelope-authority-001.json'
       - 'data/maps/map-001-walkable-envelope-candidate-001.json'
       - 'data/maps/map-001-blockout-candidate-002.json'
       - 'tools/map-navigation/**'
-      - 'docs/MAP001_WALKABLE_ENVELOPE_AUTHORITY_CANDIDATE_001_2026-09-18.md'
       - 'package.json'
   workflow_dispatch:
 
@@ -16,7 +16,8 @@ permissions:
   contents: read
 
 jobs:
-  envelope:
+  authority-runtime:
+    name: authority-runtime (operational gate of authority)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -35,11 +36,11 @@ jobs:
       - name: Tests
         run: npm run test:walkable-envelope
 
-      - name: Materialize A
-        run: node tools/map-navigation/materialize_walkable_envelope_001.mjs data/maps/map-001-walkable-envelope-candidate-001.json --out-dir build/walkable-envelope/a
+      - name: Materialize A (authority manifest -> authorized candidate -> envelope -> raster)
+        run: node tools/map-navigation/materialize_walkable_envelope_001.mjs --out-dir build/walkable-envelope/a
 
       - name: Materialize B
-        run: node tools/map-navigation/materialize_walkable_envelope_001.mjs data/maps/map-001-walkable-envelope-candidate-001.json --out-dir build/walkable-envelope/b
+        run: node tools/map-navigation/materialize_walkable_envelope_001.mjs --out-dir build/walkable-envelope/b
 
       - name: Determinism and authority gate
         shell: bash
@@ -48,22 +49,35 @@ jobs:
           node --input-type=module <<'EOF'
           import fs from 'node:fs';
           const report = JSON.parse(fs.readFileSync('build/walkable-envelope/a/validation.json','utf8'));
-          if (report.status !== 'PASS') throw new Error('walkable envelope gate must PASS');
+          if (report.status !== 'PASS') throw new Error('authority-runtime gate must PASS (status=' + report.status + ', failureClass=' + report.failureClass + ')');
+          if (report.candidate002Dependency !== false) throw new Error('authority-runtime must not depend on Candidate 002');
           if (report.derivedRaster.walkableCellCount !== 17) throw new Error('expected 17 derived cells');
           if (report.derivedRaster.connectedComponents !== 1) throw new Error('expected one connected component');
           if (report.derivedRaster.branchingNodes.length !== 0) throw new Error('expected zero branching nodes');
-          if (!report.migrationCompatibility.legacyHashMatches) throw new Error('legacy hash mismatch');
-          if (!report.migrationCompatibility.exactCellSetMatch) throw new Error('migration cell set mismatch');
+          if (report.frameBoundaryPolicy !== 'OPEN_PORTS_MAY_CROSS_FRAME') throw new Error('frameBoundaryPolicy must be OPEN_PORTS_MAY_CROSS_FRAME');
           if (report.metricScale !== 'OPEN') throw new Error('metric scale must remain OPEN');
           if (report.worldBearing !== 'OPEN') throw new Error('world bearing must remain OPEN');
           if (report.territorialGeometryClaim !== false) throw new Error('must not claim territorial geometry');
           EOF
 
-      - name: Hash evidence
+      - name: Independence check (authority-runtime PASS without Candidate 002)
+        shell: bash
+        run: |
+          mv data/maps/map-001-blockout-candidate-002.json data/maps/map-001-blockout-candidate-002.json.movedfortest
+          node tools/map-navigation/materialize_walkable_envelope_001.mjs --out-dir build/walkable-envelope/independence
+          mv data/maps/map-001-blockout-candidate-002.json.movedfortest data/maps/map-001-blockout-candidate-002.json
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const report = JSON.parse(fs.readFileSync('build/walkable-envelope/independence/validation.json','utf8'));
+          if (report.status !== 'PASS') throw new Error('authority-runtime must PASS even with Candidate 002 absent');
+          EOF
+
+      - name: Hash evidence (new evidence record for this rectification; does not touch freeze evidence)
         shell: bash
         run: |
           mkdir -p build/walkable-envelope/evidence
           sha256sum data/maps/map-001-walkable-envelope-candidate-001.json | tee build/walkable-envelope/evidence/candidate.sha256.txt
+          sha256sum data/baselines/map001-walkable-envelope-authority-001.json | tee build/walkable-envelope/evidence/authority-manifest.sha256.txt
           sha256sum tools/map-navigation/materialize_walkable_envelope_001.mjs | tee build/walkable-envelope/evidence/materializer.sha256.txt
           sha256sum build/walkable-envelope/a/validation.json | tee build/walkable-envelope/evidence/validation.sha256.txt
           sha256sum build/walkable-envelope/a/derived-raster.json | tee build/walkable-envelope/evidence/raster.sha256.txt
@@ -72,6 +86,45 @@ jobs:
       - name: Upload evidence
         uses: actions/upload-artifact@v4
         with:
-          name: map001-walkable-envelope-candidate-001
+          name: map001-walkable-envelope-authority-runtime
           path: build/walkable-envelope/
+          retention-days: 30
+
+  migration-evidence:
+    name: migration-evidence (historical Candidate 002 compatibility only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Runtime
+        run: node --version
+
+      - name: Validate migration compatibility
+        run: node tools/map-navigation/materialize_walkable_envelope_001.mjs --mode migration --out-dir build/walkable-envelope-migration
+
+      - name: Report migration verdict (informational; does not gate authority-runtime)
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const result = JSON.parse(fs.readFileSync('build/walkable-envelope-migration/migration-validation.json','utf8'));
+          console.log('migration-evidence status:', result.status);
+          if (result.status !== 'MIGRATION_PASS') {
+            throw new Error('migration-evidence did not produce MIGRATION_PASS (status=' + result.status + '); this does not affect authority-runtime');
+          }
+          EOF
+
+      - name: Upload migration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: map001-walkable-envelope-migration-evidence
+          path: build/walkable-envelope-migration/
           retention-days: 30

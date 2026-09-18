@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_ROOT = path.resolve(HERE, '../..');
 const DEFAULT_INPUT = 'data/maps/map-001-walkable-envelope-candidate-001.json';
+const DEFAULT_AUTHORITY_PATH = 'data/baselines/map001-walkable-envelope-authority-001.json';
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -51,6 +52,24 @@ function sortCells(cells) {
 
 function sha256File(filePath) {
   return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+// ---------------------------------------------------------------------------
+// Fail-closed error type for authority/input failures (RECTIFICATION 001).
+// This is distinct from a plain thrown Error: callers that expect a
+// structured, reportable fail-closed result catch this type specifically
+// and turn it into a report object instead of propagating an uncaught
+// exception. The exact `code` values are an implementation detail (per
+// the correction set §17); the class itself and the fail-closed semantics
+// are not.
+// ---------------------------------------------------------------------------
+export class WalkableEnvelopeAuthorityError extends Error {
+  constructor(code, message, details = null) {
+    super(message);
+    this.name = 'WalkableEnvelopeAuthorityError';
+    this.code = code;
+    this.details = details;
+  }
 }
 
 export function validateEnvelopeModel(model) {
@@ -116,6 +135,307 @@ export function validateEnvelopeModel(model) {
   invariant(Array.isArray(model.open) && model.open.includes('metric scale'), 'metric scale must remain listed OPEN');
   invariant(model.open.includes('surveyed route geometry'), 'surveyed route geometry must remain OPEN');
   invariant(model.productionStandard === 'NOT_ESTABLISHED', 'production standard must remain NOT_ESTABLISHED');
+
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// frameBoundaryPolicy = OPEN_PORTS_MAY_CROSS_FRAME (RECTIFICATION 001, §1/§6
+// of the correction set). This is an operational invariant checked in code
+// against the already-frozen geometry; it is not written into the candidate
+// or the authority manifest.
+//
+// screen_up / screen_down (open ports): envelope ∩ boundary SEGMENT (finite,
+// t restricted to [minX,maxX]) must be exactly one connected region, and
+// that region must contain the port anchor.
+// screen_left / screen_right (closed edges): envelope ∩ boundary SEGMENT
+// (finite, t restricted to [minY,maxY]) must be empty.
+//
+// Implementation: exact closed-form intersection of each polyline_buffer
+// capsule (segment + halfWidth) with the axis-aligned boundary line,
+// clipped to the finite localFrame edge (not the infinite line — this
+// restriction of the *query domain* to the frame's own extent is not
+// clipping of the envelope itself, which is never modified or approximated).
+// No discrete sampling, no general geometry engine, no portWidth.
+//
+// A capsule is convex, so its intersection with any line is a single
+// interval (or empty); the envelope is the union of per-segment capsules,
+// so its boundary-line intersection is the union of those intervals,
+// merged with an explicit numeric epsilon (FRAME_BOUNDARY_EPSILON) that
+// only closes floating-point seams between adjoining sub-intervals of the
+// SAME capsule and merges geometrically-touching/adjacent capsule
+// intervals — it never merges across a real, material gap. A degenerate
+// zero-width interval [t,t] (exact tangency) is treated as a nonempty
+// intersection, consistent with `distance <= halfWidth` being inclusive.
+// ---------------------------------------------------------------------------
+const FRAME_BOUNDARY_EPSILON = 1e-9;
+
+function intersectIntervals(a, b) {
+  if (!a || !b) return null;
+  const lo = Math.max(a[0], b[0]);
+  const hi = Math.min(a[1], b[1]);
+  return lo <= hi + FRAME_BOUNDARY_EPSILON ? [lo, Math.max(lo, hi)] : null;
+}
+
+// Merges a list of (possibly overlapping, adjacent, or disjoint) intervals.
+// Two intervals merge only if their gap is <= FRAME_BOUNDARY_EPSILON;
+// anything wider remains separate, per the explicit gap-vs-epsilon rule.
+function mergeIntervals(pieces) {
+  const sorted = pieces.filter(Boolean).slice().sort((p, q) => p[0] - q[0]);
+  const merged = [];
+  for (const [lo, hi] of sorted) {
+    const last = merged[merged.length - 1];
+    if (last && lo <= last[1] + FRAME_BOUNDARY_EPSILON) {
+      last[1] = Math.max(last[1], hi);
+    } else {
+      merged.push([lo, hi]);
+    }
+  }
+  return merged;
+}
+
+// Exact intersection of one capsule (segment a-b buffered by halfWidth) with
+// the horizontal line y = fixedY, expressed as x-intervals (0, 1, or more
+// pieces before merging — merged by the caller together with every other
+// segment's pieces for the same boundary edge).
+function capsuleHorizontalLineIntervals(a, b, halfWidth, fixedY) {
+  const [ax, ay] = a;
+  const [bx, by] = b;
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len2 = dx * dx + dy * dy;
+  const h2 = halfWidth * halfWidth;
+  const pieces = [];
+
+  if (len2 <= 1e-18) {
+    const disc = h2 - (fixedY - ay) * (fixedY - ay);
+    if (disc >= 0) {
+      const r = Math.sqrt(Math.max(0, disc));
+      pieces.push([ax - r, ax + r]);
+    }
+    return pieces;
+  }
+
+  // Projection parameter s(x) along the segment for point (x, fixedY),
+  // affine in x: s(x) = s1*x + s0.
+  const s1 = dx / len2;
+  const s0 = ((fixedY - ay) * dy - ax * dx) / len2;
+
+  if (Math.abs(s1) > 1e-15) {
+    const xAt0 = (0 - s0) / s1;
+    const xAt1 = (1 - s0) / s1;
+    const xLo = Math.min(xAt0, xAt1);
+    const xHi = Math.max(xAt0, xAt1);
+
+    // Rectangular region (s(x) in [0,1]): perpendicular distance to the
+    // infinite line through a,b. cross(x) = (x-ax)*dy - (fixedY-ay)*dx,
+    // affine in x; condition |cross(x)| <= halfWidth * |segment|.
+    const c1 = dy;
+    const c0 = -ax * dy - (fixedY - ay) * dx;
+    const segLen = Math.sqrt(len2);
+    const rhs = halfWidth * segLen;
+    if (Math.abs(c1) < 1e-15) {
+      if (Math.abs(c0) <= rhs + FRAME_BOUNDARY_EPSILON) pieces.push([xLo, xHi]);
+    } else {
+      let r1 = (-rhs - c0) / c1;
+      let r2 = (rhs - c0) / c1;
+      if (r1 > r2) [r1, r2] = [r2, r1];
+      const clipped = intersectIntervals([xLo, xHi], [r1, r2]);
+      if (clipped) pieces.push(clipped);
+    }
+
+    // Cap A region (s(x) < 0): distance to endpoint a.
+    const discA = h2 - (fixedY - ay) * (fixedY - ay);
+    if (discA >= 0) {
+      const r = Math.sqrt(Math.max(0, discA));
+      const domain = s1 > 0 ? [-Infinity, xLo] : [xLo, Infinity];
+      const clipped = intersectIntervals([ax - r, ax + r], domain);
+      if (clipped) pieces.push(clipped);
+    }
+
+    // Cap B region (s(x) > 1): distance to endpoint b.
+    const discB = h2 - (fixedY - by) * (fixedY - by);
+    if (discB >= 0) {
+      const r = Math.sqrt(Math.max(0, discB));
+      const domain = s1 > 0 ? [xHi, Infinity] : [-Infinity, xHi];
+      const clipped = intersectIntervals([bx - r, bx + r], domain);
+      if (clipped) pieces.push(clipped);
+    }
+  } else {
+    // s(x) is constant (dx === 0): the perpendicular foot does not depend
+    // on x, so the whole line is a single region (rect, cap A, or cap B).
+    if (s0 >= 0 && s0 <= 1) {
+      pieces.push([ax - halfWidth, ax + halfWidth]);
+    } else if (s0 < 0) {
+      const discA = h2 - (fixedY - ay) * (fixedY - ay);
+      if (discA >= 0) {
+        const r = Math.sqrt(Math.max(0, discA));
+        pieces.push([ax - r, ax + r]);
+      }
+    } else {
+      const discB = h2 - (fixedY - by) * (fixedY - by);
+      if (discB >= 0) {
+        const r = Math.sqrt(Math.max(0, discB));
+        pieces.push([bx - r, bx + r]);
+      }
+    }
+  }
+
+  return pieces;
+}
+
+// Mirror of capsuleHorizontalLineIntervals for the vertical line x = fixedX,
+// expressed as y-intervals. Same derivation with x/y roles swapped.
+function capsuleVerticalLineIntervals(a, b, halfWidth, fixedX) {
+  const [ax, ay] = a;
+  const [bx, by] = b;
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len2 = dx * dx + dy * dy;
+  const h2 = halfWidth * halfWidth;
+  const pieces = [];
+
+  if (len2 <= 1e-18) {
+    const disc = h2 - (fixedX - ax) * (fixedX - ax);
+    if (disc >= 0) {
+      const r = Math.sqrt(Math.max(0, disc));
+      pieces.push([ay - r, ay + r]);
+    }
+    return pieces;
+  }
+
+  const s1 = dy / len2;
+  const s0 = ((fixedX - ax) * dx - ay * dy) / len2;
+
+  if (Math.abs(s1) > 1e-15) {
+    const yAt0 = (0 - s0) / s1;
+    const yAt1 = (1 - s0) / s1;
+    const yLo = Math.min(yAt0, yAt1);
+    const yHi = Math.max(yAt0, yAt1);
+
+    const c1 = -dx;
+    const c0 = (fixedX - ax) * dy + ay * dx;
+    const segLen = Math.sqrt(len2);
+    const rhs = halfWidth * segLen;
+    if (Math.abs(c1) < 1e-15) {
+      if (Math.abs(c0) <= rhs + FRAME_BOUNDARY_EPSILON) pieces.push([yLo, yHi]);
+    } else {
+      let r1 = (-rhs - c0) / c1;
+      let r2 = (rhs - c0) / c1;
+      if (r1 > r2) [r1, r2] = [r2, r1];
+      const clipped = intersectIntervals([yLo, yHi], [r1, r2]);
+      if (clipped) pieces.push(clipped);
+    }
+
+    const discA = h2 - (fixedX - ax) * (fixedX - ax);
+    if (discA >= 0) {
+      const r = Math.sqrt(Math.max(0, discA));
+      const domain = s1 > 0 ? [-Infinity, yLo] : [yLo, Infinity];
+      const clipped = intersectIntervals([ay - r, ay + r], domain);
+      if (clipped) pieces.push(clipped);
+    }
+
+    const discB = h2 - (fixedX - bx) * (fixedX - bx);
+    if (discB >= 0) {
+      const r = Math.sqrt(Math.max(0, discB));
+      const domain = s1 > 0 ? [yHi, Infinity] : [-Infinity, yHi];
+      const clipped = intersectIntervals([by - r, by + r], domain);
+      if (clipped) pieces.push(clipped);
+    }
+  } else {
+    if (s0 >= 0 && s0 <= 1) {
+      pieces.push([ay - halfWidth, ay + halfWidth]);
+    } else if (s0 < 0) {
+      const discA = h2 - (fixedX - ax) * (fixedX - ax);
+      if (discA >= 0) {
+        const r = Math.sqrt(Math.max(0, discA));
+        pieces.push([ay - r, ay + r]);
+      }
+    } else {
+      const discB = h2 - (fixedX - bx) * (fixedX - bx);
+      if (discB >= 0) {
+        const r = Math.sqrt(Math.max(0, discB));
+        pieces.push([by - r, by + r]);
+      }
+    }
+  }
+
+  return pieces;
+}
+
+// Exact envelope ∩ boundary-SEGMENT regions for one localFrame edge: unions
+// the per-centerline-segment capsule intervals, clips each to the finite
+// edge extent ([minX,maxX] or [minY,maxY] — the frame's own boundary
+// segment, not the envelope), and merges within FRAME_BOUNDARY_EPSILON.
+function frameBoundaryRegions(centerline, halfWidth, edge, bounds) {
+  const { minX, maxX, minY, maxY } = bounds;
+  const isHorizontal = edge === 'screen_up' || edge === 'screen_down';
+  const fixedValue =
+    edge === 'screen_up' ? minY
+    : edge === 'screen_down' ? maxY
+    : edge === 'screen_left' ? minX
+    : maxX;
+  const domain = isHorizontal ? [minX, maxX] : [minY, maxY];
+
+  const pieces = [];
+  for (let i = 0; i < centerline.length - 1; i += 1) {
+    const rawIntervals = isHorizontal
+      ? capsuleHorizontalLineIntervals(centerline[i], centerline[i + 1], halfWidth, fixedValue)
+      : capsuleVerticalLineIntervals(centerline[i], centerline[i + 1], halfWidth, fixedValue);
+    for (const interval of rawIntervals) {
+      const clipped = intersectIntervals(interval, domain);
+      if (clipped) pieces.push(clipped);
+    }
+  }
+
+  return mergeIntervals(pieces);
+}
+
+export function validateFrameBoundaryPolicy(model) {
+  invariant(model?.geometry?.centerline && model?.localFrame?.bounds, 'frameBoundaryPolicy check requires geometry and localFrame.bounds');
+  const bounds = model.localFrame.bounds;
+  const halfWidth = model.geometry.halfWidth;
+  const centerline = model.geometry.centerline;
+  const eps = FRAME_BOUNDARY_EPSILON;
+
+  for (const edge of ['screen_left', 'screen_right']) {
+    const regions = frameBoundaryRegions(centerline, halfWidth, edge, bounds);
+    if (regions.length !== 0) {
+      throw new WalkableEnvelopeAuthorityError(
+        'FRAME_BOUNDARY_LATERAL_INTERSECTION',
+        `frameBoundaryPolicy violation: envelope intersects closed edge ${edge}`,
+        { edge, regions }
+      );
+    }
+  }
+
+  const ports = model.ports ?? [];
+  const portByEdge = {
+    screen_up: ports.find((p) => p.localEdge === 'screen_up'),
+    screen_down: ports.find((p) => p.localEdge === 'screen_down'),
+  };
+
+  for (const edge of ['screen_up', 'screen_down']) {
+    const port = portByEdge[edge];
+    invariant(port && Array.isArray(port.anchor), `frameBoundaryPolicy check requires a port anchor on ${edge}`);
+    const regions = frameBoundaryRegions(centerline, halfWidth, edge, bounds);
+    if (regions.length !== 1) {
+      throw new WalkableEnvelopeAuthorityError(
+        'FRAME_BOUNDARY_OPEN_PORT_NOT_SINGLE_REGION',
+        `frameBoundaryPolicy violation: expected exactly one connected crossing region on ${edge}, found ${regions.length}`,
+        { edge, regions }
+      );
+    }
+    const anchorT = port.anchor[0];
+    const [run] = regions;
+    if (anchorT < run[0] - eps || anchorT > run[1] + eps) {
+      throw new WalkableEnvelopeAuthorityError(
+        'FRAME_BOUNDARY_ANCHOR_NOT_IN_REGION',
+        `frameBoundaryPolicy violation: port anchor is not contained in the crossing region on ${edge}`,
+        { edge, anchorT, run }
+      );
+    }
+  }
 
   return true;
 }
@@ -231,68 +551,310 @@ function renderSvg(model, derivedCells) {
   ].join('\n');
 }
 
-export function materializeEnvelope(model, root = DEFAULT_ROOT) {
-  validateEnvelopeModel(model);
-  const derivedCells = rasterizeEnvelope(model);
+// ---------------------------------------------------------------------------
+// Authority manifest handling (RECTIFICATION 001).
+//
+// The authority manifest was previously only a documental declaration: no
+// code read it. This is the normal entry point now: authority manifest →
+// authorized candidate (path + id + SHA-256 verified) → envelope → derived
+// raster. Candidate 002 (legacy) is never read on this path.
+// ---------------------------------------------------------------------------
+
+export function loadAuthorityManifest(root = DEFAULT_ROOT, authorityPath = DEFAULT_AUTHORITY_PATH) {
+  const resolved = path.isAbsolute(authorityPath) ? authorityPath : path.join(root, authorityPath);
+  let raw;
+  try {
+    raw = fs.readFileSync(resolved, 'utf8');
+  } catch (err) {
+    throw new WalkableEnvelopeAuthorityError(
+      'AUTHORITY_MANIFEST_UNREADABLE',
+      'authority manifest could not be read: ' + authorityPath,
+      { cause: err.message }
+    );
+  }
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    throw new WalkableEnvelopeAuthorityError(
+      'AUTHORITY_MANIFEST_INVALID_JSON',
+      'authority manifest is not valid JSON: ' + authorityPath,
+      { cause: err.message }
+    );
+  }
+}
+
+function requireExact(actual, expected, label) {
+  if (actual !== expected) {
+    throw new WalkableEnvelopeAuthorityError(
+      'AUTHORITY_INVARIANT_MISMATCH',
+      `${label} mismatch: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
+      { label, expected, actual }
+    );
+  }
+}
+
+// Validates the authority manifest by exact value (correction set §11/§12).
+// Any discrepancy fails closed — no warning-and-continue path exists here.
+export function validateAuthorityManifest(manifest) {
+  if (!manifest || typeof manifest !== 'object') {
+    throw new WalkableEnvelopeAuthorityError('AUTHORITY_MANIFEST_INVALID_SHAPE', 'authority manifest must be an object');
+  }
+
+  requireExact(manifest.schemaVersion, '0.1', 'schemaVersion');
+  requireExact(manifest.authorityId, 'MAP-001-WALKABLE-ENVELOPE-AUTHORITY-001', 'authorityId');
+  requireExact(manifest.status, 'FROZEN_NAVIGATION_AUTHORITY', 'status');
+  requireExact(manifest.scope, 'MAP-001 LOCAL NAVIGATION GEOMETRY ONLY', 'scope');
+
+  const src = manifest.sourceCandidate ?? {};
+  requireExact(src.id, 'MAP-001-WALKABLE-ENVELOPE-CANDIDATE-001', 'sourceCandidate.id');
+  requireExact(src.path, 'data/maps/map-001-walkable-envelope-candidate-001.json', 'sourceCandidate.path');
+  if (typeof src.sha256 !== 'string' || src.sha256.length === 0) {
+    throw new WalkableEnvelopeAuthorityError('AUTHORITY_INVARIANT_MISMATCH', 'sourceCandidate.sha256 must be a non-empty string');
+  }
+
+  const rule = manifest.authorityRule ?? {};
+  requireExact(rule.canonicalNavigationGeometry, src.path, 'authorityRule.canonicalNavigationGeometry');
+  requireExact(rule.legacyRasterRole, 'MIGRATION_COMPATIBILITY_ONLY', 'authorityRule.legacyRasterRole');
+  requireExact(rule.legacyRasterPath, 'data/maps/map-001-blockout-candidate-002.json', 'authorityRule.legacyRasterPath');
+  requireExact(rule.reverseAuthorityProhibited, true, 'authorityRule.reverseAuthorityProhibited');
+
+  const interpretation = manifest.interpretation ?? {};
+  requireExact(interpretation.unit, 'NAVIGATION_UNIT', 'interpretation.unit');
+  requireExact(interpretation.territorialGeometryClaim, false, 'interpretation.territorialGeometryClaim');
+  requireExact(interpretation.metricScale, 'OPEN', 'interpretation.metricScale');
+  requireExact(interpretation.worldBearing, 'OPEN', 'interpretation.worldBearing');
+  requireExact(interpretation.surveyedRouteGeometry, 'OPEN', 'interpretation.surveyedRouteGeometry');
+
+  requireExact(manifest.productionStandard, 'NOT_ESTABLISHED', 'productionStandard');
+
+  return true;
+}
+
+// Resolves and verifies the candidate authorized by the manifest: reads it
+// from sourceCandidate.path, checks its SHA-256 against sourceCandidate.sha256,
+// and checks candidate.id against sourceCandidate.id. Fails closed on any
+// mismatch or unreadable/invalid file. Never touches Candidate 002.
+export function verifyAuthorizedCandidate(manifest, root = DEFAULT_ROOT) {
+  const src = manifest.sourceCandidate;
+  const candidatePath = path.join(root, src.path);
+
+  let raw;
+  try {
+    raw = fs.readFileSync(candidatePath);
+  } catch (err) {
+    throw new WalkableEnvelopeAuthorityError(
+      'CANDIDATE_UNREADABLE',
+      'authorized candidate could not be read: ' + src.path,
+      { cause: err.message }
+    );
+  }
+
+  const observedSha = crypto.createHash('sha256').update(raw).digest('hex');
+  if (observedSha !== src.sha256) {
+    throw new WalkableEnvelopeAuthorityError(
+      'CANDIDATE_SHA_MISMATCH',
+      'candidate SHA-256 does not match authority manifest sourceCandidate.sha256',
+      { expected: src.sha256, observed: observedSha, path: src.path }
+    );
+  }
+
+  let candidate;
+  try {
+    candidate = JSON.parse(raw.toString('utf8'));
+  } catch (err) {
+    throw new WalkableEnvelopeAuthorityError(
+      'CANDIDATE_INVALID_JSON',
+      'authorized candidate is not valid JSON: ' + src.path,
+      { cause: err.message }
+    );
+  }
+
+  if (candidate.id !== src.id) {
+    throw new WalkableEnvelopeAuthorityError(
+      'CANDIDATE_ID_MISMATCH',
+      'candidate.id does not match authority manifest sourceCandidate.id',
+      { expected: src.id, observed: candidate.id }
+    );
+  }
+
+  return candidate;
+}
+
+// ---------------------------------------------------------------------------
+// authority-runtime: the operational gate. Never reads Candidate 002, never
+// depends on migration-evidence, and its PASS never incorporates
+// legacyHashMatches / exactCellSetMatch.
+// ---------------------------------------------------------------------------
+export function materializeWalkableEnvelopeAuthority(root = DEFAULT_ROOT, authorityPath = DEFAULT_AUTHORITY_PATH) {
+  let manifest;
+  let candidate;
+  try {
+    manifest = loadAuthorityManifest(root, authorityPath);
+    validateAuthorityManifest(manifest);
+    candidate = verifyAuthorizedCandidate(manifest, root);
+    validateEnvelopeModel(candidate);
+    validateFrameBoundaryPolicy(candidate);
+  } catch (err) {
+    if (err instanceof WalkableEnvelopeAuthorityError) {
+      return {
+        report: {
+          status: 'FAIL_CLOSED',
+          failureClass: 'AUTHORITY_INPUT_FAILURE',
+          code: err.code,
+          message: err.message,
+          details: err.details,
+          candidate002Dependency: false
+        },
+        svg: null
+      };
+    }
+    throw err;
+  }
+
+  const derivedCells = rasterizeEnvelope(candidate);
   const graph = analyzeDerivedRaster(derivedCells);
-  const migration = compareLegacyRaster(model, root);
-  const status =
-    migration.legacyHashMatches
-    && migration.exactCellSetMatch
-    && derivedCells.length === model.rasterization.expectedDerivedWalkableCellCount
+  const geometryOk =
+    derivedCells.length === candidate.rasterization.expectedDerivedWalkableCellCount
     && graph.connectedComponents === 1
     && graph.branchingNodes.length === 0
-    && graph.endpoints.length === 2
-      ? 'PASS'
-      : 'REVISE';
+    && graph.endpoints.length === 2;
+
+  const status = geometryOk ? 'PASS' : 'REVISE';
 
   const report = {
-    envelopeId: model.id,
+    authorityId: manifest.authorityId,
+    envelopeId: candidate.id,
     status,
-    authorityState: model.status,
+    failureClass: geometryOk ? null : 'GEOMETRY_NAVIGATION_FAILURE',
+    authorityState: manifest.status,
+    frameBoundaryPolicy: 'OPEN_PORTS_MAY_CROSS_FRAME',
     territorialGeometryClaim: false,
-    localFrameUnit: model.localFrame.unit,
-    metricScale: model.localFrame.metricScale,
-    worldBearing: model.localFrame.worldBearing,
+    localFrameUnit: candidate.localFrame.unit,
+    metricScale: candidate.localFrame.metricScale,
+    worldBearing: candidate.localFrame.worldBearing,
     derivedRaster: {
-      rows: model.rasterization.grid.rows,
-      cols: model.rasterization.grid.cols,
+      rows: candidate.rasterization.grid.rows,
+      cols: candidate.rasterization.grid.cols,
       walkableCells: derivedCells,
       walkableCellCount: derivedCells.length,
       connectedComponents: graph.connectedComponents,
       branchingNodes: graph.branchingNodes,
       endpoints: graph.endpoints
     },
-    migrationCompatibility: migration,
     futureRasterAuthority: 'WALKABLE_ENVELOPE_AFTER_FREEZE',
-    productionStandard: model.productionStandard
+    productionStandard: candidate.productionStandard,
+    candidate002Dependency: false
   };
 
-  return { report, svg: renderSvg(model, derivedCells) };
+  return { report, svg: renderSvg(candidate, derivedCells) };
+}
+
+// ---------------------------------------------------------------------------
+// migration-evidence: historical compatibility check against Candidate 002.
+// Entirely separate entry point from authority-runtime. If Candidate 002 is
+// absent, this returns a structured missing-input result — never a PASS/
+// REVISE migration verdict, never an uncaught I/O exception.
+// ---------------------------------------------------------------------------
+export function validateWalkableEnvelopeMigration(root = DEFAULT_ROOT, authorityPath = DEFAULT_AUTHORITY_PATH) {
+  let manifest;
+  let candidate;
+  try {
+    manifest = loadAuthorityManifest(root, authorityPath);
+    validateAuthorityManifest(manifest);
+    candidate = verifyAuthorizedCandidate(manifest, root);
+    validateEnvelopeModel(candidate);
+  } catch (err) {
+    if (err instanceof WalkableEnvelopeAuthorityError) {
+      return {
+        status: 'MIGRATION_INPUT_MISSING',
+        failureClass: 'AUTHORITY_INPUT_FAILURE',
+        code: err.code,
+        message: err.message
+      };
+    }
+    throw err;
+  }
+
+  const migration = candidate.migrationCompatibility;
+  const legacyPath = path.join(root, migration.legacyRasterPath);
+
+  if (!fs.existsSync(legacyPath)) {
+    return {
+      status: 'MIGRATION_INPUT_MISSING',
+      failureClass: 'MIGRATION_INPUT_FAILURE',
+      code: 'LEGACY_CANDIDATE_ABSENT',
+      message: 'Candidate 002 (legacy raster) is absent; no migration verdict emitted',
+      candidateId: candidate.id
+    };
+  }
+
+  const comparison = compareLegacyRaster(candidate, root);
+  const status = comparison.legacyHashMatches && comparison.exactCellSetMatch ? 'MIGRATION_PASS' : 'MIGRATION_REVISE';
+
+  return {
+    status,
+    failureClass: status === 'MIGRATION_PASS' ? null : 'MIGRATION_COMPATIBILITY_FAILURE',
+    candidateId: candidate.id,
+    comparison
+  };
 }
 
 function parseArgs(argv) {
-  const args = { input: DEFAULT_INPUT, outDir: 'build/map001-walkable-envelope' };
-  if (argv[0] && !argv[0].startsWith('--')) args.input = argv[0];
-  const idx = argv.indexOf('--out-dir');
-  if (idx >= 0 && argv[idx + 1]) args.outDir = argv[idx + 1];
+  const args = { mode: 'authority', authorityPath: DEFAULT_AUTHORITY_PATH, outDir: null };
+  for (let i = 0; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (token === '--mode') {
+      args.mode = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    if (token === '--out-dir') {
+      args.outDir = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    if (!token.startsWith('--')) {
+      args.authorityPath = token;
+    }
+  }
+  if (!args.outDir) {
+    args.outDir = args.mode === 'migration'
+      ? 'build/map001-walkable-envelope-migration'
+      : 'build/map001-walkable-envelope';
+  }
   return args;
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const root = DEFAULT_ROOT;
-  const inputPath = path.resolve(root, args.input);
   const outDir = path.resolve(root, args.outDir);
-  const model = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
-  const { report, svg } = materializeEnvelope(model, root);
   fs.mkdirSync(outDir, { recursive: true });
-  fs.writeFileSync(path.join(outDir, 'derived-raster.json'), JSON.stringify(report.derivedRaster, null, 2) + '\n');
+
+  if (args.mode === 'migration') {
+    const result = validateWalkableEnvelopeMigration(root, args.authorityPath);
+    fs.writeFileSync(path.join(outDir, 'migration-validation.json'), JSON.stringify(result, null, 2) + '\n');
+    process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+    if (result.status !== 'MIGRATION_PASS') process.exitCode = 1;
+    return;
+  }
+
+  const { report, svg } = materializeWalkableEnvelopeAuthority(root, args.authorityPath);
   fs.writeFileSync(path.join(outDir, 'validation.json'), JSON.stringify(report, null, 2) + '\n');
-  fs.writeFileSync(path.join(outDir, 'walkable-envelope.svg'), svg);
+  if (report.derivedRaster) {
+    fs.writeFileSync(path.join(outDir, 'derived-raster.json'), JSON.stringify(report.derivedRaster, null, 2) + '\n');
+  }
+  if (svg) {
+    fs.writeFileSync(path.join(outDir, 'walkable-envelope.svg'), svg);
+  }
   process.stdout.write(JSON.stringify(report, null, 2) + '\n');
   if (report.status !== 'PASS') process.exitCode = 1;
 }
+
+// DEFAULT_INPUT is kept for tooling/tests that need the raw candidate path
+// independent of the authority manifest indirection (e.g. building negative
+// fixtures in memory).
+export { DEFAULT_INPUT, DEFAULT_AUTHORITY_PATH, DEFAULT_ROOT };
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   main().catch((error) => {
