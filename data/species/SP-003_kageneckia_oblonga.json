@@ -1,0 +1,1016 @@
+{
+  "view_schema": "arboris.species-card.v2",
+  "generated_from": {
+    "master_name": "Base_botanica_Pokedex_flora_Master",
+    "master_version": "2.0.0",
+    "schema_version": "2.0.0",
+    "source_file": "Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx",
+    "source_sha256": "24e0c1f119904f50c73967a878e02a27ae6e2ae05145d0c00248b8debc1eae50",
+    "source_of_truth": "xlsx"
+  },
+  "species": {
+    "species_id": "SP-003",
+    "nombre_cientifico": "Kageneckia oblonga",
+    "nombre_comun": "Bollén",
+    "familia": "Rosaceae",
+    "orden": "Rosales",
+    "habito": "Árbol/arbusto",
+    "origen": "Nativa",
+    "endemismo": "Sí",
+    "estado_piloto": "Activa",
+    "notas": "Incluye al menos dos individuos con variación foliar marcada."
+  },
+  "botanical_characters": [
+    {
+      "character": {
+        "caracter_id": "CH-001",
+        "grupo": "Hoja",
+        "nombre_caracter": "Tipo de hoja",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "simple",
+          "compuesta"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Arquitectura general de la hoja.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-001",
+        "estado_esperado": [
+          "simple"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-009",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "bajo",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Hoja simple."
+      },
+      "source": {
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-002",
+        "grupo": "Hoja",
+        "nombre_caracter": "Disposición foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "alterna",
+          "subopuesta",
+          "opuesta",
+          "verticilada"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Patrón de inserción de hojas sobre una misma ramilla. Evaluar varios nudos visibles; no inferir desde una hoja aislada ni desde ramillas diferentes.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-002",
+        "estado_esperado": [
+          "alterna"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-009",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Disposición alterna."
+      },
+      "source": {
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-003",
+        "grupo": "Hoja",
+        "nombre_caracter": "Dentición del margen foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "entero",
+          "finamente_serrado",
+          "serrado",
+          "dentado"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Presencia y tipo de dientes en un margen suficientemente conservado. No confundir daño, herbivoría o necrosis con dentición.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-003",
+        "estado_esperado": [
+          "serrado"
+        ],
+        "variabilidad": "alta",
+        "fuente_id": "F-009",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio-alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Margen serrado; morfología de dientes variable."
+      },
+      "source": {
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-004",
+        "grupo": "Hoja",
+        "nombre_caracter": "Consistencia",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "blanda",
+          "flexible",
+          "firme",
+          "coriacea"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Propiedad mecánica de una hoja madura. Preferir observación de campo en hoja intacta cuando sea segura; la fotografía aporta evidencia indirecta.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-004",
+        "estado_esperado": [
+          "coriacea"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-009",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Hoja coriácea."
+      },
+      "source": {
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-005",
+        "grupo": "Hoja",
+        "nombre_caracter": "Contraste cromático entre haz y envés",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "contraste_observable",
+          "sin_contraste_observable"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Diferencia cromática visualmente reconocible entre ambas caras de la misma hoja, comparadas bajo iluminación equivalente. No describe un color específico.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-005",
+        "estado_esperado": [
+          "contraste_observable"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-009",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Cara inferior blanquecina respecto de la superior."
+      },
+      "source": {
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-006",
+        "grupo": "Hoja",
+        "nombre_caracter": "Presencia de pubescencia en el envés",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Presencia de pelos o indumento visible en la superficie inferior. No clasifica tipo, densidad ni longitud del pelo.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-006",
+        "estado_esperado": [
+          "presente",
+          "ausente"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "bajo",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "media",
+        "notas": "Variación de pubescencia conservada operacionalmente."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-008",
+        "grupo": "Hoja",
+        "nombre_caracter": "Nervadura visualmente contrastante",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Indica si la nervadura se distingue visualmente de la lámina por color o contraste. No representa relieve o prominencia física.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-008",
+        "estado_esperado": [
+          "presente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Nervadura visualmente contrastante en fotografías del piloto."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-009",
+        "grupo": "Hoja",
+        "nombre_caracter": "Nervaduras secundarias visualmente distinguibles",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Se considera presente cuando varias nervaduras secundarias se distinguen claramente desde el nervio central hacia el margen.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-009",
+        "estado_esperado": [
+          "presente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Nervaduras secundarias claramente visibles en fotografías."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-010",
+        "grupo": "Hoja",
+        "nombre_caracter": "Nervaduras secundarias conectadas a reborde marginal",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Las nervaduras secundarias alcanzan o se unen a una línea o reborde continuo próximo al margen foliar.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-010",
+        "estado_esperado": [
+          "ausente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Sin reborde marginal continuo observado."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-011",
+        "grupo": "Hoja",
+        "nombre_caracter": "Forma de la lámina foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "ovada",
+          "ovado_eliptica",
+          "ovado_oblonga",
+          "eliptica",
+          "oblonga",
+          "ovado_lanceolada",
+          "lanceolada",
+          "obovada",
+          "orbicular"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Forma de la lámina madura e intacta. La variación se representa mediante múltiples estados y el campo variabilidad, no mediante un estado 'variable'.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-011",
+        "estado_esperado": [
+          "eliptica",
+          "obovada"
+        ],
+        "variabilidad": "alta",
+        "fuente_id": "F-009",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Duplicados consolidados; variación representada mediante estados múltiples."
+      },
+      "source": {
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-012",
+        "grupo": "Hoja",
+        "nombre_caracter": "Ápice foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "agudo",
+          "acuminado",
+          "obtuso",
+          "redondeado",
+          "emarginado"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Forma del extremo distal de una hoja madura e intacta; evitar hojas con ápice dañado o incompleto.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-012",
+        "estado_esperado": [
+          "obtuso",
+          "acuminado"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-009",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Variación del ápice conservada."
+      },
+      "source": {
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-013",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Tipo de fruto diagnóstico",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "drupa",
+          "foliculo",
+          "cipsela",
+          "capsula"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Categoría botánica del fruto. Los atributos de forma, color, número de lóbulos o dehiscencia se registran por separado.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-013",
+        "estado_esperado": [
+          "foliculo"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-009",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Tipo de fruto normalizado."
+      },
+      "source": {
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-014",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Tipo de inflorescencia",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "racimo",
+          "panicula",
+          "corimbo",
+          "solitaria",
+          "capitulo",
+          "amento"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Arquitectura de la inflorescencia. Color, sexualidad y otros rasgos florales no se codifican dentro de este carácter.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-014",
+        "estado_esperado": [
+          "corimbo",
+          "solitaria"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-009",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Flores masculinas en corimbos y femeninas solitarias; relación sexual conservada en nota."
+      },
+      "source": {
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-027",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Presencia de ala en la semilla",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Indica si la semilla presenta una expansión membranosa en forma de ala. Observar solo cuando semillas o frutos abiertos estén disponibles; no exigir abrir frutos.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-003",
+        "caracter_id": "CH-027",
+        "estado_esperado": [
+          "presente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-020",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio-alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Fundación Philippi describe el fruto de Bollén con semillas aladas."
+      },
+      "source": {
+        "fuente_id": "F-020",
+        "tipo": "Guía botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Kageneckia oblonga.",
+        "uso_prioritario": "Morfología reproductiva de Bollén; fruto y semillas",
+        "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+        "notas": "Describe el fruto de Bollén como folículo con forma de estrella y sus semillas como aladas."
+      },
+      "computable": true
+    }
+  ],
+  "photos": [
+    {
+      "photo_id": "PH-010",
+      "species_id": "SP-003",
+      "individual_id": "KO001",
+      "archivo": "SP-003_KO001_hojas_01.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "11_zlkfv-DtheOYOspRTb-rW_OCSvXdGq",
+      "drive_url": "https://drive.google.com/file/d/11_zlkfv-DtheOYOspRTb-rW_OCSvXdGq/view",
+      "notas": "Morfología foliar del primer individuo.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-011",
+      "species_id": "SP-003",
+      "individual_id": "KO001",
+      "archivo": "SP-003_KO001_fruto_01.jpg",
+      "organo_estructura": "fruto",
+      "tipo_evidencia": "reproductiva",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1U-FxWcuAm1ZVlrykTftPpeT_-ZwCjRD4",
+      "drive_url": "https://drive.google.com/file/d/1U-FxWcuAm1ZVlrykTftPpeT_-ZwCjRD4/view",
+      "notas": "Fruto estrellado/pentafolicular, carácter altamente diagnóstico.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-012",
+      "species_id": "SP-003",
+      "individual_id": "KO001",
+      "archivo": "SP-003_KO001_fruto_02.jpg",
+      "organo_estructura": "fruto",
+      "tipo_evidencia": "reproductiva",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1K3kVbQ5tM-6D_IUgUyUsKkQaLp3YYKAC",
+      "drive_url": "https://drive.google.com/file/d/1K3kVbQ5tM-6D_IUgUyUsKkQaLp3YYKAC/view",
+      "notas": "Segunda vista del fruto diagnóstico.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-013",
+      "species_id": "SP-003",
+      "individual_id": "KO001",
+      "archivo": "SP-003_KO001_hojas_fruto_01.jpg",
+      "organo_estructura": "hojas + fruto",
+      "tipo_evidencia": "mixta",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1hht2_F1JqteMOFw8tijZmqPh_8C1qj4w",
+      "drive_url": "https://drive.google.com/file/d/1hht2_F1JqteMOFw8tijZmqPh_8C1qj4w/view",
+      "notas": "Asocia caracteres foliares y reproductivos en la misma evidencia.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-014",
+      "species_id": "SP-003",
+      "individual_id": "KO002",
+      "archivo": "SP-003_KO002_hojas_01.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1Mdb7X7pWVn7TDrWlavz5e6DTqdX2MvZw",
+      "drive_url": "https://drive.google.com/file/d/1Mdb7X7pWVn7TDrWlavz5e6DTqdX2MvZw/view",
+      "notas": "Segundo individuo; morfología foliar atípica que produjo confusión con naranjillo.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-034",
+      "species_id": "SP-003",
+      "individual_id": "KO003",
+      "archivo": "SP-003_KO003_hojas_01.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1bc6UOS3n9W7Gnk-Wg730CC8WE0ZqlfHw",
+      "drive_url": "https://drive.google.com/file/d/1bc6UOS3n9W7Gnk-Wg730CC8WE0ZqlfHw/view",
+      "notas": "Nuevo individuo KO003. Original: IMG_20260911_134106.jpg.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-035",
+      "species_id": "SP-003",
+      "individual_id": "KO003",
+      "archivo": "SP-003_KO003_hojas_02.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "18iUoaJaUCisge4-4FpsdRodiVYVjK3A2",
+      "drive_url": "https://drive.google.com/file/d/18iUoaJaUCisge4-4FpsdRodiVYVjK3A2/view",
+      "notas": "Original: IMG_20260911_134111.jpg; segunda vista foliar de KO003.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    }
+  ],
+  "sources": [
+    {
+      "fuente_id": "F-002",
+      "tipo": "Flora/clave",
+      "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+      "uso_prioritario": "Morfología y claves de árboles",
+      "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+      "notas": "Fuente morfológica prioritaria para especies arbóreas."
+    },
+    {
+      "fuente_id": "F-004",
+      "tipo": "Registro de terreno",
+      "referencia": "Observaciones y validación humana del piloto.",
+      "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+      "url": null,
+      "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+    },
+    {
+      "fuente_id": "F-007",
+      "tipo": "Guía oficial / CONAF",
+      "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
+      "uso_prioritario": "Morfología foliar y reproductiva de litre",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+      "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+    },
+    {
+      "fuente_id": "F-009",
+      "tipo": "Flora/clave",
+      "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+      "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+      "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+      "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
+    },
+    {
+      "fuente_id": "F-017",
+      "tipo": "Guía oficial / CONAF",
+      "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+      "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+      "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+    },
+    {
+      "fuente_id": "F-020",
+      "tipo": "Guía botánica / Fundación Philippi",
+      "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Kageneckia oblonga.",
+      "uso_prioritario": "Morfología reproductiva de Bollén; fruto y semillas",
+      "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+      "notas": "Describe el fruto de Bollén como folículo con forma de estrella y sus semillas como aladas."
+    },
+    {
+      "fuente_id": "F-021",
+      "tipo": "Definición operacional interna",
+      "referencia": "Árboris Master Botánico 2.0. Vocabulario controlado y reglas de interoperabilidad.",
+      "uso_prioritario": "Definiciones operacionales del esquema; no constituye evidencia taxonómica de especies.",
+      "url": null,
+      "notas": "Fuente interna para términos del vocabulario computable. No usar para respaldar asignaciones botánicas especie–carácter."
+    }
+  ],
+  "glossary": [
+    {
+      "termino_id": "GL-001",
+      "termino": "simple",
+      "categoria": "Hoja",
+      "definicion_tecnica": "Hoja cuya lámina no está dividida en folíolos independientes.",
+      "explicacion_usuario": "Una sola lámina foliar unida al pecíolo.",
+      "fuente_id": "F-002",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-001."
+    },
+    {
+      "termino_id": "GL-003",
+      "termino": "alterna",
+      "categoria": "Disposición foliar",
+      "definicion_tecnica": "Hojas insertas de una en una en distintos niveles del tallo.",
+      "explicacion_usuario": "Las hojas van apareciendo alternadamente a lo largo de la rama.",
+      "fuente_id": "F-002",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-002."
+    },
+    {
+      "termino_id": "GL-009",
+      "termino": "serrado",
+      "categoria": "Margen foliar",
+      "definicion_tecnica": "Margen con dientes agudos orientados predominantemente hacia el ápice.",
+      "explicacion_usuario": "Borde con dientes similares a los de una sierra.",
+      "fuente_id": "F-009",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-003."
+    },
+    {
+      "termino_id": "GL-011",
+      "termino": "coriacea",
+      "categoria": "Consistencia foliar",
+      "definicion_tecnica": "Lámina firme y relativamente rígida, de consistencia semejante al cuero.",
+      "explicacion_usuario": "Hoja firme y dura, con textura parecida al cuero.",
+      "fuente_id": "F-002",
+      "sinonimos": "coriácea",
+      "observaciones": "Estado de CH-004."
+    },
+    {
+      "termino_id": "GL-018",
+      "termino": "eliptica",
+      "categoria": "Forma foliar",
+      "definicion_tecnica": "Lámina más ancha en la zona media y estrechada hacia ambos extremos.",
+      "explicacion_usuario": "Hoja con forma de elipse.",
+      "fuente_id": "F-007",
+      "sinonimos": "elíptica",
+      "observaciones": "Estado de CH-011."
+    },
+    {
+      "termino_id": "GL-022",
+      "termino": "obovada",
+      "categoria": "Forma foliar",
+      "definicion_tecnica": "Lámina ovada con la porción más ancha hacia el ápice.",
+      "explicacion_usuario": "Hoja ovalada cuya parte más ancha está hacia la punta.",
+      "fuente_id": "F-007",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-011."
+    },
+    {
+      "termino_id": "GL-025",
+      "termino": "acuminado",
+      "categoria": "Ápice foliar",
+      "definicion_tecnica": "Ápice que se estrecha gradualmente en una punta prolongada.",
+      "explicacion_usuario": "Punta alargada que se afina progresivamente.",
+      "fuente_id": "F-009",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-012."
+    },
+    {
+      "termino_id": "GL-026",
+      "termino": "obtuso",
+      "categoria": "Ápice foliar",
+      "definicion_tecnica": "Ápice de terminación roma, formando un ángulo amplio.",
+      "explicacion_usuario": "Punta más redondeada o roma que aguda.",
+      "fuente_id": "F-017",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-012."
+    },
+    {
+      "termino_id": "GL-030",
+      "termino": "foliculo",
+      "categoria": "Fruto",
+      "definicion_tecnica": "Fruto seco derivado de un carpelo que se abre por una sutura al madurar.",
+      "explicacion_usuario": "Fruto seco que se abre al madurar para liberar semillas.",
+      "fuente_id": "F-002",
+      "sinonimos": "folículo",
+      "observaciones": "Estado de CH-013."
+    },
+    {
+      "termino_id": "GL-035",
+      "termino": "corimbo",
+      "categoria": "Inflorescencia",
+      "definicion_tecnica": "Inflorescencia en que pedicelos de distinta longitud sitúan las flores aproximadamente al mismo nivel.",
+      "explicacion_usuario": "Flores que terminan aproximadamente a la misma altura.",
+      "fuente_id": "F-009",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-014."
+    },
+    {
+      "termino_id": "GL-036",
+      "termino": "solitaria",
+      "categoria": "Inflorescencia",
+      "definicion_tecnica": "Flor que aparece individualmente y no integrada en una inflorescencia pluriflora.",
+      "explicacion_usuario": "Una flor aparece sola.",
+      "fuente_id": "F-009",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-014."
+    },
+    {
+      "termino_id": "GL-048",
+      "termino": "contraste_observable",
+      "categoria": "Color foliar",
+      "definicion_tecnica": "Diferencia cromática reconocible entre haz y envés de una misma hoja bajo iluminación comparable.",
+      "explicacion_usuario": "Las dos caras de la hoja se ven claramente diferentes en color o tono.",
+      "fuente_id": "F-021",
+      "sinonimos": null,
+      "observaciones": "Estado operacional de CH-005; no implica un color específico."
+    },
+    {
+      "termino_id": "GL-050",
+      "termino": "presente",
+      "categoria": "Estado binario",
+      "definicion_tecnica": "El rasgo definido por el carácter se observa o está documentado para la unidad evaluada.",
+      "explicacion_usuario": "El rasgo está presente.",
+      "fuente_id": "F-021",
+      "sinonimos": null,
+      "observaciones": "Token binario reutilizable; su significado depende del carácter."
+    },
+    {
+      "termino_id": "GL-051",
+      "termino": "ausente",
+      "categoria": "Estado binario",
+      "definicion_tecnica": "El rasgo definido por el carácter está documentado como ausente para la unidad evaluada.",
+      "explicacion_usuario": "El rasgo no está presente.",
+      "fuente_id": "F-021",
+      "sinonimos": null,
+      "observaciones": "No inferir por falta de datos o falta de mención."
+    }
+  ],
+  "model_errors": [
+    {
+      "error_id": "ERR-001",
+      "species_id_real": "SP-003",
+      "individual_id": "KO-002",
+      "prediccion_inicial": "Citronella mucronata",
+      "validacion_humana": "Kageneckia oblonga",
+      "tipo_evidencia": "vegetativa",
+      "caracteres_clave": "hoja alterna; envés pálido; dientes apuntados; base redondeada; nervios secundarios hacia dientes",
+      "causa_probable": "Sobreconfianza ante morfología foliar atípica y forma de los dientes, carácter que la bibliografía documenta como muy variable dentro de Kageneckia oblonga.",
+      "ajuste_modelo": "Aumentar representación intraespecífica; bajar peso de forma foliar y morfología del diente aisladas; priorizar combinación margen aserrado + envés blanquecino + fruto estrellado/yemas resinosas cuando estén disponibles.",
+      "estado": "registrado"
+    }
+  ]
+}

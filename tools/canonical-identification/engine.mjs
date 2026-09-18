@@ -18,14 +18,16 @@ const POWER_SCORE = new Map([
 ]);
 
 const YES_VALUES = new Set(['si', 'sí', 'yes', 'true']);
-
 const LOW_COST = new Set(['bajo', 'nulo', 'nula']);
-
 const SAFE_VALUES = new Set(['seguro', 'bajo']);
 
 function toStateSet(value) {
   if (value == null) return new Set();
-  const values = Array.isArray(value) ? value : [value];
+
+  const values =
+    Array.isArray(value)
+      ? value
+      : [value];
 
   return new Set(
     values
@@ -36,19 +38,26 @@ function toStateSet(value) {
 }
 
 function hasUnknownObservationState(states) {
-  return [...states]
-    .some(state => UNKNOWN_OBSERVATION_STATES.has(state));
+  return [...states].some(
+    state =>
+      UNKNOWN_OBSERVATION_STATES.has(state),
+  );
 }
 
 function intersects(left, right) {
   for (const value of left) {
-    if (right.has(value)) return true;
+    if (right.has(value)) {
+      return true;
+    }
   }
 
   return false;
 }
 
-function normalizeCandidateIds(dataset, candidateIds = null) {
+function normalizeCandidateIds(
+  dataset,
+  candidateIds = null,
+) {
   if (candidateIds == null) {
     return dataset.species.map(
       species => species.speciesId,
@@ -59,13 +68,17 @@ function normalizeCandidateIds(dataset, candidateIds = null) {
   const seen = new Set();
 
   for (const speciesId of candidateIds) {
-    if (!dataset.speciesById.has(speciesId)) {
+    if (
+      !dataset.speciesById.has(speciesId)
+    ) {
       throw new Error(
         `Unknown candidate species_id ${speciesId}`,
       );
     }
 
-    if (seen.has(speciesId)) continue;
+    if (seen.has(speciesId)) {
+      continue;
+    }
 
     seen.add(speciesId);
     normalized.push(speciesId);
@@ -78,8 +91,11 @@ export function compatible(
   expectedStatesInput,
   observedStatesInput,
 ) {
-  const expectedStates = toStateSet(expectedStatesInput);
-  const observedStates = toStateSet(observedStatesInput);
+  const expectedStates =
+    toStateSet(expectedStatesInput);
+
+  const observedStates =
+    toStateSet(observedStatesInput);
 
   if (expectedStates.size === 0) {
     return {
@@ -95,14 +111,23 @@ export function compatible(
     };
   }
 
-  if (hasUnknownObservationState(observedStates)) {
+  if (
+    hasUnknownObservationState(
+      observedStates,
+    )
+  ) {
     return {
       compatible: true,
       reason: 'observed_not_resolved',
     };
   }
 
-  if (intersects(expectedStates, observedStates)) {
+  if (
+    intersects(
+      expectedStates,
+      observedStates,
+    )
+  ) {
     return {
       compatible: true,
       reason: 'state_overlap',
@@ -115,40 +140,96 @@ export function compatible(
   };
 }
 
-export function normalizeEvidence(evidence = []) {
+function normalizeEvidenceItem(item) {
+  return {
+    characterId:
+      item.characterId
+      ?? item.character_id,
+
+    observationStatus:
+      item.observationStatus
+      ?? item.observation_status
+      ?? null,
+
+    observedStates: [
+      ...toStateSet(
+        item.observedStates
+        ?? item.observed_states
+        ?? item.states
+        ?? item.state,
+      ),
+    ],
+
+    source:
+      item.source
+      ?? 'unknown',
+
+    context:
+      item.context
+      ?? null,
+
+    confidence:
+      item.confidence
+      ?? null,
+
+    model:
+      item.model
+      ?? null,
+
+    notes:
+      item.notes
+      ?? null,
+
+    provenance:
+      item.provenance
+      ?? null,
+
+    evidenceRef:
+      item.evidenceRef
+      ?? item.evidence_ref
+      ?? null,
+
+    regionOfInterest:
+      item.regionOfInterest
+      ?? item.region_of_interest
+      ?? null,
+  };
+}
+
+export function normalizeEvidence(
+  evidence = [],
+) {
   if (Array.isArray(evidence)) {
     return evidence
-      .map(item => ({
-        characterId:
-          item.characterId
-          ?? item.character_id,
-
-        observedStates: [
-          ...toStateSet(
-            item.observedStates
-            ?? item.observed_states
-            ?? item.states
-            ?? item.state,
-          ),
-        ],
-
-        source:
-          item.source
-          ?? 'unknown',
-
-        context:
-          item.context
-          ?? null,
-      }))
-      .filter(item => item.characterId);
+      .filter(
+        item =>
+          item
+          && typeof item === 'object',
+      )
+      .map(normalizeEvidenceItem)
+      .filter(
+        item => item.characterId,
+      );
   }
 
   return Object.entries(evidence)
-    .map(([characterId, states]) => ({
-      characterId,
-      observedStates: [...toStateSet(states)],
-      source: 'unknown',
-    }));
+    .map(
+      ([characterId, states]) => ({
+        characterId,
+        observationStatus: null,
+        observedStates: [
+          ...toStateSet(states),
+        ],
+        source: 'unknown',
+        context: null,
+        confidence: null,
+        model: null,
+        notes: null,
+        provenance: null,
+        evidenceRef: null,
+        regionOfInterest: null,
+      }),
+    );
 }
 
 function isDocumentedVariability(
@@ -158,16 +239,21 @@ function isDocumentedVariability(
   observedStates,
   context,
 ) {
-  if (!context) return false;
+  if (!context) {
+    return false;
+  }
 
   return getVariability(
     dataset,
     speciesId,
     characterId,
-  ).some(entry => (
-    entry.contextId === context
-    && observedStates.has(entry.alternativeState)
-  ));
+  ).some(
+    entry =>
+      entry.contextId === context
+      && observedStates.has(
+        entry.alternativeState,
+      ),
+  );
 }
 
 export function filterCandidates(
@@ -187,23 +273,32 @@ export function filterCandidates(
   const remaining = [];
   const eliminated = [];
 
-  for (const speciesId of startingCandidates) {
+  for (
+    const speciesId
+    of startingCandidates
+  ) {
     const conflicts = [];
 
-    for (const item of normalizedEvidence) {
-      const relation = getRelation(
-        dataset,
-        speciesId,
-        item.characterId,
-      );
+    for (
+      const item
+      of normalizedEvidence
+    ) {
+      const relation =
+        getRelation(
+          dataset,
+          speciesId,
+          item.characterId,
+        );
 
       const expectedStates =
-        relation?.expectedStates ?? [];
+        relation?.expectedStates
+        ?? [];
 
-      const result = compatible(
-        expectedStates,
-        item.observedStates,
-      );
+      const result =
+        compatible(
+          expectedStates,
+          item.observedStates,
+        );
 
       if (
         !result.compatible
@@ -211,7 +306,9 @@ export function filterCandidates(
           dataset,
           speciesId,
           item.characterId,
-          toStateSet(item.observedStates),
+          toStateSet(
+            item.observedStates,
+          ),
           item.context,
         )
       ) {
@@ -221,10 +318,13 @@ export function filterCandidates(
       if (!result.compatible) {
         conflicts.push({
           speciesId,
-          characterId: item.characterId,
+          characterId:
+            item.characterId,
           expectedStates,
-          observedStates: item.observedStates,
-          reason: result.reason,
+          observedStates:
+            item.observedStates,
+          reason:
+            result.reason,
         });
       }
     }
@@ -250,25 +350,33 @@ function averageRelationScore(
   candidateIds,
   characterId,
 ) {
-  const relations = candidateIds
-    .map(speciesId => (
-      getRelation(
-        dataset,
-        speciesId,
-        characterId,
+  const relations =
+    candidateIds
+      .map(
+        speciesId =>
+          getRelation(
+            dataset,
+            speciesId,
+            characterId,
+          ),
       )
-    ))
-    .filter(Boolean);
+      .filter(Boolean);
 
-  if (!relations.length) return 0;
+  if (!relations.length) {
+    return 0;
+  }
 
   let score = 0;
 
-  for (const relation of relations) {
+  for (
+    const relation
+    of relations
+  ) {
     score +=
       POWER_SCORE.get(
         relation.diagnosticPower,
-      ) ?? 0;
+      )
+      ?? 0;
 
     if (
       YES_VALUES.has(
@@ -301,7 +409,10 @@ function averageRelationScore(
     }
   }
 
-  return score / relations.length;
+  return (
+    score
+    / relations.length
+  );
 }
 
 function partitionCandidateStates(
@@ -311,25 +422,36 @@ function partitionCandidateStates(
 ) {
   const groups = new Map();
 
-  for (const speciesId of candidateIds) {
-    const relation = getRelation(
-      dataset,
-      speciesId,
-      characterId,
-    );
+  for (
+    const speciesId
+    of candidateIds
+  ) {
+    const relation =
+      getRelation(
+        dataset,
+        speciesId,
+        characterId,
+      );
 
     const states =
-      relation?.expectedStates ?? [];
+      relation?.expectedStates
+      ?? [];
 
-    const key = states.length
-      ? states.slice().sort().join('|')
-      : '__unknown__';
+    const key =
+      states.length
+        ? states
+          .slice()
+          .sort()
+          .join('|')
+        : '__unknown__';
 
     if (!groups.has(key)) {
       groups.set(key, []);
     }
 
-    groups.get(key).push(speciesId);
+    groups
+      .get(key)
+      .push(speciesId);
   }
 
   return groups;
@@ -340,30 +462,38 @@ function characterScore(
   candidateIds,
   characterId,
 ) {
-  const groups = partitionCandidateStates(
-    dataset,
-    candidateIds,
-    characterId,
-  );
+  const groups =
+    partitionCandidateStates(
+      dataset,
+      candidateIds,
+      characterId,
+    );
 
   const knownGroups = [
     ...groups.entries(),
   ].filter(
-    ([key]) => key !== '__unknown__',
+    ([key]) =>
+      key !== '__unknown__',
   );
 
-  if (knownGroups.length < 2) {
+  if (
+    knownGroups.length < 2
+  ) {
     return null;
   }
 
-  const largestKnownGroup = Math.max(
-    ...knownGroups.map(
-      ([, members]) => members.length,
-    ),
-  );
+  const largestKnownGroup =
+    Math.max(
+      ...knownGroups.map(
+        ([, members]) =>
+          members.length,
+      ),
+    );
 
   const unknownCount =
-    groups.get('__unknown__')?.length
+    groups
+      .get('__unknown__')
+      ?.length
     ?? 0;
 
   return {
@@ -398,7 +528,9 @@ function characterEvidenceStatus(
         === characterId,
     );
 
-  if (!characterEvidence.length) {
+  if (
+    !characterEvidence.length
+  ) {
     return 'visible';
   }
 
@@ -455,71 +587,78 @@ export function nextCharacter(
     new Set(
       normalizeEvidence(evidence)
         .map(
-          item => item.characterId,
+          item =>
+            item.characterId,
         ),
     );
 
   const scores =
     dataset.characters
-      .filter(character => (
-        !observedCharacterIds.has(
-          character.characterId,
-        )
-      ))
-      .map(character => (
-        characterScore(
-          dataset,
-          currentCandidateIds,
-          character.characterId,
-        )
-      ))
+      .filter(
+        character =>
+          !observedCharacterIds.has(
+            character.characterId,
+          ),
+      )
+      .map(
+        character =>
+          characterScore(
+            dataset,
+            currentCandidateIds,
+            character.characterId,
+          ),
+      )
       .filter(Boolean)
-      .sort((left, right) => {
-        if (
-          left.largestKnownGroup
-          !== right.largestKnownGroup
-        ) {
-          return (
+      .sort(
+        (left, right) => {
+          if (
             left.largestKnownGroup
-            - right.largestKnownGroup
-          );
-        }
+            !== right.largestKnownGroup
+          ) {
+            return (
+              left.largestKnownGroup
+              - right.largestKnownGroup
+            );
+          }
 
-        if (
-          left.unknownCount
-          !== right.unknownCount
-        ) {
-          return (
+          if (
             left.unknownCount
-            - right.unknownCount
-          );
-        }
+            !== right.unknownCount
+          ) {
+            return (
+              left.unknownCount
+              - right.unknownCount
+            );
+          }
 
-        if (
-          left.knownGroupCount
-          !== right.knownGroupCount
-        ) {
+          if (
+            left.knownGroupCount
+            !== right.knownGroupCount
+          ) {
+            return (
+              right.knownGroupCount
+              - left.knownGroupCount
+            );
+          }
+
+          if (
+            left.relationScore
+            !== right.relationScore
+          ) {
+            return (
+              right.relationScore
+              - left.relationScore
+            );
+          }
+
           return (
-            right.knownGroupCount
-            - left.knownGroupCount
+            left.characterId
+              .localeCompare(
+                right.characterId,
+              )
           );
-        }
-
-        if (
-          left.relationScore
-          !== right.relationScore
-        ) {
-          return (
-            right.relationScore
-            - left.relationScore
-          );
-        }
-
-        return left.characterId
-          .localeCompare(
-            right.characterId,
-          );
-      });
+        },
+      );
 
   if (!scores.length) {
     return null;
@@ -528,9 +667,10 @@ export function nextCharacter(
   const best = scores[0];
 
   const character =
-    dataset.charactersById.get(
-      best.characterId,
-    );
+    dataset.charactersById
+      .get(
+        best.characterId,
+      );
 
   return {
     ...best,
@@ -560,7 +700,8 @@ export function retryCharacter(
       evidence,
       characterId,
       candidateIds,
-    ) !== 'attempted'
+    )
+    !== 'attempted'
   ) {
     return null;
   }
@@ -586,11 +727,12 @@ export function retryCharacter(
   return {
     characterId,
     character:
-      dataset.charactersById.get(
-        characterId,
-      ),
+      dataset.charactersById
+        .get(characterId),
+
     candidates:
       currentCandidateIds,
+
     ...(score ?? {}),
   };
 }
@@ -607,27 +749,21 @@ export function assessIdentification(
       candidateIds,
     );
 
-  /*
-   * Hito 15 supported contract:
-   *
-   * A diagnostic dimension is identified by characterId.
-   * Repeated observations of the same character therefore
-   * count as one evaluated dimension, never as additional
-   * independent support.
-   */
   const evaluableCharacterIds =
     new Set(
       normalizeEvidence(evidence)
-        .filter(item => (
-          item.observedStates.length
-          && !hasUnknownObservationState(
-            toStateSet(
-              item.observedStates,
+        .filter(
+          item =>
+            item.observedStates.length
+            && !hasUnknownObservationState(
+              toStateSet(
+                item.observedStates,
+              ),
             ),
-          )
-        ))
+        )
         .map(
-          item => item.characterId,
+          item =>
+            item.characterId,
         ),
     );
 
@@ -654,7 +790,8 @@ export function assessIdentification(
   }
 
   if (
-    evaluableCharacterIds.size >= 2
+    evaluableCharacterIds.size
+    >= 2
   ) {
     return {
       status: 'supported',

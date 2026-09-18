@@ -1,0 +1,50 @@
+[
+  {
+    "evidenceId": "EV-CH003-PH-001",
+    "imageRef": "PH-001",
+    "characterId": "CH-003",
+    "status": "observed",
+    "observedState": "entero",
+    "speciesId": "SP-001",
+    "annotator": "user_validated",
+    "annotationSource": "direct_visual_annotation",
+    "notes": "Margen natural ampliamente visible; pequeñas irregularidades locales no alteran la evaluación del carácter.",
+    "provenance": {
+      "origin": "canonical_repo_photo",
+      "partition": "development"
+    },
+    "reviewHistory": []
+  },
+  {
+    "evidenceId": "EV-CH003-PH-002",
+    "imageRef": "PH-002",
+    "characterId": "CH-003",
+    "status": "observed",
+    "observedState": "entero",
+    "speciesId": "SP-001",
+    "annotator": "user_validated",
+    "annotationSource": "direct_visual_annotation",
+    "notes": "Margen natural suficientemente visible para asignar estado entero.",
+    "provenance": {
+      "origin": "canonical_repo_photo",
+      "partition": "development"
+    },
+    "reviewHistory": []
+  },
+  {
+    "evidenceId": "EV-CH003-PH-003",
+    "imageRef": "PH-003",
+    "characterId": "CH-003",
+    "status": "observed",
+    "observedState": "entero",
+    "speciesId": "SP-001",
+    "annotator": "user_validated",
+    "annotationSource": "direct_visual_annotation",
+    "notes": "La ramilla permite observar suficiente margen foliar natural; no se aprecia dentición regular.",
+    "provenance": {
+      "origin": "canonical_repo_photo",
+      "partition": "development"
+    },
+    "reviewHistory": []
+  }
+]
