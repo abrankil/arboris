@@ -23,6 +23,15 @@ const LOW_COST = new Set(['bajo', 'nulo', 'nula']);
 
 const SAFE_VALUES = new Set(['seguro', 'bajo']);
 
+const CONTAINS_APPLIES_IF =
+  /^([A-Z]{2}-\d{3})\s+contiene\s+(.+)$/i;
+
+function normalizeToken(value) {
+  return String(value)
+    .trim()
+    .toLowerCase();
+}
+
 function toStateSet(value) {
   if (value == null) return new Set();
   const values = Array.isArray(value) ? value : [value];
@@ -72,6 +81,12 @@ function normalizeCandidateIds(dataset, candidateIds = null) {
   }
 
   return normalized;
+}
+
+export function diagnosticPowerScore(value) {
+  return POWER_SCORE.get(
+    value,
+  ) ?? 0;
 }
 
 export function compatible(
@@ -149,6 +164,78 @@ export function normalizeEvidence(evidence = []) {
       observedStates: [...toStateSet(states)],
       source: 'unknown',
     }));
+}
+
+function evidenceByCharacter(normalizedEvidence) {
+  const byCharacter = new Map();
+
+  for (const item of normalizedEvidence) {
+    if (!byCharacter.has(item.characterId)) {
+      byCharacter.set(
+        item.characterId,
+        new Set(),
+      );
+    }
+
+    const target =
+      byCharacter.get(item.characterId);
+
+    for (const state of item.observedStates) {
+      target.add(state);
+    }
+  }
+
+  return byCharacter;
+}
+
+function parseAppliesIf(appliesIf) {
+  if (!appliesIf) return null;
+
+  const match = String(appliesIf)
+    .trim()
+    .match(CONTAINS_APPLIES_IF);
+
+  if (!match) return null;
+
+  return {
+    parentCharacterId:
+      match[1].toUpperCase(),
+
+    requiredState:
+      match[2].trim(),
+  };
+}
+
+function appliesIfSatisfied(
+  character,
+  evidenceIndex,
+) {
+  const rule =
+    parseAppliesIf(character.appliesIf);
+
+  if (!rule) return true;
+
+  const parentStates =
+    evidenceIndex.get(
+      rule.parentCharacterId,
+    ) ?? new Set();
+
+  if (
+    !parentStates.size
+    || hasUnknownObservationState(
+      parentStates,
+    )
+  ) {
+    return false;
+  }
+
+  return [...parentStates].some(
+    state =>
+      normalizeToken(state)
+      === normalizeToken(
+        rule.requiredState,
+      ),
+  );
 }
 
 function isDocumentedVariability(
@@ -266,9 +353,9 @@ function averageRelationScore(
 
   for (const relation of relations) {
     score +=
-      POWER_SCORE.get(
+      diagnosticPowerScore(
         relation.diagnosticPower,
-      ) ?? 0;
+      );
 
     if (
       YES_VALUES.has(
@@ -440,11 +527,14 @@ export function nextCharacter(
   evidence = [],
   candidateIds = null,
 ) {
+  const normalizedEvidence =
+    normalizeEvidence(evidence);
+
   const currentCandidateIds =
     candidateIds == null
       ? filterCandidates(
         dataset,
-        evidence,
+        normalizedEvidence,
       ).remaining
       : normalizeCandidateIds(
         dataset,
@@ -453,10 +543,14 @@ export function nextCharacter(
 
   const observedCharacterIds =
     new Set(
-      normalizeEvidence(evidence)
-        .map(
-          item => item.characterId,
-        ),
+      normalizedEvidence.map(
+        item => item.characterId,
+      ),
+    );
+
+  const evidenceIndex =
+    evidenceByCharacter(
+      normalizedEvidence,
     );
 
   const scores =
@@ -471,6 +565,7 @@ export function nextCharacter(
           dataset,
           currentCandidateIds,
           character.characterId,
+          evidenceIndex,
         )
       ))
       .filter(Boolean)
@@ -565,22 +660,31 @@ export function retryCharacter(
     return null;
   }
 
+  const normalizedEvidence =
+    normalizeEvidence(evidence);
+
   const currentCandidateIds =
     candidateIds == null
       ? filterCandidates(
         dataset,
-        evidence,
+        normalizedEvidence,
       ).remaining
       : normalizeCandidateIds(
         dataset,
         candidateIds,
       );
 
+  const evidenceIndex =
+    evidenceByCharacter(
+      normalizedEvidence,
+    );
+
   const score =
     characterScore(
       dataset,
       currentCandidateIds,
       characterId,
+      evidenceIndex,
     );
 
   return {
