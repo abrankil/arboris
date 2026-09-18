@@ -56,10 +56,6 @@ def slugify(value: str) -> str:
     return text.strip("_")
 
 
-def runtime_species_id(canonical_id: str) -> str:
-    return canonical_id.replace("-", "")
-
-
 def load_canonical_data():
     data = {}
 
@@ -277,7 +273,7 @@ def main():
             )
 
         filename = (
-            f"{runtime_species_id(species_id)}_"
+            f"{species_id}_"
             f"{slugify(scientific_name)}.json"
         )
 

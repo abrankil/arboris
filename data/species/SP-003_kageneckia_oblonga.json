@@ -5,20 +5,20 @@
     "master_version": "2.0.0",
     "schema_version": "2.0.0",
     "source_file": "Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx",
-    "source_sha256": "10e2702aa0448e24e6b8c157afcf10d7e0de1aa85f6e0169b13fbc55ec3c6409",
+    "source_sha256": "24e0c1f119904f50c73967a878e02a27ae6e2ae05145d0c00248b8debc1eae50",
     "source_of_truth": "xlsx"
   },
   "species": {
-    "species_id": "SP-002",
-    "nombre_cientifico": "Lithraea caustica",
-    "nombre_comun": "Litre",
-    "familia": "Anacardiaceae",
-    "orden": "Sapindales",
-    "habito": "Árbol",
+    "species_id": "SP-003",
+    "nombre_cientifico": "Kageneckia oblonga",
+    "nombre_comun": "Bollén",
+    "familia": "Rosaceae",
+    "orden": "Rosales",
+    "habito": "Árbol/arbusto",
     "origen": "Nativa",
     "endemismo": "Sí",
     "estado_piloto": "Activa",
-    "notas": "Mantener alias bibliográfico Lithrea caustica. Riesgo de dermatitis por contacto."
+    "notas": "Incluye al menos dos individuos con variación foliar marcada."
   },
   "botanical_characters": [
     {
@@ -41,28 +41,28 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-001",
         "estado_esperado": [
           "simple"
         ],
         "variabilidad": "baja",
-        "fuente_id": "F-007",
+        "fuente_id": "F-009",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
         "poder_diagnostico": "bajo",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
-        "notas": "CONAF describe hojas simples."
+        "notas": "Hoja simple."
       },
       "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
       },
       "computable": true
     },
@@ -88,28 +88,28 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-002",
         "estado_esperado": [
           "alterna"
         ],
         "variabilidad": "baja",
-        "fuente_id": "F-004",
+        "fuente_id": "F-009",
         "detectable_imagen": "Parcial",
         "verificable_campo": "Sí",
         "poder_diagnostico": "medio",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
-        "confianza": "media",
-        "notas": "Confirmado en terreno; mantener trazabilidad."
+        "confianza": "alta",
+        "notas": "Disposición alterna."
       },
       "source": {
-        "fuente_id": "F-004",
-        "tipo": "Registro de terreno",
-        "referencia": "Observaciones y validación humana del piloto.",
-        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
-        "url": null,
-        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
       },
       "computable": true
     },
@@ -135,28 +135,28 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-003",
         "estado_esperado": [
-          "entero"
+          "serrado"
         ],
-        "variabilidad": "baja",
-        "fuente_id": "F-007",
+        "variabilidad": "alta",
+        "fuente_id": "F-009",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
-        "poder_diagnostico": "medio",
-        "interaction_safety": "precaucion",
+        "poder_diagnostico": "medio-alto",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
-        "notas": "Dentición ausente; ondulación separada en CH-028."
+        "notas": "Margen serrado; morfología de dientes variable."
       },
       "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
       },
       "computable": true
     },
@@ -182,28 +182,28 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-004",
         "estado_esperado": [
           "coriacea"
         ],
         "variabilidad": "media",
-        "fuente_id": "F-008",
+        "fuente_id": "F-009",
         "detectable_imagen": "Parcial",
         "verificable_campo": "Sí",
         "poder_diagnostico": "medio",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
-        "confianza": "media",
-        "notas": "Estado operativo apoyado por descripción de hojas duras."
+        "confianza": "alta",
+        "notas": "Hoja coriácea."
       },
       "source": {
-        "fuente_id": "F-008",
-        "tipo": "Informe técnico / CONAF",
-        "referencia": "CONAF. Ficha Litre (Lithrea caustica), citando García y Ormazábal (2008).",
-        "uso_prioritario": "Rasgo visual de nervadura y morfología general",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2025/11/IF-FIBN-0042018.pdf",
-        "notas": "Destaca el contraste característico entre nervadura amarilla y lámina verde; usar como apoyo visual."
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
       },
       "computable": true
     },
@@ -227,28 +227,28 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-005",
         "estado_esperado": [
           "contraste_observable"
         ],
         "variabilidad": "media",
-        "fuente_id": "F-004",
+        "fuente_id": "F-009",
         "detectable_imagen": "Parcial",
         "verificable_campo": "Sí",
         "poder_diagnostico": "medio",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
-        "confianza": "media",
-        "notas": "Contraste entre caras observado en piloto."
+        "confianza": "alta",
+        "notas": "Cara inferior blanquecina respecto de la superior."
       },
       "source": {
-        "fuente_id": "F-004",
-        "tipo": "Registro de terreno",
-        "referencia": "Observaciones y validación humana del piloto.",
-        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
-        "url": null,
-        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
       },
       "computable": true
     },
@@ -272,29 +272,29 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-006",
         "estado_esperado": [
           "presente",
           "ausente"
         ],
         "variabilidad": "media",
-        "fuente_id": "F-007",
+        "fuente_id": "F-004",
         "detectable_imagen": "Parcial",
         "verificable_campo": "Sí",
         "poder_diagnostico": "bajo",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
-        "confianza": "alta",
-        "notas": "CONAF: hojas glabras o finamente pubescentes."
+        "confianza": "media",
+        "notas": "Variación de pubescencia conservada operacionalmente."
       },
       "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
       },
       "computable": true
     },
@@ -318,28 +318,28 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-008",
         "estado_esperado": [
           "presente"
         ],
-        "variabilidad": "media",
-        "fuente_id": "F-008",
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
-        "poder_diagnostico": "alto",
-        "interaction_safety": "precaucion",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
-        "notas": "Contraste característico de la nervadura con la lámina."
+        "notas": "Nervadura visualmente contrastante en fotografías del piloto."
       },
       "source": {
-        "fuente_id": "F-008",
-        "tipo": "Informe técnico / CONAF",
-        "referencia": "CONAF. Ficha Litre (Lithrea caustica), citando García y Ormazábal (2008).",
-        "uso_prioritario": "Rasgo visual de nervadura y morfología general",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2025/11/IF-FIBN-0042018.pdf",
-        "notas": "Destaca el contraste característico entre nervadura amarilla y lámina verde; usar como apoyo visual."
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
       },
       "computable": true
     },
@@ -363,28 +363,28 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-009",
         "estado_esperado": [
           "presente"
         ],
-        "variabilidad": "media",
-        "fuente_id": "F-008",
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
-        "poder_diagnostico": "medio-alto",
-        "interaction_safety": "precaucion",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
-        "notas": "Nervaduras secundarias visualmente distinguibles."
+        "notas": "Nervaduras secundarias claramente visibles en fotografías."
       },
       "source": {
-        "fuente_id": "F-008",
-        "tipo": "Informe técnico / CONAF",
-        "referencia": "CONAF. Ficha Litre (Lithrea caustica), citando García y Ormazábal (2008).",
-        "uso_prioritario": "Rasgo visual de nervadura y morfología general",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2025/11/IF-FIBN-0042018.pdf",
-        "notas": "Destaca el contraste característico entre nervadura amarilla y lámina verde; usar como apoyo visual."
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
       },
       "computable": true
     },
@@ -408,28 +408,28 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-010",
         "estado_esperado": [
-          "presente"
+          "ausente"
         ],
         "variabilidad": "baja",
-        "fuente_id": "F-007",
+        "fuente_id": "F-004",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
         "poder_diagnostico": "alto",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
-        "notas": "Nervaduras secundarias conectadas a reborde marginal; rasgo diagnóstico del piloto."
+        "notas": "Sin reborde marginal continuo observado."
       },
       "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
       },
       "computable": true
     },
@@ -460,31 +460,29 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-011",
         "estado_esperado": [
-          "ovada",
-          "ovado_oblonga",
           "eliptica",
           "obovada"
         ],
         "variabilidad": "alta",
-        "fuente_id": "F-007",
+        "fuente_id": "F-009",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
         "poder_diagnostico": "medio",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
-        "notas": "Variación explícita conservada como estados múltiples."
+        "notas": "Duplicados consolidados; variación representada mediante estados múltiples."
       },
       "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
       },
       "computable": true
     },
@@ -511,29 +509,29 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-012",
         "estado_esperado": [
-          "agudo",
-          "obtuso"
+          "obtuso",
+          "acuminado"
         ],
         "variabilidad": "media",
-        "fuente_id": "F-007",
+        "fuente_id": "F-009",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
         "poder_diagnostico": "medio",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
-        "notas": "Estados aprobados para el piloto."
+        "notas": "Variación del ápice conservada."
       },
       "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
       },
       "computable": true
     },
@@ -559,28 +557,28 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-013",
         "estado_esperado": [
-          "drupa"
+          "foliculo"
         ],
         "variabilidad": "baja",
-        "fuente_id": "F-007",
+        "fuente_id": "F-009",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
         "poder_diagnostico": "alto",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
         "notas": "Tipo de fruto normalizado."
       },
       "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
       },
       "computable": true
     },
@@ -608,323 +606,194 @@
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
+        "species_id": "SP-003",
         "caracter_id": "CH-014",
         "estado_esperado": [
-          "panicula"
+          "corimbo",
+          "solitaria"
         ],
-        "variabilidad": "baja",
-        "fuente_id": "F-007",
+        "variabilidad": "media",
+        "fuente_id": "F-009",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
         "poder_diagnostico": "alto",
-        "interaction_safety": "precaucion",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
-        "notas": "Tipo de inflorescencia normalizado."
+        "notas": "Flores masculinas en corimbos y femeninas solitarias; relación sexual conservada en nota."
       },
       "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+        "fuente_id": "F-009",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+        "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
       },
       "computable": true
     },
     {
       "character": {
-        "caracter_id": "CH-015",
-        "grupo": "Sensorial",
-        "nombre_caracter": "Aroma foliar característico",
+        "caracter_id": "CH-027",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Presencia de ala en la semilla",
         "tipo_dato": "categorico",
         "estados_permitidos": [
           "presente",
           "ausente"
         ],
-        "observable_foto": "No",
+        "observable_foto": "Sí",
         "observable_campo": "Sí",
-        "dependencia_fenologica": "No",
-        "riesgo_base": "Variable",
-        "invasividad_base": "Baja",
-        "descripcion": "Carácter sensorial. Nunca solicitar frotar, romper o triturar una planta para provocar aroma cuando exista riesgo de contacto; en Litre no provocar la observación.",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Indica si la semilla presenta una expansión membranosa en forma de ala. Observar solo cuando semillas o frutos abiertos estén disponibles; no exigir abrir frutos.",
         "estado_piloto": "activo",
         "aplica_si": null
       },
       "relation": {
-        "species_id": "SP-002",
-        "caracter_id": "CH-015",
+        "species_id": "SP-003",
+        "caracter_id": "CH-027",
         "estado_esperado": [
           "presente"
         ],
-        "variabilidad": "media",
-        "fuente_id": "F-007",
-        "detectable_imagen": "No",
-        "verificable_campo": "Sí",
-        "poder_diagnostico": "alto",
-        "interaction_safety": "no_provocar",
-        "costo_observacion": "medio",
-        "confianza": "alta",
-        "notas": "Aroma foliar característico; nunca pedir frotar, romper o triturar Litre."
-      },
-      "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
-      },
-      "computable": true
-    },
-    {
-      "character": {
-        "caracter_id": "CH-028",
-        "grupo": "Hoja",
-        "nombre_caracter": "Ondulación del margen foliar",
-        "tipo_dato": "categorico",
-        "estados_permitidos": [
-          "plano",
-          "ondulado"
-        ],
-        "observable_foto": "Sí",
-        "observable_campo": "Sí",
-        "dependencia_fenologica": "No",
-        "riesgo_base": "Bajo",
-        "invasividad_base": "Nula",
-        "descripcion": "Describe la ondulación geométrica del margen independientemente de la dentición registrada en CH-003. No inferir 'plano' por ausencia de mención bibliográfica.",
-        "estado_piloto": "activo",
-        "aplica_si": null
-      },
-      "relation": {
-        "species_id": "SP-002",
-        "caracter_id": "CH-028",
-        "estado_esperado": [
-          "ondulado"
-        ],
-        "variabilidad": "media",
-        "fuente_id": "F-007",
+        "variabilidad": "baja",
+        "fuente_id": "F-020",
         "detectable_imagen": "Sí",
         "verificable_campo": "Sí",
-        "poder_diagnostico": "medio",
-        "interaction_safety": "precaucion",
+        "poder_diagnostico": "medio-alto",
+        "interaction_safety": "seguro",
         "costo_observacion": "bajo",
         "confianza": "alta",
-        "notas": "Ondulación separada de la dentición."
+        "notas": "Fundación Philippi describe el fruto de Bollén con semillas aladas."
       },
       "source": {
-        "fuente_id": "F-007",
-        "tipo": "Guía oficial / CONAF",
-        "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
-        "uso_prioritario": "Morfología foliar y reproductiva de litre",
-        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
-        "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+        "fuente_id": "F-020",
+        "tipo": "Guía botánica / Fundación Philippi",
+        "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Kageneckia oblonga.",
+        "uso_prioritario": "Morfología reproductiva de Bollén; fruto y semillas",
+        "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+        "notas": "Describe el fruto de Bollén como folículo con forma de estrella y sus semillas como aladas."
       },
       "computable": true
     }
   ],
   "photos": [
     {
-      "photo_id": "PH-004",
-      "species_id": "SP-002",
-      "individual_id": "LC001",
-      "archivo": "SP002_LC001_hojas_01.jpg",
+      "photo_id": "PH-010",
+      "species_id": "SP-003",
+      "individual_id": "KO001",
+      "archivo": "SP-003_KO001_hojas_01.jpg",
       "organo_estructura": "hojas",
       "tipo_evidencia": "vegetativa",
       "fecha_captura": "2026-09-11",
-      "calidad_diagnostica": "media-alta",
+      "calidad_diagnostica": "media",
       "validacion": "validado_por_usuario",
-      "drive_file_id": "1U2TTo8YczjZeJYcao5felZgbweUnqYxj",
-      "drive_url": "https://drive.google.com/file/d/1U2TTo8YczjZeJYcao5felZgbweUnqYxj/view",
-      "notas": "Nervadura y morfología foliar visibles.",
+      "drive_file_id": "11_zlkfv-DtheOYOspRTb-rW_OCSvXdGq",
+      "drive_url": "https://drive.google.com/file/d/11_zlkfv-DtheOYOspRTb-rW_OCSvXdGq/view",
+      "notas": "Morfología foliar del primer individuo.",
       "estado_evidencia": "activa",
       "usar_entrenamiento": "Sí",
       "fecha_verificada": false
     },
     {
-      "photo_id": "PH-005",
-      "species_id": "SP-002",
-      "individual_id": "LC001",
-      "archivo": "SP002_LC001_hojas_02.jpg",
-      "organo_estructura": "hojas",
-      "tipo_evidencia": "vegetativa",
-      "fecha_captura": "2026-09-11",
-      "calidad_diagnostica": "media-alta",
-      "validacion": "validado_por_usuario",
-      "drive_file_id": "136zWsW9Di2yvLPV8CK_fc6ag0EKRvMtD",
-      "drive_url": "https://drive.google.com/file/d/136zWsW9Di2yvLPV8CK_fc6ag0EKRvMtD/view",
-      "notas": "Complementa variación foliar dentro del individuo.",
-      "estado_evidencia": "activa",
-      "usar_entrenamiento": "Sí",
-      "fecha_verificada": false
-    },
-    {
-      "photo_id": "PH-006",
-      "species_id": "SP-002",
-      "individual_id": "LC001",
-      "archivo": "SP002_LC001_ramilla_01.jpg",
-      "organo_estructura": "ramilla",
-      "tipo_evidencia": "vegetativa",
-      "fecha_captura": "2026-09-11",
-      "calidad_diagnostica": "media-alta",
-      "validacion": "validado_por_usuario",
-      "drive_file_id": "1O2jlqFsTAu0syD8ZlF_rpiCX3349Nkfd",
-      "drive_url": "https://drive.google.com/file/d/1O2jlqFsTAu0syD8ZlF_rpiCX3349Nkfd/view",
-      "notas": "Útil para disposición foliar y patrón de nervadura.",
-      "estado_evidencia": "activa",
-      "usar_entrenamiento": "Sí",
-      "fecha_verificada": false
-    },
-    {
-      "photo_id": "PH-007",
-      "species_id": "SP-002",
-      "individual_id": "LC001",
-      "archivo": "SP002_LC001_estructuras_reproductivas_01.jpg",
-      "organo_estructura": "estructuras reproductivas",
+      "photo_id": "PH-011",
+      "species_id": "SP-003",
+      "individual_id": "KO001",
+      "archivo": "SP-003_KO001_fruto_01.jpg",
+      "organo_estructura": "fruto",
       "tipo_evidencia": "reproductiva",
       "fecha_captura": "2026-09-11",
       "calidad_diagnostica": "alta",
       "validacion": "validado_por_usuario",
-      "drive_file_id": "1-goROx7_PoAOzaJ3_7B74G4JRLqgrCqk",
-      "drive_url": "https://drive.google.com/file/d/1-goROx7_PoAOzaJ3_7B74G4JRLqgrCqk/view",
-      "notas": "Evidencia reproductiva asociada al individuo.",
+      "drive_file_id": "1U-FxWcuAm1ZVlrykTftPpeT_-ZwCjRD4",
+      "drive_url": "https://drive.google.com/file/d/1U-FxWcuAm1ZVlrykTftPpeT_-ZwCjRD4/view",
+      "notas": "Fruto estrellado/pentafolicular, carácter altamente diagnóstico.",
       "estado_evidencia": "activa",
       "usar_entrenamiento": "Sí",
       "fecha_verificada": false
     },
     {
-      "photo_id": "PH-008",
-      "species_id": "SP-002",
-      "individual_id": "LC001",
-      "archivo": "SP002_LC001_estructuras_reproductivas_02.jpg",
-      "organo_estructura": "estructuras reproductivas",
+      "photo_id": "PH-012",
+      "species_id": "SP-003",
+      "individual_id": "KO001",
+      "archivo": "SP-003_KO001_fruto_02.jpg",
+      "organo_estructura": "fruto",
       "tipo_evidencia": "reproductiva",
       "fecha_captura": "2026-09-11",
       "calidad_diagnostica": "alta",
       "validacion": "validado_por_usuario",
-      "drive_file_id": "1v9GNn3VgbUxLen8HFe7mrL8yY12Wqjk1",
-      "drive_url": "https://drive.google.com/file/d/1v9GNn3VgbUxLen8HFe7mrL8yY12Wqjk1/view",
-      "notas": "Segunda vista de estructuras reproductivas.",
+      "drive_file_id": "1K3kVbQ5tM-6D_IUgUyUsKkQaLp3YYKAC",
+      "drive_url": "https://drive.google.com/file/d/1K3kVbQ5tM-6D_IUgUyUsKkQaLp3YYKAC/view",
+      "notas": "Segunda vista del fruto diagnóstico.",
       "estado_evidencia": "activa",
       "usar_entrenamiento": "Sí",
       "fecha_verificada": false
     },
     {
-      "photo_id": "PH-009",
-      "species_id": "SP-002",
-      "individual_id": "LC002",
-      "archivo": "SP002_LC002_hojas_01.jpg",
-      "organo_estructura": "hojas",
-      "tipo_evidencia": "vegetativa",
+      "photo_id": "PH-013",
+      "species_id": "SP-003",
+      "individual_id": "KO001",
+      "archivo": "SP-003_KO001_hojas_fruto_01.jpg",
+      "organo_estructura": "hojas + fruto",
+      "tipo_evidencia": "mixta",
       "fecha_captura": "2026-09-11",
       "calidad_diagnostica": "alta",
       "validacion": "validado_por_usuario",
-      "drive_file_id": "1-BdSKxaD5O6KxvJHEVfM8KETF4e8xVEp",
-      "drive_url": "https://drive.google.com/file/d/1-BdSKxaD5O6KxvJHEVfM8KETF4e8xVEp/view",
-      "notas": "Caso crítico de variación intraespecífica; fue confundido inicialmente con peumo.",
+      "drive_file_id": "1hht2_F1JqteMOFw8tijZmqPh_8C1qj4w",
+      "drive_url": "https://drive.google.com/file/d/1hht2_F1JqteMOFw8tijZmqPh_8C1qj4w/view",
+      "notas": "Asocia caracteres foliares y reproductivos en la misma evidencia.",
       "estado_evidencia": "activa",
       "usar_entrenamiento": "Sí",
       "fecha_verificada": false
     },
     {
-      "photo_id": "PH-028",
-      "species_id": "SP-002",
-      "individual_id": "LC003",
-      "archivo": "SP002_LC003_hojas_01.jpg",
+      "photo_id": "PH-014",
+      "species_id": "SP-003",
+      "individual_id": "KO002",
+      "archivo": "SP-003_KO002_hojas_01.jpg",
       "organo_estructura": "hojas",
       "tipo_evidencia": "vegetativa",
       "fecha_captura": "2026-09-11",
       "calidad_diagnostica": "alta",
       "validacion": "validado_por_usuario",
-      "drive_file_id": "1mj_Ll55N_KroWrXKaLNK8obeMpfJrdVr",
-      "drive_url": "https://drive.google.com/file/d/1mj_Ll55N_KroWrXKaLNK8obeMpfJrdVr/view",
-      "notas": "Nuevo individuo LC003. Original: IMG_20260911_133717.jpg; nervadura muy conspicua.",
+      "drive_file_id": "1Mdb7X7pWVn7TDrWlavz5e6DTqdX2MvZw",
+      "drive_url": "https://drive.google.com/file/d/1Mdb7X7pWVn7TDrWlavz5e6DTqdX2MvZw/view",
+      "notas": "Segundo individuo; morfología foliar atípica que produjo confusión con naranjillo.",
       "estado_evidencia": "activa",
       "usar_entrenamiento": "Sí",
       "fecha_verificada": false
     },
     {
-      "photo_id": "PH-029",
-      "species_id": "SP-002",
-      "individual_id": "LC003",
-      "archivo": "SP002_LC003_hojas_02.jpg",
+      "photo_id": "PH-034",
+      "species_id": "SP-003",
+      "individual_id": "KO003",
+      "archivo": "SP-003_KO003_hojas_01.jpg",
       "organo_estructura": "hojas",
       "tipo_evidencia": "vegetativa",
       "fecha_captura": "2026-09-11",
-      "calidad_diagnostica": "alta",
+      "calidad_diagnostica": "media-alta",
       "validacion": "validado_por_usuario",
-      "drive_file_id": "1xYqSHFsJw7lyP7AzaGHPKDss04vUju6I",
-      "drive_url": "https://drive.google.com/file/d/1xYqSHFsJw7lyP7AzaGHPKDss04vUju6I/view",
-      "notas": "Original: IMG_20260911_133717.jpg. Posible re-subida/duplicado de PH-028; no contar como individuo independiente.",
-      "estado_evidencia": "posible_duplicado",
-      "usar_entrenamiento": "No",
-      "fecha_verificada": false
-    },
-    {
-      "photo_id": "PH-030",
-      "species_id": "SP-002",
-      "individual_id": "LC004",
-      "archivo": "SP002_LC004_hojas_01.jpg",
-      "organo_estructura": "hojas",
-      "tipo_evidencia": "vegetativa",
-      "fecha_captura": "2026-09-11",
-      "calidad_diagnostica": "alta",
-      "validacion": "validado_por_usuario",
-      "drive_file_id": "1Fp7ir5XniOKz7PfrxRp66jAsPiJn3LI_",
-      "drive_url": "https://drive.google.com/file/d/1Fp7ir5XniOKz7PfrxRp66jAsPiJn3LI_/view",
-      "notas": "Nuevo individuo LC004. Original: IMG_20260911_133838.jpg.",
+      "drive_file_id": "1bc6UOS3n9W7Gnk-Wg730CC8WE0ZqlfHw",
+      "drive_url": "https://drive.google.com/file/d/1bc6UOS3n9W7Gnk-Wg730CC8WE0ZqlfHw/view",
+      "notas": "Nuevo individuo KO003. Original: IMG_20260911_134106.jpg.",
       "estado_evidencia": "activa",
       "usar_entrenamiento": "Sí",
       "fecha_verificada": false
     },
     {
-      "photo_id": "PH-031",
-      "species_id": "SP-002",
-      "individual_id": "LC004",
-      "archivo": "SP002_LC004_hojas_02.jpg",
+      "photo_id": "PH-035",
+      "species_id": "SP-003",
+      "individual_id": "KO003",
+      "archivo": "SP-003_KO003_hojas_02.jpg",
       "organo_estructura": "hojas",
       "tipo_evidencia": "vegetativa",
       "fecha_captura": "2026-09-11",
-      "calidad_diagnostica": "alta",
+      "calidad_diagnostica": "media-alta",
       "validacion": "validado_por_usuario",
-      "drive_file_id": "1tKhbZZq6nYFHw9J6k7vO6cb0bzdIVhLX",
-      "drive_url": "https://drive.google.com/file/d/1tKhbZZq6nYFHw9J6k7vO6cb0bzdIVhLX/view",
-      "notas": "Foto confirmada por usuario como litre. Original: IMG_20260911_133845.jpg; nervadura central clara y conspicua.",
-      "estado_evidencia": "activa",
-      "usar_entrenamiento": "Sí",
-      "fecha_verificada": false
-    },
-    {
-      "photo_id": "PH-032",
-      "species_id": "SP-002",
-      "individual_id": "LC004",
-      "archivo": "SP002_LC004_hojas_03.jpg",
-      "organo_estructura": "hojas",
-      "tipo_evidencia": "vegetativa",
-      "fecha_captura": "2026-09-11",
-      "calidad_diagnostica": "alta",
-      "validacion": "validado_por_usuario",
-      "drive_file_id": "1SYyI-c_9JCPSDVLGJXhCprQtHA5GoZRs",
-      "drive_url": "https://drive.google.com/file/d/1SYyI-c_9JCPSDVLGJXhCprQtHA5GoZRs/view",
-      "notas": "Original: IMG_20260911_133853.jpg; complementa variación foliar de LC004.",
-      "estado_evidencia": "activa",
-      "usar_entrenamiento": "Sí",
-      "fecha_verificada": false
-    },
-    {
-      "photo_id": "PH-033",
-      "species_id": "SP-002",
-      "individual_id": "LC004",
-      "archivo": "SP002_LC004_ramilla_01.jpg",
-      "organo_estructura": "ramilla",
-      "tipo_evidencia": "vegetativa",
-      "fecha_captura": "2026-09-11",
-      "calidad_diagnostica": "alta",
-      "validacion": "validado_por_usuario",
-      "drive_file_id": "1GONNEwAuZsVOzA78ZPNydI3DQ9Gkz6ge",
-      "drive_url": "https://drive.google.com/file/d/1GONNEwAuZsVOzA78ZPNydI3DQ9Gkz6ge/view",
-      "notas": "Original: IMG_20260911_133914.jpg; útil para arquitectura de ramilla y disposición foliar.",
+      "drive_file_id": "18iUoaJaUCisge4-4FpsdRodiVYVjK3A2",
+      "drive_url": "https://drive.google.com/file/d/18iUoaJaUCisge4-4FpsdRodiVYVjK3A2/view",
+      "notas": "Original: IMG_20260911_134111.jpg; segunda vista foliar de KO003.",
       "estado_evidencia": "activa",
       "usar_entrenamiento": "Sí",
       "fecha_verificada": false
@@ -956,12 +825,12 @@
       "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
     },
     {
-      "fuente_id": "F-008",
-      "tipo": "Informe técnico / CONAF",
-      "referencia": "CONAF. Ficha Litre (Lithrea caustica), citando García y Ormazábal (2008).",
-      "uso_prioritario": "Rasgo visual de nervadura y morfología general",
-      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2025/11/IF-FIBN-0042018.pdf",
-      "notas": "Destaca el contraste característico entre nervadura amarilla y lámina verde; usar como apoyo visual."
+      "fuente_id": "F-009",
+      "tipo": "Flora/clave",
+      "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile. Tratamiento de Kageneckia oblonga.",
+      "uso_prioritario": "Morfología y caracteres diagnósticos de Bollén",
+      "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+      "notas": "Fuente específica para Bollén dentro de Flora Arbórea de Chile. Completar volumen/páginas solo cuando se verifiquen en la fuente."
     },
     {
       "fuente_id": "F-017",
@@ -970,6 +839,14 @@
       "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
       "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
       "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+    },
+    {
+      "fuente_id": "F-020",
+      "tipo": "Guía botánica / Fundación Philippi",
+      "referencia": "Fundación R.A. Philippi. Aromas de la flora nativa de Chile. Ficha Kageneckia oblonga.",
+      "uso_prioritario": "Morfología reproductiva de Bollén; fruto y semillas",
+      "url": "https://fundacionphilippi.cl/wp-content/uploads/2021/04/aromas_de_la_flora_nativa_de_chile.pdf",
+      "notas": "Describe el fruto de Bollén como folículo con forma de estrella y sus semillas como aladas."
     },
     {
       "fuente_id": "F-021",
@@ -1002,14 +879,14 @@
       "observaciones": "Estado de CH-002."
     },
     {
-      "termino_id": "GL-007",
-      "termino": "entero",
+      "termino_id": "GL-009",
+      "termino": "serrado",
       "categoria": "Margen foliar",
-      "definicion_tecnica": "Margen sin dientes ni serraciones.",
-      "explicacion_usuario": "Borde de la hoja sin dientes.",
-      "fuente_id": "F-002",
+      "definicion_tecnica": "Margen con dientes agudos orientados predominantemente hacia el ápice.",
+      "explicacion_usuario": "Borde con dientes similares a los de una sierra.",
+      "fuente_id": "F-009",
       "sinonimos": null,
-      "observaciones": "Estado de CH-003; la ondulación se registra en CH-028."
+      "observaciones": "Estado de CH-003."
     },
     {
       "termino_id": "GL-011",
@@ -1020,26 +897,6 @@
       "fuente_id": "F-002",
       "sinonimos": "coriácea",
       "observaciones": "Estado de CH-004."
-    },
-    {
-      "termino_id": "GL-015",
-      "termino": "ovada",
-      "categoria": "Forma foliar",
-      "definicion_tecnica": "Lámina con contorno semejante a un huevo, más ancha hacia la base.",
-      "explicacion_usuario": "Hoja ovalada, más ancha cerca de la base.",
-      "fuente_id": "F-007",
-      "sinonimos": null,
-      "observaciones": "Estado de CH-011."
-    },
-    {
-      "termino_id": "GL-017",
-      "termino": "ovado_oblonga",
-      "categoria": "Forma foliar",
-      "definicion_tecnica": "Forma intermedia entre ovada y oblonga.",
-      "explicacion_usuario": "Hoja ovalada pero relativamente alargada.",
-      "fuente_id": "F-007",
-      "sinonimos": "ovado-oblonga",
-      "observaciones": "Estado de CH-011."
     },
     {
       "termino_id": "GL-018",
@@ -1062,12 +919,12 @@
       "observaciones": "Estado de CH-011."
     },
     {
-      "termino_id": "GL-024",
-      "termino": "agudo",
+      "termino_id": "GL-025",
+      "termino": "acuminado",
       "categoria": "Ápice foliar",
-      "definicion_tecnica": "Ápice que termina en un ángulo marcado sin prolongación extensa.",
-      "explicacion_usuario": "Punta de la hoja claramente aguda.",
-      "fuente_id": "F-007",
+      "definicion_tecnica": "Ápice que se estrecha gradualmente en una punta prolongada.",
+      "explicacion_usuario": "Punta alargada que se afina progresivamente.",
+      "fuente_id": "F-009",
       "sinonimos": null,
       "observaciones": "Estado de CH-012."
     },
@@ -1082,34 +939,34 @@
       "observaciones": "Estado de CH-012."
     },
     {
-      "termino_id": "GL-029",
-      "termino": "drupa",
+      "termino_id": "GL-030",
+      "termino": "foliculo",
       "categoria": "Fruto",
-      "definicion_tecnica": "Fruto carnoso indehiscente cuyo endocarpo forma una estructura endurecida alrededor de la semilla.",
-      "explicacion_usuario": "Fruto carnoso con una parte interna dura que protege la semilla.",
+      "definicion_tecnica": "Fruto seco derivado de un carpelo que se abre por una sutura al madurar.",
+      "explicacion_usuario": "Fruto seco que se abre al madurar para liberar semillas.",
       "fuente_id": "F-002",
-      "sinonimos": null,
+      "sinonimos": "folículo",
       "observaciones": "Estado de CH-013."
     },
     {
-      "termino_id": "GL-034",
-      "termino": "panicula",
+      "termino_id": "GL-035",
+      "termino": "corimbo",
       "categoria": "Inflorescencia",
-      "definicion_tecnica": "Inflorescencia ramificada cuyo eje principal porta ramas laterales floríferas.",
-      "explicacion_usuario": "Conjunto de flores ramificado.",
-      "fuente_id": "F-007",
-      "sinonimos": "panícula",
+      "definicion_tecnica": "Inflorescencia en que pedicelos de distinta longitud sitúan las flores aproximadamente al mismo nivel.",
+      "explicacion_usuario": "Flores que terminan aproximadamente a la misma altura.",
+      "fuente_id": "F-009",
+      "sinonimos": null,
       "observaciones": "Estado de CH-014."
     },
     {
-      "termino_id": "GL-043",
-      "termino": "ondulado",
-      "categoria": "Margen foliar",
-      "definicion_tecnica": "Margen que presenta una sucesión de curvas suaves fuera del plano general de la lámina, independientemente de tener o no dientes.",
-      "explicacion_usuario": "Borde que forma ondas suaves.",
-      "fuente_id": "F-002",
+      "termino_id": "GL-036",
+      "termino": "solitaria",
+      "categoria": "Inflorescencia",
+      "definicion_tecnica": "Flor que aparece individualmente y no integrada en una inflorescencia pluriflora.",
+      "explicacion_usuario": "Una flor aparece sola.",
+      "fuente_id": "F-009",
       "sinonimos": null,
-      "observaciones": "Estado de CH-028."
+      "observaciones": "Estado de CH-014."
     },
     {
       "termino_id": "GL-048",
@@ -1144,15 +1001,15 @@
   ],
   "model_errors": [
     {
-      "error_id": "ERR-002",
-      "species_id_real": "SP-002",
-      "individual_id": "LC-002",
-      "prediccion_inicial": "Cryptocarya alba",
-      "validacion_humana": "Lithraea caustica",
+      "error_id": "ERR-001",
+      "species_id_real": "SP-003",
+      "individual_id": "KO-002",
+      "prediccion_inicial": "Citronella mucronata",
+      "validacion_humana": "Kageneckia oblonga",
       "tipo_evidencia": "vegetativa",
-      "caracteres_clave": "hoja alterna; margen entero; coriácea; envés pálido glabro; punteaduras; nervadura muy notoria",
-      "causa_probable": "Sobreponderación de punteaduras/envés pálido y subponderación de nervadura",
-      "ajuste_modelo": "Reducir peso de caracteres compartidos; aumentar contraste litre-peumo; conservar ejemplo negativo",
+      "caracteres_clave": "hoja alterna; envés pálido; dientes apuntados; base redondeada; nervios secundarios hacia dientes",
+      "causa_probable": "Sobreconfianza ante morfología foliar atípica y forma de los dientes, carácter que la bibliografía documenta como muy variable dentro de Kageneckia oblonga.",
+      "ajuste_modelo": "Aumentar representación intraespecífica; bajar peso de forma foliar y morfología del diente aisladas; priorizar combinación margen aserrado + envés blanquecino + fruto estrellado/yemas resinosas cuando estén disponibles.",
       "estado": "registrado"
     }
   ]
