@@ -24,7 +24,8 @@
     "materialize:map001": "node tools/map-blockout/materialize_map001.mjs data/maps/map-001-blockout-candidate-001.json --out-dir build/map001-blockout",
     "test:map-blockout": "node --test tools/map-blockout/*.test.mjs",
     "validate:tile-grammar": "node tools/tile-grammar/validate_candidate.mjs data/tiles/tile-grammar-candidate-v0.1.json",
-    "test:tile-grammar": "node --test tools/tile-grammar/*.test.mjs"
+    "test:tile-grammar": "node --test tools/tile-grammar/*.test.mjs",
+    "stress:tile-grammar": "node tools/tile-grammar/stress_test_007.mjs"
   },
   "dependencies": {
     "expo": "~57.0.23",
