@@ -1,0 +1,68 @@
+{
+  "version": "0.1",
+  "executionMode": "compile-only",
+  "testId": "MAP-001-STRUCTURAL-FIXTURE-001",
+  "objective": "Reunir, como fixture experimental de ASC, las partes minimas ya normativas de Navigation Contract, Camera Contract e Interaction/Learning Contract de IT-001 / MAP-001, sin representar geometria, discretizacion, vistas derivadas ni valores numericos de camara.",
+  "authorizedSources": [
+    "docs/SPATIAL_MODEL.md",
+    "docs/MAP_TOPOLOGY_SYSTEM.md",
+    "docs/ARBORIS_SCENE_COMPILER.md",
+    "docs/ASC_V0_1_EXECUTABLE_SPEC.md"
+  ],
+  "structuralContract": [
+    "IT-001 Acceso Principal es la Instancia Territorial; MAP-001 es su blockout/derivado (SPATIAL_MODEL.md s9, s18).",
+    "patternLabel: corridor, derivado de dos puertos abiertos con ruta dominante entre ellos (MAP_TOPOLOGY_SYSTEM.md s5, s17).",
+    "P-IN: localEdge screen_down, state open, priority primary, progressionRole entry (SPATIAL_MODEL.md s18; MAP_TOPOLOGY_SYSTEM.md s17).",
+    "P-OUT: localEdge screen_up, state open, priority primary, progressionRole exit (SPATIAL_MODEL.md s18; MAP_TOPOLOGY_SYSTEM.md s17).",
+    "mainRoute: centro perceptual (SPATIAL_MODEL.md s18).",
+    "Camera Contract: profileId PILOT_FIXED_ISOMETRIC, orientationPolicy fixed, rotationPolicy disabled, followPolicy allowed, panPolicy allowed (SPATIAL_MODEL.md s12, s18).",
+    "UE-001 Umbral: role orient / establish_place (SPATIAL_MODEL.md s13, s18).",
+    "UE-002 Corredor: role exploration, observationOpportunity required (SPATIAL_MODEL.md s13, s18).",
+    "UE-003 Claro: role pause / reflection / progression (SPATIAL_MODEL.md s13, s18)."
+  ],
+  "mandatoryRelations": [
+    "Ningun puerto lateral (screen_left, screen_right) esta declarado open; su ausencia representa ausencia de conexion lateral autorizada, no una decision de forma (MAP_TOPOLOGY_SYSTEM.md s17).",
+    "P-IN y P-OUT deben conservarse como los unicos puertos abiertos de MAP-001.",
+    "El Camera Contract no debe adquirir valores numericos (pitch/yaw/FOV/zoom) en este fixture.",
+    "Los interactionSlots de UE-001, UE-002 y UE-003 deben conservar su rol declarado sin asignarseles contenido educativo."
+  ],
+  "open": [
+    "routeShape (MAP_TOPOLOGY_SYSTEM.md s17; SPATIAL_MODEL.md s18).",
+    "worldCardinalMapping (MAP_TOPOLOGY_SYSTEM.md s17; SPATIAL_MODEL.md s18).",
+    "Forma exacta y bearing del puente (SPATIAL_MODEL.md s18; PILOT_ENVIRONMENT_VISUAL_CANON.md).",
+    "Geometria/footprint exacto del claro (SPATIAL_MODEL.md s18).",
+    "zoomPolicy (SPATIAL_MODEL.md s12, s18).",
+    "Pitch, yaw, FOV y zoom definitivo de camara (SPATIAL_MODEL.md s12).",
+    "species de UE-002 (SPATIAL_MODEL.md s13, s18).",
+    "microhabitat de UE-002 (SPATIAL_MODEL.md s13, s18).",
+    "contentBinding de UE-003 (SPATIAL_MODEL.md s13).",
+    "Tamano de Celda Espacial, escala metro/celda y numero de bandas de altura (SPATIAL_MODEL.md, Limites actuales).",
+    "Pathfinding, renderer y esquema JSON final de contratos ASC (SPATIAL_MODEL.md, Limites actuales; ASC_V0_1_EXECUTABLE_SPEC.md s3).",
+    "Mapeo exacto entre ejes de pantalla y cardinales geograficos, dimensiones finales del sprite y relacion GPS/locomocion-avatar (SPATIAL_MODEL.md, Limites actuales)."
+  ],
+  "doNotInfer": [
+    "No inferir conexiones laterales a partir de la ausencia de declaracion explicita.",
+    "No inferir routeShape (straight/bend/meander) por conveniencia de discretizacion.",
+    "No inferir valores numericos de camara a partir de las politicas declaradas.",
+    "No inferir species ni microhabitat de UE-002 a partir de referencias ambientales generales.",
+    "No inferir geometria del puente o del claro a partir de arte conceptual aprobado (MAP-001 v0.4b)."
+  ],
+  "prohibited": [
+    "No tratar este fixture como formato definitivo de Instancia Territorial o de contrato ASC.",
+    "No derivar raster, matriz de celdas ni discretizacion de prueba a partir de este fixture en esta fase.",
+    "No asignar a MAP-001 ningun patron TEST-MAP-* declarado en MAP_TOPOLOGY_BLOCKOUT_TEST_PLAN.md.",
+    "No presentar cualquier resultado generativo compilado desde este fixture como evidencia territorial, botanica o cientifica (ARBORIS_SCENE_COMPILER.md s10)."
+  ],
+  "artisticFreedom": [],
+  "cameraFormat": [],
+  "readingPriorities": [
+    "Priorizar la preservacion de OPEN sobre cualquier conveniencia de representacion.",
+    "Priorizar puertos y conectividad explicitamente declarada sobre cualquier forma o silueta visual."
+  ],
+  "validationCriteria": [
+    "El mismo fixture debe compilar exactamente el mismo prompt ASC (determinismo).",
+    "Los elementos declarados en open deben permanecer explicitos en la seccion [OPEN] de la salida.",
+    "No debe aparecer ninguna clave fuera del esquema ASC v0.1.",
+    "No debe aparecer geometria, raster, discretizacion ni vista derivada en la salida compilada."
+  ]
+}
