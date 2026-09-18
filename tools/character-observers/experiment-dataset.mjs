@@ -1,4 +1,5 @@
-import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { readFile, readdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -6,6 +7,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, '..', '..');
 const DEFAULT_EXPERIMENT_DIR = join(REPO_ROOT, 'data', 'experiments', 'h16-exp-001');
 const DEFAULT_BOTANICAL_DIR = join(REPO_ROOT, 'data', 'botanical');
+const DEFAULT_SPECIES_DIR = join(REPO_ROOT, 'species');
 
 const PARTITION_NAMES = Object.freeze(['development', 'holdout']);
 
@@ -23,6 +25,58 @@ const OBSERVER_INPUT_WHITELIST = Object.freeze([
 
 async function readJson(path) {
   return JSON.parse(await readFile(path, 'utf8'));
+}
+
+async function walkFiles(dir) {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...await walkFiles(full));
+    } else {
+      files.push(full);
+    }
+  }
+  return files;
+}
+
+// Resolves each photos.json `archivo` (filename) against the repo's
+// species/*/photos/ tree, trusted-layer only: the resulting repoPath must
+// never leave this module's internal indices.
+async function buildRepoFilenameIndex(speciesDir) {
+  const files = await walkFiles(speciesDir);
+  const byFilename = new Map();
+  for (const repoPath of files) {
+    const filename = repoPath.split(/[\\/]/).pop();
+    if (!byFilename.has(filename)) byFilename.set(filename, []);
+    byFilename.get(filename).push(repoPath);
+  }
+  return byFilename;
+}
+
+async function resolveAssetsForPhotos(photosById, speciesDir) {
+  const byFilename = await buildRepoFilenameIndex(speciesDir);
+  const assetsByPhotoId = new Map();
+
+  for (const photo of photosById.values()) {
+    const filename = photo.archivo;
+    const matches = byFilename.get(filename) ?? [];
+
+    if (matches.length !== 1) {
+      throw new Error(
+        `photo_id ${photo.photo_id} (${filename}) resolved to ${matches.length} repo assets; expected exactly 1`,
+      );
+    }
+
+    const [repoPath] = matches;
+    const contents = await readFile(repoPath);
+    const assetKey = createHash('sha256').update(contents).digest('hex');
+
+    assetsByPhotoId.set(photo.photo_id, { repoPath, assetKey });
+  }
+
+  return assetsByPhotoId;
 }
 
 function buildPhotosIndex(photos) {
@@ -91,6 +145,7 @@ function validateAnnotations(annotations, photosById) {
 export async function loadExperimentDataset(options = {}) {
   const experimentDir = options.experimentDir ?? DEFAULT_EXPERIMENT_DIR;
   const botanicalDir = options.botanicalDir ?? DEFAULT_BOTANICAL_DIR;
+  const speciesDir = options.speciesDir ?? DEFAULT_SPECIES_DIR;
 
   const [split, annotations, photos] = await Promise.all([
     readJson(join(experimentDir, 'split.json')),
@@ -108,6 +163,9 @@ export async function loadExperimentDataset(options = {}) {
   validateExcludedPhotos(excludedPhotos, photosById);
   validateAnnotations(annotations, photosById);
 
+  // Trusted layer only: repoPath must never be exposed by buildObserverInput().
+  const assetsByPhotoId = await resolveAssetsForPhotos(photosById, speciesDir);
+
   return {
     experimentId: split.experimentId ?? null,
     characterId: split.characterId ?? null,
@@ -116,6 +174,7 @@ export async function loadExperimentDataset(options = {}) {
     excludedPhotos,
     annotations,
     partitions: split.partitions ?? {},
+    assetsByPhotoId,
   };
 }
 
@@ -174,17 +233,18 @@ export function buildObserverInput(dataset, photoId) {
     throw new Error(`photo_id ${photoId} is excluded and cannot be used as observer input`);
   }
 
-  // photo_id and individual_id are kept only internally, for
-  // provenance/split/evaluation bookkeeping — they must never reach the
-  // observer payload itself.
+  // photo_id, individual_id, repoPath and filename are kept only
+  // internally, for provenance/split/evaluation bookkeeping — they must
+  // never reach the observer payload itself.
   const photo = getPhotoRecord(dataset, photoId);
+  const asset = dataset.assetsByPhotoId.get(photoId);
+  if (!asset) {
+    throw new Error(`No resolved repo asset for photo_id ${photoId}`);
+  }
 
   const candidate = {
     characterId: dataset.characterId ?? 'CH-003',
-    imageRef: {
-      driveFileId: photo.drive_file_id ?? null,
-      driveUrl: photo.drive_url ?? null,
-    },
+    imageRef: asset.assetKey,
     organStructure: photo.organo_estructura ?? null,
     evidenceType: photo.tipo_evidencia ?? null,
     captureDate: photo.fecha_captura ?? null,

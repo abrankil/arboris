@@ -19,6 +19,9 @@ const BANNED_FIELDS = [
   'individualId',
   'archivo',
   'filename',
+  'repoPath',
+  'driveUrl',
+  'driveFileId',
   'nombre_cientifico',
   'nombre_comun',
   'scientificName',
@@ -148,4 +151,29 @@ test('getAnnotationsForPhoto fails explicitly for an unknown photo_id', async ()
     () => getAnnotationsForPhoto(dataset, 'PH-999'),
     /Unknown photo_id/,
   );
+});
+
+test('all 45 registered photos resolve to exactly one repo asset', async () => {
+  const dataset = await load();
+  assert.equal(dataset.assetsByPhotoId.size, 45);
+  for (const photoId of dataset.photosById.keys()) {
+    const asset = dataset.assetsByPhotoId.get(photoId);
+    assert.ok(asset, `missing resolved asset for ${photoId}`);
+    assert.ok(asset.repoPath, `missing repoPath for ${photoId}`);
+    assert.match(asset.assetKey, /^[0-9a-f]{64}$/);
+  }
+});
+
+test('imageRef (assetKey) is opaque and stable across loads', async () => {
+  const datasetA = await load();
+  const datasetB = await load();
+
+  const inputA = buildObserverInput(datasetA, 'PH-001');
+  const inputB = buildObserverInput(datasetB, 'PH-001');
+
+  assert.equal(inputA.imageRef, inputB.imageRef);
+  assert.match(inputA.imageRef, /^[0-9a-f]{64}$/);
+
+  // Opaque: does not reveal photo_id, individual_id or filename.
+  assert.equal(inputA.imageRef.includes('PH-001'), false);
 });
