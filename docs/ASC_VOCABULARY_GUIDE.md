@@ -35,6 +35,45 @@ Esta guía es una referencia rápida y didáctica. No reemplaza la definición n
 | **PROHIBIDO INFERIR** | El ejecutor no puede completar ese vacío por plausibilidad. | “No inferir otras construcciones.” |
 | **ART-PROVISIONAL** | Solución visual temporal permitida para una prueba. No se convierte en evidencia. | “Usar un volumen simple ART-PROVISIONAL.” |
 
+
+## 4. Estados de dominio y trazabilidad
+
+### Estados del dominio vs tratamientos ASC
+
+`KNOWN`, `OPEN`, `PROHIBIDO INFERIR` y `ART-PROVISIONAL` son tratamientos de compilación ASC.
+
+Un dominio puede mantener estados propios. Esos estados no se convierten automáticamente en tratamientos ASC.
+
+Por ejemplo, un proceso puede registrar algo como `UNRESOLVED`. Ese estado local puede recibir tratamiento `OPEN` en ASC solo cuando una evaluación explícita determine que corresponde a su semántica: no existe evidencia o decisión suficiente y el punto debe permanecer abierto. El estado original del dominio se conserva.
+
+### Trazabilidad de compilación
+
+Usar el nivel de atribución que realmente pueda demostrarse.
+
+**contrato de entrada preparado**  
+→ la información, relaciones y restricciones necesarias ya están estructuradas para compilación; esto no demuestra por sí solo autorización.
+
+**contrato de entrada autorizado**  
+→ la autoridad correspondiente aprobó su uso como input de la prueba.
+
+ASC v0.1 requiere un contrato de entrada ya preparado y autorizado.
+
+**prompt ASC**  
+→ instrucción producida mediante el proceso de compilación ASC.
+
+Cuando importe la procedencia técnica, distinguir:
+
+**construcción del prompt conforme a ASC**  
+→ se construyó el prompt preservando contrato, autoridad y restricciones, sin afirmar ejecución de una implementación concreta.
+
+**ASC v0.1 / `tools/asc/compile_asc.mjs`**  
+→ el prompt fue producido efectivamente por la implementación v0.1. Esta atribución requiere trazabilidad de esa ejecución concreta.
+
+**resultado ASC**  
+→ salida producida por un ejecutor externo a partir de un prompt ASC. No constituye evidencia por sí misma.
+
+No atribuir una compilación a ASC v0.1 o a `compile_asc.mjs` si no existe trazabilidad de esa ejecución concreta.
+
 ## Regla de lectura
 
 ```text

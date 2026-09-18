@@ -44,6 +44,8 @@ Esta guía resume términos de uso frecuente. Es didáctica y no reemplaza las a
 | **PROHIBIDO INFERIR** | El ejecutor no puede completar ese vacío por plausibilidad. Regla general del proyecto: no cerrar decisiones por suposición. |
 | **ART-PROVISIONAL** | Solución visual temporal para una prueba; no se convierte en evidencia. |
 
+Los tratamientos ASC no sustituyen estados propios de otros dominios. Cuando un estado de dominio deba recibir tratamiento ASC, ese tratamiento se determina explícitamente y el estado original del dominio se conserva. No se convierte automáticamente en `OPEN`.
+
 ### Estados de producción para derivados jugables
 
 ```text
@@ -110,7 +112,7 @@ Otros prefijos pueden existir por contexto, pero no deben tratarse como convenci
 1. Precisión antes que ambigüedad.
 2. Evidencia antes que suposiciones.
 3. Cada término en su contexto correcto.
-4. Lo que no sabemos se declara `OPEN`.
+4. Lo que no sabemos no se cierra por inferencia.
 5. Un lenguaje compartido reduce errores y ambigüedad.
 
 ## Relación con las láminas visuales
