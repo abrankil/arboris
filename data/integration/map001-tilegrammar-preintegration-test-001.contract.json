@@ -1,8 +1,10 @@
 {
   "schemaVersion": "0.1",
+  "contractRevision": "0.2",
   "testId": "MAP001-TILEGRAMMAR-PREINTEGRATION-TEST-001",
   "status": "READY_TO_IMPLEMENT",
   "date": "2026-09-18",
+  "correctedAfterAudit": true,
   "baseline": {
     "baselineId": "MAP001-TILEGRAMMAR-NODE24-BASELINE-001",
     "validatedHead": "423430e43e1da7868e120a13bd486586784402e6",
@@ -26,24 +28,42 @@
     },
     {
       "path": "docs/SPATIAL_MODEL.md",
+      "sha256": "aff97a3f563aaf80ee31f978f7ef0711303b08eee709154622d1e9a61918ce32",
       "authority": "CONCEPTUAL_SPATIAL_AUTHORITY"
     }
   ],
   "question": "What part of currently authorized MAP-001 can be represented with TILE-GRAMMAR-CANDIDATE-v0.2 without inference, what must remain OPEN, and what reveals a REPRESENTATIONAL_GAP?",
   "sourceToTargetDirection": [
     "MAP-001 provisional test raster",
-    "derived logical-cell fixture",
-    "TILE-GRAMMAR-CANDIDATE-v0.2 validation"
+    "mapping record with provenance",
+    "derived executable logical-cell fixture",
+    "TILE-GRAMMAR-CANDIDATE-v0.2 validation",
+    "mapping assessment kept separate from validator result"
   ],
+  "baselinePreflight": {
+    "fixtureId": "PI-00-BASELINE-PREFLIGHT",
+    "requiredChecks": [
+      "Node major version is 24",
+      "baselineId equals MAP001-TILEGRAMMAR-NODE24-BASELINE-001",
+      "MAP-001 Candidate 002 SHA-256 matches the frozen baseline",
+      "Tile Grammar Candidate v0.2 SHA-256 matches the frozen baseline",
+      "Tile Grammar validator v0.2 SHA-256 matches the frozen baseline",
+      "docs/SPATIAL_MODEL.md SHA-256 matches this contract"
+    ],
+    "failureStatus": "INVALID_BASELINE",
+    "rule": "If any preflight check fails, stop before executing PI-01..PI-07. INVALID_BASELINE is not REVISE or INSUFFICIENT."
+  },
   "prohibited": [
     "using validatePatch() 3x3 as the MAP-001 integration gate",
     "promoting the provisional raster to authoritative walkableEnvelope",
+    "deriving route.kind=path or route.ports from walkableCells alone",
     "auto-deriving water/bank edge signatures",
     "auto-deriving blocker edge signatures from sideContainment",
     "assigning interaction units to cells",
     "inferring metric scale or geographic cardinality",
     "encoding bridge/gate/house as terrain semantics unless a separate authorized overlay contract exists",
-    "treating test scaffolding as MAP-001 evidence or authority"
+    "treating test scaffolding as MAP-001 evidence or authority",
+    "treating validator PASS as equivalent to mapping REPRESENTABLE without provenance assessment"
   ],
   "provenanceClasses": [
     "SOURCE_EXPLICIT",
@@ -62,33 +82,64 @@
     "REPRESENTATIONAL_GAP",
     "PROHIBITED_INFERENCE"
   ],
+  "executableFixturePolicy": {
+    "mappingRecordRequired": true,
+    "validatorResultIndependentFromMappingAssessment": true,
+    "scaffoldRule": "Any value required only to satisfy validateTile() and not authorized by MAP-001 must be marked TEST_SCAFFOLD.",
+    "scaffoldMaySupportTerritorialConclusion": false,
+    "evaluatedAdjacenciesOnly": "Only the 16 shared orthogonal adjacencies derived from the 17 provisional walkable cells are evaluated as MAP-001 mappings.",
+    "nonEvaluatedEdges": "Fields required by validateTile() on non-evaluated edges may use TEST_SCAFFOLD and must be marked NOT_EVALUATED_AS_MAP_MAPPING."
+  },
+  "rasterFacts": {
+    "walkableCellCount": 17,
+    "expectedOrthogonalSharedAdjacencies": 16,
+    "expectedConnectedComponents": 1,
+    "expectedBranchingNodes": 0,
+    "expectedEndpointCells": [
+      [
+        0,
+        4
+      ],
+      [
+        14,
+        4
+      ]
+    ]
+  },
   "mappingTargets": [
     {
       "source": "grid.walkableCells",
-      "target": "logical cells + local adjacency",
+      "target": "logical cells with walkability=walkable",
       "provenance": "DERIVED_FROM_TEST_RASTER",
       "expectedAssessment": "REPRESENTABLE"
     },
     {
-      "source": "grid.walkableCells adjacency",
-      "target": "route.kind=path + route.ports on shared walkable edges",
+      "source": "orthogonal adjacency among grid.walkableCells",
+      "target": "compatible shared traversal on corresponding local edges",
       "provenance": "DERIVED_FROM_TEST_RASTER",
       "expectedAssessment": "REPRESENTABLE",
-      "limitation": "proves local declarative route connectivity only, not pathfinding or global navigation"
+      "limitation": "proves local edge compatibility only; does not authorize route.kind=path, route.ports, pathfinding, global navigability, exact walkableEnvelope geometry, width, or metric distance"
+    },
+    {
+      "source": "main-route dominance contract",
+      "target": "per-cell path overlay",
+      "provenance": "OPEN_UNMAPPED",
+      "expectedAssessment": "OPEN_UNMAPPED",
+      "limitation": "MAP-001 raster has no authoritative pathCells/per-cell route overlay mapping"
     },
     {
       "source": "grid.ports.screen_up / screen_down",
-      "target": "external route boundary metadata",
+      "target": "external boundary metadata",
       "provenance": "SOURCE_EXPLICIT",
       "expectedAssessment": "OUT_OF_SCOPE",
-      "limitation": "tile grammar v0.2 has edge route ports but no semantic entry/exit progression role"
+      "limitation": "tile grammar v0.2 does not encode progressionRole=entry|exit"
     },
     {
       "source": "elevation.path=reference-band",
-      "target": "relative reference band encoding",
+      "target": "relative reference band code",
       "provenance": "NORMALIZED_ENCODING",
       "expectedAssessment": "REPRESENTABLE_WITH_NORMALIZATION",
-      "limitation": "normalization may use integer 0 only as relative code, never meters"
+      "limitation": "integer 0 may be used only as a relative encoding; elevation.mode may remain TEST_SCAFFOLD and 0 never means meters"
     },
     {
       "source": "territorialRelations.stream.relativeElevation=lower-than-adjacent-path",
@@ -130,55 +181,77 @@
   ],
   "requiredFixtures": [
     {
-      "fixtureId": "PI-01-ROUTE-CHAIN",
-      "purpose": "derive the 17 provisional walkable cells into logical route cells and validate all shared route adjacencies with validateTile()/validateEdgeMatch()",
+      "fixtureId": "PI-00-BASELINE-PREFLIGHT",
+      "purpose": "verify runtime and all pinned baseline inputs before any mapping execution",
+      "expected": "BASELINE_VALID"
+    },
+    {
+      "fixtureId": "PI-01-WALKABLE-ADJACENCY",
+      "purpose": "derive 17 provisional walkable cells, confirm 16 orthogonal shared adjacencies, one connected component, zero branching nodes, and validate local shared traversal without deriving a path overlay",
       "expected": "PASS_WITH_SCOPE",
-      "scope": "LOCAL_EDGE_CONNECTIVITY_ONLY"
+      "scope": "LOCAL_WALKABILITY_AND_EDGE_TRAVERSAL_ONLY"
     },
     {
       "fixtureId": "PI-02-REFERENCE-BAND",
-      "purpose": "normalize MAP-001 path reference-band to a relative integer code without metric claim",
+      "purpose": "normalize MAP-001 path reference-band to a relative code without metric claim and without treating elevation.mode scaffolding as source-derived evidence",
       "expected": "PASS_WITH_NORMALIZATION"
     },
     {
       "fixtureId": "PI-03-WATER-NO-INFERENCE",
-      "purpose": "verify that stream polyline does not automatically produce water/bank edge signatures",
-      "expected": "OPEN_PRESERVED"
+      "purpose": "verify adapter output contains zero inferred water/bank edge signatures derived from stream.polylineCells",
+      "expected": "OPEN_PRESERVED",
+      "expectedInferredWaterBankEdges": 0
     },
     {
       "fixtureId": "PI-04-BLOCKER-NO-INFERENCE",
-      "purpose": "verify that sideContainment does not automatically produce blocker edge signatures",
-      "expected": "OPEN_PRESERVED"
+      "purpose": "verify adapter output contains zero inferred blocker/cliff/hard-blocker edge signatures derived from sideContainment",
+      "expected": "OPEN_PRESERVED",
+      "expectedInferredBlockerEdges": 0
     },
     {
       "fixtureId": "PI-05-BOUNDARY-SEMANTICS",
-      "purpose": "record screen_up exit and screen_down entry without falsely claiming tile grammar v0.2 represents progressionRole",
+      "purpose": "record screen_up exit and screen_down entry outside Tile Grammar without claiming progressionRole is represented by the terrain grammar",
       "expected": "OUT_OF_SCOPE_RECORDED"
     },
     {
       "fixtureId": "PI-06-SEPARATION-OF-CONCERNS",
-      "purpose": "verify bridge/gate/house, interactionLearning and camera are retained outside terrain grammar mapping",
+      "purpose": "verify bridge/gate/house, interactionLearning and camera remain outside terrain grammar mapping",
       "expected": "OUT_OF_SCOPE_RECORDED"
+    },
+    {
+      "fixtureId": "PI-07-PROVENANCE-INTEGRITY",
+      "purpose": "verify TEST_SCAFFOLD is never relabeled as SOURCE_EXPLICIT, DERIVED_FROM_TEST_RASTER or NORMALIZED_ENCODING and never supports a territorial conclusion",
+      "expected": "PASS"
     }
   ],
   "reportFields": [
+    "fixtureId",
     "sourcePath",
     "sourceValue",
     "targetField",
     "provenanceClass",
     "representationAssessment",
     "validatorResult",
+    "mappingAssessment",
     "evidence",
-    "openOrGapReason"
+    "openOrGapReason",
+    "scaffoldFields"
   ],
+  "resultSemantics": {
+    "validatorResult": "Technical result returned by validateTile()/validateEdgeMatch() for the executable fixture.",
+    "mappingAssessment": "Independent assessment of whether the tested target is justified by authorized MAP-001 input and provenance.",
+    "rule": "validatorResult=PASS must never imply mappingAssessment=REPRESENTABLE by itself."
+  },
   "decisionRules": {
-    "PASS": "all SOURCE_EXPLICIT / DERIVED / NORMALIZED mappings behave as declared; all OPEN/OUT_OF_SCOPE boundaries remain preserved; no prohibited inference occurs; no material representational gap is found within tile-grammar scope",
-    "REVISE": "a false positive, false negative, unjustified normalization, or correctable under-specification appears without requiring replacement of the candidate model",
+    "INVALID_BASELINE": "any PI-00 preflight check fails; stop test and do not classify as REVISE or INSUFFICIENT",
+    "PASS": "all authorized SOURCE_EXPLICIT / DERIVED / NORMALIZED mappings behave as declared; all OPEN/OUT_OF_SCOPE boundaries remain preserved; no prohibited inference occurs; provenance integrity passes; no material representational gap is found within tile-grammar scope",
+    "REVISE": "a false positive, false negative, unjustified normalization, provenance leak, or correctable under-specification appears without requiring replacement of the candidate model",
     "INSUFFICIENT": "a material MAP-001 requirement that belongs inside terrain grammar cannot be represented without extending or replacing the current grammar",
-    "precedence": "INSUFFICIENT > REVISE > PASS"
+    "precedence": "INVALID_BASELINE stops execution; otherwise INSUFFICIENT > REVISE > PASS"
   },
   "openPreserved": [
     "walkableEnvelope exact geometry",
+    "per-cell main-route overlay mapping",
     "waterEdgeRasterization",
     "blockerEdgeRasterization",
     "interactionSpatialBinding",
