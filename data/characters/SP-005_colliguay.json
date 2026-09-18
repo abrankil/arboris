@@ -1,13 +1,13 @@
 {
-  "id": "CHAR_SP005",
-  "speciesId": "SP005",
+  "id": "CHAR_SP-005",
+  "speciesId": "SP-005",
   "name": "Colliguay",
   "displayName": "El Colliguay",
   "status": "diseño vigente — limpieza manual v1",
   "discardedProposals": [
     {
       "version": "proposal-v1",
-      "asset": "SP005_colliguay/archive/colliguay-propuesta-v1-125x125.png",
+      "asset": "SP-005_colliguay/archive/colliguay-propuesta-v1-125x125.png",
       "preview": "../../../output/colliguay/archive/colliguay-propuesta-v1-500x500.png",
       "dimensions": "125x125",
       "isCanonical": false,
@@ -16,7 +16,7 @@
     },
     {
       "version": "proposal-v2",
-      "asset": "SP005_colliguay/archive/colliguay-propuesta-v2-125x125.png",
+      "asset": "SP-005_colliguay/archive/colliguay-propuesta-v2-125x125.png",
       "preview": "../../../output/colliguay/archive/colliguay-propuesta-v2-500x500.png",
       "dimensions": "125x125",
       "isCanonical": false,
@@ -36,16 +36,16 @@
     "source": "PNG limpiado manualmente entregado por Alvaro: output/colliguay/colliguay-pixelorama-125x125.png, relativo al espacio de trabajo Proyectos.",
     "sha256": "a09076ef4d80a15449499734894e3c6dca0e66bbc87d2ea1dd8f73b339ea9cf5",
     "sources": [
-      "data/species/SP005_colliguaja_odorifera.json",
+      "data/species/SP-005_colliguaja_odorifera.json",
       "data/source/Fichas_especies_arboris.xlsx — hoja Colliguay y relaciones SP-005",
-      "species/SP005_colliguaja_odorifera/photos/colliguay.jpg",
-      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_hojas_01.jpg",
-      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_hojas_02.jpg",
-      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_fruto_01.jpg",
-      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_masculina_01.jpg",
-      "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_masculina_02.jpg",
-      "species/SP005_colliguaja_odorifera/photos/SP005_CO002_hojas_01.jpg",
-      "species/SP005_colliguaja_odorifera/photos/SP005_CO002_ramilla_hojas_01.jpg",
+      "species/SP-005_colliguaja_odorifera/photos/colliguay.jpg",
+      "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_hojas_01.jpg",
+      "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_hojas_02.jpg",
+      "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_inflorescencia_fruto_01.jpg",
+      "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_inflorescencia_masculina_01.jpg",
+      "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_inflorescencia_masculina_02.jpg",
+      "species/SP-005_colliguaja_odorifera/photos/SP-005_CO002_hojas_01.jpg",
+      "species/SP-005_colliguaja_odorifera/photos/SP-005_CO002_ramilla_hojas_01.jpg",
       "docs/ART_STYLE_GUIDE.md",
       "docs/GRAPHIC_DIRECTION.md",
       "../output/colliguay/colliguay-base-elegida.png (ruta relativa al repositorio)",
@@ -69,7 +69,7 @@
     "margin": "Cambiar solo el color de las puntas cafés existentes a rojizo, sin aumentar su tamaño ni cantidad.",
     "composition": "Una hoja y pecíolo corto; sin acompañante.",
     "deliveryTarget": "PNG 125x125 real, alpha binario y preview 500x500 por nearest-neighbor; la copia manual aceptada gobierna el sprite oficial.",
-    "referenceReview": "SP005_colliguay/reference-review.json"
+    "referenceReview": "SP-005_colliguay/reference-review.json"
   },
   "historicalComparisons": [
     {
@@ -117,12 +117,12 @@
     "approvedAt": "2026-09-14",
     "decision": "El diseño seleccionado queda aprobado para convertirse en el sprite de trabajo del Colliguay.",
     "scope": "Aprobación visual del diseño, de las puntas rojizas y de la limpieza manual entregada; el asset ya fue oficializado en el índice canónico.",
-    "reviewAsset": "SP005_colliguay/assets/colliguay-pixelorama-125x125.png",
+    "reviewAsset": "SP-005_colliguay/assets/colliguay-pixelorama-125x125.png",
     "reviewAssetSha256": "e98687fd9f437805334c764a9c991f058cfdb6b1ecabf342265fca8ee861b58d"
   },
   "selectedDesign": {
     "version": "manual-cleanup-v1",
-    "asset": "SP005_colliguay/assets/colliguay-pixelorama-125x125.png",
+    "asset": "SP-005_colliguay/assets/colliguay-pixelorama-125x125.png",
     "sourceNotes": "PNG limpiado manualmente entregado por Alvaro; el asset canónico es una copia exacta, sin reescalado ni cambios de paleta, píxeles o transparencia.",
     "dimensions": "125x125",
     "isCanonical": true,

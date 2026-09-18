@@ -1,6 +1,6 @@
 {
-  "id": "CHAR_SP004",
-  "speciesId": "SP004",
+  "id": "CHAR_SP-004",
+  "speciesId": "SP-004",
   "name": "Mitiqui",
   "displayName": "El Mitique",
   "status": "diseño vigente — limpieza técnica v2",
@@ -15,7 +15,7 @@
   },
   "selectedDesign": {
     "version": "technical-cleanup-v2",
-    "asset": "SP004_mitique/assets/mitique-pixelorama-125x125.png",
+    "asset": "SP-004_mitique/assets/mitique-pixelorama-125x125.png",
     "source": "../../../output/mitique/mitique-pixelorama-125x125.png.pxo",
     "sourceNotes": "Ruta relativa a data/characters. Se verificó la capa RGBA interna del archivo Pixelorama y se sincronizó con el PNG oficial; ambos conservan lienzo 125x125 y alpha binario.",
     "dimensions": "125x125",

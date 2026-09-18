@@ -1,6 +1,6 @@
 {
-  "id": "CHAR_SP003",
-  "speciesId": "SP003",
+  "id": "CHAR_SP-003",
+  "speciesId": "SP-003",
   "name": "Bollen",
   "displayName": "El Bollén",
   "status": "diseño vigente — limpieza manual v1",
@@ -14,7 +14,7 @@
   },
   "selectedDesign": {
     "version": "manual-cleanup-v1",
-    "asset": "SP003_bollen/assets/bollen-pixelorama-125x125.png",
+    "asset": "SP-003_bollen/assets/bollen-pixelorama-125x125.png",
     "dimensions": "125x125",
     "isCanonical": true,
     "format": "PNG RGBA",

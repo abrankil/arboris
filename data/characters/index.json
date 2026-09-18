@@ -2,13 +2,13 @@
   "version": 1,
   "activeDesignSet": "unified-125x125-v1",
   "characters": [
-    "SP002_litre.json",
-    "SP006_quillay.json",
-    "SP001_peumo.json",
-    "SP004_mitique.json",
-    "SP003_bollen.json",
-    "SP005_colliguay.json",
-    "SP007_boldo.json"
+    "SP-002_litre.json",
+    "SP-006_quillay.json",
+    "SP-001_peumo.json",
+    "SP-004_mitique.json",
+    "SP-003_bollen.json",
+    "SP-005_colliguay.json",
+    "SP-007_boldo.json"
   ],
   "supportCharacters": [
     "GUIDE_lichen_stone.json"
@@ -28,13 +28,13 @@
       "canvas": "125x125",
       "usage": "capas fuente; no es la resolución de entrega del GIF",
       "characters": [
-        "SP002_litre/assets/litrini-layer-125x125.png",
-        "SP006_quillay/assets/quillai-layer-125x125.png",
-        "SP001_peumo/assets/peumito-layer-125x125.png",
-        "SP004_mitique/assets/mitique-pixelorama-125x125.png",
-        "SP003_bollen/assets/bollen-pixelorama-125x125.png",
-        "SP005_colliguay/assets/colliguay-pixelorama-125x125.png",
-        "SP007_boldo/assets/boldo-pixelorama-125x125.png"
+        "SP-002_litre/assets/litrini-layer-125x125.png",
+        "SP-006_quillay/assets/quillai-layer-125x125.png",
+        "SP-001_peumo/assets/peumito-layer-125x125.png",
+        "SP-004_mitique/assets/mitique-pixelorama-125x125.png",
+        "SP-003_bollen/assets/bollen-pixelorama-125x125.png",
+        "SP-005_colliguay/assets/colliguay-pixelorama-125x125.png",
+        "SP-007_boldo/assets/boldo-pixelorama-125x125.png"
       ],
       "compositingOrder": ["background", "litrini", "quillai", "peumito", "mitique", "bollen", "colliguay", "boldo"]
     },

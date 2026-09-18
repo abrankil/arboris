@@ -1,5 +1,5 @@
 {
-  "speciesId": "SP005",
+  "speciesId": "SP-005",
   "reviewedAt": "2026-09-14",
   "reviewType": "revisión visual para diseño; no validación botánica",
   "pathsRelativeTo": "repositoryRoot",
@@ -12,7 +12,7 @@
   },
   "photos": [
     {
-      "file": "species/SP005_colliguaja_odorifera/photos/colliguay.jpg",
+      "file": "species/SP-005_colliguaja_odorifera/photos/colliguay.jpg",
       "photoId": null,
       "individualId": null,
       "sourceStructure": null,
@@ -25,7 +25,7 @@
       "limitations": "Referencia complementaria local. Procedencia, individuo y madurez sin confirmar."
     },
     {
-      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_hojas_01.jpg",
+      "file": "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_hojas_01.jpg",
       "photoId": "PH-021",
       "individualId": "CO001",
       "sourceStructure": "hojas",
@@ -38,7 +38,7 @@
       "limitations": "La foto no prueba madurez ni color calibrado."
     },
     {
-      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_hojas_02.jpg",
+      "file": "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_hojas_02.jpg",
       "photoId": "PH-022",
       "individualId": "CO001",
       "sourceStructure": "hojas",
@@ -51,7 +51,7 @@
       "limitations": "Los reflejos intensos no definen por sí solos la paleta."
     },
     {
-      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_fruto_01.jpg",
+      "file": "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_inflorescencia_fruto_01.jpg",
       "photoId": "PH-023",
       "individualId": "CO001",
       "sourceStructure": "inflorescencia fruto",
@@ -64,7 +64,7 @@
       "limitations": "La etiqueta no identifica todas las estructuras visibles."
     },
     {
-      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_masculina_01.jpg",
+      "file": "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_inflorescencia_masculina_01.jpg",
       "photoId": "PH-019",
       "individualId": "CO001",
       "sourceStructure": "inflorescencia masculina",
@@ -77,7 +77,7 @@
       "limitations": "Referencia documental; acompañante sin aprobar."
     },
     {
-      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO001_inflorescencia_masculina_02.jpg",
+      "file": "species/SP-005_colliguaja_odorifera/photos/SP-005_CO001_inflorescencia_masculina_02.jpg",
       "photoId": "PH-020",
       "individualId": "CO001",
       "sourceStructure": "inflorescencia masculina",
@@ -90,7 +90,7 @@
       "limitations": "Elegida para margen/superficie, no para copiar el ápice."
     },
     {
-      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO002_hojas_01.jpg",
+      "file": "species/SP-005_colliguaja_odorifera/photos/SP-005_CO002_hojas_01.jpg",
       "photoId": "PH-040",
       "individualId": "CO002",
       "sourceStructure": "hojas",
@@ -103,7 +103,7 @@
       "limitations": "Identidad de la estructura pendiente; nota de contenido sin recategorización."
     },
     {
-      "file": "species/SP005_colliguaja_odorifera/photos/SP005_CO002_ramilla_hojas_01.jpg",
+      "file": "species/SP-005_colliguaja_odorifera/photos/SP-005_CO002_ramilla_hojas_01.jpg",
       "photoId": "PH-041",
       "individualId": "CO002",
       "sourceStructure": "ramilla hojas",

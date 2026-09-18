@@ -1,6 +1,6 @@
 {
-  "id": "CHAR_SP001",
-  "speciesId": "SP001",
+  "id": "CHAR_SP-001",
+  "speciesId": "SP-001",
   "name": "Peumito",
   "displayName": "El Peumo",
   "status": "diseño vigente — sprite limpiado manualmente v2",
@@ -16,21 +16,21 @@
   },
   "selectedDesign": {
     "version": "manual-cleanup-v2",
-    "asset": "SP001_peumo/assets/peumito-layer-125x125.png",
+    "asset": "SP-001_peumo/assets/peumito-layer-125x125.png",
     "dimensions": "125x125",
     "isCanonical": true,
     "notes": "Sprite limpiado manualmente por el usuario, copiado sin modificar sus píxeles. PNG 125x125 con transparencia. Ruta relativa a data/characters. Conserva el ápice agudo, la ausencia de pecíolo visible y el fruto acompañante."
   },
   "references": {
     "speciesPhotos": [
-      "species/SP001_cryptocarya_alba/photos/SP001_CA001_hojas_01.jpg",
-      "species/SP001_cryptocarya_alba/photos/SP001_CA001_hojas_02.jpg",
-      "species/SP001_cryptocarya_alba/photos/SP001_CA001_ramilla_apical_01.jpg"
+      "species/SP-001_cryptocarya_alba/photos/SP-001_CA001_hojas_01.jpg",
+      "species/SP-001_cryptocarya_alba/photos/SP-001_CA001_hojas_02.jpg",
+      "species/SP-001_cryptocarya_alba/photos/SP-001_CA001_ramilla_apical_01.jpg"
     ],
     "sources": [
       "CONAF, ficha de Peumo (Cryptocarya alba)",
       "Ministerio del Medio Ambiente, guía de campo de bosques",
-      "Ficha científica Arboris SP001"
+      "Ficha científica Arboris SP-001"
     ]
   }
 }

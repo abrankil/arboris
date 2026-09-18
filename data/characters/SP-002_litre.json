@@ -1,6 +1,6 @@
 {
-  "id": "CHAR_SP002",
-  "speciesId": "SP002",
+  "id": "CHAR_SP-002",
+  "speciesId": "SP-002",
   "name": "Litrini",
   "displayName": "El Litre",
   "status": "diseño vigente — sprite limpiado manualmente v2",
@@ -20,7 +20,7 @@
   },
   "selectedDesign": {
     "version": "manual-cleanup-v2",
-    "asset": "SP002_litre/assets/litrini-layer-125x125.png",
+    "asset": "SP-002_litre/assets/litrini-layer-125x125.png",
     "dimensions": "125x125",
     "isCanonical": true
   },

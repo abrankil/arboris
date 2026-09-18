@@ -12,7 +12,7 @@ const sharp = require('C:/Users/cia_x/.cache/codex-runtimes/codex-primary-runtim
 
 const root = process.cwd();
 const outDir = path.join(root, '..', 'output', 'colliguay');
-const repoAssetDir = path.join(root, 'data', 'characters', 'SP005_colliguay', 'assets');
+const repoAssetDir = path.join(root, 'data', 'characters', 'SP-005_colliguay', 'assets');
 fs.mkdirSync(outDir, { recursive: true });
 fs.mkdirSync(repoAssetDir, { recursive: true });
 

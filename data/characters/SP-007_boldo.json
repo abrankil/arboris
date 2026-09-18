@@ -1,6 +1,6 @@
 {
-  "id": "CHAR_SP007",
-  "speciesId": "SP007",
+  "id": "CHAR_SP-007",
+  "speciesId": "SP-007",
   "name": "Boldo",
   "displayName": "El Boldo",
   "status": "diseño vigente — limpieza manual v1; sujeto a cambios posteriores",
@@ -26,8 +26,8 @@
   },
   "selectedDesign": {
     "version": "manual-cleanup-v1",
-    "asset": "SP007_boldo/assets/boldo-pixelorama-125x125.png",
-    "source": "SP007_boldo/assets/boldo-pixelorama-125x125.png.pxo",
+    "asset": "SP-007_boldo/assets/boldo-pixelorama-125x125.png",
+    "source": "SP-007_boldo/assets/boldo-pixelorama-125x125.png.pxo",
     "dimensions": "125x125",
     "isCanonical": true,
     "format": "PNG RGBA",
