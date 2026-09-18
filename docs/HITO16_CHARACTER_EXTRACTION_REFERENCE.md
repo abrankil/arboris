@@ -1508,14 +1508,14 @@ A fecha de esta revisión:
 - [x] Integración con ciclo `attempted / resolved / retry` validada.
 - [x] Rama de Hito 16 rebasada sobre el `main` vigente.
 - [x] Tests de ACE: `24/24 PASS`.
-- [x] Tests de observadores e integración H16: `16/16 PASS`.
+- [x] Tests de observadores e integración H16: `29/29 PASS`.
 - [x] Gate integrado `npm test`: PASS.
 - [x] Protocolo mínimo de dataset `CH-003` definido.
 - [x] Cobertura de `finamente_serrado` revisada.
 - [x] `finamente_serrado` mantenido en el vocabulario canónico sin inventar cobertura experimental.
 - [x] Split anti-leakage inicial definido por `individual_id`.
 - [x] `PH-029` excluida como posible duplicado de `PH-028`.
-- [x] Holdout inicial congelado conceptualmente.
+- [x] Holdout inicial materializado y protegido por tests.
 - [x] `confidence` fijada como metadata no inferencial y protegida por test.
 
 El comando:
@@ -1536,8 +1536,8 @@ no como fallo de Hito 16.
 
 ## 27. Secuencia pendiente
 
-- [ ] Materializar el dataset efectivo de `H16-EXP-001`.
-- [ ] Ejecutar anotación humana de `CH-003`.
+- [x] Materializar la infraestructura de `H16-EXP-001`: split, archivo de anotaciones, loader y garantías anti-leakage.
+- [ ] Ejecutar anotación humana de `CH-003` y poblar `annotations.json`.
 - [ ] Calcular cobertura observada por clase.
 - [ ] Confirmar que los derivados y crops respeten el split por individuo.
 - [ ] Construir baseline simple.
@@ -1705,3 +1705,4 @@ LeafMachine2 se evaluará como posible herramienta de preprocessing, no como arq
 La arquitectura de Árboris continúa gobernada por cuatro principios:
 
 > **evidencia antes que inferencia; observación antes que identificación; incertidumbre antes que falsa certeza; trazabilidad antes que automatización opaca.**
+
