@@ -1,0 +1,33 @@
+name: Temporary Expo lock alignment
+
+on:
+  push:
+    branches:
+      - fix/expo-sdk57-alignment
+
+permissions:
+  contents: read
+
+jobs:
+  generate-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Update Expo dependency metadata
+        run: npm install --package-lock-only --ignore-scripts expo@~57.0.24 expo-constants@~57.0.19 expo-image-picker@~57.0.19 expo-router@~57.0.22
+
+      - name: Upload updated package files
+        uses: actions/upload-artifact@v4
+        with:
+          name: expo-lock-alignment
+          path: |
+            package.json
+            package-lock.json
