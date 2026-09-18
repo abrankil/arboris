@@ -333,7 +333,16 @@ No crear estas capas por anticipación si una prueba concreta todavía no las ne
 
 [`ASC_VOCABULARY_GUIDE.md`](ASC_VOCABULARY_GUIDE.md) es la referencia rápida aprobada provisionalmente para términos, órdenes de trabajo y tratamientos de información de ASC. Es didáctica y no reemplaza este documento normativo.
 
-## 16. Implementación ejecutable v0.1
+## 16. Evidencia experimental integrada
+
+La suficiencia de ASC v0.1 se evalúa mediante casos concretos sin convertir cada resultado experimental en nueva autoridad normativa.
+
+- [`ASC_MAP001_CONTRACT_V2_1_EXPERIMENT_2026-09-17.md`](ASC_MAP001_CONTRACT_V2_1_EXPERIMENT_2026-09-17.md): evidencia para topología, relaciones territoriales y cámara dentro del alcance probado.
+- [`ASC_IL_001_INTERACTION_LEARNING_EXPERIMENT_2026-09-18.md`](ASC_IL_001_INTERACTION_LEARNING_EXPERIMENT_2026-09-18.md): evidencia de que el mínimo estructural Interaction/Learning probado puede representarse en ASC v0.1 preservando secuencia, roles, una oportunidad de observación obligatoria y bindings `OPEN` mediante strings autocontenidos, sin cambio demostrado de schema o compilador.
+
+Estos experimentos delimitan capacidades demostradas para sus casos respectivos. No autorizan generalizaciones a contratos más complejos ni cierran los límites `OPEN` de ASC.
+
+## 17. Implementación ejecutable v0.1
 
 Existe una implementación mínima y versionada de ASC para el modo `compile-only`:
 
