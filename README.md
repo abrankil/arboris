@@ -1,95 +1,115 @@
-# ├ürboris
+# Árboris
 
-├ürboris es un juego de exploraci├│n, aprendizaje y colecci├│n de flora nativa chilena basado en observaciones del mundo real.
+Árboris es un juego de exploración, aprendizaje y colección de flora nativa chilena basado en observaciones del mundo real.
 
-La identificaci├│n asistida es una mec├ínica dentro de una experiencia m├ís amplia: explorar territorio real, encontrar plantas, observarlas, reunir evidencia, formular una identificaci├│n asistida, descubrir especies y avanzar en una colecci├│n con utilidad jugable.
+La identificación asistida es una mecánica dentro de una experiencia más amplia: explorar territorio real, encontrar plantas, observarlas, reunir evidencia, formular una identificación asistida, descubrir especies y avanzar en una colección con utilidad jugable.
 
-├ürboris no busca reemplazar la observaci├│n bot├ínica mediante una identificaci├│n autom├ítica. La tecnolog├¡a funciona como apoyo para que el usuario aprenda progresivamente a observar y reconocer la biodiversidad nativa.
+Árboris no busca reemplazar la observación botánica mediante una identificación automática. La tecnología funciona como apoyo para que el usuario aprenda progresivamente a observar y reconocer la biodiversidad nativa.
 
 ## Piloto 1.0
 
-El piloto inicial est├í deliberadamente limitado a una zona geogr├ífica/ecol├│gica y seis especies nativas:
+El piloto inicial está deliberadamente limitado a una zona geográfica/ecológica y seis especies nativas:
 
-- **Peumo** ÔÇö *Cryptocarya alba*
-- **Litre** ÔÇö *Lithraea caustica*
-- **Boll├®n** ÔÇö *Kageneckia oblonga*
-- **Mitique** ÔÇö *Podanthus mitiqui*
-- **Colliguay** ÔÇö *Colliguaja odorifera*
-- **Quillay** ÔÇö *Quillaja saponaria*
+- **Peumo** — *Cryptocarya alba*
+- **Litre** — *Lithraea caustica*
+- **Bollén** — *Kageneckia oblonga*
+- **Mitique** — *Podanthus mitiqui*
+- **Colliguay** — *Colliguaja odorifera*
+- **Quillay** — *Quillaja saponaria*
 
-El objetivo t├®cnico inmediato es lograr un flujo completo y trazable desde una observaci├│n real hasta una hip├│tesis bot├ínica asistida para estas seis especies.
+El objetivo técnico inmediato es lograr un flujo completo y trazable desde una observación real hasta una hipótesis botánica asistida para estas seis especies.
 
 ## Ciclo principal
 
-El ciclo conceptual de ├ürboris es:
+El ciclo conceptual de Árboris es:
 
-**explorar ÔåÆ encontrar ÔåÆ observar ÔåÆ reunir evidencia ÔåÆ identificar de forma asistida ÔåÆ descubrir ÔåÆ coleccionar ÔåÆ jugar ÔåÆ volver a explorar**
+**explorar → encontrar → observar → reunir evidencia → identificar de forma asistida → descubrir → coleccionar → jugar → volver a explorar**
 
-La colecci├│n no es solamente un cat├ílogo. Las especies descubiertas pueden dar acceso a personajes, contenido, capacidades, variantes y otras mec├ínicas de juego.
+La colección no es solamente un catálogo. Las especies descubiertas pueden dar acceso a personajes, contenido, capacidades, variantes y otras mecánicas de juego.
 
-├ürboris mantiene separados pero conectados tres objetos:
+Árboris mantiene separados pero conectados tres objetos:
 
-1. la especie biol├│gica real;
+1. la especie biológica real;
 2. su registro de conocimiento, observaciones y evidencia;
 3. el personaje jugable inspirado en esa especie.
 
-## Principio de identificaci├│n
+## Principio de identificación
 
-La IA no constituye una autoridad taxon├│mica y no debe transformar una fotograf├¡a directamente en una identificaci├│n definitiva.
+La IA no constituye una autoridad taxonómica y no debe transformar una fotografía directamente en una identificación definitiva.
 
 El sistema puede combinar:
 
-- fotograf├¡as;
+- fotografías;
 - candidatos visuales;
-- caracteres bot├ínicos observables;
-- ubicaci├│n y contexto ecol├│gico;
-- distribuci├│n;
-- ├®poca y fenolog├¡a;
+- caracteres botánicos observables;
+- ubicación y contexto ecológico;
+- distribución;
+- época y fenología;
 - evidencia acumulada;
-- preguntas diagn├│sticas adaptativas.
+- preguntas diagnósticas adaptativas.
 
 El flujo conceptual es:
 
 ```text
-Observaci├│n real
-      Ôåô
-Fotograf├¡a(s) + contexto
-      Ôåô
-Modelo visual/biol├│gico
-      Ôåô
+Observación real
+      ↓
+Fotografía(s) + contexto
+      ↓
+Modelo visual/biológico
+      ↓
 Candidatos
-      Ôåô
-├ürboris determina qu├® car├ícter bot├ínico
+      ↓
+Árboris determina qué carácter botánico
 puede discriminar entre los candidatos
-      Ôåô
-┬┐Existe evidencia suficiente?
-      Ôåô
-S├¡ ÔåÆ utilizarla
-No ÔåÆ intentar observar el car├ícter autom├íticamente
-      Ôåô
-┬┐Puede observarse con suficiente confianza?
-      Ôåô
-S├¡ ÔåÆ incorporar la evidencia
-No ÔåÆ preguntar al usuario o solicitar otra observaci├│n
-      Ôåô
-Hip├│tesis de identificaci├│n
-      Ôåô
+      ↓
+¿Existe evidencia suficiente?
+      ↓
+Sí → utilizarla
+No → intentar observar el carácter automáticamente
+      ↓
+¿Puede observarse con suficiente confianza?
+      ↓
+Sí → incorporar la evidencia
+No → preguntar al usuario o solicitar otra observación
+      ↓
+Hipótesis de identificación
+      ↓
 Evidencia + confianza + trazabilidad
 ```
 
-`No s├®` y `No puedo observarlo` son respuestas v├ílidas.
+`No sé` y `No puedo observarlo` son respuestas válidas.
 
-La falta de informaci├│n nunca debe transformarse autom├íticamente en evidencia negativa. La evidencia manda y las identificaciones son revisables.
+La falta de información nunca debe transformarse automáticamente en evidencia negativa. La evidencia manda y las identificaciones son revisables.
 
-## Datos bot├ínicos
+## Datos botánicos
 
-La fuente editorial y cient├¡fica del piloto es:
+La fuente editorial y científica del piloto es:
 
 `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
 
-El Master Bot├ínico 2.0 contiene las especies, caracteres, estados bot├ínicos, relaciones especieÔÇôcar├ícter, fuentes, glosario y evidencia fotogr├ífica del piloto.
+El Master Botánico 2.0 contiene las especies, caracteres, estados botánicos, relaciones especie–carácter, fuentes, glosario y evidencia fotográfica del piloto.
 
 Los formatos JSON y CSV derivados del Master deben generarse de forma reproducible y no mantenerse como una segunda fuente manual de verdad.
+
+### Convención canónica de identificadores de especie
+
+Árboris utiliza globalmente el formato `SP-###` como identificador canónico de especie, con el prefijo `SP-` seguido de tres dígitos.
+
+Ejemplos:
+
+- `SP-001`
+- `SP-006`
+- `SP-007`
+
+Esta convención se aplica en todo el proyecto: datos botánicos, personajes y arte, nombres de archivos y directorios, referencias internas y namespaces derivados.
+
+Los identificadores derivados deben conservar el identificador canónico completo. Por ejemplo:
+
+`CHAR_SP-001`
+
+La forma compacta `SP###` (por ejemplo, `SP001`) se considera legado y no debe utilizarse para crear nuevos identificadores, rutas, archivos o referencias activas.
+
+El uso de un identificador `SP-###` en un área del proyecto no implica por sí mismo que la especie forme parte del Master Botánico vigente. El Master continúa siendo la autoridad sobre las especies incorporadas al backbone botánico.
 
 ACE utiliza como base principal el conocimiento botánico canónico derivado del Master Botánico 2.0. La variabilidad natural y sus contextos se mantienen en una capa complementaria explícita, separada de los derivados reproducibles del Master:
 
@@ -100,74 +120,74 @@ Estos archivos complementarios no son exportaciones del Master Botánico 2.0 ni 
 
 Reglas fundamentales:
 
-- vac├¡o significa `sin dato`, no `ausente`;
-- `no_se`, `no_observable` y `no_aplica` no son estados bot├ínicos;
-- la variaci├│n intraespec├¡fica se conserva;
-- cada identificaci├│n mantiene evidencia y procedencia;
-- los caracteres retirados o pendientes pueden conservarse para auditor├¡a sin participar en el motor de identificaci├│n;
+- vacío significa `sin dato`, no `ausente`;
+- `no_se`, `no_observable` y `no_aplica` no son estados botánicos;
+- la variación intraespecífica se conserva;
+- cada identificación mantiene evidencia y procedencia;
+- los caracteres retirados o pendientes pueden conservarse para auditoría sin participar en el motor de identificación;
 - no deben inventarse estados negativos para completar una matriz.
 
-## Arquitectura de identificaci├│n
+## Arquitectura de identificación
 
 La arquitectura objetivo del piloto es:
 
 ```text
-Observaci├│n
-    Ôåô
-Fotograf├¡as + contexto
-    Ôåô
+Observación
+    ↓
+Fotografías + contexto
+    ↓
 BioCLIP
-    Ôåô
+    ↓
 Candidatos visuales
-    Ôåô
-Selecci├│n del car├ícter m├ís informativo
-    Ôåô
-Observaci├│n autom├ítica cuando sea posible
-    Ôåô
+    ↓
+Selección del carácter más informativo
+    ↓
+Observación automática cuando sea posible
+    ↓
 Pregunta al usuario cuando sea necesario
-    Ôåô
-Clave bot├ínica adaptativa
-    Ôåô
-Hip├│tesis
-    Ôåô
+    ↓
+Clave botánica adaptativa
+    ↓
+Hipótesis
+    ↓
 Evidencia + incertidumbre + trazabilidad
 ```
 
 BioCLIP funciona como generador de candidatos, no como autoridad final.
 
-Los modelos visuales auxiliares pueden intentar observar caracteres bot├ínicos espec├¡ficos. Deben poder abstenerse cuando el car├ícter no sea observable con suficiente confianza.
+Los modelos visuales auxiliares pueden intentar observar caracteres botánicos específicos. Deben poder abstenerse cuando el carácter no sea observable con suficiente confianza.
 
 ## Modelo de datos conceptual
 
-La unidad fundamental es la observaci├│n real.
+La unidad fundamental es la observación real.
 
 El modelo conceptual principal es:
 
 ```text
 Species
-  Ôåô
+  ↓
 Individual
-  Ôåô
+  ↓
 Observation
-  Ôåô
+  ↓
 Evidence / Photo
-  Ôåô
+  ↓
 Identification
 ```
 
-Una identificaci├│n puede cambiar sin destruir la observaci├│n ni su evidencia.
+Una identificación puede cambiar sin destruir la observación ni su evidencia.
 
-Descubrir una especie tampoco significa completarla. Nuevas observaciones pueden aportar individuos, localidades, microh├íbitats, fenolog├¡a, variaci├│n morfol├│gica y otros datos relevantes.
+Descubrir una especie tampoco significa completarla. Nuevas observaciones pueden aportar individuos, localidades, microhábitats, fenología, variación morfológica y otros datos relevantes.
 
 ## Seguridad
 
-La obtenci├│n de evidencia debe priorizar m├®todos observacionales, seguros y no invasivos.
+La obtención de evidencia debe priorizar métodos observacionales, seguros y no invasivos.
 
 El sistema no debe solicitar indiscriminadamente tocar, romper, triturar u oler estructuras vegetales.
 
-En particular, si **Litre (*Lithraea caustica*)** es un candidato, ├ürboris no debe pedir al usuario frotar, triturar, romper ni oler hojas para provocar una respuesta diagn├│stica.
+En particular, si **Litre (*Lithraea caustica*)** es un candidato, Árboris no debe pedir al usuario frotar, triturar, romper ni oler hojas para provocar una respuesta diagnóstica.
 
-## Estado t├®cnico
+## Estado técnico
 
 El proyecto utiliza:
 
@@ -178,26 +198,26 @@ El proyecto utiliza:
 - Expo Router
 - SQLite mediante `expo-sqlite`
 
-La integraci├│n can├│nica **Master Bot├ínico 2.0 ÔåÆ JSON normalizado ÔåÆ fichas por especie ÔåÆ motor adaptativo** qued├│ cerrada como base m├¡nima en el Hito 15. El motor vigente consume datos can├│nicos y no debe volver a introducir conocimiento bot├ínico hardcodeado.
+La integración canónica **Master Botánico 2.0 → JSON normalizado → fichas por especie → motor adaptativo** quedó cerrada como base mínima en el Hito 15. El motor vigente consume datos canónicos y no debe volver a introducir conocimiento botánico hardcodeado.
 
-La siguiente etapa t├®cnica del frente de identificaci├│n es el **Hito 16 ÔÇö extracci├│n autom├ítica de caracteres bot├ínicos**: observadores visuales restringidos por car├ícter que puedan responder con un estado permitido, incertidumbre o `NO_OBSERVABLE`, sin sentenciar directamente una especie.
+La siguiente etapa técnica del frente de identificación es el **Hito 16 — extracción automática de caracteres botánicos**: observadores visuales restringidos por carácter que puedan responder con un estado permitido, incertidumbre o `NO_OBSERVABLE`, sin sentenciar directamente una especie.
 
-En paralelo, los frentes de entorno, mapas y producci├│n visual contin├║an sus propios gates de validaci├│n documentados en `docs/START_HERE.md` y `docs/ROADMAP.md`.
+En paralelo, los frentes de entorno, mapas y producción visual continúan sus propios gates de validación documentados en `docs/START_HERE.md` y `docs/ROADMAP.md`.
 
-Para consultas de datos y agentes, comenzar por `AGENTS.md` y `data/README.md`; la estrategia de rendimiento est├í en `docs/DATA_ACCESS_PERFORMANCE.md`.
+Para consultas de datos y agentes, comenzar por `AGENTS.md` y `data/README.md`; la estrategia de rendimiento está en `docs/DATA_ACCESS_PERFORMANCE.md`.
 
-## Direcci├│n de ├ürboris
+## Dirección de Árboris
 
 - **Alejandra:** fundadora y directora de proyecto.
-- **├ülvaro:** director de arte.
+- **Álvaro:** director de arte.
 
-La direcci├│n del proyecto corresponde a Alejandra. La direcci├│n art├¡stica y la coherencia visual corresponden a ├ülvaro.
+La dirección del proyecto corresponde a Alejandra. La dirección artística y la coherencia visual corresponden a Álvaro.
 
-## Documentaci├│n
+## Documentación
 
-La documentaci├│n principal del producto se encuentra en:
+La documentación principal del producto se encuentra en:
 
-- [Visi├│n de producto](docs/PRODUCT_VISION.md)
+- [Visión de producto](docs/PRODUCT_VISION.md)
 - [Principios de producto](docs/PRODUCT_PRINCIPLES.md)
 - [Arquitectura](docs/ARCHITECTURE.md)
 - [Modelo de datos](docs/DATA_MODEL.md)
@@ -205,52 +225,52 @@ La documentaci├│n principal del producto se encuentra en:
 - [Factores habilitantes](docs/ENABLING_FACTORS.md)
 - [Roadmap](docs/ROADMAP.md)
 
-## Desarrollo gr├ífico
+## Desarrollo gráfico
 
-La direcci├│n gr├ífica y el trabajo de arte tienen documentaci├│n propia y no deben confundirse con la l├│gica bot├ínica o de identificaci├│n.
+La dirección gráfica y el trabajo de arte tienen documentación propia y no deben confundirse con la lógica botánica o de identificación.
 
 Comenzar por:
 
-- [Direcci├│n gr├ífica y m├®todo de trabajo](docs/GRAPHIC_DIRECTION.md)
-- [Auditor├¡a y decisiones de Direcci├│n de Arte](docs/ART_DIRECTION_AUDIT_2026-09-16.md)
-- [Gu├¡a unificada de arte](docs/ART_STYLE_GUIDE.md)
-- [Flujo de creaci├│n de personajes](docs/CHARACTER_CREATION_WORKFLOW.md)
+- [Dirección gráfica y método de trabajo](docs/GRAPHIC_DIRECTION.md)
+- [Auditoría y decisiones de Dirección de Arte](docs/ART_DIRECTION_AUDIT_2026-09-16.md)
+- [Guía unificada de arte](docs/ART_STYLE_GUIDE.md)
+- [Flujo de creación de personajes](docs/CHARACTER_CREATION_WORKFLOW.md)
 - [Plantilla de personajes](docs/CHARACTER_TEMPLATE.md)
 - [Estado actual de personajes](docs/CHARACTER_DESIGN_STATUS.md)
-- [├ìndice de personajes](data/characters/index.json)
+- [Índice de personajes](data/characters/index.json)
 
-El estado de implementaci├│n del refactor de documentaci├│n de personajes est├í registrado en:
+El estado de implementación del refactor de documentación de personajes está registrado en:
 
 - [Character Refactor Status](docs/CHARACTER_REFACTOR_STATUS.md)
 
-La consolidaci├│n hist├│rica del 15 de septiembre de 2026 se conserva en:
+La consolidación histórica del 15 de septiembre de 2026 se conserva en:
 
 - [Character Canon Snapshot](docs/CHARACTER_CANON_SNAPSHOT_2026-09-15.md)
 
-Ese documento es un registro hist├│rico y no constituye la fuente de verdad actual.
+Ese documento es un registro histórico y no constituye la fuente de verdad actual.
 
-La antigua [colecci├│n final de personajes](docs/CHARACTER_COLLECTION_FINAL.md) se mantiene temporalmente como referencia de compatibilidad obsoleta.
+La antigua [colección final de personajes](docs/CHARACTER_COLLECTION_FINAL.md) se mantiene temporalmente como referencia de compatibilidad obsoleta.
 
 ## Ambientes y mapas
 
-La construcci├│n de escenarios y mapas conectados se documenta en:
+La construcción de escenarios y mapas conectados se documenta en:
 
 - [Modelo espacial](docs/SPATIAL_MODEL.md)
 - [Protocolo de mapeo territorial](docs/TERRITORIAL_MAPPING_PROTOCOL.md)
 - [Protocolo de referencias ambientales](docs/ENVIRONMENT_REFERENCE_PROTOCOL.md)
-- [Direcci├│n de arte de escenarios](docs/ENVIRONMENT_ART_DIRECTION.md)
-- [Sistema de topolog├¡a y conectividad de mapas](docs/MAP_TOPOLOGY_SYSTEM.md)
+- [Dirección de arte de escenarios](docs/ENVIRONMENT_ART_DIRECTION.md)
+- [Sistema de topología y conectividad de mapas](docs/MAP_TOPOLOGY_SYSTEM.md)
 - [Plan de pruebas de blockouts](docs/MAP_TOPOLOGY_BLOCKOUT_TEST_PLAN.md)
 - [Plantilla de brief de escena](docs/SCENE_REFERENCE_BRIEF_TEMPLATE.md)
 
 Los recursos de ambientes se registran en:
 
 - [Biblioteca de referencias ambientales](docs/references/environments/README.md)
-- [Cat├ílogo de ambientes](docs/assets/backgrounds/README.md)
+- [Catálogo de ambientes](docs/assets/backgrounds/README.md)
 
 Para recursos destinados a Android, Steam/PC y web se utiliza:
 
-- [Especificaci├│n de producci├│n de ambientes](docs/ENVIRONMENT_PRODUCTION_SPEC.md)
+- [Especificación de producción de ambientes](docs/ENVIRONMENT_PRODUCTION_SPEC.md)
 
 En Windows puede ejecutarse:
 
@@ -258,14 +278,14 @@ En Windows puede ejecutarse:
 pwsh -File tools/validate-graphic-assets.ps1
 ```
 
-Esta comprobaci├│n es de solo lectura y revisa metadatos gr├íficos, archivos referenciados, dimensiones y transparencia. No sustituye la revisi├│n visual ni la verificaci├│n en Pixelorama.
+Esta comprobación es de solo lectura y revisa metadatos gráficos, archivos referenciados, dimensiones y transparencia. No sustituye la revisión visual ni la verificación en Pixelorama.
 
 ## Criterio de desarrollo
 
-├ürboris prioriza integrar y validar el ciclo completo del piloto antes de a├▒adir nuevas capas tecnol├│gicas.
+Árboris prioriza integrar y validar el ciclo completo del piloto antes de añadir nuevas capas tecnológicas.
 
 Un componente nuevo solo debe incorporarse cuando resuelva un bloqueo concreto demostrado.
 
-El objetivo no es construir m├ís visi├│n artificial que la necesaria.
+El objetivo no es construir más visión artificial que la necesaria.
 
-El valor de ├ürboris est├í en combinar modelos existentes, conocimiento bot├ínico estructurado, selecci├│n adaptativa de caracteres, evidencia real, participaci├│n del usuario, incertidumbre, trazabilidad y juego.
+El valor de Árboris está en combinar modelos existentes, conocimiento botánico estructurado, selección adaptativa de caracteres, evidencia real, participación del usuario, incertidumbre, trazabilidad y juego.
