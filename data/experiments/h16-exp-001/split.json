@@ -1,0 +1,35 @@
+{
+  "experimentId": "H16-EXP-001",
+  "characterId": "CH-003",
+  "splitUnit": "individual_id",
+  "definedAt": "2026-09-18",
+  "source": "docs/HITO16_CHARACTER_EXTRACTION_REFERENCE.md#16.18",
+  "partitions": {
+    "development": [
+      "CA001",
+      "LC001",
+      "LC002",
+      "LC004",
+      "KO001",
+      "KO002",
+      "PM001",
+      "CO001",
+      "QS001"
+    ],
+    "holdout": [
+      "CA002",
+      "LC003",
+      "KO003",
+      "PM002",
+      "CO002",
+      "QS002"
+    ]
+  },
+  "excludedPhotos": {
+    "PH-029": {
+      "reason": "possible_duplicate",
+      "duplicateOf": "PH-028",
+      "notes": "Exclusion overrides individual_id partition membership (LC003/holdout). PH-029 is never usable as independent evidence."
+    }
+  }
+}
