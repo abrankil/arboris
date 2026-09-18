@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "0.1",
+  "authorityId": "MAP-001-WALKABLE-ENVELOPE-AUTHORITY-001",
+  "date": "2026-09-18",
+  "status": "FROZEN_NAVIGATION_AUTHORITY",
+  "scope": "MAP-001 LOCAL NAVIGATION GEOMETRY ONLY",
+  "sourceCandidate": {
+    "id": "MAP-001-WALKABLE-ENVELOPE-CANDIDATE-001",
+    "path": "data/maps/map-001-walkable-envelope-candidate-001.json",
+    "sha256": "10bf81d817b947665499aa5b942b9edb23dd0ef4259087150a5a5cf7a1f7614c"
+  },
+  "validation": {
+    "runtime": "Node v24.20.0",
+    "repositoryHead": "9e94d247a83b0e89a3afd5fb7579ad8c71025e42",
+    "workflow": "MAP-001 Walkable Envelope Gate",
+    "runId": 35380568068,
+    "conclusion": "success",
+    "artifact": {
+      "id": 10561084320,
+      "name": "map001-walkable-envelope-candidate-001",
+      "digest": "sha256:dacd271b20b6a47bc2794b6b6780858a36eaee9bd27e7339857308752ffe32d8"
+    },
+    "hashes": {
+      "materializer": "1420d8847e86aca5f3e75b4cf941a8408e52c708516b6d173c9b111aafed1470",
+      "validationJson": "3e6e7ff3a046afe9acddbb26b9e643859e6d36297f9f7cf4e6eef281bcc7a2bd",
+      "derivedRaster": "ece4186d0dd164809dc492a7fec92d40cba2de7ab627603a95592e1c5b9c2c32",
+      "previewSvg": "6f017c99bd3eabe570b4fae788c9f1797cd85830319e43a44f15278b657802f9"
+    }
+  },
+  "derivedRasterGate": {
+    "cellCount": 17,
+    "connectedComponents": 1,
+    "branchingNodes": 0,
+    "endpoints": [
+      [
+        0,
+        4
+      ],
+      [
+        14,
+        4
+      ]
+    ],
+    "migrationExactCellSetMatch": true,
+    "legacyCandidate002HashMatched": true,
+    "deterministicAB": true
+  },
+  "authorityRule": {
+    "canonicalNavigationGeometry": "data/maps/map-001-walkable-envelope-candidate-001.json",
+    "futureRasterRule": "All future MAP-001 navigation rasters must be regenerated from the frozen walkable envelope or an explicitly superseding authority.",
+    "legacyRasterRole": "MIGRATION_COMPATIBILITY_ONLY",
+    "legacyRasterPath": "data/maps/map-001-blockout-candidate-002.json",
+    "reverseAuthorityProhibited": true
+  },
+  "interpretation": {
+    "unit": "NAVIGATION_UNIT",
+    "territorialGeometryClaim": false,
+    "metricScale": "OPEN",
+    "worldBearing": "OPEN",
+    "surveyedRouteGeometry": "OPEN"
+  },
+  "stillOpen": [
+    "territorial metric scale",
+    "real trail width",
+    "surveyed route geometry",
+    "world cardinal mapping",
+    "waterEdgeRasterization",
+    "blockerEdgeRasterization",
+    "interactionSpatialBinding",
+    "pathfinding implementation",
+    "renderer",
+    "tile size",
+    "final environmental art"
+  ],
+  "productionStandard": "NOT_ESTABLISHED"
+}
