@@ -48,16 +48,19 @@ test('holdout partition has exactly 14 usable photos', async () => {
 
 test('no individual_id appears in both partitions', async () => {
   const dataset = await load();
+
   const dev = new Set(
     listUsablePhotoIds(dataset, 'development').map(
       id => dataset.photosById.get(id).individual_id,
     ),
   );
+
   const holdout = new Set(
     listUsablePhotoIds(dataset, 'holdout').map(
       id => dataset.photosById.get(id).individual_id,
     ),
   );
+
   for (const individualId of dev) {
     assert.equal(holdout.has(individualId), false);
   }
@@ -65,6 +68,7 @@ test('no individual_id appears in both partitions', async () => {
 
 test('PH-029 is excluded and its exclusion prevails over LC003 holdout membership', async () => {
   const dataset = await load();
+
   assert.equal(isExcludedPhoto(dataset, 'PH-029'), true);
   assert.equal(getPartitionForPhoto(dataset, 'PH-029'), 'excluded');
 
@@ -78,9 +82,11 @@ test('PH-029 is excluded and its exclusion prevails over LC003 holdout membershi
 
 test('excluded + development + holdout accounts for all 45 registered photos', async () => {
   const dataset = await load();
+
   const dev = listUsablePhotoIds(dataset, 'development').length;
   const holdout = listUsablePhotoIds(dataset, 'holdout').length;
   const excluded = Object.keys(dataset.excludedPhotos).length;
+
   assert.equal(dev + holdout + excluded, dataset.photosById.size);
   assert.equal(dataset.photosById.size, 45);
 });
@@ -88,7 +94,9 @@ test('excluded + development + holdout accounts for all 45 registered photos', a
 test('buildObserverInput exposes exactly the minimal whitelisted keys', async () => {
   const dataset = await load();
   const input = buildObserverInput(dataset, 'PH-001');
+
   const keys = Object.keys(input).sort();
+
   assert.deepEqual(keys, [
     'captureDate',
     'characterId',
@@ -96,9 +104,11 @@ test('buildObserverInput exposes exactly the minimal whitelisted keys', async ()
     'imageRef',
     'organStructure',
   ]);
+
   for (const key of keys) {
     assert.equal(OBSERVER_INPUT_WHITELIST_FIELDS.includes(key), true);
   }
+
   assert.equal(input.characterId, 'CH-003');
 });
 
@@ -106,6 +116,7 @@ test('buildObserverInput never exposes species or ground-truth fields', async ()
   const dataset = await load();
   const input = buildObserverInput(dataset, 'PH-001');
   const serialized = JSON.stringify(input);
+
   for (const banned of BANNED_FIELDS) {
     assert.equal(
       serialized.toLowerCase().includes(banned.toLowerCase()),
@@ -117,16 +128,25 @@ test('buildObserverInput never exposes species or ground-truth fields', async ()
 
 test('buildObserverInput refuses to build input for an excluded photo', async () => {
   const dataset = await load();
-  assert.throws(() => buildObserverInput(dataset, 'PH-029'), /excluded/);
+
+  assert.throws(
+    () => buildObserverInput(dataset, 'PH-029'),
+    /excluded/,
+  );
 });
 
 test('buildObserverInput fails explicitly for an unknown photo_id', async () => {
   const dataset = await load();
-  assert.throws(() => buildObserverInput(dataset, 'PH-999'), /Unknown photo_id/);
+
+  assert.throws(
+    () => buildObserverInput(dataset, 'PH-999'),
+    /Unknown photo_id/,
+  );
 });
 
 test('getPartitionForIndividual fails explicitly for an unknown individual_id', async () => {
   const dataset = await load();
+
   assert.throws(
     () => getPartitionForIndividual(dataset, 'ZZ999'),
     /Unknown individual_id/,
@@ -135,18 +155,47 @@ test('getPartitionForIndividual fails explicitly for an unknown individual_id', 
 
 test('getPartitionForPhoto fails explicitly for an unknown photo_id', async () => {
   const dataset = await load();
-  assert.throws(() => getPartitionForPhoto(dataset, 'PH-999'), /Unknown photo_id/);
+
+  assert.throws(
+    () => getPartitionForPhoto(dataset, 'PH-999'),
+    /Unknown photo_id/,
+  );
 });
 
-test('annotations.json starts empty and is never used to build observer input', async () => {
+test('human CH-003 annotations are loaded but never leak into observer input', async () => {
   const dataset = await load();
-  assert.deepEqual(dataset.annotations, []);
-  const annotations = getAnnotationsForPhoto(dataset, 'PH-001');
-  assert.deepEqual(annotations, []);
+
+  assert.equal(dataset.annotations.length, 3);
+
+  const expected = [
+    ['PH-001', 'observed', 'entero'],
+    ['PH-002', 'observed', 'entero'],
+    ['PH-003', 'observed', 'entero'],
+  ];
+
+  for (const [photoId, status, observedState] of expected) {
+    const annotations = getAnnotationsForPhoto(dataset, photoId);
+
+    assert.equal(annotations.length, 1);
+    assert.equal(annotations[0].characterId, 'CH-003');
+    assert.equal(annotations[0].status, status);
+    assert.equal(annotations[0].observedState, observedState);
+
+    const observerInput = buildObserverInput(dataset, photoId);
+    const serializedInput = JSON.stringify(observerInput);
+
+    assert.equal(serializedInput.includes(status), false);
+    assert.equal(serializedInput.includes(observedState), false);
+    assert.equal(serializedInput.includes('SP-001'), false);
+  }
+
+  // No holdout annotation has been introduced.
+  assert.deepEqual(getAnnotationsForPhoto(dataset, 'PH-027'), []);
 });
 
 test('getAnnotationsForPhoto fails explicitly for an unknown photo_id', async () => {
   const dataset = await load();
+
   assert.throws(
     () => getAnnotationsForPhoto(dataset, 'PH-999'),
     /Unknown photo_id/,
@@ -155,9 +204,12 @@ test('getAnnotationsForPhoto fails explicitly for an unknown photo_id', async ()
 
 test('all 45 registered photos resolve to exactly one repo asset', async () => {
   const dataset = await load();
+
   assert.equal(dataset.assetsByPhotoId.size, 45);
+
   for (const photoId of dataset.photosById.keys()) {
     const asset = dataset.assetsByPhotoId.get(photoId);
+
     assert.ok(asset, `missing resolved asset for ${photoId}`);
     assert.ok(asset.repoPath, `missing repoPath for ${photoId}`);
     assert.match(asset.assetKey, /^[0-9a-f]{64}$/);
