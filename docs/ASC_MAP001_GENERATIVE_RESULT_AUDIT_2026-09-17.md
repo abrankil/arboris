@@ -190,16 +190,19 @@ Opciones válidas:
 3. probar explícitamente 360×640 y 360×800;
 4. materializar un blockout/walkableEnvelope y medir preservación geométrica.
 
-Para el siguiente ciclo inmediato se prioriza:
+La procedencia incompleta del primer resultado impide tratar la siguiente corrida como repetición estricta. Para el siguiente ciclo inmediato se prioriza establecer un baseline reproducible e instrumentado:
 
 ```text
-MISMO CONTRATO
-→ NUEVA EJECUCIÓN
+MISMO CONTRATO v2.1
+→ RECOMPILACIÓN CON RUNTIME CONFORME
+→ REGISTRO DEL PROMPT EXACTO + HASH
+→ REGISTRO DE PROVIDER / MODEL ID / PARÁMETROS DISPONIBLES
+→ EJECUCIÓN GENERATIVA
 → AUDITORÍA CON LOS MISMOS CRITERIOS
-→ COMPARACIÓN ENTRE RESULTADOS
+→ BASELINE REPRODUCIBLE
 ```
 
-Esto permite evaluar estabilidad del prompt antes de cambiar ASC.
+El primer resultado permanece como referencia histórica comparativa. No se utiliza como baseline de reproducibilidad porque no conserva provenance suficiente para reconstruir una ejecución exacta.
 
 ## 12. Auditoría
 
@@ -224,4 +227,279 @@ No se identifica redundancia nueva en el contrato.
 **MANTENER ASC v0.1.**  
 **MANTENER v2.1 SIN CAMBIOS.**  
 **CLASIFICAR ESTE RESULTADO COMO PARTIAL / REVISE.**  
-**SIGUIENTE PASO: REPETIR EJECUCIÓN Y COMPARAR RESULTADOS ANTES DE ALTERAR EL CONTRATO.**
+**SIGUIENTE PASO: ESTABLECER `MAP-001-ASC-GENERATIVE-BASELINE-001` ANTES DE INTENTAR UNA PRUEBA DE REPRODUCIBILIDAD.**
+
+
+## 13. Refinamiento del siguiente gate — baseline reproducible
+
+Una revisión posterior del registro experimental determinó que el primer resultado generativo v2.1 tiene procedencia incompleta.
+
+Está respaldado que:
+
+- fue auditado contra `MAP-001-ASC-MAPPING-0021`;
+- constituye la primera evidencia generativa registrada contra el contrato v2.1;
+- puede utilizarse como referencia histórica comparativa.
+
+No quedó registrado de forma suficiente:
+
+- un `executionTestId` específico de la corrida;
+- el prompt exacto efectivamente enviado al ejecutor;
+- provider;
+- identificador exacto de modelo / versión;
+- parámetros de generación;
+- seed, si existió;
+- configuración específica del ejecutor.
+
+Por ello:
+
+```text
+Resultado 001
+= evidencia generativa v2.1 válida
+= provenance incompleta
+≠ baseline de reproducibilidad
+≠ repetición controlable
+```
+
+No se atribuye documentalmente esta corrida a una persona, proveedor o modelo que el registro actual no identifique.
+
+## 14. MAP-001-ASC-GENERATIVE-BASELINE-001
+
+El siguiente experimento se define como:
+
+```text
+MAP-001-ASC-GENERATIVE-BASELINE-001
+```
+
+Su propósito es establecer por primera vez una ejecución v2.1 cuya entrada, compilación y ejecución generativa puedan trazarse de extremo a extremo.
+
+### 14.1 Contrato
+
+Fuente semántica congelada:
+
+```text
+contractId / testId:
+MAP-001-ASC-MAPPING-0021
+
+revision:
+v2.1
+```
+
+El contrato completo continúa registrado como JSON embebido en `docs/ASC_MAP001_CONTRACT_V2_1_EXPERIMENT_2026-09-17.md`.
+
+No se modifica su contenido para construir el baseline.
+
+### 14.2 Artefactos preliminares reportados
+
+La sesión experimental reportó una extracción literal del JSON del contrato y una compilación preliminar fuera del runtime declarado por el proyecto.
+
+```text
+CONTRACT
+MAP-001-ASC-MAPPING-0021.json
+sha256:
+9e8f08b576809f61816f3c6392998dd0b42a51c8382b4e77de1d454f2892ef1c
+
+PRELIMINARY PROMPT
+PROMPT_ASC_BASELINE-001.txt
+sha256:
+a2a907f60ca279e6f8ef52f0c76af549bae958c2cae004e305299f369093cf00
+```
+
+Estado reportado de esa compilación:
+
+```text
+runtime: Node v22.22.2
+package runtime requirement: >=24.0.0 <25
+exitCode: 0
+two-run determinism under Node 22: PASS
+prompt status: PRELIMINARY / RUNTIME-NONCONFORMING
+```
+
+Estos hashes se registran como evidencia experimental reportada y deberán verificarse en el entorno conforme antes de consolidar el prompt canónico del baseline.
+
+No se persiste por esta decisión un nuevo fixture v2.1 en `tools/asc/fixtures/`.
+
+### 14.3 Gate de runtime y provenance
+
+Antes de ejecutar un modelo generativo deben registrarse en un entorno conforme:
+
+- versión exacta de Node 24.x;
+- `git rev-parse HEAD`;
+- `git branch --show-current`;
+- `git status --short`;
+- SHA-256 del contrato;
+- SHA-256 de `tools/asc/compile_asc.mjs`;
+- dos compilaciones independientes del mismo contrato;
+- SHA-256 de ambas salidas.
+
+Criterio:
+
+```text
+prompt A == prompt B
+→ determinism under conforming runtime = PASS
+```
+
+Si además el hash Node 24 coincide con el prompt preliminar Node 22:
+
+```text
+cross-runtime output equivalence Node22 ↔ Node24 = PASS
+```
+
+Si no coincide, se debe revisar primero:
+
+1. hash del contrato;
+2. hash del compilador;
+3. determinismo interno de Node 24;
+4. mecanismo de escritura (`--output` frente a redirección de stdout);
+5. encoding y newlines;
+6. estado del working tree.
+
+No se atribuye una diferencia al runtime hasta descartar esas variables.
+
+### 14.4 Gate del ejecutor generativo
+
+La ejecución generativa permanece bloqueada hasta cerrar el gate anterior.
+
+El baseline debe preferir un ejecutor que permita registrar explícitamente, cuando la plataforma lo exponga:
+
+- provider;
+- model ID / versión;
+- prompt exacto;
+- tamaño / aspect ratio;
+- número de imágenes;
+- parámetros disponibles;
+- seed, si existe;
+- fecha/hora;
+- identificador de respuesta o job, si existe.
+
+Cada campo debe distinguir entre:
+
+```text
+KNOWN
+NOT APPLICABLE
+NOT EXPOSED
+```
+
+Una interfaz que oculte el identificador exacto del modelo puede seguir siendo útil para una futura prueba exploratoria o de portabilidad, pero no constituye por sí sola el baseline preferido de reproducibilidad.
+
+### 14.5 Auditoría posterior del baseline
+
+El resultado del baseline debe evaluarse con la misma matriz empleada para el Resultado 001.
+
+Después del baseline, una ejecución posterior solo puede tratarse como prueba de reproducibilidad estricta si mantiene:
+
+```text
+mismo contrato
++ mismo prompt exacto
++ mismo provider
++ mismo model ID / versión
++ mismos parámetros disponibles
+```
+
+Las diferencias entre resultados deberán clasificarse como:
+
+- `STABLE`;
+- `VARIABLE-BUT-VALID`;
+- `REGRESSION`;
+- `REPEATED-FAILURE`;
+- `NOT-VERIFIABLE`.
+
+Una evidencia de gap no autoriza automáticamente una v0.2.
+
+## 15. Estado del gate
+
+La verificación local posterior cerró el gate de compilación bajo el runtime declarado por el proyecto.
+
+```text
+BASELINE-001
+├── contrato v2.1 exacto: CERRADO
+├── contract SHA-256: VERIFIED
+├── compilación Node 22: PRELIMINARY / PASS
+├── determinismo Node 22: PASS
+├── runtime Node 24.19.0: PASS / CONFORMING
+├── provenance Git: CLOSED
+├── compiler SHA-256: VERIFIED
+├── determinismo Node 24: PASS
+├── equivalencia Node22 ↔ Node24: PASS
+├── prompt canónico definitivo: CLOSED
+├── provider: PENDING
+├── model ID / versión: PENDING
+├── parámetros de ejecución: PENDING
+├── ejecución generativa: PENDING
+└── auditoría del resultado: PENDING
+```
+
+Registro de compilación conforme:
+
+```text
+REPOSITORY
+branch: main
+HEAD: 030887a0d8deb3eee43a71a1e96db482144efcda
+working tree: clean
+
+RUNTIME
+Node: v24.19.0
+package requirement: >=24.0.0 <25
+status: CONFORMING
+
+CONTRACT
+MAP-001-ASC-MAPPING-0021
+revision: v2.1
+sha256:
+9e8f08b576809f61816f3c6392998dd0b42a51c8382b4e77de1d454f2892ef1c
+
+COMPILER
+tools/asc/compile_asc.mjs
+sha256:
+d9ab96577b62652d640d96e153e9e1340ed6630e86e751113e182f59dd9e5eb
+
+NODE24 PROMPT A
+sha256:
+a2a907f60ca279e6f8ef52f0c76af549bae958c2cae004e305299f369093cf00
+
+NODE24 PROMPT B
+sha256:
+a2a907f60ca279e6f8ef52f0c76af549bae958c2cae004e305299f369093cf00
+
+DETERMINISM UNDER CONFORMING RUNTIME
+PASS
+
+CROSS-RUNTIME OUTPUT EQUIVALENCE
+Node 22 ↔ Node 24: PASS
+```
+
+Por tanto, para este contrato y esta implementación exacta del compilador:
+
+```text
+PROMPT_ASC_BASELINE-001
+sha256:
+a2a907f60ca279e6f8ef52f0c76af549bae958c2cae004e305299f369093cf00
+status:
+CANONICAL FOR BASELINE-001
+```
+
+Esta equivalencia demuestra estabilidad byte-a-byte para este caso concreto. No se generaliza a todos los contratos ni a todas las versiones de Node.
+
+## 16. Auditoría de esta actualización
+
+### AUDITORÍA
+
+La actualización refina el siguiente gate usando la evidencia disponible sin modificar ASC v0.1, el contrato v2.1 ni la autoridad de los documentos upstream.
+
+### INCONSISTENCIAS
+
+La formulación anterior de “repetir ejecución” era demasiado fuerte porque el Resultado 001 no conserva metadata suficiente para una repetición estricta. Se reemplaza por la construcción de un baseline instrumentado.
+
+### VACÍOS / OMISIONES
+
+El gate de compilación ya está cerrado. Permanecen pendientes provider, model ID / versión, parámetros expuestos por el ejecutor, ejecución generativa y auditoría posterior del resultado.
+
+### REDUNDANCIAS
+
+No se crea una nueva especificación de ASC ni un segundo contrato. Esta actualización extiende el registro experimental existente para evitar una nota paralela con la misma autoridad y alcance.
+
+### DECISIÓN
+
+**MANTENER ASC v0.1 SIN CAMBIOS.**  
+**MANTENER MAP-001-ASC-MAPPING-0021 v2.1 CONGELADO.**  
+**TRATAR RESULTADO 001 COMO REFERENCIA HISTÓRICA COMPARATIVA, NO COMO BASELINE REPRODUCIBLE.**  
+**EL GATE DE COMPILACIÓN DE MAP-001-ASC-GENERATIVE-BASELINE-001 ESTÁ CERRADO; EL SIGUIENTE GATE ES SELECCIONAR E INSTRUMENTAR EL EJECUTOR GENERATIVO.**
