@@ -481,3 +481,115 @@ test(
     );
   },
 );
+
+test(
+  'confidence is preserved metadata and does not change ACE filtering',
+  () => {
+    const conflict =
+      findExplicitConflict(
+        dataset,
+      );
+
+    assert.ok(
+      conflict,
+      'expected at least one explicit conflict',
+    );
+
+    const candidateIds = [
+      conflict.left.speciesId,
+      conflict.right.speciesId,
+    ];
+
+    const characterId =
+      conflict
+        .character
+        .characterId;
+
+    const observedState =
+      conflict
+        .left
+        .relation
+        .expectedStates[0];
+
+    const lowConfidenceEvidence = [
+      observerResultToEvidence(
+        dataset,
+        {
+          characterId,
+          status:
+            'observed',
+          observedState,
+          confidence:
+            0,
+        },
+      ),
+    ];
+
+    const highConfidenceEvidence = [
+      observerResultToEvidence(
+        dataset,
+        {
+          characterId,
+          status:
+            'observed',
+          observedState,
+          confidence:
+            1,
+        },
+      ),
+    ];
+
+    const lowNormalized =
+      normalizeEvidence(
+        lowConfidenceEvidence,
+      );
+
+    const highNormalized =
+      normalizeEvidence(
+        highConfidenceEvidence,
+      );
+
+    assert.equal(
+      lowNormalized[0]
+        .confidence,
+      0,
+    );
+
+    assert.equal(
+      highNormalized[0]
+        .confidence,
+      1,
+    );
+
+    const lowResult =
+      filterCandidates(
+        dataset,
+        lowConfidenceEvidence,
+        candidateIds,
+      );
+
+    const highResult =
+      filterCandidates(
+        dataset,
+        highConfidenceEvidence,
+        candidateIds,
+      );
+
+    assert.deepEqual(
+      lowResult.remaining,
+      highResult.remaining,
+    );
+
+    assert.deepEqual(
+      lowResult.eliminated,
+      highResult.eliminated,
+    );
+
+    assert.deepEqual(
+      lowResult.remaining,
+      [
+        conflict.left.speciesId,
+      ],
+    );
+  },
+);
