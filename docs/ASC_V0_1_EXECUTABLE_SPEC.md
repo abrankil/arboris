@@ -189,6 +189,8 @@ Candidatos posibles, todavía `OPEN`:
 
 Ninguno de estos elementos forma parte de v0.1 por aparecer en esta lista.
 
+Este documento permanece congelado como especificación de ASC v0.1. Existe una extensión aditiva y retrocompatible en [`ASC_V0_2_EXECUTABLE_SPEC.md`](ASC_V0_2_EXECUTABLE_SPEC.md); ningún contrato `version: "0.1"` existente requiere cambios.
+
 ## 10. Auditoría de esta especificación
 
 ### AUDITORÍA
