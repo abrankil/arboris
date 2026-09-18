@@ -75,8 +75,11 @@ export function validateObserverResult(dataset, input) {
 
 export function observerResultToEvidence(dataset, input) {
   const result = validateObserverResult(dataset, input);
+
   if (!result.valid) {
-    const error = new Error(`Invalid observer result: ${result.errors.join('; ')}`);
+    const error = new Error(
+      `Invalid observer result: ${result.errors.join('; ')}`
+    );
     error.validationErrors = result.errors;
     throw error;
   }
@@ -86,7 +89,20 @@ export function observerResultToEvidence(dataset, input) {
   if (normalized.status === 'observed') {
     return {
       characterId: normalized.characterId,
+      observationStatus: 'observed',
       observedStates: [normalized.observedState],
+      source: normalized.source,
+      confidence: normalized.confidence,
+      model: normalized.model,
+      notes: normalized.notes,
+    };
+  }
+
+  if (normalized.status === 'not_observable') {
+    return {
+      characterId: normalized.characterId,
+      observationStatus: 'not_observable',
+      observedStates: ['not_observable'],
       source: normalized.source,
       confidence: normalized.confidence,
       model: normalized.model,
@@ -96,7 +112,8 @@ export function observerResultToEvidence(dataset, input) {
 
   return {
     characterId: normalized.characterId,
-    observedStates: ['not_observable'],
+    observationStatus: 'uncertain',
+    observedStates: [],
     source: normalized.source,
     confidence: normalized.confidence,
     model: normalized.model,
