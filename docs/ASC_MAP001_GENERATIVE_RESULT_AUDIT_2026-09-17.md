@@ -407,19 +407,77 @@ Una evidencia de gap no autoriza automáticamente una v0.2.
 
 ## 15. Estado del gate
 
+La verificación local posterior cerró el gate de compilación bajo el runtime declarado por el proyecto.
+
 ```text
 BASELINE-001
 ├── contrato v2.1 exacto: CERRADO
-├── hash de contrato preliminar: REGISTRADO / PENDIENTE VERIFICACIÓN LOCAL
+├── contract SHA-256: VERIFIED
 ├── compilación Node 22: PRELIMINARY / PASS
 ├── determinismo Node 22: PASS
-├── runtime Node 24: PENDIENTE
-├── provenance Git: PENDIENTE
-├── determinismo Node 24: PENDIENTE
-├── equivalencia Node22 ↔ Node24: PENDIENTE
-├── prompt canónico definitivo: PENDIENTE
-└── ejecución generativa: BLOQUEADA
+├── runtime Node 24.19.0: PASS / CONFORMING
+├── provenance Git: CLOSED
+├── compiler SHA-256: VERIFIED
+├── determinismo Node 24: PASS
+├── equivalencia Node22 ↔ Node24: PASS
+├── prompt canónico definitivo: CLOSED
+├── provider: PENDING
+├── model ID / versión: PENDING
+├── parámetros de ejecución: PENDING
+├── ejecución generativa: PENDING
+└── auditoría del resultado: PENDING
 ```
+
+Registro de compilación conforme:
+
+```text
+REPOSITORY
+branch: main
+HEAD: 030887a0d8deb3eee43a71a1e96db482144efcda
+working tree: clean
+
+RUNTIME
+Node: v24.19.0
+package requirement: >=24.0.0 <25
+status: CONFORMING
+
+CONTRACT
+MAP-001-ASC-MAPPING-0021
+revision: v2.1
+sha256:
+9e8f08b576809f61816f3c6392998dd0b42a51c8382b4e77de1d454f2892ef1c
+
+COMPILER
+tools/asc/compile_asc.mjs
+sha256:
+d9ab96577b62652d640d96e153e9e1340ed6630e86e751113e182f59dd9e5eb
+
+NODE24 PROMPT A
+sha256:
+a2a907f60ca279e6f8ef52f0c76af549bae958c2cae004e305299f369093cf00
+
+NODE24 PROMPT B
+sha256:
+a2a907f60ca279e6f8ef52f0c76af549bae958c2cae004e305299f369093cf00
+
+DETERMINISM UNDER CONFORMING RUNTIME
+PASS
+
+CROSS-RUNTIME OUTPUT EQUIVALENCE
+Node 22 ↔ Node 24: PASS
+```
+
+Por tanto, para este contrato y esta implementación exacta del compilador:
+
+```text
+PROMPT_ASC_BASELINE-001
+sha256:
+a2a907f60ca279e6f8ef52f0c76af549bae958c2cae004e305299f369093cf00
+status:
+CANONICAL FOR BASELINE-001
+```
+
+Esta equivalencia demuestra estabilidad byte-a-byte para este caso concreto. No se generaliza a todos los contratos ni a todas las versiones de Node.
 
 ## 16. Auditoría de esta actualización
 
@@ -433,7 +491,7 @@ La formulación anterior de “repetir ejecución” era demasiado fuerte porque
 
 ### VACÍOS / OMISIONES
 
-Permanecen pendientes el runtime conforme Node 24, provenance Git del entorno de compilación, hash confirmado del compilador y prompt Node 24, provider/modelo y metadata de ejecución generativa.
+El gate de compilación ya está cerrado. Permanecen pendientes provider, model ID / versión, parámetros expuestos por el ejecutor, ejecución generativa y auditoría posterior del resultado.
 
 ### REDUNDANCIAS
 
@@ -444,4 +502,4 @@ No se crea una nueva especificación de ASC ni un segundo contrato. Esta actuali
 **MANTENER ASC v0.1 SIN CAMBIOS.**  
 **MANTENER MAP-001-ASC-MAPPING-0021 v2.1 CONGELADO.**  
 **TRATAR RESULTADO 001 COMO REFERENCIA HISTÓRICA COMPARATIVA, NO COMO BASELINE REPRODUCIBLE.**  
-**CERRAR PRIMERO MAP-001-ASC-GENERATIVE-BASELINE-001 ANTES DE UNA PRUEBA FORMAL DE REPRODUCIBILIDAD.**
+**EL GATE DE COMPILACIÓN DE MAP-001-ASC-GENERATIVE-BASELINE-001 ESTÁ CERRADO; EL SIGUIENTE GATE ES SELECCIONAR E INSTRUMENTAR EL EJECUTOR GENERATIVO.**
