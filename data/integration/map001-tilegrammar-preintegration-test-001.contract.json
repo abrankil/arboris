@@ -1,0 +1,193 @@
+{
+  "schemaVersion": "0.1",
+  "testId": "MAP001-TILEGRAMMAR-PREINTEGRATION-TEST-001",
+  "status": "READY_TO_IMPLEMENT",
+  "date": "2026-09-18",
+  "baseline": {
+    "baselineId": "MAP001-TILEGRAMMAR-NODE24-BASELINE-001",
+    "validatedHead": "423430e43e1da7868e120a13bd486586784402e6",
+    "runtime": "Node v24.20.0"
+  },
+  "authorizedInputs": [
+    {
+      "path": "data/maps/map-001-blockout-candidate-002.json",
+      "sha256": "f64878658508e56141ac1545f18c85e4b0d833b8285ab9f2cd0dc8b4a0fe2763",
+      "authority": "PROVISIONAL_TEST_RASTER_ONLY"
+    },
+    {
+      "path": "data/tiles/tile-grammar-candidate-v0.2.json",
+      "sha256": "f4d4e88c85f892b15999622045bddaeedd2ab127d9e89ab5355b958fde23c00b",
+      "authority": "CANDIDATE_GRAMMAR"
+    },
+    {
+      "path": "tools/tile-grammar/validate_tile_grammar_v02.mjs",
+      "sha256": "2d70ca824de393a100c449e5a20f2f6dbb9a59cd4c9b4e848a96a934a8e9009b",
+      "authority": "VALIDATION_IMPLEMENTATION"
+    },
+    {
+      "path": "docs/SPATIAL_MODEL.md",
+      "authority": "CONCEPTUAL_SPATIAL_AUTHORITY"
+    }
+  ],
+  "question": "What part of currently authorized MAP-001 can be represented with TILE-GRAMMAR-CANDIDATE-v0.2 without inference, what must remain OPEN, and what reveals a REPRESENTATIONAL_GAP?",
+  "sourceToTargetDirection": [
+    "MAP-001 provisional test raster",
+    "derived logical-cell fixture",
+    "TILE-GRAMMAR-CANDIDATE-v0.2 validation"
+  ],
+  "prohibited": [
+    "using validatePatch() 3x3 as the MAP-001 integration gate",
+    "promoting the provisional raster to authoritative walkableEnvelope",
+    "auto-deriving water/bank edge signatures",
+    "auto-deriving blocker edge signatures from sideContainment",
+    "assigning interaction units to cells",
+    "inferring metric scale or geographic cardinality",
+    "encoding bridge/gate/house as terrain semantics unless a separate authorized overlay contract exists",
+    "treating test scaffolding as MAP-001 evidence or authority"
+  ],
+  "provenanceClasses": [
+    "SOURCE_EXPLICIT",
+    "DERIVED_FROM_TEST_RASTER",
+    "NORMALIZED_ENCODING",
+    "TEST_SCAFFOLD",
+    "OPEN_UNMAPPED",
+    "OUT_OF_SCOPE",
+    "PROHIBITED_INFERENCE"
+  ],
+  "representationAssessments": [
+    "REPRESENTABLE",
+    "REPRESENTABLE_WITH_NORMALIZATION",
+    "OPEN_UNMAPPED",
+    "OUT_OF_SCOPE",
+    "REPRESENTATIONAL_GAP",
+    "PROHIBITED_INFERENCE"
+  ],
+  "mappingTargets": [
+    {
+      "source": "grid.walkableCells",
+      "target": "logical cells + local adjacency",
+      "provenance": "DERIVED_FROM_TEST_RASTER",
+      "expectedAssessment": "REPRESENTABLE"
+    },
+    {
+      "source": "grid.walkableCells adjacency",
+      "target": "route.kind=path + route.ports on shared walkable edges",
+      "provenance": "DERIVED_FROM_TEST_RASTER",
+      "expectedAssessment": "REPRESENTABLE",
+      "limitation": "proves local declarative route connectivity only, not pathfinding or global navigation"
+    },
+    {
+      "source": "grid.ports.screen_up / screen_down",
+      "target": "external route boundary metadata",
+      "provenance": "SOURCE_EXPLICIT",
+      "expectedAssessment": "OUT_OF_SCOPE",
+      "limitation": "tile grammar v0.2 has edge route ports but no semantic entry/exit progression role"
+    },
+    {
+      "source": "elevation.path=reference-band",
+      "target": "relative reference band encoding",
+      "provenance": "NORMALIZED_ENCODING",
+      "expectedAssessment": "REPRESENTABLE_WITH_NORMALIZATION",
+      "limitation": "normalization may use integer 0 only as relative code, never meters"
+    },
+    {
+      "source": "territorialRelations.stream.relativeElevation=lower-than-adjacent-path",
+      "target": "relative lower elevation relation",
+      "provenance": "SOURCE_EXPLICIT",
+      "expectedAssessment": "OPEN_UNMAPPED",
+      "limitation": "water edge rasterization remains OPEN"
+    },
+    {
+      "source": "territorialRelations.stream.polylineCells",
+      "target": "water / bank edge signatures",
+      "provenance": "PROHIBITED_INFERENCE",
+      "expectedAssessment": "PROHIBITED_INFERENCE"
+    },
+    {
+      "source": "territorialRelations.sideContainment=blockers-left-and-right",
+      "target": "specific blocker edges / hard blocker cells",
+      "provenance": "PROHIBITED_INFERENCE",
+      "expectedAssessment": "PROHIBITED_INFERENCE"
+    },
+    {
+      "source": "bridge/gate/house",
+      "target": "terrain tile semantics",
+      "provenance": "OUT_OF_SCOPE",
+      "expectedAssessment": "OUT_OF_SCOPE"
+    },
+    {
+      "source": "interactionLearning",
+      "target": "tile grammar",
+      "provenance": "OUT_OF_SCOPE",
+      "expectedAssessment": "OUT_OF_SCOPE"
+    },
+    {
+      "source": "camera",
+      "target": "tile grammar",
+      "provenance": "OUT_OF_SCOPE",
+      "expectedAssessment": "OUT_OF_SCOPE"
+    }
+  ],
+  "requiredFixtures": [
+    {
+      "fixtureId": "PI-01-ROUTE-CHAIN",
+      "purpose": "derive the 17 provisional walkable cells into logical route cells and validate all shared route adjacencies with validateTile()/validateEdgeMatch()",
+      "expected": "PASS_WITH_SCOPE",
+      "scope": "LOCAL_EDGE_CONNECTIVITY_ONLY"
+    },
+    {
+      "fixtureId": "PI-02-REFERENCE-BAND",
+      "purpose": "normalize MAP-001 path reference-band to a relative integer code without metric claim",
+      "expected": "PASS_WITH_NORMALIZATION"
+    },
+    {
+      "fixtureId": "PI-03-WATER-NO-INFERENCE",
+      "purpose": "verify that stream polyline does not automatically produce water/bank edge signatures",
+      "expected": "OPEN_PRESERVED"
+    },
+    {
+      "fixtureId": "PI-04-BLOCKER-NO-INFERENCE",
+      "purpose": "verify that sideContainment does not automatically produce blocker edge signatures",
+      "expected": "OPEN_PRESERVED"
+    },
+    {
+      "fixtureId": "PI-05-BOUNDARY-SEMANTICS",
+      "purpose": "record screen_up exit and screen_down entry without falsely claiming tile grammar v0.2 represents progressionRole",
+      "expected": "OUT_OF_SCOPE_RECORDED"
+    },
+    {
+      "fixtureId": "PI-06-SEPARATION-OF-CONCERNS",
+      "purpose": "verify bridge/gate/house, interactionLearning and camera are retained outside terrain grammar mapping",
+      "expected": "OUT_OF_SCOPE_RECORDED"
+    }
+  ],
+  "reportFields": [
+    "sourcePath",
+    "sourceValue",
+    "targetField",
+    "provenanceClass",
+    "representationAssessment",
+    "validatorResult",
+    "evidence",
+    "openOrGapReason"
+  ],
+  "decisionRules": {
+    "PASS": "all SOURCE_EXPLICIT / DERIVED / NORMALIZED mappings behave as declared; all OPEN/OUT_OF_SCOPE boundaries remain preserved; no prohibited inference occurs; no material representational gap is found within tile-grammar scope",
+    "REVISE": "a false positive, false negative, unjustified normalization, or correctable under-specification appears without requiring replacement of the candidate model",
+    "INSUFFICIENT": "a material MAP-001 requirement that belongs inside terrain grammar cannot be represented without extending or replacing the current grammar",
+    "precedence": "INSUFFICIENT > REVISE > PASS"
+  },
+  "openPreserved": [
+    "walkableEnvelope exact geometry",
+    "waterEdgeRasterization",
+    "blockerEdgeRasterization",
+    "interactionSpatialBinding",
+    "tileSize",
+    "metricScale",
+    "renderer",
+    "pathfinding",
+    "world cardinal mapping",
+    "final pixel art"
+  ],
+  "productionStandard": "NOT_ESTABLISHED"
+}
