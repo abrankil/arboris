@@ -217,7 +217,7 @@ El cierre queda registrado en `docs/HITO15_CLOSEOUT_2026-09-16.md`, `tools/canon
 **Hito 16 — Extracción automática de caracteres botánicos.**  
 Estado: siguiente etapa técnica.
 
-Objetivo: probar observadores visuales restringidos por carácter. El modelo debe responder con estado permitido, `NO_OBSERVABLE` o incertidumbre; no con una especie definitiva.
+Objetivo: probar observadores visuales restringidos por carácter. El modelo debe responder con estado permitido, `NOT_OBSERVABLE` o incertidumbre; no con una especie definitiva.
 
 **Hito 17 — Integración visión → caracteres → clave adaptativa.**  
 Estado: pendiente.
