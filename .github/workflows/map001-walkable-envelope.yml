@@ -1,0 +1,77 @@
+name: MAP-001 Walkable Envelope Gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/map001-walkable-envelope.yml'
+      - 'data/maps/map-001-walkable-envelope-candidate-001.json'
+      - 'data/maps/map-001-blockout-candidate-002.json'
+      - 'tools/map-navigation/**'
+      - 'docs/MAP001_WALKABLE_ENVELOPE_AUTHORITY_CANDIDATE_001_2026-09-18.md'
+      - 'package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  envelope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Runtime
+        run: node --version
+
+      - name: Tests
+        run: npm run test:walkable-envelope
+
+      - name: Materialize A
+        run: node tools/map-navigation/materialize_walkable_envelope_001.mjs data/maps/map-001-walkable-envelope-candidate-001.json --out-dir build/walkable-envelope/a
+
+      - name: Materialize B
+        run: node tools/map-navigation/materialize_walkable_envelope_001.mjs data/maps/map-001-walkable-envelope-candidate-001.json --out-dir build/walkable-envelope/b
+
+      - name: Determinism and authority gate
+        shell: bash
+        run: |
+          diff -rq build/walkable-envelope/a build/walkable-envelope/b
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const report = JSON.parse(fs.readFileSync('build/walkable-envelope/a/validation.json','utf8'));
+          if (report.status !== 'PASS') throw new Error('walkable envelope gate must PASS');
+          if (report.derivedRaster.walkableCellCount !== 17) throw new Error('expected 17 derived cells');
+          if (report.derivedRaster.connectedComponents !== 1) throw new Error('expected one connected component');
+          if (report.derivedRaster.branchingNodes.length !== 0) throw new Error('expected zero branching nodes');
+          if (!report.migrationCompatibility.legacyHashMatches) throw new Error('legacy hash mismatch');
+          if (!report.migrationCompatibility.exactCellSetMatch) throw new Error('migration cell set mismatch');
+          if (report.metricScale !== 'OPEN') throw new Error('metric scale must remain OPEN');
+          if (report.worldBearing !== 'OPEN') throw new Error('world bearing must remain OPEN');
+          if (report.territorialGeometryClaim !== false) throw new Error('must not claim territorial geometry');
+          EOF
+
+      - name: Hash evidence
+        shell: bash
+        run: |
+          mkdir -p build/walkable-envelope/evidence
+          sha256sum data/maps/map-001-walkable-envelope-candidate-001.json | tee build/walkable-envelope/evidence/candidate.sha256.txt
+          sha256sum tools/map-navigation/materialize_walkable_envelope_001.mjs | tee build/walkable-envelope/evidence/materializer.sha256.txt
+          sha256sum build/walkable-envelope/a/validation.json | tee build/walkable-envelope/evidence/validation.sha256.txt
+          sha256sum build/walkable-envelope/a/derived-raster.json | tee build/walkable-envelope/evidence/raster.sha256.txt
+          sha256sum build/walkable-envelope/a/walkable-envelope.svg | tee build/walkable-envelope/evidence/svg.sha256.txt
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: map001-walkable-envelope-candidate-001
+          path: build/walkable-envelope/
+          retention-days: 30

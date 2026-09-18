@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "0.1",
+  "id": "MAP-001-WALKABLE-ENVELOPE-CANDIDATE-001",
+  "status": "CANDIDATE_PENDING_NODE24_AND_AUDIT",
+  "date": "2026-09-18",
+  "instanceId": "IT-001",
+  "mapId": "MAP-001",
+  "scope": "NAVIGATION_ONLY",
+  "territorialGeometryClaim": false,
+  "authorityIntent": "Become the authoritative local navigation geometry for MAP-001 after deterministic validation and audit; future rasters must derive from this envelope.",
+  "sourceContext": {
+    "conceptualAuthority": [
+      "docs/SPATIAL_MODEL.md",
+      "docs/MAP_TOPOLOGY_SYSTEM.md",
+      "docs/MAP_TOPOLOGY_BLOCKOUT_TEST_PLAN.md",
+      "docs/TERRITORIAL_MAPPING_PROTOCOL.md",
+      "docs/PILOT_ENVIRONMENT_VISUAL_CANON.md"
+    ],
+    "migrationSource": "data/maps/map-001-blockout-candidate-002.json",
+    "migrationSourceRole": "ONE_TIME_COMPATIBILITY_SEED_ONLY",
+    "migrationRule": "The legacy raster may be used to bootstrap and compare this first continuous envelope, but it must not remain the source of truth after freeze.",
+    "evidenceLimitation": "Current territorial evidence does not support metric or surveyed route geometry. This envelope is a gameplay/navigation derivation, not a territorial measurement."
+  },
+  "localFrame": {
+    "origin": "screen_up_left",
+    "xAxis": "screen_right",
+    "yAxis": "screen_down",
+    "bounds": {
+      "minX": 0,
+      "maxX": 9,
+      "minY": 0,
+      "maxY": 15
+    },
+    "unit": "NAVIGATION_UNIT",
+    "metricScale": "OPEN",
+    "worldBearing": "OPEN"
+  },
+  "geometry": {
+    "type": "polyline_buffer",
+    "centerline": [
+      [
+        4.5,
+        15
+      ],
+      [
+        4.5,
+        5.5
+      ],
+      [
+        3.5,
+        5.5
+      ],
+      [
+        3.5,
+        2.5
+      ],
+      [
+        4.5,
+        2.5
+      ],
+      [
+        4.5,
+        0
+      ]
+    ],
+    "halfWidth": 0.49,
+    "capStyle": "round",
+    "joinStyle": "round",
+    "interpretation": "Continuous region containing every point whose Euclidean distance to the centerline is less than or equal to halfWidth."
+  },
+  "ports": [
+    {
+      "id": "P-IN",
+      "localEdge": "screen_down",
+      "state": "open",
+      "priority": "primary",
+      "progressionRole": "entry",
+      "directionality": "bidirectional",
+      "anchor": [
+        4.5,
+        15
+      ],
+      "centerlineEndpoint": "start",
+      "worldBearing": "OPEN"
+    },
+    {
+      "id": "P-OUT",
+      "localEdge": "screen_up",
+      "state": "open",
+      "priority": "primary",
+      "progressionRole": "exit",
+      "directionality": "bidirectional",
+      "anchor": [
+        4.5,
+        0
+      ],
+      "centerlineEndpoint": "end",
+      "worldBearing": "OPEN"
+    }
+  ],
+  "closedLocalEdges": [
+    "screen_left",
+    "screen_right"
+  ],
+  "rasterization": {
+    "method": "CELL_CENTER_DISTANCE_TO_CENTERLINE_LEQ_HALF_WIDTH",
+    "grid": {
+      "rows": 15,
+      "cols": 9
+    },
+    "cellCenterDefinition": "x = col + 0.5; y = row + 0.5",
+    "boundaryPolicy": "distance <= halfWidth",
+    "outputRole": "DERIVED_VERIFICATION_RASTER",
+    "expectedDerivedWalkableCellCount": 17
+  },
+  "migrationCompatibility": {
+    "legacyRasterPath": "data/maps/map-001-blockout-candidate-002.json",
+    "legacyRasterSha256": "f64878658508e56141ac1545f18c85e4b0d833b8285ab9f2cd0dc8b4a0fe2763",
+    "compareField": "grid.walkableCells",
+    "expectedRelation": "EXACT_CELL_SET_MATCH",
+    "authorityAfterFreeze": "LEGACY_RASTER_BECOMES_MIGRATION_COMPATIBILITY_ONLY"
+  },
+  "preservedNavigationContract": {
+    "singleConnectedRegion": true,
+    "noInventedBranches": true,
+    "screenDownEntryConnected": true,
+    "screenUpExitConnected": true,
+    "screenLeftClosed": true,
+    "screenRightClosed": true,
+    "patternLabel": "corridor",
+    "mainRouteDominance": "PRESERVED_AS_CONTRACT_NOT_PER_CELL_OVERLAY"
+  },
+  "open": [
+    "metric scale",
+    "territorial route width",
+    "surveyed route geometry",
+    "world cardinal mapping",
+    "exact bridge bearing",
+    "waterEdgeRasterization",
+    "blockerEdgeRasterization",
+    "interactionSpatialBinding",
+    "pathfinding implementation",
+    "renderer",
+    "tile size",
+    "final art"
+  ],
+  "prohibited": [
+    "Treating navigation units as meters",
+    "Treating this envelope as surveyed territorial geometry",
+    "Deriving geographic cardinality from local screen axes",
+    "Using the legacy raster as a future geometry authority after this envelope is frozen",
+    "Inferring water banks, blockers, interaction slots or botany from this envelope"
+  ],
+  "productionStandard": "NOT_ESTABLISHED"
+}

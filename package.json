@@ -35,7 +35,9 @@
     "test:map-blockout:v01": "node --test tools/map-blockout/materialize_map001.test.mjs",
     "test:map-blockout:v02": "node --test tools/map-blockout/materialize_map001_v02.test.mjs",
     "test:map001-tilegrammar-preintegration": "node --test tools/integration/*.test.mjs",
-    "run:map001-tilegrammar-preintegration": "node tools/integration/map001_tilegrammar_preintegration_001.mjs"
+    "run:map001-tilegrammar-preintegration": "node tools/integration/map001_tilegrammar_preintegration_001.mjs",
+    "test:walkable-envelope": "node --test tools/map-navigation/*.test.mjs",
+    "materialize:walkable-envelope": "node tools/map-navigation/materialize_walkable_envelope_001.mjs data/maps/map-001-walkable-envelope-candidate-001.json --out-dir build/map001-walkable-envelope"
   },
   "dependencies": {
     "expo": "~57.0.23",
