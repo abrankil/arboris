@@ -1,0 +1,56 @@
+{
+  "version": "0.1",
+  "executionMode": "compile-only",
+  "testId": "ASC-IL-001",
+  "objective": "Represent the authorized Interaction/Learning structure of IT-001 / MAP-001 while preserving the ordered sequence orient → notice → observe, the distinct roles of UE-001, UE-002 and UE-003, the required observation opportunity in UE-002, and all explicitly OPEN bindings.",
+  "authorizedSources": [
+    "docs/SPATIAL_MODEL.md"
+  ],
+  "structuralContract": [
+    "IT-001 / MAP-001 must preserve an Interaction/Learning sequence ordered as: orient → notice → observe.",
+    "The Interaction/Learning structure contains three distinct experiential units: UE-001, UE-002 and UE-003.",
+    "UE-001, UE-002 and UE-003 must remain distinguishable as separate units with their respective authorized roles."
+  ],
+  "mandatoryRelations": [
+    "UE-001 must fulfill the roles orient and establish_place.",
+    "UE-002 must fulfill the role exploration.",
+    "UE-002 must contain a required observation opportunity.",
+    "UE-003 must fulfill the roles pause, reflection and progression."
+  ],
+  "open": [
+    "UE-001 spatialBinding remains OPEN.",
+    "UE-002 contentBinding remains OPEN.",
+    "UE-002 species associated with its required observation opportunity remains OPEN.",
+    "UE-002 microhabitat associated with its required observation opportunity remains OPEN.",
+    "UE-002 spatialBinding remains OPEN.",
+    "UE-003 contentBinding remains OPEN.",
+    "UE-003 spatialBinding remains OPEN."
+  ],
+  "doNotInfer": [
+    "Do not infer a species for UE-002 or for its required observation opportunity while species remains OPEN.",
+    "Do not infer a microhabitat for UE-002 or for its required observation opportunity while microhabitat remains OPEN.",
+    "Do not infer content bindings for UE-002 or UE-003 while their contentBinding remains OPEN.",
+    "Do not infer spatial bindings for UE-001, UE-002 or UE-003 while their spatialBinding remains OPEN."
+  ],
+  "prohibited": [],
+  "artisticFreedom": [],
+  "cameraFormat": [],
+  "readingPriorities": [
+    "Preserve the ordered learning progression orient → notice → observe.",
+    "Keep the distinct experiential roles of UE-001, UE-002 and UE-003 legible.",
+    "Prioritize the required observation opportunity in UE-002 without resolving its OPEN bindings."
+  ],
+  "validationCriteria": [
+    "The Interaction/Learning sequence is preserved as orient → notice → observe.",
+    "UE-001 retains the roles orient and establish_place.",
+    "UE-002 retains the role exploration.",
+    "UE-002 contains a required observation opportunity.",
+    "UE-003 retains the roles pause, reflection and progression.",
+    "No concrete species is assigned to UE-002 or its required observation opportunity.",
+    "No concrete microhabitat is assigned to UE-002 or its required observation opportunity.",
+    "The OPEN species and microhabitat states remain explicitly associated with UE-002 and its required observation opportunity.",
+    "Each OPEN contentBinding remains explicitly associated with the UE to which it belongs.",
+    "Each OPEN spatialBinding remains explicitly associated with the UE to which it belongs.",
+    "No explicitly OPEN Interaction/Learning value is presented as resolved."
+  ]
+}
