@@ -6,7 +6,9 @@ import {
   validateCharacterObservation,
   observerResultToCharacterObservation,
   characterObservationToAceEvidence,
+  assessAceEligibility,
 } from './common-evidence-contract.mjs';
+import { normalizeEvidence } from '../canonical-identification/engine.mjs';
 
 const dataset = await loadCanonicalDataset();
 const photo = {
@@ -118,7 +120,7 @@ test('confirmed prefill requires traceable prior-observation basis', () => {
     acquisition: {
       mode: 'prefilled',
       confirmedOnCurrentPhoto: true,
-      basis: { type: 'prior_observations', refs: ['CO-0001'] },
+      basis: { type: 'prior_observations', photoEvidenceRefs: ['PE-001'] },
     },
   }, photoMap);
   assert.equal(traced.valid, true);
@@ -144,4 +146,111 @@ test('multiple evidence items survive ACE handoff without silent first-item proj
   assert.equal(ace.evidenceRef, null);
   assert.equal(ace.regionOfInterest, null);
   assert.deepEqual(ace.provenance, { origin: 'H16-C1.3-R2' });
+});
+
+
+test('retired character remains structurally valid but is explicitly ACE-ineligible', () => {
+  const retired = validateCharacterObservation(dataset, {
+    photoEvidenceRef: 'PE-001',
+    characterId: 'CH-007',
+    status: 'observed',
+    observedState: 'presente',
+    observer: { type: 'human', tool: 'APC' },
+    acquisition: { mode: 'manual' },
+  }, photoMap);
+  assert.equal(retired.valid, true);
+  assert.deepEqual(assessAceEligibility(dataset, 'CH-007'), { eligible: false, reason: 'retired_character' });
+  assert.deepEqual(assessAceEligibility(dataset, 'CH-NOT-REAL'), { eligible: false, reason: 'unknown_character' });
+  assert.throws(
+    () => characterObservationToAceEvidence(dataset, retired.normalized, photoMap),
+    error => error?.code === 'ACE_INELIGIBLE' && error?.aceEligibility?.reason === 'retired_character',
+  );
+});
+
+test('prefilled basis uses real APC photoEvidenceRefs and enforces referential integrity', () => {
+  const base = {
+    photoEvidenceRef: 'PE-001',
+    characterId: 'CH-003',
+    status: 'observed',
+    observedState: 'serrado',
+    observer: { type: 'human', tool: 'APC' },
+  };
+  const valid = validateCharacterObservation(dataset, {
+    ...base,
+    acquisition: {
+      mode: 'prefilled',
+      confirmedOnCurrentPhoto: true,
+      basis: { type: 'prior_observations', photoEvidenceRefs: ['PE-001'] },
+    },
+  }, photoMap);
+  assert.equal(valid.valid, true);
+
+  const empty = validateCharacterObservation(dataset, {
+    ...base,
+    acquisition: {
+      mode: 'prefilled',
+      confirmedOnCurrentPhoto: true,
+      basis: { type: 'prior_observations', photoEvidenceRefs: [] },
+    },
+  }, photoMap);
+  assert.equal(empty.valid, false);
+
+  const missing = validateCharacterObservation(dataset, {
+    ...base,
+    acquisition: {
+      mode: 'prefilled',
+      confirmedOnCurrentPhoto: true,
+      basis: { type: 'prior_observations', photoEvidenceRefs: ['PE-GHOST'] },
+    },
+  }, photoMap);
+  assert.equal(missing.valid, false);
+  assert.match(missing.errors.join(' '), /Unknown acquisition\.basis\.photoEvidenceRef/);
+});
+
+test('current confirmed state may differ from prior-photo state', () => {
+  const result = validateCharacterObservation(dataset, {
+    photoEvidenceRef: 'PE-001',
+    characterId: 'CH-003',
+    status: 'observed',
+    observedState: 'serrado',
+    observer: { type: 'human', tool: 'APC' },
+    acquisition: {
+      mode: 'prefilled',
+      confirmedOnCurrentPhoto: true,
+      basis: { type: 'prior_observations', photoEvidenceRefs: ['PE-001'] },
+    },
+  }, photoMap);
+  assert.equal(result.valid, true);
+  assert.equal(result.normalized.observedState, 'serrado');
+});
+
+test('contractual evidence survives adapter and actual ACE normalization losslessly', () => {
+  const observation = {
+    photoEvidenceRef: 'PE-001',
+    characterId: 'CH-003',
+    status: 'observed',
+    observedState: 'serrado',
+    observer: { type: 'machine', tool: 'character-observer', model: 'test-model' },
+    acquisition: { mode: 'automatic' },
+    evidence: [
+      {
+        evidenceRef: 'EV-A',
+        regionOfInterest: { x: 1, y: 1, width: 2, height: 2 },
+        provenance: { method: 'machine', detector: 'margin-v1' },
+        contractualMetadata: { capture: 'macro' },
+      },
+      {
+        evidenceRef: 'EV-B',
+        regionOfInterest: { x: 5, y: 5, width: 3, height: 3 },
+        provenance: { method: 'machine', detector: 'margin-v1' },
+        contractualMetadata: { capture: 'overview' },
+      },
+    ],
+  };
+  const ace = characterObservationToAceEvidence(dataset, observation, photoMap);
+  const [normalized] = normalizeEvidence([ace]);
+  assert.equal(normalized.evidence.length, 2);
+  assert.deepEqual(normalized.evidence, observation.evidence);
+  assert.equal(normalized.evidenceRef, null);
+  assert.equal(normalized.regionOfInterest, null);
 });
