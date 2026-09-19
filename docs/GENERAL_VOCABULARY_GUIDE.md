@@ -15,7 +15,7 @@ Esta guía resume términos de uso frecuente. Es didáctica y no reemplaza las a
 | **Autoridad / fuente de verdad** | Documento, dato o especialista que gobierna un tema concreto. | “Para conectividad y topología, consultar `MAP_TOPOLOGY_SYSTEM`; manda la conectividad explícita + `walkable envelope`.” |
 | **Evidencia** | Información respaldada y con procedencia. | “Fotografía real con fuente registrada.” |
 | **Interpretación** | Conclusión o hipótesis plausible basada en evidencia, pero no directamente demostrada. | “La forma podría corresponder a una hoja, pero no está confirmada.” |
-| **Derivado** | Material generado desde una autoridad. No reemplaza ni gobierna la fuente original. | “Una imagen generada con IA es un derivado, no evidencia.” |
+| **Derivado** | Material generado desde una autoridad. No reemplaza ni gobierna la fuente original. | “Una imagen generada con IA es un derivado: no reemplaza evidencia de dominio y sólo puede apoyar criterios compatibles con la clase de evidencia que realmente aporta.” |
 | **Trazabilidad** | Capacidad de saber de dónde provino una decisión, dato o cambio. | “Vincular la decisión con issue, PR y documento fuente.” |
 | **Alcance** | Qué incluye y qué no incluye una tarea o decisión. | “Este cambio afecta MAP-001; no modifica canon botánico.” |
 
