@@ -157,7 +157,7 @@ do not introduce unauthorized branches
 Simplified technical representation of an Instance's contracts used to test connectivity, routes, relative elevations, blockers, interaction, camera, and occlusion before final art.
 
 **visual prototype / prototipo visual**  
-Experimental visual representation used to evaluate how authorized structure translates visually. It is not evidence and is not automatically production-ready.
+Experimental visual representation used to evaluate how authorized structure translates visually. It is not domain evidence by itself and is not automatically production-ready. It may serve as experimental evidence for criteria that the visual output can actually demonstrate.
 
 **production asset / asset de producción**  
 Resource used or prepared under the applicable technical and artistic production specification. Its existence does not imply final approval.
@@ -310,7 +310,7 @@ MAP ≠ production stage
 
 blockout ≠ visual prototype
 visual prototype ≠ asset
-ASC result ≠ evidence
+ASC result ≠ domain evidence by itself
 preview ≠ master
 
 walkableEnvelope ≠ discretization
@@ -360,7 +360,7 @@ Do not declare geometric PASS without logical or materialized geometry.
 
 1. Preserve terminology exactly when semantic distinctions matter.
 2. Do not create new production states unless an authoritative document defines them.
-3. Do not reinterpret an ASC result as territorial, botanical, spatial, ecological, or scientific evidence.
+3. Do not reinterpret an ASC result as territorial, botanical, spatial, ecological, or scientific evidence. It may support experimental criteria only when the available evidence class can actually demonstrate them.
 4. Do not convert visually plausible content into project truth.
 5. Do not close OPEN through common sense, aesthetics, realism, or model priors.
 6. Do not weaken restrictions to improve visual quality.
