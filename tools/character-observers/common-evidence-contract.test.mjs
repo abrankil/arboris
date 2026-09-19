@@ -74,3 +74,74 @@ for (const sample of [
     assert.deepEqual(ace.regionOfInterest, { x: 1, y: 2, width: 3, height: 4 });
   });
 }
+
+
+test('requires PhotoEvidence fingerprint for stable asset identity', () => {
+  const result = validatePhotoEvidence({
+    photoEvidenceId: 'PE-002',
+    sourcePhoto: { photoRef: 'PH-002' },
+  });
+  assert.equal(result.valid, false);
+  assert.match(result.errors.join(' '), /fingerprintSha256 is required/);
+});
+
+test('referential validation cannot be bypassed by omitting photoEvidenceById', () => {
+  const result = validateCharacterObservation(dataset, {
+    photoEvidenceRef: 'PE-001',
+    characterId: 'CH-003',
+    status: 'observed',
+    observedState: 'entero',
+    observer: { type: 'human', tool: 'APC' },
+    acquisition: { mode: 'manual' },
+  });
+  assert.equal(result.valid, false);
+  assert.match(result.errors.join(' '), /photoEvidenceById Map is required/);
+});
+
+test('confirmed prefill requires traceable prior-observation basis', () => {
+  const base = {
+    photoEvidenceRef: 'PE-001',
+    characterId: 'CH-003',
+    status: 'observed',
+    observedState: 'entero',
+    observer: { type: 'human', tool: 'APC' },
+  };
+  const missing = validateCharacterObservation(dataset, {
+    ...base,
+    acquisition: { mode: 'prefilled', confirmedOnCurrentPhoto: true },
+  }, photoMap);
+  assert.equal(missing.valid, false);
+  assert.match(missing.errors.join(' '), /requires acquisition.basis/);
+
+  const traced = validateCharacterObservation(dataset, {
+    ...base,
+    acquisition: {
+      mode: 'prefilled',
+      confirmedOnCurrentPhoto: true,
+      basis: { type: 'prior_observations', refs: ['CO-0001'] },
+    },
+  }, photoMap);
+  assert.equal(traced.valid, true);
+});
+
+test('multiple evidence items survive ACE handoff without silent first-item projection', () => {
+  const observation = {
+    photoEvidenceRef: 'PE-001',
+    characterId: 'CH-003',
+    status: 'observed',
+    observedState: 'serrado',
+    observer: { type: 'machine', tool: 'character-observer', model: 'test-model' },
+    acquisition: { mode: 'automatic' },
+    provenance: { origin: 'H16-C1.3-R2' },
+    evidence: [
+      { evidenceRef: 'EV-A', regionOfInterest: { x: 1, y: 1, width: 2, height: 2 } },
+      { evidenceRef: 'EV-B', regionOfInterest: { x: 5, y: 5, width: 3, height: 3 } },
+    ],
+  };
+  const ace = characterObservationToAceEvidence(dataset, observation, photoMap);
+  assert.equal(ace.evidence.length, 2);
+  assert.deepEqual(ace.evidence.map(item => item.evidenceRef), ['EV-A', 'EV-B']);
+  assert.equal(ace.evidenceRef, null);
+  assert.equal(ace.regionOfInterest, null);
+  assert.deepEqual(ace.provenance, { origin: 'H16-C1.3-R2' });
+});
