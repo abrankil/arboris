@@ -14,7 +14,12 @@
       "sourceProvenance": "OFICIAL",
       "contentOrigin": "Quite OK Games",
       "unitType": "COLECCIÓN",
-      "resourceNature": ["SITIO_OFICIAL", "MEDIA_KIT", "KEY_ART", "GALERÍA"],
+      "resourceNature": [
+        "SITIO_OFICIAL",
+        "MEDIA_KIT",
+        "KEY_ART",
+        "GALERÍA"
+      ],
       "documentaryRelation": "FUENTE_PRIMARIA",
       "contentAccessibility": "CONTENIDO_COMPLETO",
       "provenanceNotes": "El sitio incluye también otros proyectos de Quite OK Games; la sección pertinente y el enlace al press kit de Laysara están identificados explícitamente.",
@@ -35,7 +40,12 @@
       "sourceProvenance": "OFICIAL",
       "contentOrigin": "Quite OK Games",
       "unitType": "COLECCIÓN",
-      "resourceNature": ["MEDIA_KIT", "KEY_ART", "GALERÍA", "DOCUMENTACIÓN_DE_PRODUCCIÓN"],
+      "resourceNature": [
+        "MEDIA_KIT",
+        "KEY_ART",
+        "GALERÍA",
+        "DOCUMENTACIÓN_DE_PRODUCCIÓN"
+      ],
       "documentaryRelation": "FUENTE_PRIMARIA",
       "contentAccessibility": "CONTENIDO_COMPLETO",
       "provenanceNotes": "Aunque está alojado en la infraestructura de prensa de Future Friends Games, el propio sitio de Quite OK Games enlaza este recurso como el press kit oficial de Laysara.",
