@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git branch --show-current)",
+      "Bash(git log*)",
+      "Bash(pwsh -File tools/validate-graphic-assets.ps1*)",
+      "Bash(npm test)",
+      "Bash(npm run typecheck)",
+      "Bash(npm.cmd test)",
+      "Bash(npm.cmd run typecheck)",
+      "PowerShell(git status*)",
+      "PowerShell(git branch --show-current)",
+      "PowerShell(git log*)",
+      "PowerShell(pwsh -File tools/validate-graphic-assets.ps1*)",
+      "PowerShell(npm test)",
+      "PowerShell(npm run typecheck)",
+      "PowerShell(npm.cmd test)",
+      "PowerShell(npm.cmd run typecheck)"
+    ]
+  }
+}
