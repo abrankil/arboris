@@ -1,55 +1,44 @@
 # Arboris — Estado del diseño de personajes
 
-## Alcance actual
+## Alcance
 
-Este equipo de trabajo se concentra en diseño gráfico y UI/UX. Las fichas científicas se mantienen como referencia de identidad botánica y no se modifican desde esta línea de trabajo salvo para enlazar assets.
+Este documento informa el estado de producción vigente. No redefine el método de trabajo ni el contrato técnico: para eso consultar [`CHARACTER_CREATION_WORKFLOW.md`](CHARACTER_CREATION_WORKFLOW.md) y [`ART_STYLE_GUIDE.md`](ART_STYLE_GUIDE.md). El canon operativo se enumera en [`data/characters/index.json`](../data/characters/index.json) y en las fichas individuales.
 
-El argumento y el método de trabajo están en [GRAPHIC_DIRECTION.md](GRAPHIC_DIRECTION.md); el contrato visual y técnico, en [ART_STYLE_GUIDE.md](ART_STYLE_GUIDE.md). La lista operativa es [data/characters/index.json](../data/characters/index.json).
+Los estados describen únicamente lo ya documentado. `open` significa que la decisión no está cerrada; `none` significa que el diseño vigente no incorpora ese elemento.
 
 ## Personajes vigentes
 
-- **Litrini / Litre** — `SP002`, sprite limpiado manualmente, 125×125 px.
-- **Quillai / Quillay** — `SP006`, sprite limpiado manualmente, 125×125 px.
-- **Peumito / Peumo** — `SP001`, sprite limpiado manualmente, 125×125 px.
-- **Mitiqui / Mitique** — `SP004`, sprite con limpieza técnica v2, 125×125 px y alpha binario.
-- **Bollén** — `SP003`, sprite limpiado manualmente v1, 125×125 px, PNG RGBA con transparencia binaria. La limpieza manual reemplaza la propuesta previa.
-- **Colliguay** — `SP005`, sprite limpiado manualmente v1, 125×125 px, PNG RGBA con transparencia binaria. La limpieza manual reemplaza la propuesta previa.
-- **Boldo** — `SP007`, sprite limpiado manualmente v1, 125×125 px, PNG RGBA con transparencia binaria y proyecto `.pxo` asociado. Personaje botánico canon adicional, sujeto a cambios posteriores.
+| ID | Personaje | Sprite canónico vigente | Morfología | Paleta | Rostro | Compañero | Cleanup | Animación | Gameplay |
+|---|---|---|---|---|---|---|---|---|---|
+| SP001 | Peumo / Peumito | `SP001_peumo/assets/peumito-layer-125x125.png` | approved | approved | approved | approved | verified | not_started | open |
+| SP002 | Litre / Litrini | `SP002_litre/assets/litrini-layer-125x125.png` | approved | approved | approved | approved | verified | not_started | open |
+| SP003 | Bollén | `SP003_bollen/assets/bollen-pixelorama-125x125.png` | approved | approved | approved | approved | verified | not_started | open |
+| SP004 | Mitique / Mitiqui | `SP004_mitique/assets/mitique-pixelorama-125x125.png` | approved | approved | approved | none | verified | not_started | open |
+| SP005 | Colliguay | `SP005_colliguay/assets/colliguay-pixelorama-125x125.png` | approved | approved | approved | none | verified | not_started | open |
+| SP006 | Quillay / Quillai | `SP006_quillay/assets/quillai-layer-125x125.png` | approved | approved | approved | none | verified | not_started | open |
+| SP007 | Boldo | `SP007_boldo/assets/boldo-pixelorama-125x125.png` | approved | approved | approved | approved | verified | not_started | open |
+| GUIDE | Piedra-guía de líquen | `shared/guides/piedra-guia-pixelorama-125x125.png` | approved | approved | approved | none | verified | not_started | open |
 
-Los personajes canónicos actuales comparten hojas como cuerpo, ojos pequeños, flotación independiente y dirección HD-2D. Frutos, flores o cápsulas pueden actuar como mascotas, accesorios o armas según cada diseño. El formato y la transparencia se verifican aparte de la aprobación visual; ver pendientes técnicos más abajo. Esta colección inicial no fija el número total de personajes de Arboris.
+`Sprite canónico vigente` usa rutas relativas a `data/characters/`. Mientras no exista un asset master separado, este sprite seleccionado funciona como master visual operativo según la regla transitoria definida en `ART_STYLE_GUIDE.md`.
 
-## Personaje auxiliar vigente
+## Pendientes reales
 
-- **Piedra-guía de líquen** — personaje auxiliar de guía y asistencia, no asociado a una especie botánica. Sprite limpiado manualmente, 125×125 px, PNG RGBA con transparencia binaria. Su asset vive en `data/characters/shared/guides/piedra-guia-pixelorama-125x125.png` y se registra en `supportCharacters` dentro del índice.
+- Las capacidades, diálogos, personalidades, habilidades y mecánicas de gameplay de los personajes permanecen abiertas salvo decisión futura explícita.
+- Las animaciones del elenco no se consideran iniciadas por la existencia de sprites base o previews históricos.
+- La escala visual comparativa del elenco debe medirse antes de fijar rangos de proporción, pivotes, bounds o anchors.
+- Los derivados de discovery, gameplay, expresiones, animación y promoción deben declarar siempre su master de origen.
 
-Colliguay (`SP005`) tiene un diseño aprobado explícitamente por Alvaro a partir de la base seleccionada y el ajuste de puntas rojizas respaldado por la referencia cromática de Alejandra. La limpieza manual fue entregada y verificada como [PNG oficial 125×125](../../output/colliguay/colliguay-pixelorama-125x125.png), con alpha binario y [preview ampliado 500×500](../../output/colliguay/colliguay-pixelorama-preview-500x500.png). El asset ya está integrado al índice canónico; las propuestas y herramientas superadas permanecen archivadas. Ver [registro de producción](../../output/colliguay/PRODUCCION_COLLIGUAY.md).
+## Incidencias y excepciones técnicas documentadas
 
-## Regla de entrega editable
+- Mitique tuvo 3.140 píxeles con alpha intermedio; se normalizaron técnicamente a 0/255 sin cambiar canales RGB. La revisión técnica no sustituye una revisión visual opcional de contorno y nervadura.
+- Mitique tiene una fuente `.pxo` asociada mediante `selectedDesign.source`; la equivalencia verificada se limita a la capa de imagen comparada y no sustituye una apertura visual en Pixelorama.
+- No se recibió un `.pxo` de Bollén en la entrega documentada.
+- Boldo sí tiene un proyecto `.pxo` asociado a su sprite vigente.
+- Colliguay fue aprobado a partir de la base seleccionada y del ajuste de puntas rojizas respaldado por la referencia cromática atribuida a Alejandra.
+- La Piedra-guía es un personaje auxiliar no botánico y se registra bajo `supportCharacters`; no cuenta como especie del catálogo.
 
-Aplicar el [contrato para Pixelorama](ART_STYLE_GUIDE.md#contrato-para-pixelorama): PNG base 125×125, cuadrícula de píxel revisada y ampliaciones enteras. Conservar las limpiezas manuales exactamente, incluida su paleta; una comprobación técnica no autoriza cambios automáticos.
+## Assets y validación
 
-La decisión vigente mantiene la edición 1:1 en Pixelorama con pincel de 1 px. El lienzo 125×125 es un marco común: la escala se evalúa por el área efectiva de cada personaje, no por llenar todo el lienzo. Las pruebas de reducción a 72×148 y de pincel 4 px quedan archivadas como exploraciones descartadas.
+Los sprites canónicos viven en las carpetas `data/characters/*/assets/`; los auxiliares, bajo `data/characters/shared/`. La imagen promocional de tres personajes es una referencia histórica de composición y no sustituye los sprites canónicos individuales ni futuros masters separados.
 
-## Assets aprobados
-
-- Promocional de tres personajes: `data/characters/shared/promotional/arboris-tres-personajes-125x125.png`, referencia histórica de composición. No representa por sí sola el elenco completo ni sustituye las limpiezas posteriores.
-- Capas de personajes: cada sprite vive en la carpeta de su especie bajo `assets/`.
-- Personajes auxiliares: sus sprites viven bajo `data/characters/shared/` y no se cuentan como especies del catálogo botánico.
-- Bollén vigente: `data/characters/SP003_bollen/assets/bollen-pixelorama-125x125.png`, copia exacta del PNG limpiado por el usuario. Se conserva la entrega de trabajo en `../output/bollen/bollen-pixelorama-125x125.png` respecto de la raíz de Arboris.
-- Mitique vigente: `data/characters/SP004_mitique/assets/mitique-pixelorama-125x125.png`, sincronizado con la capa RGBA de `../output/mitique/mitique-pixelorama-125x125.png.pxo` respecto de la raíz de Arboris.
-- Colliguay vigente: `data/characters/SP005_colliguay/assets/colliguay-pixelorama-125x125.png`, copia exacta del PNG limpiado por el usuario. Las propuestas y registros de exploración están en `../output/colliguay/archive/` respecto de la raíz de Arboris.
-- Boldo vigente: `data/characters/SP007_boldo/assets/boldo-pixelorama-125x125.png`, copia exacta del PNG limpiado por el usuario. Su fuente editable asociada es `data/characters/SP007_boldo/assets/boldo-pixelorama-125x125.png.pxo`.
-
-El antiguo fondo `background-125x125.png` y el GIF de 125×125 fueron eliminados por resolución insuficiente. Los fondos ambientales se mantienen fuera de la galería de personajes y se versionan en `docs/assets/backgrounds/`, con variantes panorámicas y cuadradas HD-2D. La primera composición ya está separada en cuatro capas de parallax reutilizables.
-
-## Próximo punto de trabajo
-
-Elegir el siguiente recurso según la tarea solicitada, aplicar el brief de la dirección gráfica y comparar con los assets canónicos. Para escenarios, probar las capas en contexto y revisar escala, amplitudes y legibilidad; el detalle está en el [catálogo ambiental](assets/backgrounds/README.md).
-
-## Verificación técnica y pendientes
-
-La revisión actual confirma los sprites canónicos en 125×125 con alpha binario. Mitique tenía 3.140 píxeles con alpha intermedio; se normalizaron técnicamente a 0/255 sin cambiar ningún canal RGB y se sincronizaron el PNG oficial, la capa del `.pxo` y el preview. Su aprobación visual queda separada de la revisión manual opcional de contorno y nervadura.
-
-Mitique tiene una fuente `.pxo` localizada mediante `selectedDesign.source`, relativa a `data/characters/`; la capa de imagen interna fue comparada con el PNG oficial. La equivalencia queda limitada a esa capa y no sustituye una apertura visual en Pixelorama. No se recibió un `.pxo` de Bollén en esta entrega.
-
-Ejecutar `pwsh -File tools/validate-graphic-assets.ps1` desde la raíz de Arboris para repetir las comprobaciones. El resultado informa los problemas sin editar píxeles. Los próximos cambios en un sprite aprobado deben responder a una instrucción concreta y conservar su procedencia.
+Ejecutar `pwsh -File tools/validate-graphic-assets.ps1` desde la raíz de Arboris para repetir comprobaciones medibles. El resultado informa problemas sin editar píxeles y no certifica por sí solo morfología, estilo ni aprobación artística.

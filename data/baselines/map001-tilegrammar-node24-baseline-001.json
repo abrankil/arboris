@@ -1,0 +1,84 @@
+{
+  "baselineId": "MAP001-TILEGRAMMAR-NODE24-BASELINE-001",
+  "date": "2026-09-18",
+  "status": "FROZEN_EXPERIMENTAL_BASELINE",
+  "scope": "MAP-001 pre-integration blockout + TILE-GRAMMAR-CANDIDATE-v0.2",
+  "runtime": {
+    "node": "v24.20.0",
+    "npm": "11.19.0",
+    "os": "ubuntu-24.04",
+    "repositoryHead": "423430e43e1da7868e120a13bd486586784402e6",
+    "workingTreeClean": true
+  },
+  "githubActions": {
+    "workflow": "Node 24 Experimental Baseline Gate",
+    "runId": 35373464338,
+    "conclusion": "success",
+    "artifact": {
+      "id": 10559096953,
+      "name": "map001-tilegrammar-node24-baseline",
+      "digest": "sha256:573bceff0ad07054377312b0ab02ed9bdaf2b65e5e22ea454a0ef34f961df97f",
+      "retentionDays": 30
+    }
+  },
+  "map001": {
+    "candidate": "MAP-001-BLOCKOUT-CANDIDATE-002",
+    "tests": {
+      "v01": "6/6 PASS",
+      "v02": "9/9 PASS"
+    },
+    "materializationAB": "IDENTICAL",
+    "rasterAuthority": "TEST_ONLY",
+    "walkableEnvelope": "NOT_MATERIALIZED",
+    "hashes": {
+      "candidateJson": "f64878658508e56141ac1545f18c85e4b0d833b8285ab9f2cd0dc8b4a0fe2763",
+      "materializer": "6a0054f9ecefa04cf2296d0554f66065b676494f5a1b2832a7064821bc1adcaa",
+      "svg360x640": "4299c9824c6f09cc27f074361beb4140854e7330b7b490268196f1a331eafbea",
+      "svg360x800": "f9e1aec00d4697db323a263e2e25bc8532176e8346dbb683881a1d388d81483b",
+      "validationJson": "0f67cd9442b3b39b8d519be4d8adbbea64ae315cac30e9e47aa1ea9cfa38eaf6"
+    }
+  },
+  "tileGrammar": {
+    "candidate": "TILE-GRAMMAR-CANDIDATE-v0.2",
+    "mixedEdgePolicy": "UNRESOLVED_NON_CONNECTABLE",
+    "tests": "14/14 PASS",
+    "candidateValidation": "PASS",
+    "internalEdgesValidated": 12,
+    "compatibleInternalEdges": 12,
+    "stress": {
+      "testId": "TILE-GRAMMAR-MIXED-SEMANTICS-TEST-008",
+      "fixtures": "17/17 CORRECT",
+      "decision": "KEEP"
+    },
+    "hashes": {
+      "candidateJson": "f4d4e88c85f892b15999622045bddaeedd2ab127d9e89ab5355b958fde23c00b",
+      "validator": "2d70ca824de393a100c449e5a20f2f6dbb9a59cd4c9b4e848a96a934a8e9009b",
+      "stressScript": "3cc63eed8114a4b893282a5966e18daad68ed830257a7eed53f87a7f7f56c116",
+      "stressOutput": "8ddda83681fb311e31f8edb154fb769361bec92675701787b7cb537a30a509c7"
+    }
+  },
+  "authority": {
+    "productionStandard": "NOT_ESTABLISHED",
+    "integrationAuthorized": "PRE_INTEGRATION_ONLY",
+    "tileSize": "OPEN",
+    "metricScale": "OPEN",
+    "renderer": "OPEN",
+    "pathfinding": "OPEN",
+    "territorialGeometry": "OPEN",
+    "interactionSpatialBinding": "OPEN",
+    "waterEdgeRasterization": "OPEN",
+    "blockerEdgeRasterization": "OPEN"
+  },
+  "repositoryWideCI": {
+    "status": "FAIL",
+    "unrelatedToBaselineGate": true,
+    "failingStep": "npx expo install --check",
+    "reason": "Expo dependency alignment",
+    "expectedUpdates": {
+      "expo": "~57.0.24",
+      "expo-constants": "~57.0.19",
+      "expo-image-picker": "~57.0.19",
+      "expo-router": "~57.0.22"
+    }
+  }
+}

@@ -1,0 +1,292 @@
+{
+  "schemaVersion": "0.2",
+  "id": "MAP-001-BLOCKOUT-CANDIDATE-002",
+  "status": "provisional-test-geometry",
+  "sourceContract": "MAP-001-ASC-MAPPING-0021-v2.1",
+  "coordinateSystem": {
+    "origin": "screen_up_left",
+    "rowDirection": "screen_down",
+    "colDirection": "screen_right",
+    "worldBearing": "OPEN"
+  },
+  "grid": {
+    "rows": 15,
+    "cols": 9,
+    "walkableCells": [
+      [
+        0,
+        4
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        7,
+        4
+      ],
+      [
+        8,
+        4
+      ],
+      [
+        9,
+        4
+      ],
+      [
+        10,
+        4
+      ],
+      [
+        11,
+        4
+      ],
+      [
+        12,
+        4
+      ],
+      [
+        13,
+        4
+      ],
+      [
+        14,
+        4
+      ]
+    ],
+    "ports": {
+      "screen_up": {
+        "state": "open",
+        "priority": "primary",
+        "progressionRole": "exit",
+        "cell": [
+          0,
+          4
+        ]
+      },
+      "screen_down": {
+        "state": "open",
+        "priority": "primary",
+        "progressionRole": "entry",
+        "cell": [
+          14,
+          4
+        ]
+      },
+      "screen_left": {
+        "state": "closed",
+        "priority": "none",
+        "progressionRole": "none"
+      },
+      "screen_right": {
+        "state": "closed",
+        "priority": "none",
+        "progressionRole": "none"
+      }
+    }
+  },
+  "territorialRelations": {
+    "bridge": {
+      "cell": [
+        10,
+        4
+      ],
+      "geometryClass": "line",
+      "metricGeometry": "OPEN"
+    },
+    "gate": {
+      "cell": [
+        8,
+        4
+      ],
+      "geometryClass": "line",
+      "metricGeometry": "OPEN"
+    },
+    "house": {
+      "cell": [
+        7,
+        2
+      ],
+      "geometryClass": "area",
+      "metricGeometry": "OPEN"
+    },
+    "stream": {
+      "geometryClass": "line",
+      "metricGeometry": "OPEN",
+      "relativeElevation": "lower-than-adjacent-path",
+      "polylineCells": [
+        [
+          10,
+          2
+        ],
+        [
+          10,
+          3
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          10,
+          5
+        ],
+        [
+          9,
+          5
+        ],
+        [
+          8,
+          5
+        ],
+        [
+          7,
+          5
+        ],
+        [
+          6,
+          5
+        ],
+        [
+          5,
+          5
+        ]
+      ]
+    },
+    "sideContainment": "blockers-left-and-right",
+    "clearing": {
+      "state": "OPEN",
+      "footprint": "OPEN",
+      "position": "later-toward-interior"
+    }
+  },
+  "elevation": {
+    "path": "reference-band",
+    "stream": "lower-relative-band",
+    "sideSlopes": "blocking-masses",
+    "globalAscentDescent": "OPEN",
+    "meters": "OPEN"
+  },
+  "camera": {
+    "profileId": "PILOT_FIXED_ISOMETRIC",
+    "orientationPolicy": "fixed",
+    "rotationPolicy": "disabled",
+    "followPolicy": "allowed",
+    "panPolicy": "allowed",
+    "zoomPolicy": "OPEN",
+    "screenRelations": {
+      "screen_up": "interior / cordillera / progression",
+      "screen_down": "entry / return"
+    },
+    "viewports": [
+      [
+        360,
+        640
+      ],
+      [
+        360,
+        800
+      ]
+    ]
+  },
+  "playerProxy": {
+    "state": "provisional",
+    "purpose": [
+      "readability",
+      "occlusion",
+      "relative-scale"
+    ],
+    "finalSpriteDimensions": "OPEN"
+  },
+  "interactionLearning": {
+    "status": "STRUCTURAL_CONTRACT_DEFINED",
+    "spatialBinding": "OPEN",
+    "sequence": [
+      "orient",
+      "notice",
+      "observe"
+    ],
+    "units": {
+      "UE-001": {
+        "roles": [
+          "orient",
+          "establish_place"
+        ],
+        "spatialBinding": "OPEN"
+      },
+      "UE-002": {
+        "roles": [
+          "exploration"
+        ],
+        "observationOpportunity": "required",
+        "contentBinding": "OPEN",
+        "species": "OPEN",
+        "microhabitat": "OPEN",
+        "spatialBinding": "OPEN"
+      },
+      "UE-003": {
+        "roles": [
+          "pause",
+          "reflection",
+          "progression"
+        ],
+        "contentBinding": "OPEN",
+        "spatialBinding": "OPEN"
+      }
+    }
+  },
+  "prohibitions": [
+    "no-invented-walkable-branches",
+    "no-open-left-port",
+    "no-open-right-port",
+    "no-metric-claims-from-test-geometry",
+    "no-cardinal-inference"
+  ],
+  "navigationGeometry": {
+    "walkableEnvelope": {
+      "status": "NOT_MATERIALIZED",
+      "exactGeometry": "OPEN",
+      "authority": "UPSTREAM_NAVIGATION_CONTRACT"
+    },
+    "testRaster": {
+      "status": "PROVISIONAL_TEST_RASTER",
+      "authority": "TEST_ONLY",
+      "derivationFromEnvelope": "NOT_YET_REGENERABLE"
+    }
+  },
+  "preIntegration": {
+    "tileGrammarUse": "PROVISIONAL_FIXTURE_ONLY",
+    "walkableRasterAuthority": "TEST_ONLY",
+    "waterEdgeRasterization": "OPEN",
+    "blockerEdgeRasterization": "OPEN",
+    "interactionSpatialBinding": "OPEN"
+  }
+}

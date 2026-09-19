@@ -1,0 +1,101 @@
+# Árboris — Guía de vocabulario ASC
+
+**Estado:** aprobada provisionalmente como guía operativa  
+**Ámbito:** fundamentos de uso cotidiano del Arboris Scene Compiler (ASC)  
+**Autoridad normativa:** [`ARBORIS_SCENE_COMPILER.md`](ARBORIS_SCENE_COMPILER.md)
+
+Esta guía es una referencia rápida y didáctica. No reemplaza la definición normativa de ASC. Si existe una discrepancia, prevalece `ARBORIS_SCENE_COMPILER.md`.
+
+## 1. Cuando trabajamos con ASC
+
+| Término | Qué significa | Ejemplo correcto |
+| --- | --- | --- |
+| **ASC** | Arboris Scene Compiler. Sistema que transforma canon, evidencia, contratos y restricciones en instrucciones ejecutables por una herramienta generativa. | “Pásalo por ASC.” |
+| **prompt ASC** | Instrucción compilada que ASC entrega al ejecutor generativo. | “Muéstrame el prompt ASC antes de ejecutarlo.” |
+| **modelo generativo / ejecutor** | Herramienta externa que interpreta el prompt ASC y produce la salida. | “El ejecutor interpretó mal el estero.” |
+| **resultado ASC** | Salida obtenida después de ejecutar un prompt ASC. No constituye evidencia por sí misma. | “Auditemos el resultado ASC.” |
+| **prueba ASC** | Experimento controlado para comprobar una hipótesis de compilación, traducción o representación. | `TOPOLOGY-STRESS-TEST-001` |
+| **contrato de entrada** | Relaciones, restricciones y estados que ASC debe preservar durante la compilación. | “El puente antes de la reja pertenece al contrato de entrada.” |
+
+### Convención de lenguaje: para ASC · con ASC · de ASC
+
+Estas tres relaciones no son tratamientos, estados ni operaciones nuevas. Son una convención de lenguaje para reducir ambigüedad al describir la posición de algo respecto del flujo ASC.
+
+| Forma | Indica | Ejemplo |
+| --- | --- | --- |
+| **para ASC** | El objeto está aguas arriba de la compilación: se prepara, revisa o audita antes de entrar a ASC. | “Auditar propuesta para ASC” — revisar la propuesta antes de usarla en el flujo de compilación. No significa “ASC audita la propuesta” ni autoriza corregir, aprobar, compilar o ejecutar por sí sola. |
+| **con ASC** | La operación utiliza ASC dentro del flujo. La operación concreta determina si termina en compilación o continúa hacia ejecución externa. | “Compila con ASC el acceso principal” — produce el prompt ASC sin ejecutar generación. Para la distinción entre “Compila con ASC” y “Genera con ASC / Ejecuta con ASC”, ver la sección 2. |
+| **de ASC** | El objeto tiene procedencia demostrable dentro del flujo ASC; su tipo concreto determina si fue producido por la compilación ASC o por un ejecutor externo a partir de un prompt ASC. | “Auditar resultado de ASC contra contrato v2.1” — identifica su procedencia en el flujo sin convertirlo en evidencia ni atribuir su generación al compilador. |
+
+Esta convención no crea autoridad, no modifica tratamientos ASC ni sustituye la definición normativa de `ARBORIS_SCENE_COMPILER.md`. Su único propósito es lingüístico.
+
+## 2. Órdenes de trabajo con ASC
+
+| Orden | Qué hace | Ejemplo |
+| --- | --- | --- |
+| **Compila con ASC** | Prepara el prompt ASC. No ejecuta generación. | “Compila con ASC el acceso principal.” |
+| **Genera con ASC / Ejecuta con ASC** | Compila primero y después ejecuta el prompt con la herramienta generativa disponible. | “Genera con ASC el MAP-001.” |
+| **Audita ASC** | Revisa el prompt o resultado contra contrato, fuentes y criterios de validación. | “Audita ASC este resultado.” |
+| **Usa X como input ASC** | Permite que X alimente la compilación, sin convertirlo automáticamente en autoridad o verdad. | “Usa este mapa como input ASC.” |
+
+## 3. Tratamientos de información en ASC
+
+| Tratamiento | Qué significa | Ejemplo |
+| --- | --- | --- |
+| **KNOWN** | Existe base suficiente para trasladar la información a la compilación. | “La casa está a la izquierda: KNOWN.” |
+| **OPEN** | No existe evidencia o decisión suficiente. Debe permanecer abierto. | “Altura exacta: OPEN.” |
+| **PROHIBIDO INFERIR** | El ejecutor no puede completar ese vacío por plausibilidad. | “No inferir otras construcciones.” |
+| **ART-PROVISIONAL** | Solución visual temporal permitida para una prueba. No se convierte en evidencia. | “Usar un volumen simple ART-PROVISIONAL.” |
+
+
+## 4. Estados de dominio y trazabilidad
+
+### Estados del dominio vs tratamientos ASC
+
+`KNOWN`, `OPEN`, `PROHIBIDO INFERIR` y `ART-PROVISIONAL` son tratamientos de compilación ASC.
+
+Un dominio puede mantener estados propios. Esos estados no se convierten automáticamente en tratamientos ASC.
+
+Por ejemplo, un proceso puede registrar algo como `UNRESOLVED`. Ese estado local puede recibir tratamiento `OPEN` en ASC solo cuando una evaluación explícita determine que corresponde a su semántica: no existe evidencia o decisión suficiente y el punto debe permanecer abierto. El estado original del dominio se conserva.
+
+### Trazabilidad de compilación
+
+Usar el nivel de atribución que realmente pueda demostrarse.
+
+**contrato de entrada preparado**  
+→ la información, relaciones y restricciones necesarias ya están estructuradas para compilación; esto no demuestra por sí solo autorización.
+
+**contrato de entrada autorizado**  
+→ la autoridad correspondiente aprobó su uso como input de la prueba.
+
+ASC v0.1 requiere un contrato de entrada ya preparado y autorizado.
+
+**prompt ASC**  
+→ instrucción producida mediante el proceso de compilación ASC.
+
+Cuando importe la procedencia técnica, distinguir:
+
+**construcción del prompt conforme a ASC**  
+→ se construyó el prompt preservando contrato, autoridad y restricciones, sin afirmar ejecución de una implementación concreta.
+
+**ASC v0.1 / `tools/asc/compile_asc.mjs`**  
+→ el prompt fue producido efectivamente por la implementación v0.1. Esta atribución requiere trazabilidad de esa ejecución concreta.
+
+**resultado ASC**  
+→ salida producida por un ejecutor externo a partir de un prompt ASC. No constituye evidencia por sí misma.
+
+No atribuir una compilación a ASC v0.1 o a `compile_asc.mjs` si no existe trazabilidad de esa ejecución concreta.
+
+## Regla de lectura
+
+```text
+ASC compila; no decide la verdad del proyecto.
+La plausibilidad visual no es evidencia.
+Si no está respaldado, permanece OPEN.
+```
+
+Los tratamientos ASC no sustituyen estados de otros dominios como `claimState`, `evidenceStatus` o `productionStatus`.
+
+## Uso recomendado
+
+Usar esta guía para conversaciones rápidas, handoffs y trabajo diario con agentes o herramientas generativas. Para compilación real, auditorías o decisiones que vayan a consolidarse, abrir primero `ARBORIS_SCENE_COMPILER.md` y luego solo las autoridades de dominio necesarias.

@@ -8,7 +8,7 @@ Esta es la fuente técnica común para personajes, escenarios, animaciones y rec
 
 Arboris representa flora nativa real de Chile. La estilización conserva los rasgos que permiten reconocer cada especie: forma, margen y nervaduras de hojas; porte y follaje ambiental; estructuras reproductivas y contexto ecológico. Revisar fotografías y ficha antes de proponer. Registrar las correcciones del usuario y Alejandra como decisiones de diseño atribuidas, sin convertirlas automáticamente en reglas botánicas universales.
 
-Los personajes de colección usan la hoja como cuerpo principal. Frutos, flores y cápsulas pueden ser mascotas, accesorios, herramientas, armas o elementos expresivos cuando el diseño de esa especie lo contemple. Su presencia no es obligatoria ni aprueba una mecánica de juego. En Mitique se acordó una hoja única sin anexos. Arboris también puede incorporar personajes auxiliares no botánicos, como la Piedra-guía de líquen, que deben conservar el lenguaje técnico común sin fingir pertenecer a una especie del catálogo.
+Los personajes de colección usan la hoja como cuerpo principal. Frutos, flores, cápsulas y otros elementos pueden funcionar como acompañantes, accesorios, props visuales o elementos expresivos cuando el diseño de esa especie lo contemple. Su presencia gráfica no define automáticamente una mecánica de juego. En Mitique se acordó una hoja única sin anexos. Arboris también puede incorporar personajes auxiliares no botánicos, como la Piedra-guía de líquen, que deben conservar el lenguaje técnico común sin fingir pertenecer a una especie del catálogo.
 
 ## Lenguaje común de personajes
 
@@ -27,6 +27,48 @@ Para una piedra cubierta de líquen, conservar como rasgos de identidad la masa 
 La locomoción puede declararse flotante o anclada según la escena. Esta excepción no modifica la regla de que los personajes de colección flotan de manera independiente. Los accesorios, efectos de ayuda y poses de interacción se producirán como derivados separados, sin alterar el sprite base aprobado.
 
 Conservar las decisiones de las [fichas vigentes](../data/characters/index.json): nervaduras bifurcadas de Litrini; ausencia de pecíolo y verde azulado grisáceo de Peumito; ápice acunatado con forma de corazón o coronilla, ondulación moderada y dos dientes suaves por lado de Quillai; hoja única, ápice prolongado y nervadura fina de Mitique; margen aserrado continuo y fruto oscuro de Bollén. Las cápsulas sugeridas en la ficha de Quillai no obligan a agregarlas al PNG aprobado.
+
+## Master y derivados
+
+Para cada personaje distinguir el master canónico de sus usos derivados:
+
+```text
+character master
+├── gallery sprite
+├── discovery derivative
+├── gameplay derivative
+├── expressions
+├── animation frames
+└── promotional derivative
+```
+
+Reglas:
+
+- el master conserva la identidad canónica del personaje;
+- un derivado no reemplaza al master de forma implícita;
+- todo derivado debe declarar el master del que proviene;
+- una pose, expresión o animación no se convierte por sí sola en un nuevo master;
+- una modificación estructural de silueta, morfología o identidad requiere una nueva versión documentada del master;
+- los derivados pueden adaptar encuadre o movimiento a su uso sin borrar los rasgos que identifican al personaje.
+
+### Regla transitoria de master visual
+
+El repositorio todavía no define un asset master separado para cada personaje. Mientras esa separación no exista, el `selectedDesign` de la ficha individual y su PNG canónico aprobado funcionan juntos como **master visual operativo**. El concepto de `gallery sprite` como derivado se aplica únicamente cuando exista un asset derivado explícitamente creado y declarado como tal. Esta regla transitoria evita reclasificar retroactivamente los sprites canónicos actuales sin una migración de datos y assets.
+
+## Geometría de producción futura
+
+**Estado: PROPUESTO.** Estos campos preparan animación, composición y UI, pero no tienen valores normativos todavía.
+
+Medir primero el elenco canónico antes de fijar rangos o defaults para:
+
+- `visual center`;
+- `pivot/origin`;
+- `effective bounds`;
+- `float anchor`;
+- `attachment points`;
+- `safe area`.
+
+No inventar coordenadas ni imponer una proporción común. El objetivo es coherencia de lectura y composición, no uniformidad física entre especies.
 
 ## Contrato para Pixelorama
 

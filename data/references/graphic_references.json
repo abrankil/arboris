@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0.0",
+  "corpusId": "ARBORIS_GRAPHIC_REFERENCES",
+  "nextRefNumber": 3,
+  "references": [
+    {
+      "refId": "REF-001",
+      "identityStatus": "active",
+      "canonicalRefId": null,
+      "title": "Quite OK Games — Laysara: Summit Kingdom / Official Website",
+      "sourceUrl": "https://quiteokgames.com/",
+      "previousUrls": [],
+      "authorOrganization": "Quite OK Games",
+      "sourceProvenance": "OFICIAL",
+      "contentOrigin": "Quite OK Games",
+      "unitType": "COLECCIÓN",
+      "resourceNature": [
+        "SITIO_OFICIAL",
+        "MEDIA_KIT",
+        "KEY_ART",
+        "GALERÍA"
+      ],
+      "documentaryRelation": "FUENTE_PRIMARIA",
+      "contentAccessibility": "CONTENIDO_COMPLETO",
+      "provenanceNotes": "El sitio incluye también otros proyectos de Quite OK Games; la sección pertinente y el enlace al press kit de Laysara están identificados explícitamente.",
+      "preservedCopies": [],
+      "registrationProvenance": {
+        "collectionProtocol": "GRAPHIC_REFERENCE_COLLECTION_V3",
+        "collectionSubject": "Laysara: Summit Kingdom",
+        "sourceArtifact": null,
+        "sourceRecordNumber": null
+      },
+      "registeredAt": "2026-09-19T02:23:00-03:00",
+      "updatedAt": "2026-09-19T02:23:00-03:00"
+    },
+    {
+      "title": "Laysara: Summit Kingdom Presskit",
+      "sourceUrl": "https://press.futurefriendsgames.com/Laysara-Summit-Kingdom-1742a2ad16e04369971bcfe8341f495b",
+      "authorOrganization": "Future Friends Games / Quite OK Games",
+      "sourceProvenance": "OFICIAL",
+      "contentOrigin": "Quite OK Games",
+      "unitType": "COLECCIÓN",
+      "resourceNature": [
+        "MEDIA_KIT",
+        "KEY_ART",
+        "GALERÍA",
+        "DOCUMENTACIÓN_DE_PRODUCCIÓN"
+      ],
+      "documentaryRelation": "FUENTE_PRIMARIA",
+      "contentAccessibility": "CONTENIDO_COMPLETO",
+      "provenanceNotes": "Aunque está alojado en la infraestructura de prensa de Future Friends Games, el propio sitio de Quite OK Games enlaza este recurso como el press kit oficial de Laysara.",
+      "registrationProvenance": {
+        "collectionProtocol": "GRAPHIC_REFERENCE_COLLECTION_V3",
+        "collectionSubject": "Laysara: Summit Kingdom",
+        "sourceArtifact": null,
+        "sourceRecordNumber": null
+      },
+      "registeredAt": "2026-09-19T03:23:00-03:00",
+      "updatedAt": "2026-09-19T03:23:00-03:00",
+      "refId": "REF-002",
+      "identityStatus": "active",
+      "canonicalRefId": null,
+      "previousUrls": [],
+      "preservedCopies": []
+    }
+  ]
+}

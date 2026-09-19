@@ -1,300 +1,242 @@
 # Árboris — Factores habilitantes
 
-Este documento define las condiciones que deben existir para que Árboris pueda desarrollar de forma confiable su sistema de exploración, identificación asistida, colección y juego.
+**Versión:** 0.3  
+**Última actualización:** 16 septiembre 2026  
+**Alcance:** Piloto 1.0 — seis especies
 
-Los factores habilitantes no son funcionalidades visibles para el usuario. Son la infraestructura científica, técnica y de datos que permite construirlas correctamente.
+Este documento define las condiciones científicas, técnicas y de datos necesarias para que Árboris desarrolle de forma confiable su sistema de exploración, aprendizaje, identificación asistida, colección y juego.
+
+## Regla general de desarrollo
+
+Un componente nuevo solo debe incorporarse cuando resuelva un problema demostrado del piloto. Árboris prioriza integración, trazabilidad, simplicidad y funcionamiento offline antes que expansión tecnológica.
 
 ## 1. Base botánica estructurada
 
-Estado: EN DESARROLLO
+**Estado: CONSOLIDADO — MASTER 2.0**
 
-Cada especie debe contar con información taxonómica y botánica estructurada y respaldada por fuentes.
+La fuente científica/editorial única del piloto es:
 
-Debe incluir progresivamente:
+`data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
 
-- Identificación de especie
-- Nombre común
-- Nombre científico
-- Familia
-- Hábito
-- Origen y endemismo
-- Caracteres diagnósticos
-- Variabilidad de los caracteres
-- Fenología
-- Distribución
-- Hábitat
-- Especies confundibles
-- Criterios para diferenciarlas
-- Consideraciones de seguridad
-- Fuentes bibliográficas
+El Master Botánico 2.0 gobierna especies, caracteres, estados, relaciones especie–carácter, variabilidad, fuentes, seguridad, evidencia fotográfica, glosario y errores conocidos.
 
-Piloto actual: 6 especies.
+Flujo canónico:
 
-La planilla `data/source/Fichas_especies_arboris.xlsx` funciona actualmente como fuente maestra editorial.
+```text
+Master Botánico 2.0
+→ exportación reproducible
+→ data/botanical/*.json
+→ validación estricta
+→ fichas derivadas en data/species/
+→ runtime / UI / dirección de arte / identificación
+```
 
----
+Estado validado:
 
-## 2. Evidencia fotográfica
+- 6 especies;
+- 24 caracteres totales;
+- 19 activos/computables;
+- 4 retirados;
+- 1 pendiente de revisión;
+- 89 relaciones especie–carácter;
+- 21 fuentes;
+- 53 términos de glosario;
+- 45 fotografías;
+- 2 errores de modelo registrados;
+- 0 advertencias y 0 errores en la validación canónica.
 
-Estado: EN DESARROLLO
+Los JSON y fichas por especie son derivados. No deben editarse manualmente como fuentes científicas paralelas.
 
-Las fotografías no deben tratarse simplemente como imágenes de referencia.
+## 2. Fichas canónicas por especie
 
-Cada fotografía debe poder relacionarse con:
+**Estado: CONSOLIDADO Y REPRODUCIBLE**
 
-- Especie
-- Individuo observado
-- Órgano o estructura visible
-- Tipo de evidencia
-- Calidad
-- Validación
-- Contexto de la observación cuando esté disponible
+Las seis fichas en `data/species/` se generan desde `data/botanical/*.json` mediante:
 
-El piloto cuenta actualmente con 45 fotografías distribuidas entre las 6 especies.
+`tools/botanical-data/build_species_data.py`
 
-La nomenclatura de archivos conserva la relación entre especie, individuo y estructura fotografiada.
+Se validan mediante:
 
----
+`tools/botanical-data/validate_species_data.py`
 
-## 3. Variación intraespecífica
+La regeneración es determinista: el mismo conjunto de JSON canónicos produce las mismas fichas.
 
-Estado: PARCIAL
+Estas fichas son la vista práctica para consumo humano, IA, interfaz y dirección de arte, pero su autoridad científica proviene del Master 2.0.
 
-Árboris no debe representar una especie mediante un único "aspecto típico".
+## 3. Evidencia fotográfica
 
-El sistema debe poder registrar múltiples individuos y distintas expresiones morfológicas de una misma especie.
+**Estado: OPERATIVO / EN AMPLIACIÓN**
 
-Cuando sea posible, las observaciones deberán incorporar contexto como:
+Las fotografías constituyen evidencia de observaciones y no simples imágenes decorativas.
 
-- Exposición
-- Sombra o cobertura
-- Pendiente
-- Altitud
-- Fenología
-- Microhábitat
-- Otras condiciones ambientales relevantes
+El piloto cuenta con 45 fotografías propias vinculadas a las seis especies.
 
-El objetivo es distinguir variación real dentro de una especie de diferencias entre especies.
+Cada fotografía debe conservar, cuando exista, relación con especie, individuo, estructura visible, procedencia y contexto.
 
----
+Los datos desconocidos no deben inventarse.
 
-## 4. Modelo de observaciones
+## 4. Variación intraespecífica
 
-Estado: PENDIENTE
+**Estado: INCORPORADO AL MODELO / DATOS AÚN LIMITADOS**
 
-Debe distinguirse entre:
+Árboris no modela una especie mediante una única apariencia típica.
 
-- Especie
-- Individuo
-- Observación
-- Fotografía
-- Evidencia
-- Identificación
+La arquitectura debe permitir múltiples estados esperados, individuos, observaciones y condiciones ambientales/fenológicas.
 
-Descubrir una especie y observar nuevamente esa especie son eventos distintos.
+La variación biológica no debe confundirse automáticamente con error.
 
-Una especie puede desbloquearse una vez, pero acumular múltiples observaciones y evidencia a lo largo del tiempo.
+## 5. Modelo de observaciones
 
----
+**Estado: DEFINIDO CONCEPTUALMENTE / IMPLEMENTACIÓN PARCIAL**
 
-## 5. Identificación asistida y manejo de incertidumbre
+Árboris distingue:
 
-Estado: PENDIENTE
+```text
+Species
+→ Individual
+→ Observation
+→ Evidence
+→ Identification
+```
 
-Árboris no debe entregar identificaciones definitivas basadas ciegamente en IA.
+Una identificación es una hipótesis revisable. Una fotografía pertenece a una observación y constituye evidencia.
 
-La identificación deberá combinar progresivamente:
+## 6. Identificación asistida e incertidumbre
 
-- Fotografías
-- Caracteres botánicos observables
-- Ubicación
-- Ecosistema
-- Distribución
-- Fenología
-- Evidencia acumulada
+**Estado: PROTOTIPO FUNCIONAL / ARQUITECTURA EN REFACTOR**
 
-El sistema debe mantener candidatos alternativos cuando exista incertidumbre.
+Árboris no entrega identificaciones definitivas basadas ciegamente en IA.
 
-"No sé" o "No puedo observarlo" deben ser respuestas válidas durante una identificación.
+BioCLIP funciona como generador/priorizador de candidatos. La evidencia botánica debe poder corregir una priorización visual incorrecta.
 
----
+“No sé” y “No puedo observarlo” son respuestas válidas. La ausencia de información nunca equivale automáticamente a evidencia negativa.
 
-## 6. Claves adaptativas
+## 7. Clave adaptativa
 
-Estado: PENDIENTE
+**Estado: PROTOTIPO FUNCIONAL / MIGRACIÓN A MOTOR CANÓNICO**
 
-Cuando una fotografía no sea suficiente, Árboris debe preguntar por caracteres que permitan discriminar entre los candidatos restantes.
+La clave histórica demostró el principio de preguntas adaptativas, pero todavía contiene conocimiento botánico duplicado y vocabulario anterior al Master 2.0.
 
-Las preguntas deben:
+La arquitectura definitiva debe separar:
 
-1. Priorizar caracteres diagnósticos.
-2. Evitar preguntar información que ya pueda obtenerse de la imagen.
-3. Adaptarse según las respuestas anteriores.
-4. Permitir que el usuario indique que un carácter no puede observarse.
+```text
+conocimiento botánico canónico
+        ↓
+motor genérico
+        ↓
+selección del carácter necesario
+        ↓
+adquisición de evidencia
+        ↓
+pregunta al usuario solo si hace falta
+```
 
----
+La clave no debe mantener estados específicos por especie fuera del Master 2.0.
 
-## 7. Trazabilidad de la identificación
+Los caracteres retirados o pendientes se conservan para auditoría, pero no participan en el motor mientras no estén activos.
 
-Estado: PENDIENTE
+## 8. Trazabilidad de la identificación
 
-Cada identificación debe conservar evidencia de cómo se llegó al resultado.
+**Estado: PARCIAL / EN DESARROLLO**
 
-Debe ser posible registrar:
+Cada identificación debe conservar evidencia, procedencia, método, candidatos considerados, caracteres utilizados, incertidumbre e historial de revisión.
 
-- Fotografías utilizadas
-- Caracteres observados
-- Respuestas del usuario
-- Contexto territorial
-- Método de identificación
-- Candidatos considerados
-- Nivel de confianza
-- Cantidad y calidad de evidencia
+La evidencia original no debe perderse cuando cambia una hipótesis.
 
-El resultado debe poder revisarse posteriormente.
+## 9. Seguridad y observación ética
 
----
+**Estado: DEFINIDO**
 
-## 8. Seguridad
+La obtención de evidencia debe privilegiar métodos visuales, seguros y no destructivos.
 
-Estado: PARCIAL
+Mientras *Lithraea caustica* sea candidata, Árboris no debe solicitar frotar, triturar ni oler hojas.
 
-El sistema debe evitar instrucciones que puedan poner al usuario en riesgo.
+Tampoco debe solicitar cortar tejidos de *Colliguaja odorifera* para comprobar látex ni pruebas destructivas equivalentes sobre otras especies.
 
-Las preguntas de identificación deben considerar las especies candidatas antes de pedir interacciones físicas.
+## 10. Contexto territorial, ecológico y fenológico
+
+**Estado: PREPARADO CONCEPTUALMENTE / PENDIENTE DE INTEGRACIÓN**
+
+La identificación debe poder incorporar progresivamente territorio, ecosistema, distribución, altitud, hábitat, microhábitat, época y fenología.
+
+El contexto informa las hipótesis; no debe inventar certeza.
+
+## 11. Arquitectura offline-first
+
+**Estado: DEFINIDO / IMPLEMENTACIÓN PARCIAL**
+
+La app debe poder funcionar en terreno con conectividad limitada.
+
+Stack previsto:
+
+- Expo;
+- React Native;
+- TypeScript;
+- Expo Router;
+- SQLite mediante `expo-sqlite`.
+
+La inferencia visual on-device se decidirá solo después de validar qué modelos son realmente necesarios.
+
+## 12. Paquetes territoriales
+
+**Estado: DEFINIDO CONCEPTUALMENTE / FUTURO**
+
+Árboris podrá distribuir paquetes descargables por territorio/ecosistema con especies, datos, mapas y recursos de identificación necesarios para uso offline.
+
+No es necesario definir el formato final antes de cerrar el piloto.
+
+## 13. Separación entre especie, conocimiento y personaje
+
+**Estado: DEFINIDO**
+
+Árboris mantiene separados:
+
+1. especie biológica real;
+2. conocimiento/evidencia;
+3. personaje jugable.
+
+El personaje no sustituye la ficha científica y las decisiones gráficas no se convierten automáticamente en reglas botánicas.
+
+## 14. Dirección de arte basada en datos canónicos
+
+**Estado: HABILITADA**
+
+Para el piloto, la dirección de arte debe consultar prioritariamente:
+
+1. `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx` como autoridad editorial/científica;
+2. `data/species/` como vista completa generada por especie;
+3. `data/botanical/` para datos estructurados y trazabilidad;
+4. fotografías reales como evidencia visual;
+5. `data/characters/` para decisiones lúdicas y assets aprobados.
+
+Una ficha derivada facilita el trabajo, pero no reemplaza la autoridad del Master 2.0.
+
+## 15. Integridad, procedencia y versionado
+
+**Estado: OPERATIVO / EN DESARROLLO CONTINUO**
+
+El Master 2.0 registra versión de esquema y SHA-256 de integridad. Los exports y fichas se validan automáticamente.
+
+Los IDs canónicos son `SP-001...SP-006`. Los IDs `SP001...SP006` se mantienen solo para compatibilidad histórica con algunos componentes.
+
+## 16. Modelos visuales como observadores de caracteres
+
+**Estado: POSTERIOR AL MOTOR CANÓNICO**
+
+Los modelos visuales futuros no deben responder directamente “esta especie es X”. Deben observar caracteres concretos definidos por el Master 2.0 y poder abstenerse.
 
 Ejemplo:
 
-Si litre permanece entre los candidatos, Árboris no debe pedir al usuario frotar, triturar u oler hojas para diferenciarlas.
+```text
+Photo + CH-003
+→ modelo visual
+→ estado permitido o NO_OBSERVABLE
+```
 
-La observación no destructiva debe ser prioritaria.
+La procedencia de esa observación debe conservarse.
 
----
+## 17. Prioridad actual
 
-## 9. Contexto territorial
+Con Master 2.0, JSON canónicos y fichas por especie ya consolidados, la prioridad técnica es construir y validar el motor genérico de identificación antes de ampliar la visión artificial o retirar el legado.
 
-Estado: PENDIENTE
-
-La identificación debe utilizar el territorio como evidencia.
-
-El sistema deberá poder considerar:
-
-- Zona geográfica
-- Ecosistema
-- Distribución conocida de las especies
-- Altitud cuando corresponda
-- Hábitat
-- Época del año
-
-La presencia o ausencia territorial no debe utilizarse como criterio absoluto cuando exista incertidumbre.
-
----
-
-## 10. Arquitectura offline-first
-
-Estado: DEFINIDO / PENDIENTE DE IMPLEMENTACIÓN
-
-Árboris debe poder utilizarse en terreno con conectividad limitada o inexistente.
-
-La arquitectura debe contemplar:
-
-- Datos esenciales almacenados localmente
-- Identificación básica offline cuando sea técnicamente posible
-- Registro de observaciones sin conexión
-- Sincronización posterior
-- Mapas o información territorial descargable
-
----
-
-## 11. Paquetes territoriales
-
-Estado: PENDIENTE
-
-La aplicación podrá organizar parte de sus datos mediante paquetes descargables por territorio.
-
-Un paquete podría contener:
-
-- Especies esperables
-- Fichas
-- Caracteres diagnósticos
-- Recursos visuales
-- Información territorial
-- Datos necesarios para exploración offline
-
-Esto permite ampliar Árboris progresivamente sin instalar desde el inicio toda la flora de Chile.
-
----
-
-## 12. Separación entre especie, conocimiento y personaje
-
-Estado: DEFINIDO
-
-Árboris debe mantener separados tres objetos relacionados:
-
-1. La especie biológica real.
-2. El conocimiento y evidencia acumulados sobre esa especie.
-3. El personaje jugable inspirado en esa especie.
-
-El personaje no sustituye la ficha científica.
-
-La progresión del personaje puede relacionarse con el conocimiento y las observaciones acumuladas de la especie.
-
----
-
-## 13. Ciclo de juego
-
-Estado: DEFINIDO / PENDIENTE DE IMPLEMENTACIÓN
-
-El ciclo central de Árboris es:
-
-Explorar el territorio real
-→ encontrar una planta
-→ observar e investigar
-→ realizar identificación asistida
-→ desbloquear la especie
-→ obtener su personaje
-→ incorporarlo a la colección
-→ utilizarlo en juegos u otras mecánicas
-→ obtener nuevos incentivos para explorar.
-
-La identificación es una mecánica dentro del juego, no el producto completo.
-
----
-
-## 14. Aprendizaje como resultado de la interacción
-
-Estado: DEFINIDO
-
-La IA debe funcionar como andamio para el aprendizaje.
-
-El objetivo no es que el teléfono aprenda a reconocer plantas mientras el usuario permanece dependiente de él.
-
-Árboris debe favorecer que, con el tiempo, el usuario:
-
-- Observe mejores caracteres.
-- Reconozca especies conocidas.
-- Distinga especies confundibles.
-- Comprenda la variación natural.
-- Necesite menos asistencia para especies ya aprendidas.
-
-Regla de diseño:
-
-Priorizar funciones que hagan que el usuario conozca mejor la naturaleza, no solamente que el teléfono la reconozca mejor.
-
----
-
-## 15. Integridad y versionado de los datos
-
-Estado: EN DESARROLLO
-
-Los datos estructurados, documentación y evidencia del proyecto deben mantenerse versionados.
-
-Actualmente:
-
-- Git gestiona el historial.
-- GitHub mantiene el repositorio remoto.
-- `data/source/` conserva la fuente maestra editorial.
-- `data/species/` contiene datos estructurados para uso de la aplicación.
-- `species/` contiene los recursos asociados a cada especie.
-
-Los cambios futuros en datos científicos deben poder rastrearse y revisarse.
+La dirección de arte puede avanzar en paralelo sobre las fichas canónicas y fotografías reales.

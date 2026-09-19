@@ -1,0 +1,116 @@
+name: Node 24 Experimental Baseline Gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/node24-experimental-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Capture runtime and repository state
+        shell: bash
+        run: |
+          mkdir -p build/baseline-node24
+          node --version | tee build/baseline-node24/node-version.txt
+          git rev-parse HEAD | tee build/baseline-node24/head.txt
+          git status --short | tee build/baseline-node24/working-tree.txt
+          test ! -s build/baseline-node24/working-tree.txt
+
+      - name: MAP-001 tests
+        run: npm run test:map-blockout
+
+      - name: MAP-001 materialization A/B
+        shell: bash
+        run: |
+          rm -rf build/map001-a build/map001-b
+          node tools/map-blockout/materialize_map001_v02.mjs data/maps/map-001-blockout-candidate-002.json --out-dir build/map001-a > build/baseline-node24/map001-a.stdout.json
+          node tools/map-blockout/materialize_map001_v02.mjs data/maps/map-001-blockout-candidate-002.json --out-dir build/map001-b > build/baseline-node24/map001-b.stdout.json
+          diff -rq build/map001-a build/map001-b
+          diff -u build/baseline-node24/map001-a.stdout.json build/baseline-node24/map001-b.stdout.json
+
+      - name: Tile grammar tests
+        run: npm run test:tile-grammar
+
+      - name: Tile grammar candidate validation
+        shell: bash
+        run: |
+          npm run validate:tile-grammar | tee build/baseline-node24/tile-grammar-validation.txt
+
+      - name: Tile grammar stress test
+        shell: bash
+        run: |
+          npm run stress:tile-grammar | tee build/baseline-node24/tile-grammar-stress.json
+          node --input-type=module -e "import fs from 'node:fs'; const raw=fs.readFileSync('build/baseline-node24/tile-grammar-stress.json','utf8'); const start=raw.indexOf('{'); const report=JSON.parse(raw.slice(start)); if(report.summary?.decision!=='KEEP') throw new Error('stress decision must be KEEP'); if((report.summary?.counts?.CORRECT ?? 0)!==17) throw new Error('expected 17 CORRECT fixtures');"
+
+      - name: Compute SHA-256 baseline manifest
+        shell: bash
+        run: |
+          {
+            sha256sum data/maps/map-001-blockout-candidate-002.json
+            sha256sum tools/map-blockout/materialize_map001_v02.mjs
+            sha256sum build/map001-a/map001-blockout-360x640.svg
+            sha256sum build/map001-a/map001-blockout-360x800.svg
+            sha256sum build/map001-a/validation.json
+            sha256sum data/tiles/tile-grammar-candidate-v0.2.json
+            sha256sum tools/tile-grammar/validate_tile_grammar_v02.mjs
+            sha256sum tools/tile-grammar/stress_test_008.mjs
+            sha256sum build/baseline-node24/tile-grammar-stress.json
+          } | tee build/baseline-node24/sha256.txt
+
+      - name: Freeze machine-readable gate report
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const report = {
+            gateId: 'MAP001-TILEGRAMMAR-NODE24-BASELINE-001',
+            runtime: fs.readFileSync('build/baseline-node24/node-version.txt','utf8').trim(),
+            head: fs.readFileSync('build/baseline-node24/head.txt','utf8').trim(),
+            workingTreeClean: fs.readFileSync('build/baseline-node24/working-tree.txt','utf8').trim() === '',
+            map001: {
+              candidate: 'MAP-001-BLOCKOUT-CANDIDATE-002',
+              tests: 'PASS',
+              materializationAB: 'IDENTICAL',
+              rasterAuthority: 'TEST_ONLY',
+              walkableEnvelope: 'NOT_MATERIALIZED'
+            },
+            tileGrammar: {
+              candidate: 'TILE-GRAMMAR-CANDIDATE-v0.2',
+              tests: 'PASS',
+              validation: 'PASS',
+              stressDecision: 'KEEP',
+              fixturesCorrect: 17
+            },
+            productionStandard: 'NOT_ESTABLISHED',
+            integrationAuthorized: 'PRE_INTEGRATION_ONLY'
+          };
+          fs.writeFileSync('build/baseline-node24/gate-report.json', JSON.stringify(report, null, 2) + '\n');
+          EOF
+          cat build/baseline-node24/gate-report.json
+
+      - name: Upload baseline evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: map001-tilegrammar-node24-baseline
+          path: |
+            build/baseline-node24/
+            build/map001-a/
+            build/map001-b/
+          retention-days: 30

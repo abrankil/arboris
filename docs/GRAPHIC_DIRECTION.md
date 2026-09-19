@@ -1,59 +1,94 @@
-# Arboris — Dirección argumental y método de trabajo gráfico
+# Árboris — Dirección argumental y método de trabajo gráfico
+
+**Última actualización:** 16 septiembre 2026
 
 ## Argumento común
 
-En Arboris, explorar la flora nativa chilena permite convertir la curiosidad en reconocimiento. Las observaciones aportan evidencia; un descubrimiento suficientemente respaldado permite incorporar una especie a la colección y acceder al personaje que la representa. El arte hace memorable lo aprendido y anima a volver al territorio.
+En Árboris, explorar la flora nativa chilena permite convertir la curiosidad en reconocimiento. Las observaciones aportan evidencia; un descubrimiento suficientemente respaldado permite incorporar una especie a la colección y acceder al personaje que la representa. El arte hace memorable lo aprendido y anima a volver al territorio.
 
 Este marco conecta la [visión del producto](PRODUCT_VISION.md), los [principios permanentes](PRODUCT_PRINCIPLES.md) y los [requerimientos funcionales](FUNCTIONAL_REQUIREMENTS.md), especialmente RF-09, RF-14, RF-15 y RF-22. Organiza las decisiones gráficas; no define nuevos poderes, combates, antagonistas, reglas de desbloqueo ni una trama cerrada.
 
-El jugador observa y descubre. Los personajes de colección representan especies conocidas; los personajes auxiliares pueden orientar, asistir o conectar sistemas sin representar una especie. Los escenarios sitúan esos encuentros en un ecosistema. La interfaz ayuda a distinguir evidencia, dudas, descubrimientos y progreso. El tono compartido es curioso, orgánico, amable y de humor discreto.
-
 ## Responsables y ámbitos de decisión
 
-Según los [roles establecidos del proyecto](../README.md#dirección-de-arboris), **Alejandra es la fundadora y directora de proyecto de Arboris** y **Alvaro es su director de arte**. Alvaro es quien conduce esta línea de trabajo en la conversación.
+Según los [roles establecidos del proyecto](../README.md#dirección-de-arboris), **Alejandra es la fundadora y directora de proyecto de Árboris** y **Álvaro es su director de arte**.
 
-Alejandra dirige el proyecto y su orientación general. Alvaro dirige el arte, define la coherencia visual y aprueba las decisiones de diseño gráfico dentro de esa orientación. Los aportes de ambos deben atribuirse por nombre y ámbito; las observaciones botánicas de Alejandra conservan además su procedencia como evidencia o comentario de revisión.
+Alejandra dirige el proyecto y su orientación general. Álvaro dirige el arte, define la coherencia visual y aprueba las decisiones de diseño gráfico dentro de esa orientación.
 
 ## Fuentes y autoridad
+
+La dirección de arte debe distinguir con claridad autoridad científica, evidencia visual y canon gráfico.
 
 | Decisión | Fuente que se debe consultar | Aplicación |
 | --- | --- | --- |
 | Propósito y relación entre ciencia y juego | Visión, principios y requerimientos del producto | Un sprite no constituye evidencia de identificación. |
-| Morfología y contexto | `data/species/`, fotografías en `species/`, ficha descriptiva y fuentes citadas | Comparar individuos y registrar variación. El JSON resumido no sustituye la ficha completa. |
-| Correcciones de diseño | Dirección artística de Alvaro y aportes atribuidos a Alejandra, fundadora y directora de proyecto | Conservar autoría y ámbito; una elección para el personaje no se convierte automáticamente en regla botánica universal. |
-| Apariencia vigente | `selectedDesign` en las fichas de `data/characters/` y el PNG aprobado | La última limpieza manual aceptada gobierna los píxeles y la paleta. |
+| Autoridad botánica/editorial | `data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx` | Fuente científica única del piloto. |
+| Ficha completa por especie | `data/species/` | Vista generada desde los JSON canónicos para consulta humana/IA y dirección de arte. No editar manualmente. |
+| Datos estructurados y trazabilidad | `data/botanical/` | Consultar caracteres, estados, fuentes, fotos, glosario y metadata cuando se necesite detalle estructurado. |
+| Evidencia visual | fotografías reales vinculadas a las especies/observaciones | Comparar individuos, órganos, proporciones, color y variación real. |
+| Correcciones de diseño | Dirección artística de Álvaro y aportes atribuidos a Alejandra | Una elección para el personaje no se convierte automáticamente en regla botánica universal. |
+| Apariencia vigente | `selectedDesign` en `data/characters/` y PNG aprobado | La última limpieza manual aceptada gobierna los píxeles y la paleta. |
 | Técnica visual | [Guía de arte](ART_STYLE_GUIDE.md) | Fuente única para personajes, escenarios, interfaz y entregas. |
+| Orientación/composición del escenario piloto | [`PILOT_ENVIRONMENT_VISUAL_CANON.md`](PILOT_ENVIRONMENT_VISUAL_CANON.md) | Regla obligatoria para `IT-001 / MAP-001` y primeros fragmentos derivados. |
 | Inventario y pendientes | [Estado de personajes](CHARACTER_DESIGN_STATUS.md), [índice de personajes](../data/characters/index.json), [catálogo ambiental](assets/backgrounds/README.md) | Distinguir recurso aprobado, ensayo, derivado y pendiente. |
 
-Una instrucción explícita nueva actualiza la decisión gráfica correspondiente. Si entra en conflicto con evidencia científica o con principios del producto, registrar el conflicto y resolverlo en su ámbito; no reescribir silenciosamente la ficha científica. `output/` contiene entregas y exploraciones, no una segunda guía normativa.
+Jerarquía botánica para arte:
+
+```text
+Master Botánico 2.0
+        ↓
+data/botanical/*.json
+        ↓
+data/species/*.json
+        ↓
+fotografías reales + interpretación artística
+        ↓
+asset gráfico
+```
+
+Si una ficha derivada, una nota antigua o una clave histórica entra en conflicto con Master 2.0, gobierna Master 2.0.
+
+## Arquitectura documental de personajes
+
+Cada tipo de decisión debe tener una fuente principal. Evitar duplicar reglas completas en varios manuales.
+
+| Documento o recurso | Responsabilidad principal |
+| --- | --- |
+| [`GRAPHIC_DIRECTION.md`](GRAPHIC_DIRECTION.md) | Propósito, roles, jerarquía de autoridad y método de decisión. |
+| [`ART_STYLE_GUIDE.md`](ART_STYLE_GUIDE.md) | Contrato visual y técnico. |
+| [`CHARACTER_CREATION_WORKFLOW.md`](CHARACTER_CREATION_WORKFLOW.md) | Procedimiento operativo para crear, revisar, limpiar e integrar personajes. |
+| [`CHARACTER_TEMPLATE.md`](CHARACTER_TEMPLATE.md) | Plantilla de ficha para personajes-especie y auxiliares. |
+| [`CHARACTER_DESIGN_STATUS.md`](CHARACTER_DESIGN_STATUS.md) | Estado de producción vigente, pendientes e incidencias. |
+| [`../data/characters/index.json`](../data/characters/index.json) | Índice activo y canon operativo. |
+| JSON individual en `data/characters/<character>.json` + assets correspondientes | Identidad específica, selección vigente, procedencia y assets. |
+| [`CHARACTER_CANON_SNAPSHOT_2026-09-15.md`](CHARACTER_CANON_SNAPSHOT_2026-09-15.md) | Snapshot histórico; no fuente normativa vigente. |
+
+`ARBORIS_CHARACTER_CREATION_RULES.md` y `CHARACTER_COLLECTION_FINAL.md` se mantienen únicamente como rutas de compatibilidad deprecadas durante la transición. No deben recibir reglas nuevas.
 
 ## Cinco modelos de pensamiento
 
-Son herramientas de decisión para el equipo, no una selección de modelos de IA ni cambios de configuración del asistente.
-
 | Modelo | Pregunta de trabajo | Resultado esperado |
 | --- | --- | --- |
-| 1. Evidencia → observación → interpretación | ¿Qué está documentado, qué se ve en esta foto y qué estamos estilizando? | Un breve registro de fuentes, rasgos visibles, variaciones y decisiones de diseño. |
-| 2. Lenguaje común + identidad propia | ¿Se reconoce como Arboris y se diferencia de los demás? | Comparación de silueta, margen, ápice, nervaduras y color con el elenco vigente. |
-| 3. Jerarquía de atención | ¿Qué debe entender primero quien mira la imagen? | Hoja y rostro protagonistas; compañero subordinado; fondo que sitúa; interfaz legible. |
-| 4. Recurso dentro del ciclo de descubrimiento | ¿Qué aporta este gráfico al encuentro, la observación, el descubrimiento o la colección? | Un uso claro y estados visuales que preserven la incertidumbre de la identificación. |
-| 5. Contrato de entrega y conservación | ¿Qué podemos verificar y qué debe revisar una persona? | Formato medido, revisión visual y preservación exacta del archivo manual aprobado. |
+| Evidencia → observación → interpretación | ¿Qué está documentado, qué se ve en esta foto y qué estamos estilizando? | Registro breve de fuentes, rasgos visibles, variaciones y decisiones de diseño. |
+| Lenguaje común + identidad propia | ¿Se reconoce como Árboris y se diferencia de los demás? | Comparación de silueta, margen, ápice, nervaduras y color con el elenco vigente. |
+| Jerarquía de atención | ¿Qué debe entender primero quien mira la imagen? | Hoja y rostro protagonistas; compañero subordinado; fondo que sitúa; interfaz legible. |
+| Recurso dentro del ciclo de descubrimiento | ¿Qué aporta este gráfico al encuentro, observación, descubrimiento o colección? | Uso claro y estados visuales que preserven la incertidumbre. |
+| Contrato de entrega y conservación | ¿Qué podemos verificar y qué debe revisar una persona? | Formato medido, revisión visual y preservación exacta del archivo manual aprobado. |
 
-### Cómo aplicarlos
+## Cómo aplicarlos
 
-**Evidencia.** Una foto de hoja adulta no demuestra cómo se ven todas las hojas jóvenes. Separar la descripción bibliográfica, lo observable en cada imagen y la corrección aportada por Alejandra. Si falta un rasgo, dejarlo pendiente; no completarlo con decoración inventada.
+**Evidencia.** Separar siempre descripción científica, lo observable en cada imagen y estilización. Una foto de hoja adulta no demuestra cómo se ven todas las hojas jóvenes. Si falta un rasgo, dejarlo pendiente; no completarlo con decoración inventada.
 
-**Identidad.** La unidad del elenco procede del píxel, el rostro, los contornos y el sombreado. Cada especie conserva su paleta y morfología. El límite de dientes de Mitique o Quillai pertenece a sus decisiones de diseño; no se aplica al aserrado continuo del Bollén. Unificar no implica recolorear todos los personajes ni darles el mismo ápice.
+**Identidad.** La unidad del elenco procede del píxel, rostro, contornos y sombreado. Cada especie conserva su paleta y morfología. Unificar no implica recolorear todos los personajes ni darles la misma silueta.
 
-**Atención.** La hoja sigue siendo el cuerpo; el fruto o flor solo aparece cuando la versión de esa especie lo incluye. La flora ambiental se representa como planta del paisaje y no hereda los ojos ni la anatomía fantástica de los personajes. Los efectos de profundidad no deben borrar los rasgos de la hoja o competir con texto y controles.
+**Atención.** La hoja sigue siendo el cuerpo cuando esa es la decisión vigente. Flor, fruto u otros acompañamientos aparecen solo cuando la versión aprobada los incluye. La flora ambiental no hereda automáticamente ojos ni anatomía fantástica.
 
-**Descubrimiento.** El personaje es una representación lúdica de una especie, no una fotografía de un individuo. Un fruto acompañante tampoco significa que el ejemplar observado esté fructificando. La futura interfaz deberá distinguir candidato o identificación pendiente de especie descubierta; las reglas y gráficos concretos de esos estados aún requieren diseño.
+**Descubrimiento.** El personaje es una representación lúdica de una especie, no una fotografía de un individuo. Un fruto acompañante tampoco significa que el ejemplar observado esté fructificando.
 
-**Conservación.** Un archivo cuadrado no prueba correspondencia de píxel 1:1. Tampoco la prueban un número bajo de colores o un alpha binario. Medir el archivo, examinar la cuadrícula a zoom entero y comparar con los sprites aprobados. Integrar la limpieza manual mediante copia exacta, verificando hash, sin cuantización, reescalado ni generación adicional.
+**Conservación.** Un archivo cuadrado no demuestra correspondencia de píxel 1:1. Medir el archivo, examinar la cuadrícula a zoom entero y comparar con los sprites aprobados. Integrar la limpieza manual mediante copia exacta, sin cuantización ni reescalado.
 
 ## Elenco y función visual actual
 
-Estas son identidades gráficas, no personalidades ni habilidades narrativas asignadas.
+Estas son identidades gráficas, no personalidades ni habilidades narrativas definitivas.
 
 | Especie | Identidad del personaje vigente | Acompañamiento vigente |
 | --- | --- | --- |
@@ -61,65 +96,103 @@ Estas son identidades gráficas, no personalidades ni habilidades narrativas asi
 | Litre / Litrini · SP002 | Hoja ovalada; nervaduras secundarias bifurcadas cerca del margen; tallo curvo | Dos frutos blancos |
 | Bollén · SP003 | Hoja oblonga, ápice poco agudo, oliva con matiz café y dientes blanquecinos ascendentes en todo el margen | Fruto oscuro estrellado, dos ojos y espacio de semilla vacío |
 | Mitique · SP004 | Hoja única ancha en la zona media, ápice alargado, hasta tres dientes suaves por lado y nervadura fina blanquecina | Ninguno |
-| Quillay / Quillai · SP006 | Hoja con dos dientes suaves por lado y coronilla característica | Sin accesorio separado en el PNG vigente; las posibilidades de la ficha no equivalen a un asset aprobado |
-| Colliguay · SP005 | Diseño y limpieza manual aprobados por Alvaro; puntas rojizas con proporción conservada, según foto cromática aprobada por Alejandra. PNG 125×125 1:1 canónico | Hoja única con pecíolo corto; sin acompañante en la versión elegida |
-| Boldo · SP007 | Hoja oblonga de verde bosque oliva oscuro, superficie coriácea y textura agrupada. Diseño y limpieza manual integrados; sujeto a cambios posteriores | Fruto burgundy y flor clara separados de la hoja y del pecíolo |
-| Piedra-guía de líquen · auxiliar | Diseño y limpieza manual aprobados; personaje de asistencia no botánico, PNG 125×125 1:1 canónico | Roca compacta con manto de líquen y rostro amable; sin suelo ni escenario en el sprite |
+| Colliguay · SP005 | Diseño y limpieza manual aprobados; puntas rojizas con proporción conservada según referencia aprobada | Hoja única con pecíolo corto; sin acompañante en la versión elegida |
+| Quillay / Quillai · SP006 | Hoja con dos dientes suaves por lado y coronilla característica | Sin accesorio separado en el PNG vigente |
+| Boldo · SP007 | Recurso gráfico fuera de las seis especies botánicas del piloto actual | Fruto y flor separados según diseño vigente |
+| Piedra-guía de líquen · auxiliar | Personaje de asistencia no botánico | Roca compacta con manto de líquen y rostro; sin suelo ni escenario en el sprite |
 
-La Piedra-guía queda documentada como referencia de producción para futuros auxiliares: puede apartarse de la anatomía foliar, pero debe conservar la resolución, transparencia, lectura facial, contorno escalonado y sombreado por clusters del sistema Arboris. Su función narrativa es orientar y asistir; no se deben inferir poderes, diálogos o mecánicas definitivas desde el sprite.
+Nota: SP007 Boldo y personajes auxiliares pertenecen a la capa gráfica/jugable y no amplían por sí solos el catálogo científico del piloto Master 2.0.
 
 ## Tipografía de interfaz confirmada
 
-Decisión de dirección de proyecto comunicada por Alejandra y adoptada para Arboris: **Pixelify Sans + Nunito Sans**. Esta decisión gobierna la interfaz, los mockups y las futuras piezas de comunicación, sin modificar los sprites ni convertir una tipografía en evidencia botánica. El logotipo se mantiene como un diseño independiente y no adopta estas fuentes.
+Decisión vigente: **Pixelify Sans + Nunito Sans**.
 
 | Familia | Uso principal | Criterio |
 | --- | --- | --- |
-| **Pixelify Sans** | Títulos, nombres de especies, encabezados, acciones destacadas y mensajes de descubrimiento | Conserva el carácter pixelado/JRPG y la jerarquía visual de Arboris. |
-| **Nunito Sans** | Cuerpo de texto, descripciones, botones secundarios, navegación, etiquetas y metadatos | Aporta legibilidad, calidez y una lectura accesible en pantallas pequeñas. |
+| Pixelify Sans | Títulos, nombres de especies, encabezados, acciones destacadas y descubrimientos | Conserva el carácter pixelado/JRPG. |
+| Nunito Sans | Cuerpo, descripciones, botones secundarios, navegación y metadatos | Aporta legibilidad y lectura accesible en pantallas pequeñas. |
 
-Jersey 10 queda registrado como alternativa experimental para etiquetas o recompensas, no como combinación tipográfica vigente. DotGothic16 y Silkscreen quedan fuera de la opción elegida. Las licencias y archivos de fuente deben verificarse antes de empaquetar una entrega comercial.
+El logotipo se mantiene como diseño independiente.
 
-## Flujo de una tarea
+## Canon espacial del escenario piloto
 
-1. **Precisar el encargo.** Especie o entorno, uso del recurso, referencia vigente, cambio solicitado y formato de entrega.
-2. **Consultar evidencia.** Revisar fotos reales y ficha; anotar rasgos, variación y correcciones humanas. Para variar un personaje, abrir también su PNG aprobado.
-3. **Definir la propuesta.** Elegir silueta, paleta y estructura secundaria a partir de esas referencias. Indicar lo pendiente sin bloquear los aspectos ya resueltos.
-4. **Revisar en contexto.** Comparar con el elenco, el fondo o la interfaz donde se utilizará. Evaluar legibilidad al tamaño real y con zoom entero.
-5. **Preparar el editable.** Aplicar el contrato de la guía. Un concepto generado o reducido todavía puede requerir limpieza y revisión sobre la cuadrícula.
-6. **Auditar la salida.** Antes de enviarla a Pixelorama, revisar transparencia, halos, píxeles fantasmas y separación entre accesorios. La prioridad es entregar un PNG fácil de limpiar, no añadir detalle innecesario.
-7. **Validar y registrar.** Registrar la aprobación de diseño de Alvaro, como director de arte, y la verificación técnica por separado. Atribuir a Alejandra las decisiones de dirección de proyecto y los aportes que realice. Incorporar la limpieza manual sin alterar píxeles; actualizar ficha e índice solo si corresponde.
-8. **Entregar y ordenar.** Identificar el archivo vigente, distinguir fuentes de previews y reportar pendientes reales. Retirar únicamente duplicados obsoletos cuya procedencia y referencias se hayan comprobado.
+Para `IT-001 / MAP-001`, la lectura de pantalla queda fijada así:
+
+```text
+arriba de pantalla = cordillera / interior / objetivo final
+abajo de pantalla  = entrada / dirección hacia el mar / retorno
+centro             = camino principal recorrible
+derecha del camino = Estero El Arrayán, en nivel inferior
+laterales          = laderas norte y sur que contienen el recorrido
+```
+
+La referencia al mar expresa dirección territorial; no obliga a mostrar el océano.
+
+El lenguaje espacial es isométrico y usa Celdas Espaciales cúbicas o prismáticas para construir terrazas y cambios de altura. Las laderas deben sentirse como relieve continuo, no como islas flotantes. Pueden existir accesos puntuales a senderos secundarios solo cuando la topología real los respalde.
+
+### Densidad y limpieza
+
+Decisión de proyecto: **no es necesario poblar intensamente los escenarios**. La dirección visual prioriza:
+
+```text
+pocos elementos reconocibles
++ espacio negativo
++ lectura clara de camino y desniveles
++ anclas territoriales bien ubicadas
+```
+
+No llenar cada tile por decoración. Una zona simple de suelo, roca o vegetación baja puede ser correcta si mejora legibilidad y reconocimiento del lugar.
+
+La especificación detallada y los criterios de fallo están en [`PILOT_ENVIRONMENT_VISUAL_CANON.md`](PILOT_ENVIRONMENT_VISUAL_CANON.md).
+
+## Flujo de una tarea gráfica
+
+1. Precisar especie/entorno, uso, referencia vigente y formato.
+2. Consultar primero la ficha de `data/species/` y, si hace falta, `data/botanical/` y Master 2.0.
+3. Revisar fotografías reales y distinguir rasgos documentados de estilización.
+4. Definir silueta, paleta y estructura secundaria.
+5. Comparar con el elenco vigente y revisar legibilidad al tamaño real.
+6. Preparar el editable siguiendo la guía de arte.
+7. Auditar transparencia, halos, píxeles fantasmas y separación de accesorios.
+8. Registrar aprobación artística y conservar la procedencia de cualquier corrección botánica.
+9. Integrar limpieza manual sin alterar píxeles aprobados.
 
 ## Control de prompts y modelos de imagen
 
-La biblioteca de prompts es un registro experimental separado de los assets canónicos. Sirve para repetir pruebas, comparar modelos y documentar correcciones, pero no convierte una salida generada en decisión de arte.
+La biblioteca de prompts es experimental y está separada de los assets canónicos.
 
-- “Analiza”, “corrige” y “genera un prompt” producen únicamente análisis o texto.
-- “Genera la imagen”, “crea una variante” o una instrucción equivalente autoriza la ejecución de un modelo de imagen.
-- Si la intención es ambigua, entregar el prompt sin ejecutar el modelo.
-- Usar una sola variante por defecto y conservar tokens evitando iteraciones automáticas.
-- Registrar modelo, fecha, referencia, resolución, prompt, prompt negativo, salida y observaciones.
-- Separar referencia, propuesta, diseño aprobado, editable verificado y limpieza manual integrada.
-- Revisar visualmente la salida antes de promoverla y ejecutar la validación técnica cuando corresponda.
+Una imagen generada no se convierte automáticamente en decisión de arte ni en evidencia botánica.
 
-Las referencias externas (*Sea of Stars*, *Chained Echoes*, *Alabaster Dawn* y *Octopath Traveler*) solo aportan principios comparativos de composición, profundidad, iluminación y legibilidad. No autorizan copiar personajes, interfaces, paletas, escenarios ni composiciones.
+Registrar, cuando corresponda: modelo, fecha, referencia, resolución, prompt, salida y observaciones.
 
-Estados de trabajo: **referencia → propuesta → diseño aprobado → editable verificado → limpieza manual integrada**. Una revisión técnica puede detectar un pendiente en un diseño aprobado; esto no autoriza a redibujarlo automáticamente. Los fondos y ensayos no heredan por asociación el estado de producción de los sprites.
+Las referencias externas sirven para principios comparativos de composición, profundidad, iluminación y legibilidad; no autorizan copiar personajes, interfaces, paletas, escenarios ni composiciones.
+
+Estados de trabajo:
+
+```text
+referencia
+→ propuesta
+→ diseño aprobado
+→ editable verificado
+→ limpieza manual integrada
+```
 
 ## Brief mínimo para continuar
 
-Antes de producir, dejar en el contexto de la tarea: recurso y uso; archivo de partida; fuentes botánicas; rasgos que conservar; cambio pedido; decisiones pendientes; compañeros incluidos; lienzo y formato; comparación con canon; verificación prevista. Usar un brief breve y específico, no repetir toda la guía en cada conversación.
+Antes de producir, dejar en el contexto de la tarea: recurso y uso, especie/entorno, ficha canónica consultada, fotografías relevantes, rasgos a conservar, cambio pedido, decisiones pendientes, lienzo, formato, comparación con canon y verificación prevista.
 
 ## Verificación reutilizable
 
-Desde la raíz de `arboris`, ejecutar `pwsh -File tools/validate-graphic-assets.ps1` en Windows. El comando solo lee datos: comprueba fichas, unicidad de IDs, rutas de sprites y referencias compartidas, dimensiones, transparencia, hashes declarados y lienzos de las capas ambientales. Informa las semitransparencias como observación pendiente; no modifica assets ni certifica por sí solo estilo, morfología o edición en Pixelorama.
+Desde la raíz de `arboris`, ejecutar en Windows:
 
-La revisión visual y la aceptación de Alvaro, como director de arte, siguen siendo necesarias para aprobar el diseño gráfico. No afirmar que un `.pxo` coincide con un PNG sin abrir o comparar realmente su contenido.
+`pwsh -File tools/validate-graphic-assets.ps1`
+
+La comprobación técnica no sustituye revisión visual ni aceptación del director de arte.
 
 ## Pendientes delimitados
 
-- Mantener el marco de descubrimiento como argumento común; personalidades, habilidades y relaciones narrativas del elenco siguen abiertas.
-- Colliguay ya fue limpiado manualmente e integrado como sprite canónico. Conservar la copia exacta y revisar cualquier modificación futura como una nueva versión.
-- Revisar la transparencia del Mitique aprobado sin alterar automáticamente su limpieza manual.
-- Los fondos y el ensayo de parallax existentes requieren revisión de escala en contexto. Su resolución de presentación no acredita una cuadrícula nativa compartida.
-- Los minijuegos, mapas y estados de UI todavía necesitan sus propios briefs. La regla de sprites de 125×125 no se aplica al texto ni a toda la interfaz móvil.
+- Mantener el marco de descubrimiento como argumento común; personalidades, habilidades y relaciones narrativas siguen abiertas.
+- Conservar los sprites manualmente aprobados como versiones canónicas hasta una revisión explícita.
+- Revisar fondos, parallax, minijuegos, mapas y estados de UI mediante briefs propios.
+- No aplicar la regla de sprites 125×125 al texto ni a toda la interfaz móvil.
+- Toda nueva decisión morfológica de una especie piloto debe contrastarse con la ficha derivada de Master 2.0 y con evidencia fotográfica real.

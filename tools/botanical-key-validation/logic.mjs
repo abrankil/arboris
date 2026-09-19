@@ -1,5 +1,18 @@
 // Conservative photographic adaptation of BOTANICAL_KEY_PILOT.md v1.0.
+import { adaptSpeciesRecords } from './species_adapter.mjs';
+import SP001 from '../../data/species/SP001_cryptocarya_alba.json' with { type: 'json' };
+import SP002 from '../../data/species/SP002_lithraea_caustica.json' with { type: 'json' };
+import SP003 from '../../data/species/SP003_kageneckia_oblonga.json' with { type: 'json' };
+import SP004 from '../../data/species/SP004_podanthus_mitiqui.json' with { type: 'json' };
+import SP005 from '../../data/species/SP005_colliguaja_odorifera.json' with { type: 'json' };
+import SP006 from '../../data/species/SP006_quillaja_saponaria.json' with { type: 'json' };
+
 export const SPECIES = ['SP001', 'SP002', 'SP003', 'SP004', 'SP005', 'SP006'];
+const VENATION_STATES = Object.fromEntries(
+  adaptSpeciesRecords([SP001, SP002, SP003, SP004, SP005, SP006])
+    .filter(record => record.states.venation.length > 0)
+    .map(record => [record.id, record.states.venation]),
+);
 const question = (id, branch, prompt, options, states) => ({ id, branch, prompt,
   options: [...options.map(([value, label]) => ({ value, label })),
     { value: 'unknown', label: 'No sé / no puedo observarlo' }], states });
@@ -12,9 +25,9 @@ export const QUESTIONS = [
   question('glands', '3a (componente foliar)', '¿Se ven pequeñas glándulas en los dientes de un margen claramente aserrado?',
     [['yes', 'Sí, combinación visible'], ['no', 'No: la combinación se puede descartar visualmente']],
     { SP003: ['yes'] }),
-  question('venation', '4', '¿La nervadura es clara o amarillenta, nítida y marcadamente prominente sobre la lámina?',
+  question('venation', '4', '¿El nervio medio es claramente prominente sobre la lámina?',
     [['yes', 'Sí, coincide'], ['no', 'No, sin ese contraste y relieve']],
-    { SP002: ['yes'], SP001: ['no'], SP006: ['no'] }),
+    VENATION_STATES),
   question('underside', '5', 'Comparando haz y envés: ¿el envés es notoriamente más claro, blanquecino o glauco?',
     [['yes', 'Sí, contraste marcado'], ['no', 'No, sin contraste marcado']],
     { SP001: ['yes'], SP006: ['no'] }),

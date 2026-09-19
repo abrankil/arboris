@@ -1,0 +1,34 @@
+{
+  "testId": "TILE-GRAMMAR-STRESS-TEST-007",
+  "runtime": "v22.16.0",
+  "candidate": "TILE-GRAMMAR-CANDIDATE-v0.1",
+  "fixtureCount": 13,
+  "summary": {
+    "counts": {
+      "CORRECT": 12,
+      "UNDER_SPECIFIED": 1
+    },
+    "decision": "REVISE",
+    "productionStandard": "NOT_ESTABLISHED",
+    "openPreserved": {
+      "tileSize": "OPEN",
+      "metricScale": "OPEN",
+      "renderer": "OPEN"
+    }
+  },
+  "keyEvidence": {
+    "PASS-01": "land ↔ land accepted",
+    "PASS-02": "+1 → slope → 0 accepted across both shared edges",
+    "PASS-03": "land ↔ water accepted through closed bank ↔ bank",
+    "PASS-04": "three-cell routePort chain accepted; scope EDGE_PORT_CONNECTIVITY_ONLY",
+    "FAIL-01": "routePort mismatch rejected at EDGE_COMPATIBILITY",
+    "FAIL-02": "traversal mismatch rejected at EDGE_COMPATIBILITY",
+    "FAIL-03": "bandEndpoints mismatch rejected at EDGE_COMPATIBILITY",
+    "FAIL-04": "land ↔ water without bank rejected at EDGE_COMPATIBILITY",
+    "FAIL-05A": "walkable hard blocker rejected at TILE_INVARIANT",
+    "FAIL-05B": "hard blocker route rejected at TILE_INVARIANT",
+    "FAIL-06": "open cliff rejected at TILE_INVARIANT",
+    "REVIEW-01": "mixed ↔ water accepted because mixed currently behaves as an unconditional edge-content wildcard",
+    "PASS-05-MULTICELL-LOCAL": "pairwise compatibility passed; navigationClaim=NOT_TESTED"
+  }
+}

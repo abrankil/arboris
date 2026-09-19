@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python validation dependency
+        run: python -m pip install --upgrade pip openpyxl
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Check Expo dependency alignment
+        run: npx expo install --check
+
+      - name: Audit production dependencies for high severity issues
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Canonical tests
+        run: npm test
+
+      - name: Detect TypeScript config
+        id: tsconfig
+        shell: bash
+        run: |
+          if [ -f tsconfig.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "No tsconfig.json in repository; typecheck is not yet an executable gate."
+          fi
+
+      - name: TypeScript typecheck
+        if: steps.tsconfig.outputs.present == 'true'
+        run: npm run typecheck

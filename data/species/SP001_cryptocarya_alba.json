@@ -1,515 +1,1195 @@
 {
-  "id": "SP001",
-  "commonName": "Peumo",
-  "scientificName": "Cryptocarya alba",
-  "family": "Lauraceae",
-  "habit": "Árbol",
-  "origin": "Nativa",
-  "endemicToChile": true,
-  "photos": [
+  "view_schema": "arboris.species-card.v2",
+  "generated_from": {
+    "master_name": "Base_botanica_Pokedex_flora_Master",
+    "master_version": "2.0.0",
+    "schema_version": "2.0.0",
+    "source_file": "Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx",
+    "source_sha256": "ee3c6d47a33a835f6a6e8f2622dfeb75a536f13b08f3b3cba5a5707f56b6e1f8",
+    "source_of_truth": "xlsx"
+  },
+  "species": {
+    "species_id": "SP-001",
+    "nombre_cientifico": "Cryptocarya alba",
+    "nombre_comun": "Peumo",
+    "familia": "Lauraceae",
+    "orden": "Laurales",
+    "habito": "Árbol",
+    "origen": "Nativa",
+    "endemismo": "Sí",
+    "estado_piloto": "Activa",
+    "notas": "Ficha piloto; identificación asistida probada en terreno."
+  },
+  "botanical_characters": [
     {
-      "id": "PH-001",
-      "individualId": "CA001",
-      "file": "SP001_CA001_hojas_01.jpg",
-      "structure": "hojas"
-    },
-    {
-      "id": "PH-002",
-      "individualId": "CA001",
-      "file": "SP001_CA001_hojas_02.jpg",
-      "structure": "hojas"
-    },
-    {
-      "id": "PH-003",
-      "individualId": "CA001",
-      "file": "SP001_CA001_ramilla_apical_01.jpg",
-      "structure": "ramilla apical"
-    },
-    {
-      "individualId": "CA002",
-      "file": "SP001_CA002_hojas_01.jpg",
-      "structure": "hojas"
-    }
-  ],
-  "order": "Laurales",
-  "endemicChile": true,
-  "pilotStatus": "Activa",
-  "botanicalNotes": "Ficha piloto; identificación asistida probada en terreno.",
-  "botanicalCharacters": [
-    {
-      "characterId": "CH-001",
-      "group": "Hoja",
-      "name": "Tipo de hoja",
-      "dataType": "categorico",
-      "expectedStates": [
-        "simple"
-      ],
-      "allowedStates": [
-        "simple",
-        "compuesta"
-      ],
-      "variability": "baja",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "bajo",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-002",
+      "character": {
+        "caracter_id": "CH-001",
+        "grupo": "Hoja",
+        "nombre_caracter": "Tipo de hoja",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "simple",
+          "compuesta"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Arquitectura general de la hoja.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-001",
+        "estado_esperado": [
+          "simple"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "bajo",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Hoja simple."
+      },
       "source": {
+        "fuente_id": "F-002",
         "tipo": "Flora/clave",
         "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
         "uso_prioritario": "Morfología y claves de árboles",
         "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
         "notas": "Fuente morfológica prioritaria para especies arbóreas."
       },
-      "notes": "Hojas persistentes y simples según Flora Arbórea de Chile.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "computable": true
     },
     {
-      "characterId": "CH-002",
-      "group": "Hoja",
-      "name": "Disposición foliar",
-      "dataType": "categorico",
-      "expectedStates": [
-        "alterna",
-        "subopuesta",
-        "opuesta"
-      ],
-      "allowedStates": [
-        "alterna",
-        "subopuesta",
-        "opuesta",
-        "verticilada",
-        "no_observable"
-      ],
-      "variability": "alta",
-      "imageObservability": "Parcial",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-002",
+      "character": {
+        "caracter_id": "CH-002",
+        "grupo": "Hoja",
+        "nombre_caracter": "Disposición foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "alterna",
+          "subopuesta",
+          "opuesta",
+          "verticilada"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Patrón de inserción de hojas sobre una misma ramilla. Evaluar varios nudos visibles; no inferir desde una hoja aislada ni desde ramillas diferentes.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-002",
+        "estado_esperado": [
+          "alterna",
+          "subopuesta",
+          "opuesta"
+        ],
+        "variabilidad": "alta",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Variación publicada; evaluar varios nudos de una misma ramilla."
+      },
       "source": {
+        "fuente_id": "F-002",
         "tipo": "Flora/clave",
         "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
         "uso_prioritario": "Morfología y claves de árboles",
         "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
         "notas": "Fuente morfológica prioritaria para especies arbóreas."
       },
-      "notes": "Variación publicada: alternas, subopuestas u opuestas; no penalizar disposiciones intermedias.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "computable": true
     },
     {
-      "characterId": "CH-003",
-      "group": "Hoja",
-      "name": "Margen foliar",
-      "dataType": "categorico",
-      "expectedStates": [
-        "entero",
-        "ondulado"
-      ],
-      "allowedStates": [
-        "entero",
-        "ondulado",
-        "finamente_serrado",
-        "serrado",
-        "dentado",
-        "variable",
-        "no_observable"
-      ],
-      "variability": "media",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-002",
+      "character": {
+        "caracter_id": "CH-003",
+        "grupo": "Hoja",
+        "nombre_caracter": "Dentición del margen foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "entero",
+          "finamente_serrado",
+          "serrado",
+          "dentado"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Presencia y tipo de dientes en un margen suficientemente conservado. No confundir daño, herbivoría o necrosis con dentición.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-003",
+        "estado_esperado": [
+          "entero"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Dentición ausente; la ondulación se registra en CH-028."
+      },
       "source": {
+        "fuente_id": "F-002",
         "tipo": "Flora/clave",
         "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
         "uso_prioritario": "Morfología y claves de árboles",
         "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
         "notas": "Fuente morfológica prioritaria para especies arbóreas."
       },
-      "notes": "Margen entero y ondulado; registrar entero y ondulación por separado en una futura normalización.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "computable": true
     },
     {
-      "characterId": "CH-004",
-      "group": "Hoja",
-      "name": "Consistencia",
-      "dataType": "categorico",
-      "expectedStates": [
-        "coriacea"
-      ],
-      "allowedStates": [
-        "blanda",
-        "flexible",
-        "firme",
-        "coriacea",
-        "no_se"
-      ],
-      "variability": "media",
-      "imageObservability": "Probable",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-002",
+      "character": {
+        "caracter_id": "CH-004",
+        "grupo": "Hoja",
+        "nombre_caracter": "Consistencia",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "blanda",
+          "flexible",
+          "firme",
+          "coriacea"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Propiedad mecánica de una hoja madura. Preferir observación de campo en hoja intacta cuando sea segura; la fotografía aporta evidencia indirecta.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-004",
+        "estado_esperado": [
+          "coriacea"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Hoja coriácea; la rigidez puede variar con exposición y estado hídrico."
+      },
       "source": {
+        "fuente_id": "F-002",
         "tipo": "Flora/clave",
         "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
         "uso_prioritario": "Morfología y claves de árboles",
         "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
         "notas": "Fuente morfológica prioritaria para especies arbóreas."
       },
-      "notes": "Coriácea. La rigidez puede variar con exposición y estado hídrico.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "computable": true
     },
     {
-      "characterId": "CH-005",
-      "group": "Hoja",
-      "name": "Color relativo del envés",
-      "dataType": "categorico",
-      "expectedStates": [
-        "mas_palido",
-        "glauco"
-      ],
-      "allowedStates": [
-        "similar",
-        "mas_palido",
-        "glauco",
-        "no_observable"
-      ],
-      "variability": "media",
-      "imageObservability": "Parcial",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-002",
+      "character": {
+        "caracter_id": "CH-005",
+        "grupo": "Hoja",
+        "nombre_caracter": "Contraste cromático entre haz y envés",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "contraste_observable",
+          "sin_contraste_observable"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Diferencia cromática visualmente reconocible entre ambas caras de la misma hoja, comparadas bajo iluminación equivalente. No describe un color específico.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-005",
+        "estado_esperado": [
+          "contraste_observable"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Existe contraste cromático entre haz y envés; la glaucosidad se registra aparte."
+      },
       "source": {
+        "fuente_id": "F-002",
         "tipo": "Flora/clave",
         "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
         "uso_prioritario": "Morfología y claves de árboles",
         "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
         "notas": "Fuente morfológica prioritaria para especies arbóreas."
       },
-      "notes": "Envés verde-azulado/glauco; contraste con haz puede variar con iluminación y exposición.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "computable": true
     },
     {
-      "characterId": "CH-015",
-      "group": "Sensorial",
-      "name": "Aroma de hoja",
-      "dataType": "categorico",
-      "expectedStates": [
-        "intenso_caracteristico"
-      ],
-      "allowedStates": [
-        "intenso_caracteristico",
-        "leve",
-        "ausente",
-        "no_se"
-      ],
-      "variability": "media",
-      "imageObservability": "No",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "alto",
-      "interactionSafety": "evaluar_antes",
-      "observationCost": "medio",
-      "confidence": "alta",
-      "sourceId": "F-002",
+      "character": {
+        "caracter_id": "CH-006",
+        "grupo": "Hoja",
+        "nombre_caracter": "Presencia de pubescencia en el envés",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Parcial",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Presencia de pelos o indumento visible en la superficie inferior. No clasifica tipo, densidad ni longitud del pelo.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-006",
+        "estado_esperado": [
+          "ausente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Parcial",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "bajo",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Envés tratado operacionalmente como sin pubescencia."
+      },
       "source": {
+        "fuente_id": "F-002",
         "tipo": "Flora/clave",
         "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
         "uso_prioritario": "Morfología y claves de árboles",
         "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
         "notas": "Fuente morfológica prioritaria para especies arbóreas."
       },
-      "notes": "Hoja aromática según Flora Arbórea. No pedir frotar una planta desconocida si entre candidatos hay especies de contacto riesgoso.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "computable": true
     },
     {
-      "characterId": "CH-006",
-      "group": "Hoja",
-      "name": "Pubescencia del envés",
-      "dataType": "categorico",
-      "expectedStates": [
-        "glabro"
-      ],
-      "allowedStates": [
-        "glabro",
-        "pubescente",
-        "no_se"
-      ],
-      "variability": "baja",
-      "imageObservability": "Parcial",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "bajo",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-002",
-      "source": {
-        "tipo": "Flora/clave",
-        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
-        "uso_prioritario": "Morfología y claves de árboles",
-        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
-        "notas": "Fuente morfológica prioritaria para especies arbóreas."
+      "character": {
+        "caracter_id": "CH-008",
+        "grupo": "Hoja",
+        "nombre_caracter": "Nervadura visualmente contrastante",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Indica si la nervadura se distingue visualmente de la lámina por color o contraste. No representa relieve o prominencia física.",
+        "estado_piloto": "activo",
+        "aplica_si": null
       },
-      "notes": "Flora Arbórea describe pecíolo glabro; fuente secundaria describe ambas superficies glabras.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-011",
-      "group": "Hoja",
-      "name": "Forma foliar predominante",
-      "dataType": "categorico",
-      "expectedStates": [
-        "ovada",
-        "eliptica",
-        "oblonga",
-        "variable"
-      ],
-      "allowedStates": [
-        "ovada",
-        "eliptica",
-        "oblonga",
-        "lanceolada",
-        "obovada",
-        "orbicular",
-        "variable",
-        "no_observable"
-      ],
-      "variability": "media",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-002",
-      "source": {
-        "tipo": "Flora/clave",
-        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
-        "uso_prioritario": "Morfología y claves de árboles",
-        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
-        "notas": "Fuente morfológica prioritaria para especies arbóreas."
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-008",
+        "estado_esperado": [
+          "presente"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "media",
+        "notas": "Nervadura visualmente contrastante en evidencia del piloto."
       },
-      "notes": "Descripción: aovado-elípticas u oblongas.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-012",
-      "group": "Hoja",
-      "name": "Ápice foliar",
-      "dataType": "categorico",
-      "expectedStates": [
-        "obtuso",
-        "emarginado",
-        "variable"
-      ],
-      "allowedStates": [
-        "agudo",
-        "acuminado",
-        "obtuso",
-        "redondeado",
-        "emarginado",
-        "variable",
-        "no_observable"
-      ],
-      "variability": "media",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "alta",
-      "sourceId": "F-002",
       "source": {
-        "tipo": "Flora/clave",
-        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
-        "uso_prioritario": "Morfología y claves de árboles",
-        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
-        "notas": "Fuente morfológica prioritaria para especies arbóreas."
-      },
-      "notes": "Ápice obtuso o ligeramente emarginado.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-008",
-      "group": "Hoja",
-      "name": "Nervio medio prominente",
-      "dataType": "categorico",
-      "expectedStates": [
-        "si"
-      ],
-      "allowedStates": [
-        "si",
-        "no",
-        "no_se"
-      ],
-      "variability": "media",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "bajo",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "media",
-      "sourceId": "F-002",
-      "source": {
-        "tipo": "Flora/clave",
-        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
-        "uso_prioritario": "Morfología y claves de árboles",
-        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
-        "notas": "Fuente morfológica prioritaria para especies arbóreas."
-      },
-      "notes": "No usar aislado; la prominencia depende de cara, iluminación y ejemplar.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-009",
-      "group": "Hoja",
-      "name": "Nervaduras secundarias prominentes",
-      "dataType": "categorico",
-      "expectedStates": [
-        "si"
-      ],
-      "allowedStates": [
-        "si",
-        "no",
-        "no_se"
-      ],
-      "variability": "media",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "media",
-      "sourceId": "F-002",
-      "source": {
-        "tipo": "Flora/clave",
-        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
-        "uso_prioritario": "Morfología y claves de árboles",
-        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
-        "notas": "Fuente morfológica prioritaria para especies arbóreas."
-      },
-      "notes": "Fuente complementaria reporta 5–8 nervaduras secundarias por lado.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-010",
-      "group": "Hoja",
-      "name": "Reticulación visible",
-      "dataType": "categorico",
-      "expectedStates": [
-        "si"
-      ],
-      "allowedStates": [
-        "si",
-        "no",
-        "no_se"
-      ],
-      "variability": "media",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "medio",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "media",
-      "sourceId": "F-002",
-      "source": {
-        "tipo": "Flora/clave",
-        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
-        "uso_prioritario": "Morfología y claves de árboles",
-        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
-        "notas": "Fuente morfológica prioritaria para especies arbóreas."
-      },
-      "notes": "Fuente complementaria describe venación terciaria conspicua; validar en más ejemplares.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
-    },
-    {
-      "characterId": "CH-007",
-      "group": "Hoja",
-      "name": "Punteaduras visibles",
-      "dataType": "categorico",
-      "expectedStates": [
-        "presentes"
-      ],
-      "allowedStates": [
-        "presentes",
-        "ausentes",
-        "no_se"
-      ],
-      "variability": "desconocida",
-      "imageObservability": "Sí",
-      "fieldObservability": "Sí",
-      "diagnosticPower": "bajo",
-      "interactionSafety": "seguro",
-      "observationCost": "bajo",
-      "confidence": "baja",
-      "sourceId": "F-004",
-      "source": {
+        "fuente_id": "F-004",
         "tipo": "Registro de terreno",
         "referencia": "Observaciones y validación humana del piloto.",
         "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
         "url": null,
         "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
       },
-      "notes": "Punteaduras observadas en terreno, pero no usar como rasgo diagnóstico de peumo hasta validar su expresión macroscópica bibliográficamente.",
-      "validation": {
-        "valid": true,
-        "invalidStates": []
-      }
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-009",
+        "grupo": "Hoja",
+        "nombre_caracter": "Nervaduras secundarias visualmente distinguibles",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Se considera presente cuando varias nervaduras secundarias se distinguen claramente desde el nervio central hacia el margen.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-009",
+        "estado_esperado": [
+          "presente"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "media",
+        "notas": "Nervaduras secundarias visualmente distinguibles."
+      },
+      "source": {
+        "fuente_id": "F-002",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+        "uso_prioritario": "Morfología y claves de árboles",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente morfológica prioritaria para especies arbóreas."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-010",
+        "grupo": "Hoja",
+        "nombre_caracter": "Nervaduras secundarias conectadas a reborde marginal",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Las nervaduras secundarias alcanzan o se unen a una línea o reborde continuo próximo al margen foliar.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-010",
+        "estado_esperado": [
+          "ausente"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-004",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "No se observa reborde marginal continuo conectado a las nervaduras secundarias."
+      },
+      "source": {
+        "fuente_id": "F-004",
+        "tipo": "Registro de terreno",
+        "referencia": "Observaciones y validación humana del piloto.",
+        "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+        "url": null,
+        "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-011",
+        "grupo": "Hoja",
+        "nombre_caracter": "Forma de la lámina foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "ovada",
+          "ovado_eliptica",
+          "ovado_oblonga",
+          "eliptica",
+          "oblonga",
+          "ovado_lanceolada",
+          "lanceolada",
+          "obovada",
+          "orbicular"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Forma de la lámina madura e intacta. La variación se representa mediante múltiples estados y el campo variabilidad, no mediante un estado 'variable'.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-011",
+        "estado_esperado": [
+          "ovado_eliptica",
+          "oblonga"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Descripción aovado-elíptica u oblonga."
+      },
+      "source": {
+        "fuente_id": "F-002",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+        "uso_prioritario": "Morfología y claves de árboles",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente morfológica prioritaria para especies arbóreas."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-012",
+        "grupo": "Hoja",
+        "nombre_caracter": "Ápice foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "agudo",
+          "acuminado",
+          "obtuso",
+          "redondeado",
+          "emarginado"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Forma del extremo distal de una hoja madura e intacta; evitar hojas con ápice dañado o incompleto.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-012",
+        "estado_esperado": [
+          "obtuso",
+          "agudo"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Variación del ápice conservada como estados múltiples."
+      },
+      "source": {
+        "fuente_id": "F-002",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+        "uso_prioritario": "Morfología y claves de árboles",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente morfológica prioritaria para especies arbóreas."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-013",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Tipo de fruto diagnóstico",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "drupa",
+          "foliculo",
+          "cipsela",
+          "capsula"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Categoría botánica del fruto. Los atributos de forma, color, número de lóbulos o dehiscencia se registran por separado.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-013",
+        "estado_esperado": [
+          "drupa"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Tipo de fruto; atributos adicionales permanecen en notas/evidencia."
+      },
+      "source": {
+        "fuente_id": "F-002",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+        "uso_prioritario": "Morfología y claves de árboles",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente morfológica prioritaria para especies arbóreas."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-014",
+        "grupo": "Reproductivo",
+        "nombre_caracter": "Tipo de inflorescencia",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "racimo",
+          "panicula",
+          "corimbo",
+          "solitaria",
+          "capitulo",
+          "amento"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "Sí",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Arquitectura de la inflorescencia. Color, sexualidad y otros rasgos florales no se codifican dentro de este carácter.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-014",
+        "estado_esperado": [
+          "racimo"
+        ],
+        "variabilidad": "baja",
+        "fuente_id": "F-005",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Inflorescencia codificada por arquitectura."
+      },
+      "source": {
+        "fuente_id": "F-005",
+        "tipo": "Monografía técnica",
+        "referencia": "Benedetti, S. (ed.) (2012). Monografía de Peumo, Cryptocarya alba. Instituto Forestal (INFOR).",
+        "uso_prioritario": "Variación foliar, anatomía y ecología del peumo",
+        "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2018/11/004_2011-DOCUMENTOS_MONOGRAFIA_PEUMO.pdf",
+        "notas": "Compila Rodríguez et al. (1983) y antecedentes sobre hojas de luz/sombra y sequía."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-015",
+        "grupo": "Sensorial",
+        "nombre_caracter": "Aroma foliar característico",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "presente",
+          "ausente"
+        ],
+        "observable_foto": "No",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Variable",
+        "invasividad_base": "Baja",
+        "descripcion": "Carácter sensorial. Nunca solicitar frotar, romper o triturar una planta para provocar aroma cuando exista riesgo de contacto; en Litre no provocar la observación.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-015",
+        "estado_esperado": [
+          "presente"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-002",
+        "detectable_imagen": "No",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "alto",
+        "interaction_safety": "evaluar_antes",
+        "costo_observacion": "medio",
+        "confianza": "alta",
+        "notas": "Aroma foliar característico. No provocar aroma mediante manipulación insegura."
+      },
+      "source": {
+        "fuente_id": "F-002",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+        "uso_prioritario": "Morfología y claves de árboles",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente morfológica prioritaria para especies arbóreas."
+      },
+      "computable": true
+    },
+    {
+      "character": {
+        "caracter_id": "CH-028",
+        "grupo": "Hoja",
+        "nombre_caracter": "Ondulación del margen foliar",
+        "tipo_dato": "categorico",
+        "estados_permitidos": [
+          "plano",
+          "ondulado"
+        ],
+        "observable_foto": "Sí",
+        "observable_campo": "Sí",
+        "dependencia_fenologica": "No",
+        "riesgo_base": "Bajo",
+        "invasividad_base": "Nula",
+        "descripcion": "Describe la ondulación geométrica del margen independientemente de la dentición registrada en CH-003. No inferir 'plano' por ausencia de mención bibliográfica.",
+        "estado_piloto": "activo",
+        "aplica_si": null
+      },
+      "relation": {
+        "species_id": "SP-001",
+        "caracter_id": "CH-028",
+        "estado_esperado": [
+          "ondulado"
+        ],
+        "variabilidad": "media",
+        "fuente_id": "F-002",
+        "detectable_imagen": "Sí",
+        "verificable_campo": "Sí",
+        "poder_diagnostico": "medio",
+        "interaction_safety": "seguro",
+        "costo_observacion": "bajo",
+        "confianza": "alta",
+        "notas": "Ondulación separada de la dentición."
+      },
+      "source": {
+        "fuente_id": "F-002",
+        "tipo": "Flora/clave",
+        "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+        "uso_prioritario": "Morfología y claves de árboles",
+        "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+        "notas": "Fuente morfológica prioritaria para especies arbóreas."
+      },
+      "computable": true
     }
   ],
-  "botanicalData": {
-    "version": "pilot-master-v0.1",
-    "source": "data/source/Base_botanica_Pokedex_flora_Master.xlsx",
-    "masterSpeciesId": "SP-001",
-    "validationWarnings": 0
-  }
+  "photos": [
+    {
+      "photo_id": "PH-001",
+      "species_id": "SP-001",
+      "individual_id": "CA001",
+      "archivo": "SP-001_CA001_hojas_01.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1PD7ukfiK8Nr6XDDNb5L-WnexMNO5mzgO",
+      "drive_url": "https://drive.google.com/file/d/1PD7ukfiK8Nr6XDDNb5L-WnexMNO5mzgO/view",
+      "notas": "Hojas completas; útil para forma, margen y textura aparente.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-002",
+      "species_id": "SP-001",
+      "individual_id": "CA001",
+      "archivo": "SP-001_CA001_hojas_02.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1hBL00eSoqPns93BVHOA3DZvE4PIOiDQF",
+      "drive_url": "https://drive.google.com/file/d/1hBL00eSoqPns93BVHOA3DZvE4PIOiDQF/view",
+      "notas": "Vista foliar complementaria del mismo individuo.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-003",
+      "species_id": "SP-001",
+      "individual_id": "CA001",
+      "archivo": "SP-001_CA001_ramilla_apical_01.jpg",
+      "organo_estructura": "ramilla apical",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1Jp2yWG6FzaDXiJwssG-d-PZGIRSdEEjq",
+      "drive_url": "https://drive.google.com/file/d/1Jp2yWG6FzaDXiJwssG-d-PZGIRSdEEjq/view",
+      "notas": "Arquitectura de ramilla y disposición foliar parcialmente observables.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-027",
+      "species_id": "SP-001",
+      "individual_id": "CA002",
+      "archivo": "SP-001_CA002_hojas_01.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-11",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1j4V9gzo17ey3dQ5tchYb3MvM4zAaWq9C",
+      "drive_url": "https://drive.google.com/file/d/1j4V9gzo17ey3dQ5tchYb3MvM4zAaWq9C/view",
+      "notas": "Nuevo individuo CA002. Original: IMG_20260911_133703.jpg.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-046",
+      "species_id": "SP-001",
+      "individual_id": "CA001",
+      "archivo": "SP-001_CA001_ramilla_01.jpg",
+      "organo_estructura": "ramilla",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-14",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "12EBZYhPiCr6rJ7tl2lwOSXaX1ojyNGG-",
+      "drive_url": "https://drive.google.com/file/d/12EBZYhPiCr6rJ7tl2lwOSXaX1ojyNGG-/view?usp=drivesdk",
+      "notas": "Original: IMG_20260914_105801.jpg; Ubicación APC: El Arrayán.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-047",
+      "species_id": "SP-001",
+      "individual_id": "CA001",
+      "archivo": "SP-001_CA001_ramilla_02.jpg",
+      "organo_estructura": "ramilla",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-14",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1kQCeVmBkH0jqcWpC8samLOGYwFrfHw60",
+      "drive_url": "https://drive.google.com/file/d/1kQCeVmBkH0jqcWpC8samLOGYwFrfHw60/view?usp=drivesdk",
+      "notas": "Original: IMG_20260914_105828.jpg; Ubicación APC: El Arrayán; Hojas con daño.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-048",
+      "species_id": "SP-001",
+      "individual_id": "CA001",
+      "archivo": "SP-001_CA001_hojas_03.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-14",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "13QO6TZEAJWht8JPoXmssYAM8Nwx5nVnF",
+      "drive_url": "https://drive.google.com/file/d/13QO6TZEAJWht8JPoXmssYAM8Nwx5nVnF/view?usp=drivesdk",
+      "notas": "Original: IMG_20260914_105838.jpg; Ubicación APC: El Arrayán; Vista envés.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-049",
+      "species_id": "SP-001",
+      "individual_id": "CA001",
+      "archivo": "SP-001_CA001_ramilla_03.jpg",
+      "organo_estructura": "ramilla",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-14",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1rH8z7W0vLjxqDZtGlpo_FyLa-x_o7HMp",
+      "drive_url": "https://drive.google.com/file/d/1rH8z7W0vLjxqDZtGlpo_FyLa-x_o7HMp/view?usp=drivesdk",
+      "notas": "Original: IMG_20260914_105855.jpg; Ubicación APC: El Arrayán; Hojas con daño.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-078",
+      "species_id": "SP-001",
+      "individual_id": "CA002",
+      "archivo": "SP-001_CA002_hojas_02.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-16",
+      "calidad_diagnostica": "media",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "133XAHibttmTrGJIqEe34L3tdoeWRglSG",
+      "drive_url": "https://drive.google.com/file/d/133XAHibttmTrGJIqEe34L3tdoeWRglSG/view?usp=drivesdk",
+      "notas": "Original: IMG_20260916_183212.jpg; Ubicación APC: El Arrayán.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-089",
+      "species_id": "SP-001",
+      "individual_id": "CA002",
+      "archivo": "SP-001_CA002_ramilla_01.jpg",
+      "organo_estructura": "ramilla",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-16",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1i11Fs9ZhLuu3SY0yioOlPT-f0RIXasGM",
+      "drive_url": "https://drive.google.com/file/d/1i11Fs9ZhLuu3SY0yioOlPT-f0RIXasGM/view?usp=drivesdk",
+      "notas": "Original: IMG_20260916_184214.jpg; Ubicación APC: El Arrayán.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-090",
+      "species_id": "SP-001",
+      "individual_id": "CA002",
+      "archivo": "SP-001_CA002_hojas_03.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-16",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1CsNptXab1gEOEGIopnRasX-QznDiIsOC",
+      "drive_url": "https://drive.google.com/file/d/1CsNptXab1gEOEGIopnRasX-QznDiIsOC/view?usp=drivesdk",
+      "notas": "Original: IMG_20260916_184220.jpg; Ubicación APC: El Arrayán; hojas con daño.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-091",
+      "species_id": "SP-001",
+      "individual_id": "CA002",
+      "archivo": "SP-001_CA002_hojas_04.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-16",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1gB3h0yCilDyGa7Bxe1g8d1tgefSeQ8Rz",
+      "drive_url": "https://drive.google.com/file/d/1gB3h0yCilDyGa7Bxe1g8d1tgefSeQ8Rz/view?usp=drivesdk",
+      "notas": "Original: IMG_20260916_184232.jpg; Ubicación APC: El Arrayán; hoja con daño.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-092",
+      "species_id": "SP-001",
+      "individual_id": "CA002",
+      "archivo": "SP-001_CA002_hojas_05.jpg",
+      "organo_estructura": "hojas",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-16",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "19EWtUcW9p4qtnvHb_cXL0T-Dl7ZFKeMl",
+      "drive_url": "https://drive.google.com/file/d/19EWtUcW9p4qtnvHb_cXL0T-Dl7ZFKeMl/view?usp=drivesdk",
+      "notas": "Original: IMG_20260916_184255.jpg; Ubicación APC: El Arrayán.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    },
+    {
+      "photo_id": "PH-093",
+      "species_id": "SP-001",
+      "individual_id": "CA002",
+      "archivo": "SP-001_CA002_ramilla_02.jpg",
+      "organo_estructura": "ramilla",
+      "tipo_evidencia": "vegetativa",
+      "fecha_captura": "2026-09-16",
+      "calidad_diagnostica": "media-alta",
+      "validacion": "validado_por_usuario",
+      "drive_file_id": "1FbC2vUGr7IKQuaNqmNVNQu7G6tsDn1Qx",
+      "drive_url": "https://drive.google.com/file/d/1FbC2vUGr7IKQuaNqmNVNQu7G6tsDn1Qx/view?usp=drivesdk",
+      "notas": "Original: IMG_20260916_184313.jpg; Ubicación APC: El Arrayán; vista envés.",
+      "estado_evidencia": "activa",
+      "usar_entrenamiento": "Sí",
+      "fecha_verificada": false
+    }
+  ],
+  "sources": [
+    {
+      "fuente_id": "F-002",
+      "tipo": "Flora/clave",
+      "referencia": "Rodríguez, Matthei & Quezada (1983). Flora Arbórea de Chile.",
+      "uso_prioritario": "Morfología y claves de árboles",
+      "url": "https://flora-arborea-chile.linnaeus.naturalis.nl/",
+      "notas": "Fuente morfológica prioritaria para especies arbóreas."
+    },
+    {
+      "fuente_id": "F-004",
+      "tipo": "Registro de terreno",
+      "referencia": "Observaciones y validación humana del piloto.",
+      "uso_prioritario": "Variación real, evidencia fotográfica, correcciones del modelo",
+      "url": null,
+      "notas": "Nunca reemplaza bibliografía; complementa y permite evaluar el motor."
+    },
+    {
+      "fuente_id": "F-005",
+      "tipo": "Monografía técnica",
+      "referencia": "Benedetti, S. (ed.) (2012). Monografía de Peumo, Cryptocarya alba. Instituto Forestal (INFOR).",
+      "uso_prioritario": "Variación foliar, anatomía y ecología del peumo",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2018/11/004_2011-DOCUMENTOS_MONOGRAFIA_PEUMO.pdf",
+      "notas": "Compila Rodríguez et al. (1983) y antecedentes sobre hojas de luz/sombra y sequía."
+    },
+    {
+      "fuente_id": "F-007",
+      "tipo": "Guía oficial / CONAF",
+      "referencia": "CONAF. Guía de reconocimiento de especies de la Región de Coquimbo. Ficha Lithraea caustica.",
+      "uso_prioritario": "Morfología foliar y reproductiva de litre",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+      "notas": "Describe hojas simples, glabras o finamente pubescentes, ovadas/ovado-oblongas/elípticas/obovadas, ápice variable, margen entero ondulado y nerviación pinada."
+    },
+    {
+      "fuente_id": "F-014",
+      "tipo": "Guía oficial / SAG",
+      "referencia": "SAG Región de Valparaíso (2013). Reseña sobre flora y vegetación de la Serranía El Asiento, San Felipe. Ficha Colliguaja odorifera.",
+      "uso_prioritario": "Hábito, hojas, flores, fruto y fenología",
+      "url": "https://www.sag.gob.cl/sites/default/files/flora_san_felipe_2013.pdf",
+      "notas": "Arbusto siempreverde hasta 1,5 m; hojas opuestas, bordes aserrados, verde pálido; espigas terminales amarillo-rojizas; cápsula tricoca; floración mayo-diciembre."
+    },
+    {
+      "fuente_id": "F-015",
+      "tipo": "Ficha botánica / Fundación Philippi",
+      "referencia": "Fundación R.A. Philippi. Ficha Colliguaja odorifera.",
+      "uso_prioritario": "Morfología detallada, látex, reproducción y ecología",
+      "url": "https://fundacionphilippi.cl/catalogo/colliguaja-odorifera/",
+      "notas": "Hojas opuestas, coriáceas, oblongas, dientes agudos con glándulas oscuras; monoica; flores masculinas en amento con flor femenina basal; cápsula tricoca explosiva; matorral mediterráneo asoleado y pedregoso."
+    },
+    {
+      "fuente_id": "F-017",
+      "tipo": "Guía oficial / CONAF",
+      "referencia": "CONAF. Guía de campo de especies de la Región de Coquimbo. Ficha Quillaja saponaria.",
+      "uso_prioritario": "Morfología foliar, inflorescencia y fruto",
+      "url": "https://investigacion.conaf.cl/archivos/repositorio_documento/2021/08/Coquimbo.pdf",
+      "notas": "Hojas simples, glabras, elípticas, ápice obtuso o poco agudo, margen entero u oscuramente dentado; panículas cortas axilares; pentafolículo estrellado oscuro y tomentoso."
+    },
+    {
+      "fuente_id": "F-021",
+      "tipo": "Definición operacional interna",
+      "referencia": "Árboris Master Botánico 2.0. Vocabulario controlado y reglas de interoperabilidad.",
+      "uso_prioritario": "Definiciones operacionales del esquema; no constituye evidencia taxonómica de especies.",
+      "url": null,
+      "notas": "Fuente interna para términos del vocabulario computable. No usar para respaldar asignaciones botánicas especie–carácter."
+    }
+  ],
+  "glossary": [
+    {
+      "termino_id": "GL-001",
+      "termino": "simple",
+      "categoria": "Hoja",
+      "definicion_tecnica": "Hoja cuya lámina no está dividida en folíolos independientes.",
+      "explicacion_usuario": "Una sola lámina foliar unida al pecíolo.",
+      "fuente_id": "F-002",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-001."
+    },
+    {
+      "termino_id": "GL-003",
+      "termino": "alterna",
+      "categoria": "Disposición foliar",
+      "definicion_tecnica": "Hojas insertas de una en una en distintos niveles del tallo.",
+      "explicacion_usuario": "Las hojas van apareciendo alternadamente a lo largo de la rama.",
+      "fuente_id": "F-002",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-002."
+    },
+    {
+      "termino_id": "GL-004",
+      "termino": "subopuesta",
+      "categoria": "Disposición foliar",
+      "definicion_tecnica": "Disposición en que dos hojas se aproximan a una posición opuesta sin compartir exactamente el mismo nudo.",
+      "explicacion_usuario": "Dos hojas parecen casi enfrentadas, pero no nacen exactamente al mismo nivel.",
+      "fuente_id": "F-002",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-002."
+    },
+    {
+      "termino_id": "GL-005",
+      "termino": "opuesta",
+      "categoria": "Disposición foliar",
+      "definicion_tecnica": "Dos hojas insertas enfrentadas en un mismo nudo.",
+      "explicacion_usuario": "Dos hojas nacen una frente a la otra.",
+      "fuente_id": "F-014",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-002."
+    },
+    {
+      "termino_id": "GL-007",
+      "termino": "entero",
+      "categoria": "Margen foliar",
+      "definicion_tecnica": "Margen sin dientes ni serraciones.",
+      "explicacion_usuario": "Borde de la hoja sin dientes.",
+      "fuente_id": "F-002",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-003; la ondulación se registra en CH-028."
+    },
+    {
+      "termino_id": "GL-011",
+      "termino": "coriacea",
+      "categoria": "Consistencia foliar",
+      "definicion_tecnica": "Lámina firme y relativamente rígida, de consistencia semejante al cuero.",
+      "explicacion_usuario": "Hoja firme y dura, con textura parecida al cuero.",
+      "fuente_id": "F-002",
+      "sinonimos": "coriácea",
+      "observaciones": "Estado de CH-004."
+    },
+    {
+      "termino_id": "GL-016",
+      "termino": "ovado_eliptica",
+      "categoria": "Forma foliar",
+      "definicion_tecnica": "Forma intermedia entre ovada y elíptica.",
+      "explicacion_usuario": "Hoja con forma intermedia entre ovalada y elíptica.",
+      "fuente_id": "F-002",
+      "sinonimos": "aovado-elíptica",
+      "observaciones": "Estado de CH-011."
+    },
+    {
+      "termino_id": "GL-019",
+      "termino": "oblonga",
+      "categoria": "Forma foliar",
+      "definicion_tecnica": "Lámina alargada con lados aproximadamente paralelos en buena parte de su longitud.",
+      "explicacion_usuario": "Hoja alargada, con lados relativamente paralelos.",
+      "fuente_id": "F-015",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-011."
+    },
+    {
+      "termino_id": "GL-024",
+      "termino": "agudo",
+      "categoria": "Ápice foliar",
+      "definicion_tecnica": "Ápice que termina en un ángulo marcado sin prolongación extensa.",
+      "explicacion_usuario": "Punta de la hoja claramente aguda.",
+      "fuente_id": "F-007",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-012."
+    },
+    {
+      "termino_id": "GL-026",
+      "termino": "obtuso",
+      "categoria": "Ápice foliar",
+      "definicion_tecnica": "Ápice de terminación roma, formando un ángulo amplio.",
+      "explicacion_usuario": "Punta más redondeada o roma que aguda.",
+      "fuente_id": "F-017",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-012."
+    },
+    {
+      "termino_id": "GL-029",
+      "termino": "drupa",
+      "categoria": "Fruto",
+      "definicion_tecnica": "Fruto carnoso indehiscente cuyo endocarpo forma una estructura endurecida alrededor de la semilla.",
+      "explicacion_usuario": "Fruto carnoso con una parte interna dura que protege la semilla.",
+      "fuente_id": "F-002",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-013."
+    },
+    {
+      "termino_id": "GL-033",
+      "termino": "racimo",
+      "categoria": "Inflorescencia",
+      "definicion_tecnica": "Inflorescencia con eje principal alargado y flores pediceladas insertas lateralmente.",
+      "explicacion_usuario": "Flores unidas por pequeños pedúnculos a un eje principal.",
+      "fuente_id": "F-005",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-014."
+    },
+    {
+      "termino_id": "GL-043",
+      "termino": "ondulado",
+      "categoria": "Margen foliar",
+      "definicion_tecnica": "Margen que presenta una sucesión de curvas suaves fuera del plano general de la lámina, independientemente de tener o no dientes.",
+      "explicacion_usuario": "Borde que forma ondas suaves.",
+      "fuente_id": "F-002",
+      "sinonimos": null,
+      "observaciones": "Estado de CH-028."
+    },
+    {
+      "termino_id": "GL-048",
+      "termino": "contraste_observable",
+      "categoria": "Color foliar",
+      "definicion_tecnica": "Diferencia cromática reconocible entre haz y envés de una misma hoja bajo iluminación comparable.",
+      "explicacion_usuario": "Las dos caras de la hoja se ven claramente diferentes en color o tono.",
+      "fuente_id": "F-021",
+      "sinonimos": null,
+      "observaciones": "Estado operacional de CH-005; no implica un color específico."
+    },
+    {
+      "termino_id": "GL-050",
+      "termino": "presente",
+      "categoria": "Estado binario",
+      "definicion_tecnica": "El rasgo definido por el carácter se observa o está documentado para la unidad evaluada.",
+      "explicacion_usuario": "El rasgo está presente.",
+      "fuente_id": "F-021",
+      "sinonimos": null,
+      "observaciones": "Token binario reutilizable; su significado depende del carácter."
+    },
+    {
+      "termino_id": "GL-051",
+      "termino": "ausente",
+      "categoria": "Estado binario",
+      "definicion_tecnica": "El rasgo definido por el carácter está documentado como ausente para la unidad evaluada.",
+      "explicacion_usuario": "El rasgo no está presente.",
+      "fuente_id": "F-021",
+      "sinonimos": null,
+      "observaciones": "No inferir por falta de datos o falta de mención."
+    }
+  ],
+  "model_errors": []
 }

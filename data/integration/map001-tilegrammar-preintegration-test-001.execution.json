@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "0.1",
+  "executionId": "MAP001-TILEGRAMMAR-PREINTEGRATION-TEST-001-EXEC-001",
+  "testId": "MAP001-TILEGRAMMAR-PREINTEGRATION-TEST-001",
+  "contractRevision": "0.2",
+  "date": "2026-09-18",
+  "status": "COMPLETED",
+  "semanticDecision": "PASS",
+  "scopeDecision": "PASS_WITHIN_TESTED_SCOPE",
+  "productionStandard": "NOT_ESTABLISHED",
+  "repositoryHead": "d15c68ae0786efbe5b7382c5b37e22d3fa3b65eb",
+  "runtime": {
+    "node": "v24.20.0",
+    "npm": "11.19.0",
+    "os": "ubuntu-24.04"
+  },
+  "githubActions": {
+    "workflow": "MAP-001 Tile Grammar Pre-integration",
+    "runId": 35379033154,
+    "conclusion": "success",
+    "artifact": {
+      "id": 10561736458,
+      "name": "map001-tilegrammar-preintegration-test-001",
+      "digest": "sha256:a7b5f7e580115c62a6bfa5ae3d43e53ed0ebbdabfb9714899571e93fabe81a19",
+      "sizeBytes": 5987,
+      "retentionDays": 30
+    }
+  },
+  "evidenceHashes": {
+    "reportJson": "b48b68b58c73620011f94a6ddf82bc1f02d1c76ae18b96ee4390d54bbb02c6c3",
+    "contractJson": "f607a0a8ef3839954aba77f1cab7f3232cc9575c83a2a0b80f65d7bc080aef64",
+    "executableFixtureDigest": "08aacbcff97551d517cd002f6393e983781aeb3ddd9cb4e25ebe9b34678938a2"
+  },
+  "automatedTests": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0
+  },
+  "preflight": {
+    "status": "BASELINE_VALID",
+    "node24": true,
+    "baselineIdMatched": true,
+    "pinnedInputsMatched": true,
+    "spatialModelHashMatched": true
+  },
+  "rasterGraph": {
+    "walkableCellCount": 17,
+    "orthogonalSharedAdjacencies": 16,
+    "connectedComponents": 1,
+    "branchingNodes": 0,
+    "endpointCells": [
+      [
+        0,
+        4
+      ],
+      [
+        14,
+        4
+      ]
+    ]
+  },
+  "tileValidation": {
+    "tilesPassed": 17,
+    "tilesTotal": 17,
+    "sharedEdgesPassed": 16,
+    "sharedEdgesTotal": 16
+  },
+  "inferenceGuards": {
+    "routeOverlayDerived": false,
+    "inferredWaterBankEdges": 0,
+    "inferredBlockerEdges": 0
+  },
+  "referenceBandNormalization": {
+    "source": "reference-band",
+    "normalizedCode": 0,
+    "appliedPerCell": false,
+    "metricMeaning": "NONE",
+    "assessment": "REPRESENTABLE_WITH_NORMALIZATION"
+  },
+  "provenanceIntegrity": {
+    "status": "PASS",
+    "violations": 0,
+    "scaffoldMaySupportTerritorialConclusion": false
+  },
+  "fixtureResults": [
+    {
+      "fixtureId": "PI-00-BASELINE-PREFLIGHT",
+      "status": "BASELINE_VALID"
+    },
+    {
+      "fixtureId": "PI-01-WALKABLE-ADJACENCY",
+      "status": "PASS_WITH_SCOPE"
+    },
+    {
+      "fixtureId": "PI-02-REFERENCE-BAND",
+      "status": "PASS_WITH_NORMALIZATION"
+    },
+    {
+      "fixtureId": "PI-03-WATER-NO-INFERENCE",
+      "status": "OPEN_PRESERVED"
+    },
+    {
+      "fixtureId": "PI-04-BLOCKER-NO-INFERENCE",
+      "status": "OPEN_PRESERVED"
+    },
+    {
+      "fixtureId": "PI-05-BOUNDARY-SEMANTICS",
+      "status": "OUT_OF_SCOPE_RECORDED"
+    },
+    {
+      "fixtureId": "PI-06-SEPARATION-OF-CONCERNS",
+      "status": "OUT_OF_SCOPE_RECORDED"
+    },
+    {
+      "fixtureId": "PI-07-PROVENANCE-INTEGRITY",
+      "status": "PASS"
+    }
+  ],
+  "outOfScopePreserved": {
+    "boundaryProgressionRole": true,
+    "bridgeGateHouse": true,
+    "interactionLearning": true,
+    "camera": true,
+    "bridgeCrossLayerOverlapPreserved": true
+  },
+  "openPreserved": [
+    "walkableEnvelope exact geometry",
+    "per-cell main-route overlay mapping",
+    "waterEdgeRasterization",
+    "blockerEdgeRasterization",
+    "interactionSpatialBinding",
+    "tileSize",
+    "metricScale",
+    "renderer",
+    "pathfinding",
+    "world cardinal mapping",
+    "final pixel art"
+  ],
+  "audit": {
+    "representationalGapFoundWithinTestedTerrainGrammarScope": false,
+    "tileGrammarV03RequiredByThisTest": false,
+    "map001Candidate003RequiredByThisTest": false,
+    "assetsOrRendererAuthorizedByThisTest": false
+  },
+  "repositoryWideCI": {
+    "status": "FAIL",
+    "workflowRunId": 35379033148,
+    "failingStep": "Check Expo dependency alignment",
+    "relationToPreintegrationResult": "SEPARATE"
+  }
+}

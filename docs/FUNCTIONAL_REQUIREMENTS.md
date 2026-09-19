@@ -1,348 +1,810 @@
-# Árboris — Requerimientos Funcionales
+Árboris — Requerimientos Funcionales
 
-## 1. Propósito
+Versión: 0.2
+Última actualización: 15 septiembre 2026
+Alcance: Piloto 1.0 — seis especies
+
+1. Propósito
 
 Este documento define las capacidades que Árboris debe ofrecer a sus usuarios.
 
-Los requerimientos funcionales describen **qué debe poder hacer el sistema**, sin determinar todavía cómo será implementado técnicamente.
+Los requerimientos funcionales describen qué debe poder hacer el sistema, sin fijar todavía la implementación técnica definitiva.
 
-Se derivan de la visión y los principios de Árboris y sirven como vínculo entre el concepto del producto, los factores habilitantes y la arquitectura técnica.
+Se derivan de la visión, los principios de producto, el modelo de dominio y la arquitectura de Árboris.
 
----
+El Piloto 1.0 debe validar especialmente el ciclo:
 
-## 2. Convención
+explorar
+→ buscar
+→ encontrar
+→ observar
+→ reunir evidencia
+→ identificar de forma asistida
+→ descubrir
+→ desbloquear
+→ coleccionar
+→ progresar
+→ volver a explorar
 
-Cada requerimiento funcional se identifica mediante un código único: `RF-01`, `RF-02`, `RF-03`, etc.
+La identificación es una mecánica central del juego, pero no constituye por sí sola el producto.
+
+2. Convención
+
+Cada requerimiento funcional se identifica mediante un código RF-XX.
 
 Los requerimientos se formulan principalmente desde la perspectiva del usuario:
 
-> **Como usuario, quiero [acción o capacidad], para [propósito o beneficio].**
+Como usuario, quiero [acción o capacidad], para [propósito o beneficio].
 
-Cada RF puede contener funciones subordinadas necesarias para cumplir el requerimiento, evitando convertir cada comportamiento menor en un requerimiento independiente.
+Para el Piloto 1.0 se distinguen tres niveles:
 
-Los RF podrán clasificarse posteriormente según su etapa de desarrollo:
+Piloto: necesario para demostrar el ciclo principal.
 
-- **MVP:** necesario para el primer prototipo funcional de Árboris.
-- **Posterior:** necesario para etapas posteriores de desarrollo.
-- **Visión:** forma parte del producto proyectado, pero no condiciona las primeras versiones.
+Posterior: previsto después de validar el piloto.
 
----
+Visión: forma parte de la dirección futura, pero no condiciona el piloto.
 
-# 3. Requerimientos funcionales
+Los estados de desarrollo se registran en ROADMAP.md.
 
-## RF-01 — Seleccionar actividad principal
+3. Requerimientos funcionales
 
-**Como usuario, quiero elegir qué quiero hacer al abrir Árboris, para acceder directamente a la experiencia que me interesa.**
+RF-01 — Acceder a las áreas principales
 
-La aplicación deberá permitir acceder, al menos, a las siguientes áreas principales:
+Nivel: Piloto
 
-- Explorar.
-- Mi personaje.
-- Pokédex.
-- Historial.
-- Minijuegos.
+Como usuario, quiero acceder a las principales áreas de Árboris, para elegir qué quiero hacer.
 
----
+La interfaz podrá dar acceso progresivamente a áreas como:
 
-## RF-02 — Iniciar una exploración
+Explorar.
 
-**Como usuario, quiero iniciar y finalizar una exploración en terreno, para agrupar las observaciones y actividades realizadas durante una salida.**
+Colección / Pokédex.
 
-Una exploración podrá contener múltiples observaciones y actividades realizadas durante un mismo recorrido o sesión de campo.
+Personaje.
 
----
+Historial.
 
-## RF-03 — Consultar el mapa de exploración
+Minijuegos.
 
-**Como usuario, quiero visualizar mi ubicación, el territorio y mis observaciones en un mapa, para relacionar mis descubrimientos con el lugar donde fueron realizados.**
+El Piloto 1.0 no requiere que todas estas áreas tengan profundidad equivalente.
 
-El mapa deberá permitir representar espacialmente las observaciones realizadas por el usuario y servir como apoyo durante la exploración.
+RF-02 — Iniciar una exploración
 
----
+Nivel: Piloto
 
-## RF-04 — Consultar especies del área
+Como usuario, quiero iniciar una experiencia de exploración en terreno, para buscar, observar y descubrir flora nativa.
 
-**Como usuario, quiero conocer qué especies están registradas o son esperables en el área que estoy explorando, para orientar mi búsqueda.**
+Una exploración podrá agrupar múltiples encuentros, observaciones y actividades realizadas durante una salida.
 
-Cuando la información disponible lo permita, Árboris deberá diferenciar entre:
+La experiencia deberá estar diseñada para condiciones reales de terreno y requerir la menor interacción innecesaria posible con la pantalla.
 
-- especies esperables en el área;
-- especies con registros conocidos en el área;
-- especies ya observadas por el usuario.
+RF-03 — Recibir una especie objetivo
 
-La presencia potencial de una especie no deberá presentarse como garantía de que exista exactamente en un punto determinado.
+Nivel: Piloto
 
----
+Como usuario, quiero recibir una especie que debo encontrar, para convertir la exploración botánica en una búsqueda del tesoro.
 
-## RF-05 — Identificar mediante cámara
+Árboris deberá poder presentar una especie objetivo perteneciente al catálogo disponible para el territorio o experiencia activa.
 
-**Como usuario, quiero registrar evidencia fotográfica de una planta y obtener varias especies candidatas ordenadas según su nivel de coincidencia o confianza, para iniciar o apoyar su identificación.**
+El sistema podrá entregar progresivamente información que ayude a encontrarla sin revelar inmediatamente toda la solución.
 
-La aplicación no deberá presentar necesariamente la primera alternativa como una identificación definitiva.
+La especie objetivo pertenece a la capa de juego y no constituye una identificación de ninguna planta observada posteriormente.
 
-La evidencia fotográfica podrá posteriormente complementarse con otras fotografías, caracteres observables o información contextual.
+RF-04 — Consultar una guía para encontrar la especie objetivo
 
----
+Nivel: Piloto
 
-## RF-06 — Identificar mediante claves
+Como usuario, quiero consultar pistas y caracteres útiles de la especie que estoy buscando, para aprender qué debo observar en terreno.
 
-**Como usuario, quiero intentar identificar una planta mediante sus caracteres observables, sin que sea obligatorio utilizar una fotografía o inteligencia artificial.**
+La guía podrá incluir:
 
-La identificación mediante claves deberá conducir progresivamente desde la evidencia observable hacia uno o más taxones candidatos.
+aspecto general;
 
----
+tipo de hoja;
 
-## RF-07 — Indicar la evidencia disponible
+disposición;
 
-**Como usuario, quiero indicar qué partes y características de la planta puedo observar, para que Árboris utilice únicamente evidencia que realmente tengo disponible.**
+margen;
 
-Entre las partes observables podrán considerarse:
+nervadura;
 
-- hojas;
-- flores;
-- frutos;
-- corteza;
-- ramillas;
-- porte o planta completa;
-- otros caracteres relevantes.
+envés;
 
-La disponibilidad de estas estructuras podrá variar entre individuos, lugares y épocas del año.
+otros caracteres diagnósticos;
 
----
+hábitat o contexto;
 
-## RF-08 — Refinar la identificación mediante claves adaptativas
+imágenes de referencia;
 
-**Como usuario, quiero que Árboris seleccione preguntas diagnósticas útiles para diferenciar las especies candidatas y actualice la identificación a medida que incorporo nueva evidencia.**
+diferencias frente a especies similares.
 
-Las preguntas deberán adaptarse a:
+La guía deberá favorecer el aprendizaje de observación y no reducirse a mostrar una fotografía para memorizar.
 
-- las especies candidatas existentes;
-- la evidencia ya registrada;
-- las estructuras que el usuario puede observar;
-- los caracteres que permitan discriminar mejor entre los candidatos.
+RF-05 — Registrar un posible hallazgo
 
-El usuario deberá disponer siempre de opciones equivalentes a:
+Nivel: Piloto
 
-- **No sé.**
-- **No puedo observarlo.**
+Como usuario, quiero registrar una planta que creo que puede corresponder a mi especie objetivo, para comprobar mi hipótesis.
 
-La imposibilidad de responder una pregunta no deberá impedir continuar el proceso de identificación.
+El usuario deberá poder aportar evidencia fotográfica del organismo encontrado.
 
----
+Registrar un posible hallazgo no implica que la especie haya sido identificada ni descubierta.
 
-## RF-09 — Comparar especies candidatas
+RF-06 — Obtener candidatos visuales
 
-**Como usuario, quiero comparar las especies candidatas mediante imágenes, caracteres diagnósticos y diferencias relevantes, para comprender por qué una alternativa es más consistente con mi observación que otra.**
+Nivel: Piloto
 
-La comparación deberá favorecer el aprendizaje de caracteres útiles para el reconocimiento posterior de las especies.
+Como usuario, quiero que Árboris analice mi evidencia fotográfica y considere especies visualmente compatibles, para orientar la identificación sin presentar una respuesta automática como definitiva.
 
----
+El sistema podrá utilizar BioCLIP u otro modelo equivalente para generar y ordenar candidatos.
 
-## RF-10 — Proponer mi propia identificación
+La salida de un modelo visual:
 
-**Como usuario, quiero indicar qué especie creo estar observando antes de solicitar una respuesta a Árboris, para comprobar mi propia capacidad de reconocimiento y utilizar la herramienta como apoyo.**
+no constituye por sí sola una identificación;
 
-Árboris deberá permitir evaluar o contrastar esta hipótesis utilizando la evidencia disponible.
+no constituye evidencia botánica;
 
-El objetivo es permitir que el usuario pueda depender progresivamente menos de la identificación automática a medida que aprende a reconocer especies.
+no debe interpretarse automáticamente como probabilidad taxonómica;
 
----
+puede ser corregida mediante evidencia botánica posterior.
 
-## RF-11 — Registrar una observación
+Árboris deberá poder trabajar con varios candidatos simultáneamente.
 
-**Como usuario, quiero registrar el encuentro con una planta como una observación individual, para conservar evidencia de qué organismo observé, dónde y cuándo.**
+RF-07 — Identificar mediante caracteres botánicos
 
-Una observación podrá contener:
+Nivel: Piloto
 
-- una o más fotografías;
-- ubicación;
-- fecha y hora;
-- caracteres observados;
-- estructuras disponibles;
-- estado fenológico;
-- información ambiental o del microhábitat;
-- notas del usuario;
-- identificación o hipótesis taxonómica asociada.
+Como usuario, quiero identificar una planta mediante caracteres observables, para comprobar qué especie es utilizando evidencia botánica.
 
-Cada nuevo encuentro con otro individuo podrá constituir una nueva observación aunque la especie ya haya sido descubierta anteriormente.
+El sistema deberá utilizar conocimiento botánico estructurado para evaluar la compatibilidad entre la observación y las especies candidatas.
 
----
+La identificación mediante caracteres deberá poder utilizarse aunque la clasificación visual sea incierta o incorrecta.
 
-## RF-12 — Registrar y revisar una identificación
+RF-08 — Refinar la identificación mediante una clave adaptativa
 
-**Como usuario, quiero asociar una identificación a una observación conservando la evidencia que la respalda, para poder consultarla, confirmarla o modificarla posteriormente cuando disponga de nueva información.**
+Nivel: Piloto
 
-La identificación deberá tratarse como una **hipótesis revisable** y mantenerse conceptualmente separada de la observación.
+Como usuario, quiero que Árboris seleccione preguntas útiles para diferenciar los candidatos activos, para no tener que recorrer una clave fija completa.
 
-Cuando una identificación sea modificada, deberá ser posible conservar la trazabilidad de las hipótesis anteriores y de la evidencia utilizada.
+La selección de preguntas deberá considerar:
 
----
+candidatos activos;
 
-## RF-13 — Obtener progreso o recompensa
+evidencia ya disponible;
 
-**Como usuario, quiero obtener progreso o una recompensa cuando realizo un descubrimiento o una actividad relevante, para que explorar, observar y aprender produzcan consecuencias dentro del juego.**
+caracteres discriminativos;
 
-La naturaleza exacta de las recompensas, puntos, experiencia u otros sistemas de progresión será definida posteriormente.
+observabilidad;
 
----
+seguridad;
 
-## RF-14 — Desbloquear una especie y su personaje
+invasividad;
 
-**Como usuario, quiero que el primer descubrimiento válido de una especie la desbloquee en mi colección y habilite su sprite o personaje correspondiente.**
+información faltante.
 
-Árboris deberá mantener conceptualmente separados:
+El sistema deberá evitar preguntar por caracteres que ya hayan sido observados de forma suficientemente fiable.
 
-- la especie biológica real;
-- las observaciones realizadas de individuos de esa especie;
-- el personaje o sprite inspirado en la especie.
+RF-09 — Responder sin estar obligado a saber
 
-El desbloqueo de una especie no deberá implicar que su conocimiento o progreso se encuentre completado.
+Nivel: Piloto
 
----
+Como usuario, quiero poder indicar que no sé una respuesta o que no puedo observar un carácter, para continuar la identificación sin inventar información.
 
-## RF-15 — Consultar la ficha de una especie
+Las preguntas deberán admitir opciones equivalentes a:
 
-**Como usuario, quiero acceder a información sobre una especie, para aprender a conocerla, identificarla y reconocerla en terreno.**
+Sí.
+
+No.
+
+No sé.
+
+No puedo observarlo.
+
+“No sé” y “No puedo observarlo” no deberán interpretarse como ausencia del carácter ni eliminar automáticamente especies candidatas.
+
+RF-10 — Solicitar evidencia adicional
+
+Nivel: Piloto
+
+Como usuario, quiero que Árboris me indique qué evidencia adicional sería útil, para saber qué observar o fotografiar a continuación.
+
+El sistema podrá solicitar, cuando sea necesario:
+
+otra hoja;
+
+otra vista;
+
+envés;
+
+rama;
+
+planta completa;
+
+flor;
+
+fruto;
+
+corteza;
+
+otro carácter observable.
+
+Las solicitudes deberán respetar las reglas de seguridad y observación no destructiva.
+
+RF-11 — Observar automáticamente un carácter
+
+Nivel: Posterior inmediato / experimental
+
+Como usuario, quiero que Árboris intente extraer de mis fotografías algunos caracteres botánicos concretos, para reducir preguntas que el sistema pueda resolver de manera fiable.
+
+El modelo visual deberá recibir una tarea restringida.
+
+Ejemplo:
+
+Carácter solicitado: CH-003
+Tarea: observar margen foliar
+Resultado:
+- estado permitido
+- NO_OBSERVABLE
+
+El modelo deberá poder abstenerse.
+
+Una respuesta automática incierta no deberá transformarse en evidencia firme.
+
+La procedencia deberá indicar que el carácter fue observado por un modelo.
+
+RF-12 — Pedir ayuda al usuario cuando el modelo no puede observar
+
+Nivel: Piloto
+
+Como usuario, quiero que Árboris me pregunte solamente cuando la evidencia automática sea insuficiente o el carácter requiera observación humana, para participar activamente sin responder preguntas innecesarias.
+
+Flujo esperado:
+
+carácter necesario
+→ revisar evidencia existente
+→ intentar observación automática si corresponde
+→ evidencia o abstención
+→ preguntar al usuario / solicitar otra fotografía
+
+La tecnología debe actuar como apoyo a la observación, no sustituirla.
+
+RF-13 — Mantener procedencia de la evidencia
+
+Nivel: Piloto
+
+Como usuario, quiero que Árboris conserve de dónde provino cada evidencia relevante, para que una identificación pueda ser revisada y comprendida posteriormente.
+
+El sistema deberá poder distinguir conceptualmente evidencia proveniente de:
+
+fotografía original;
+
+usuario;
+
+modelo visual;
+
+contexto;
+
+conocimiento botánico;
+
+validación experta futura.
+
+La evidencia automática no deberá volverse indistinguible de la evidencia humana.
+
+RF-14 — Obtener una hipótesis de identificación
+
+Nivel: Piloto
+
+Como usuario, quiero obtener una hipótesis basada en la evidencia disponible, para saber qué especie es más consistente con lo que observé.
+
+El resultado podrá ser:
+
+suficientemente respaldado;
+
+probable;
+
+tentativo;
+
+no resuelto.
+
+La nomenclatura definitiva de estados podrá ajustarse durante la implementación.
+
+El sistema no deberá forzar una identificación cuando la evidencia sea insuficiente.
+
+RF-15 — Saber si encontré la especie objetivo
+
+Nivel: Piloto
+
+Como usuario, quiero saber si la planta que encontré es compatible con la especie que estaba buscando, para continuar o completar la búsqueda del tesoro.
+
+Si la evidencia resulta incompatible con la especie objetivo, Árboris deberá permitir continuar la búsqueda.
+
+Ejemplo de respuesta lúdica:
+
+No corresponde a la especie que buscas.
+Sigue explorando.
+
+El sistema podrá conservar la observación realizada aunque no corresponda al objetivo.
+
+Una observación “incorrecta” dentro del juego puede seguir teniendo valor como registro real.
+
+RF-16 — Completar un descubrimiento
+
+Nivel: Piloto
+
+Como usuario, quiero completar el descubrimiento cuando reúno evidencia suficiente de la especie objetivo, para obtener una consecuencia dentro del juego.
+
+La política exacta que determine cuándo existe evidencia suficiente deberá definirse y validarse durante el piloto.
+
+Por lo tanto:
+
+Identification ≠ Discovery
+
+Una identificación no deberá producir obligatoriamente un desbloqueo sin aplicar la política de descubrimiento correspondiente.
+
+RF-17 — Registrar una observación
+
+Nivel: Piloto
+
+Como usuario, quiero conservar cada encuentro con una planta como una observación, para registrar qué encontré, dónde, cuándo y con qué evidencia.
+
+Una observación podrá relacionarse con:
+
+una o más fotografías;
+
+fecha y hora;
+
+ubicación;
+
+individuo, cuando sea conocido;
+
+caracteres observados;
+
+fenología;
+
+contexto ambiental;
+
+microhábitat;
+
+notas;
+
+hipótesis de identificación.
+
+No todos los campos deberán ser obligatorios.
+
+Los datos desconocidos deberán permanecer desconocidos.
+
+RF-18 — Registrar múltiples individuos y reobservaciones
+
+Nivel: Piloto / progresivo
+
+Como usuario, quiero registrar nuevos individuos y nuevas observaciones de especies conocidas, para que volver a encontrar una especie siga teniendo valor.
+
+Las reobservaciones podrán aportar información sobre:
+
+variación morfológica;
+
+microhábitat;
+
+localización;
+
+fenología;
+
+estación;
+
+altitud;
+
+exposición;
+
+otros factores.
+
+Descubrir una especie no equivale a completarla.
+
+RF-19 — Revisar una identificación
+
+Nivel: Piloto
+
+Como usuario, quiero revisar una identificación cuando aparece nueva evidencia, para corregir o mejorar una hipótesis sin borrar el proceso anterior.
+
+La identificación deberá mantenerse conceptualmente separada de la observación.
+
+Cuando cambie una hipótesis, el sistema deberá poder conservar:
+
+hipótesis anterior;
+
+evidencia utilizada;
+
+nueva evidencia;
+
+resultado posterior.
+
+RF-20 — Proponer mi propia identificación
+
+Nivel: Posterior
+
+Como usuario, quiero proponer qué especie creo estar observando antes de pedir ayuda, para poner a prueba mi capacidad de reconocimiento.
+
+Árboris podrá contrastar la hipótesis del usuario con la evidencia disponible.
+
+Esta función debe apoyar el objetivo de que el usuario dependa progresivamente menos de la asistencia tecnológica.
+
+RF-21 — Comparar especies candidatas
+
+Nivel: Posterior
+
+Como usuario, quiero comparar candidatos mediante imágenes y caracteres diagnósticos, para entender por qué una especie coincide mejor con mi observación que otra.
+
+La comparación deberá destacar diferencias útiles para aprender a reconocer las especies posteriormente.
+
+RF-22 — Consultar la ficha de una especie
+
+Nivel: Piloto
+
+Como usuario, quiero consultar información de una especie, para aprender a encontrarla, observarla, identificarla y reconocerla.
 
 La ficha podrá incluir:
 
-- nombre científico;
-- nombre o nombres comunes;
-- familia;
-- hábito;
-- presentación general;
-- morfología relevante;
-- caracteres diagnósticos;
-- especies similares y formas de diferenciarlas;
-- hábitat y ecología;
-- fenología;
-- distribución en Chile;
-- características especiales;
-- estado de conservación;
-- fuentes de información.
+nombre científico;
 
-La información morfológica deberá priorizar los caracteres útiles para reconocer y diferenciar la especie, sin limitarse a una descripción botánica general.
+nombres comunes;
 
----
+familia;
 
-## RF-16 — Buscar especies
+hábito;
 
-**Como usuario, quiero buscar especies por nombre científico, nombre común u otros criterios disponibles, para acceder directamente a su información y registros.**
+descripción;
 
-La búsqueda deberá permitir acceder a las especies independientemente de que el usuario se encuentre realizando una exploración.
+caracteres diagnósticos;
 
----
+especies similares;
 
-## RF-17 — Consultar mi Pokédex
+hábitat;
 
-**Como usuario, quiero consultar mi progreso personal de descubrimiento y conocimiento de la flora registrada en Árboris, para visualizar el desarrollo de mi colección.**
+ecología;
 
-La Pokédex deberá funcionar como representación del progreso personal del usuario sobre el catálogo biológico de Árboris.
+fenología;
 
----
+distribución;
 
-## RF-18 — Consultar descubrimientos recientes
+características especiales;
 
-**Como usuario, quiero ver rápidamente las especies que he encontrado recientemente, para acceder a mis últimos descubrimientos.**
+conservación;
 
----
+fuentes.
 
-## RF-19 — Consultar progreso por territorio
+La información morfológica deberá priorizar caracteres útiles para observación e identificación.
 
-**Como usuario, quiero ver las áreas que he visitado y mi progreso en cada una, para saber cuánto he explorado y qué especies todavía puedo descubrir.**
+RF-23 — Representar variación intraespecífica
 
-Cada área podrá mostrar un indicador o porcentaje de avance.
+Nivel: Piloto / progresivo
 
-La fórmula utilizada para calcular dicho progreso será definida posteriormente y podrá considerar más elementos que el simple número de especies desbloqueadas.
+Como usuario, quiero ver que una especie puede presentar variaciones entre individuos y condiciones, para no aprender una única imagen idealizada de ella.
 
----
+Las fichas y sistemas de identificación deberán poder incorporar múltiples ejemplos de una misma especie.
 
-## RF-20 — Navegar por el Herbario
+Cuando existan datos, la variación podrá relacionarse con contexto ambiental y fenológico.
 
-**Como usuario, quiero navegar por el catálogo general de especies disponibles en Árboris, distinguiendo las especies que ya he descubierto de aquellas que todavía permanecen bloqueadas.**
+RF-24 — Aplicar reglas de seguridad
 
-Las especies desbloqueadas deberán permitir acceder a su información disponible.
+Nivel: Piloto
 
-Árboris podrá controlar qué información se revela sobre una especie antes de que el usuario la descubra.
+Como usuario, quiero recibir instrucciones de observación seguras, para identificar plantas sin exponerme innecesariamente ni dañarlas.
 
-El Herbario representa el catálogo biológico de especies, mientras que la Pokédex representa el progreso personal del usuario sobre dicho catálogo.
+La selección de preguntas deberá considerar riesgo e invasividad.
 
----
+Mientras Lithraea caustica permanezca como candidata, Árboris no deberá pedir frotar, triturar ni oler hojas.
 
-## RF-21 — Consultar mi historial de actividad
+El sistema deberá priorizar observaciones no destructivas.
 
-**Como usuario, quiero revisar cronológicamente mis exploraciones, observaciones, identificaciones, descubrimientos y otras actividades realizadas en Árboris, para conservar una bitácora de mi experiencia.**
+No deberá solicitar cortar una planta solamente para comprobar un carácter cuando exista una alternativa menos invasiva.
 
-Desde el historial, el usuario deberá poder volver a consultar una observación anterior y la información asociada a ella.
+RF-25 — Desbloquear una especie
 
----
+Nivel: Piloto
 
-## RF-22 — Seleccionar mi personaje activo
+Como usuario, quiero que un descubrimiento válido desbloquee la especie en mi colección, para que encontrar plantas reales produzca progreso dentro del juego.
 
-**Como usuario, quiero elegir como personaje activo uno de los sprites correspondientes a especies que he desbloqueado, para utilizarlo como mi representación dentro de la dimensión jugable de Árboris.**
+El desbloqueo deberá derivarse de un Discovery, no directamente de una predicción visual.
 
----
+La política exacta de evidencia requerida deberá validarse durante el piloto.
 
-## RF-23 — Mejorar personajes mediante nuevas observaciones
+RF-26 — Desbloquear el personaje asociado
 
-**Como usuario, quiero que encontrar nuevos individuos de una especie ya conocida contribuya al progreso de su personaje, para que volver a observar especies conocidas siga teniendo valor.**
+Nivel: Piloto
 
-El progreso podrá posteriormente considerar hitos como:
+Como usuario, quiero obtener el personaje asociado a una especie que he descubierto, para incorporar el hallazgo real a la dimensión jugable de Árboris.
 
-- número de individuos observados;
-- observaciones en diferentes territorios;
-- registro de diferentes estados fenológicos;
-- observación de variaciones morfológicas;
-- nuevos caracteres aprendidos;
-- reconocimiento de la especie con menor asistencia.
+Árboris deberá mantener separados:
 
-La mecánica exacta de progresión será definida posteriormente.
+especie biológica
+≠
+conocimiento y observaciones
+≠
+personaje jugable
 
----
+El personaje podrá utilizar rasgos reales de la especie como inspiración, pero sus datos de juego no deberán modificar la ficha científica.
 
-## RF-24 — Participar en minijuegos y desafíos
+RF-27 — Consultar mi colección
 
-**Como usuario, quiero utilizar los personajes que he desbloqueado en minijuegos y desafíos, para que mi colección tenga utilidad jugable y mi progreso en la exploración tenga consecuencias dentro del juego.**
+Nivel: Piloto
 
-Los minijuegos podrán incluir, entre otras posibilidades:
+Como usuario, quiero consultar las especies y personajes que he desbloqueado, para visualizar mi progreso.
 
-- clickers;
-- desafíos asociados a territorios;
-- juegos que utilicen determinados sprites;
-- desafíos vinculados al progreso del usuario.
+La colección deberá distinguir entre especies descubiertas y todavía no descubiertas.
 
-Los juegos deberán ser capaces de evolucionar independientemente sin modificar el núcleo de observación e identificación de Árboris.
+La interfaz podrá controlar cuánto contenido de una especie no descubierta se revela previamente.
 
----
+RF-28 — Mantener valor después del primer descubrimiento
 
-# 4. Flujo funcional principal
+Nivel: Piloto / progresivo
 
-Los requerimientos anteriores permiten representar el ciclo principal de Árboris de la siguiente manera:
+Como usuario, quiero que volver a observar una especie conocida tenga consecuencias útiles, para que el juego no se convierta en una lista que se completa una sola vez.
 
-**Explorar → encontrar → observar → registrar evidencia → identificar o proponer una identificación → comparar y refinar → registrar la observación → descubrir → desbloquear → aprender → progresar → jugar → volver a explorar.**
+Las nuevas observaciones podrán contribuir posteriormente a:
 
-La identificación puede comenzar mediante diferentes vías:
+conocimiento acumulado;
 
-**Cámara → candidatos → claves adaptativas → identificación revisable**
+variantes;
 
-o
+progreso del personaje;
 
-**Observación directa → claves adaptativas → candidatos → identificación revisable**
+estados fenológicos;
 
-o
+territorios;
 
-**Reconocimiento del usuario → hipótesis propia → comprobación → identificación revisable**
+logros;
 
-Estas vías convergen en un mismo sistema de observación, evidencia e identificación.
+capacidades;
 
----
+contenido adicional.
 
-# 5. Principio funcional transversal
+La mecánica exacta se definirá después de validar el ciclo básico.
 
-Árboris no debe reducir la experiencia de reconocimiento de flora a:
+RF-29 — Utilizar personajes en actividades jugables
 
-**fotografía → inteligencia artificial → nombre de especie.**
+Nivel: Posterior
 
-La aplicación debe permitir que el usuario observe, formule hipótesis, compare, responda preguntas, registre evidencia y aprenda de cada encuentro.
+Como usuario, quiero utilizar los personajes desbloqueados en minijuegos y otras mecánicas, para que mi colección tenga utilidad real dentro del juego.
 
-La asistencia tecnológica deberá apoyar el aprendizaje y el reconocimiento progresivo de las especies, no sustituir permanentemente la capacidad de observación del usuario.
+Los juegos deberán ser capaces de funcionar como juegos por sí mismos.
+
+No deberán limitarse a cuestionarios educativos disfrazados.
+
+Podrán inspirarse en características ecológicas o biológicas reales sin modificar el núcleo científico.
+
+RF-30 — Consultar historial
+
+Nivel: Posterior
+
+Como usuario, quiero revisar mis observaciones, identificaciones, descubrimientos y actividades anteriores, para conservar una bitácora de mi experiencia.
+
+El historial deberá permitir volver a una observación y consultar su evidencia e identificación.
+
+RF-31 — Consultar territorio y especies esperables
+
+Nivel: Posterior
+
+Como usuario, quiero conocer qué especies son esperables en un territorio, para orientar mi exploración.
+
+Árboris deberá distinguir cuando sea posible entre:
+
+especie potencialmente presente;
+
+registros conocidos;
+
+observaciones del usuario.
+
+La presencia potencial no deberá presentarse como garantía de presencia exacta.
+
+RF-32 — Consultar mapa
+
+Nivel: Posterior
+
+Como usuario, quiero relacionar mis observaciones con el territorio mediante un mapa, para comprender dónde he explorado y dónde he encontrado especies.
+
+La política de precisión y privacidad de las ubicaciones deberá definirse antes de cualquier publicación o intercambio de coordenadas.
+
+RF-33 — Funcionar sin conectividad continua
+
+Nivel: Piloto
+
+Como usuario, quiero poder utilizar las funciones esenciales de Árboris en terreno sin depender de conexión permanente a internet, para explorar en lugares con cobertura limitada o inexistente.
+
+El sistema deberá diseñarse offline-first.
+
+El piloto deberá determinar qué componentes de identificación pueden ejecutarse localmente y cuáles requieren inicialmente un entorno de desarrollo conectado.
+
+La arquitectura futura deberá permitir paquetes territoriales descargables.
+
+RF-34 — Preservar evidencia original
+
+Nivel: Piloto
+
+Como usuario, quiero que las fotografías y registros originales se conserven aunque cambie la interpretación posterior, para mantener la trazabilidad de mis observaciones.
+
+Una predicción, embedding, score o feature derivado no deberá reemplazar la evidencia original.
+
+RF-35 — Registrar versiones relevantes
+
+Nivel: Posterior / arquitectura preparada
+
+Como sistema, Árboris debe poder conocer qué versión de datos, clave o modelo produjo una inferencia relevante, para permitir reproducibilidad y revisión.
+
+La implementación completa de versionado no es requisito inmediato, pero el diseño no deberá impedirla.
+
+4. Flujo funcional del Piloto 1.0
+
+El ciclo principal del piloto será:
+
+INICIO
+  ↓
+Especie objetivo
+  ↓
+Guía de identificación
+  ↓
+Exploración real
+  ↓
+Usuario encuentra una posible planta
+  ↓
+Captura evidencia
+  ↓
+BioCLIP genera candidatos
+  ↓
+Árboris evalúa qué carácter discrimina mejor
+  ↓
+¿Existe evidencia suficiente?
+  ├── Sí → utilizarla
+  └── No
+       ↓
+  ¿Puede observarla un modelo?
+       ├── Sí → registrar evidencia automática
+       └── No / incierto
+             ↓
+       preguntar al usuario
+       o solicitar otra fotografía
+             ↓
+  actualizar candidatos
+             ↓
+  hipótesis
+             ↓
+¿Corresponde a la especie objetivo?
+  ├── No → seguir explorando
+  └── Sí
+       ↓
+  aplicar política de descubrimiento
+       ↓
+  Discovery
+       ↓
+  desbloquear especie
+       ↓
+  desbloquear personaje
+       ↓
+  colección / progreso
+       ↓
+  volver a explorar
+
+El flujo debe poder terminar también en:
+
+UNRESOLVED
+
+cuando la evidencia disponible no permita sostener una identificación.
+
+5. Flujo científico subyacente
+
+La experiencia lúdica se apoya en un modelo científico independiente:
+
+Species
+   ↓
+Individual
+   ↓
+Observation
+   ↓
+Evidence
+   ↓
+Identification
+
+La capa de juego puede generar eventos a partir de este núcleo:
+
+Identification
+   ↓
+Discovery
+   ↓
+Collection
+   ↓
+GameCharacter
+
+Pero no deberá modificar retroactivamente la evidencia científica.
+
+6. Principios funcionales transversales
+
+Árboris no deberá reducir la identificación a:
+
+fotografía
+→ IA
+→ especie
+
+La experiencia deberá combinar:
+
+fotografía
++ ubicación
++ ecosistema
++ época / fenología
++ caracteres visibles
++ preguntas diagnósticas
++ evidencia acumulada
++ participación del usuario
+
+La IA ayuda a observar y priorizar.
+
+No sentencia.
+
+La imposibilidad de resolver una identificación constituye un resultado válido.
+
+La tecnología deberá aumentar la capacidad del usuario para observar y reconocer flora, y hacerse progresivamente menos necesaria a medida que el usuario aprende.
+
+7. Límites del Piloto 1.0
+
+El Piloto 1.0 trabaja con seis especies y una experiencia territorial acotada.
+
+No es requisito inmediato incorporar:
+
+nuevas especies;
+
+backend cloud;
+
+autenticación;
+
+funciones sociales;
+
+rankings;
+
+sincronización compleja;
+
+ciencia ciudadana completa;
+
+exportación Darwin Core;
+
+nuevos clasificadores propios;
+
+segmentación especializada;
+
+detectores propios para cada carácter;
+
+minijuegos complejos;
+
+progresión avanzada;
+
+múltiples territorios.
+
+Estas capacidades podrán incorporarse cuando el núcleo del piloto haya sido validado.
+
+8. Criterio funcional de éxito del piloto
+
+El núcleo de identificación se considera funcional cuando Árboris puede recibir una fotografía real de una de las seis especies y producir una hipótesis botánica razonada mediante la combinación de candidatos visuales, conocimiento botánico y evidencia observacional.
+
+El sistema deberá:
+
+preservar la evidencia;
+
+conservar incertidumbre;
+
+permitir abstención;
+
+solicitar participación humana cuando sea necesaria;
+
+evitar convertir un score visual en una identificación;
+
+permitir que una hipótesis permanezca no resuelta;
+
+mantener trazabilidad suficiente para comprender cómo se obtuvo el resultado.
+
+El producto se considera funcional como juego cuando ese proceso puede integrarse en el ciclo:
+
+buscar
+→ encontrar
+→ identificar
+→ descubrir
+→ coleccionar
+→ obtener utilidad jugable
+→ querer volver a explorar
+
+Ese ciclo constituye el objetivo funcional del Piloto 1.0.

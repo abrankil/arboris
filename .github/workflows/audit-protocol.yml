@@ -1,0 +1,27 @@
+name: Audit Protocol Check
+
+# Bloquea el merge si el PR no cumple el protocolo auditor
+# definido en AGENTS.md / docs/DEVELOPMENT_MANUAL.md.
+#
+# Instalar en: .github/workflows/audit-protocol.yml
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  audit-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Run audit-check against PR body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node tools/audit-check.js --stdin-env PR_BODY

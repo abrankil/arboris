@@ -1,785 +1,326 @@
+from __future__ import annotations
+
 import json
 import re
 import unicodedata
 from pathlib import Path
 
-import pandas as pd
-
 
 ROOT = Path(__file__).resolve().parents[2]
+BOTANICAL_DIR = ROOT / "data" / "botanical"
+OUTPUT_DIR = ROOT / "data" / "species"
 
-MASTER_FILE = (
-    ROOT
-    / "data"
-    / "source"
-    / "Base_botanica_Pokedex_flora_Master.xlsx"
-)
-
-OUTPUT_DIR = (
-    ROOT
-    / "tools"
-    / "botanical-data"
-    / "output"
-)
-
-
-def normalize_species_id(species_id):
-    """
-    SP-006 -> SP006
-    """
-    return str(species_id).replace("-", "").strip()
+REQUIRED_FILES = {
+    "metadata": "metadata.json",
+    "species": "species.json",
+    "characters": "characters.json",
+    "species_characters": "species_characters.json",
+    "sources": "sources.json",
+    "photos": "photos.json",
+    "glossary": "glossary.json",
+    "model_errors": "model_errors.json",
+}
 
 
-def normalize_text(value):
-    """
-    Normaliza texto para comparaciones internas.
+class SpeciesBuildError(RuntimeError):
+    pass
 
-    Ejemplos:
-    'Texto libre'  -> 'texto_libre'
-    'texto_libre' -> 'texto_libre'
-    'Texto-Libre' -> 'texto_libre'
-    """
-    if value is None:
-        return ""
 
-    text = str(value).strip().lower()
+def read_json(path: Path):
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
 
-    text = unicodedata.normalize(
-        "NFKD",
-        text
+
+def write_json(path: Path, payload):
+    path.write_text(
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=False,
+        )
+        + "\n",
+        encoding="utf-8",
     )
 
+
+def slugify(value: str) -> str:
+    text = unicodedata.normalize("NFKD", value)
     text = "".join(
         char
         for char in text
         if not unicodedata.combining(char)
     )
-
-    text = re.sub(
-        r"[\s\-]+",
-        "_",
-        text
-    )
-
-    return text
+    text = text.lower().strip()
+    text = re.sub(r"[^a-z0-9]+", "_", text)
+    return text.strip("_")
 
 
-def split_states(value):
-    """
-    entero|dentado|variable
-    ->
-    ["entero", "dentado", "variable"]
-    """
-    if pd.isna(value):
-        return []
+def runtime_species_id(canonical_id: str) -> str:
+    return canonical_id.replace("-", "")
 
-    return [
-        item.strip()
-        for item in str(value).split("|")
-        if item.strip()
+
+def load_canonical_data():
+    data = {}
+
+    for key, filename in REQUIRED_FILES.items():
+        path = BOTANICAL_DIR / filename
+        if not path.exists():
+            raise SpeciesBuildError(
+                f"Falta archivo canónico requerido: {path}"
+            )
+        data[key] = read_json(path)
+
+    if not isinstance(data["metadata"], dict):
+        raise SpeciesBuildError("metadata.json debe ser un objeto.")
+
+    for key in (
+        "species",
+        "characters",
+        "species_characters",
+        "sources",
+        "photos",
+        "glossary",
+        "model_errors",
+    ):
+        if not isinstance(data[key], list):
+            raise SpeciesBuildError(
+                f"{REQUIRED_FILES[key]} debe contener un array."
+            )
+
+    return data
+
+
+def index_unique(records, field: str, label: str):
+    index = {}
+
+    for record in records:
+        value = record.get(field)
+
+        if not isinstance(value, str) or not value:
+            raise SpeciesBuildError(
+                f"{label}: registro sin {field} válido."
+            )
+
+        if value in index:
+            raise SpeciesBuildError(
+                f"{label}: {field} duplicado: {value}"
+            )
+
+        index[value] = record
+
+    return index
+
+
+def build_species_view(
+    species_record,
+    *,
+    metadata,
+    character_by_id,
+    source_by_id,
+    relations,
+    photos,
+    glossary,
+    model_errors,
+):
+    species_id = species_record["species_id"]
+    computable_status = metadata["computable_status"]
+
+    species_relations = [
+        relation
+        for relation in relations
+        if relation.get("species_id") == species_id
     ]
 
+    botanical_characters = []
+    used_source_ids = set()
+    expected_states = set()
 
-def clean_value(value):
-    """
-    Convierte NaN de pandas a None
-    y limpia espacios.
-    """
-    if pd.isna(value):
-        return None
+    for relation in species_relations:
+        character_id = relation.get("caracter_id")
+        character = character_by_id.get(character_id)
 
-    if isinstance(value, str):
-        return value.strip()
-
-    # Convierte tipos numpy/pandas a tipos Python
-    if hasattr(value, "item"):
-        try:
-            return value.item()
-        except Exception:
-            pass
-
-    return value
-
-
-def load_sheet(name):
-    return pd.read_excel(
-        MASTER_FILE,
-        sheet_name=name,
-    )
-
-
-def safe_filename(value):
-    """
-    Genera un nombre simple para archivos.
-    """
-    value = normalize_text(value)
-    value = re.sub(
-        r"[^a-z0-9_]+",
-        "_",
-        value
-    )
-
-    return value.strip("_")
-
-
-def build_species(
-    species,
-    relations,
-    character_lookup,
-    source_lookup,
-):
-    warnings = []
-    output_characters = []
-
-    for _, relation in relations.iterrows():
-
-        character_id = clean_value(
-            relation.get("caracter_id")
-        )
-
-        # -----------------------------------------------------
-        # Verificar que el carácter exista
-        # -----------------------------------------------------
-
-        if character_id not in character_lookup:
-
-            warnings.append(
-                {
-                    "type": "unknown_character",
-                    "character_id": character_id,
-                    "message": (
-                        f"{character_id} aparece en "
-                        "Especie_Caracter pero no en Caracteres."
-                    ),
-                }
+        if character is None:
+            raise SpeciesBuildError(
+                f"{species_id}: relación con carácter inexistente "
+                f"{character_id}"
             )
 
-            continue
+        source_id = relation.get("fuente_id")
+        source = None
 
-        definition = character_lookup[
-            character_id
-        ]
-
-        expected_states = split_states(
-            relation.get("estado_esperado")
-        )
-
-        allowed_states = split_states(
-            definition.get(
-                "estados_permitidos"
-            )
-        )
-
-        data_type = clean_value(
-            definition.get("tipo_dato")
-        )
-
-        normalized_data_type = normalize_text(
-            data_type
-        )
-
-        # -----------------------------------------------------
-        # VALIDACIÓN DE ESTADOS
-        # -----------------------------------------------------
-        #
-        # Los caracteres de texto libre pueden contener
-        # cualquier descripción.
-        #
-        # Se reconocen variantes como:
-        # texto libre
-        # texto_libre
-        # texto-libre
-        # -----------------------------------------------------
-
-        is_free_text = (
-            normalized_data_type
-            in {
-                "texto_libre",
-                "texto",
-                "free_text",
-            }
-        )
-
-        if is_free_text:
-
-            invalid_states = []
-
-        else:
-
-            invalid_states = [
-                state
-                for state in expected_states
-                if state not in allowed_states
-            ]
-
-        if invalid_states:
-
-            warnings.append(
-                {
-                    "type": "state_not_allowed",
-                    "character_id": character_id,
-                    "character_name": clean_value(
-                        definition.get(
-                            "nombre_caracter"
-                        )
-                    ),
-                    "invalid_states":
-                        invalid_states,
-                    "allowed_states":
-                        allowed_states,
-                }
-            )
-
-        # -----------------------------------------------------
-        # FUENTE
-        # -----------------------------------------------------
-
-        source_id = clean_value(
-            relation.get("fuente_id")
-        )
-
-        source_data = None
-
-        if (
-            source_id is not None
-            and source_id in source_lookup
-        ):
-
-            source_data = {
-                key: clean_value(value)
-                for key, value
-                in source_lookup[
-                    source_id
-                ].items()
-            }
-
-        # -----------------------------------------------------
-        # SALIDA DEL CARÁCTER
-        # -----------------------------------------------------
-
-        output_characters.append(
-            {
-                "characterId":
-                    character_id,
-
-                "group":
-                    clean_value(
-                        definition.get(
-                            "grupo"
-                        )
-                    ),
-
-                "name":
-                    clean_value(
-                        definition.get(
-                            "nombre_caracter"
-                        )
-                    ),
-
-                "dataType":
-                    data_type,
-
-                "expectedStates":
-                    expected_states,
-
-                "allowedStates":
-                    allowed_states,
-
-                "variability":
-                    clean_value(
-                        relation.get(
-                            "variabilidad"
-                        )
-                    ),
-
-                "imageObservability":
-                    clean_value(
-                        relation.get(
-                            "detectable_imagen"
-                        )
-                    ),
-
-                "fieldObservability":
-                    clean_value(
-                        relation.get(
-                            "verificable_campo"
-                        )
-                    ),
-
-                "diagnosticPower":
-                    clean_value(
-                        relation.get(
-                            "poder_diagnostico"
-                        )
-                    ),
-
-                "interactionSafety":
-                    clean_value(
-                        relation.get(
-                            "interaction_safety"
-                        )
-                    ),
-
-                "observationCost":
-                    clean_value(
-                        relation.get(
-                            "costo_observacion"
-                        )
-                    ),
-
-                "confidence":
-                    clean_value(
-                        relation.get(
-                            "confianza"
-                        )
-                    ),
-
-                "sourceId":
-                    source_id,
-
-                "source":
-                    source_data,
-
-                "notes":
-                    clean_value(
-                        relation.get(
-                            "notas"
-                        )
-                    ),
-
-                "validation": {
-                    "valid":
-                        len(
-                            invalid_states
-                        ) == 0,
-
-                    "invalidStates":
-                        invalid_states,
-                },
-            }
-        )
-
-    # ---------------------------------------------------------
-    # FICHA COMPUTABLE
-    # ---------------------------------------------------------
-
-    output = {
-        "dataVersion":
-            "pilot-master-v0.1",
-
-        "source":
-            str(
-                MASTER_FILE.relative_to(
-                    ROOT
+        if source_id:
+            source = source_by_id.get(source_id)
+            if source is None:
+                raise SpeciesBuildError(
+                    f"{species_id}/{character_id}: fuente inexistente "
+                    f"{source_id}"
                 )
-            ).replace("\\", "/"),
+            used_source_ids.add(source_id)
 
-        "species": {
-            "id":
-                normalize_species_id(
-                    species[
-                        "species_id"
-                    ]
-                ),
+        states = relation.get("estado_esperado") or []
+        if not isinstance(states, list):
+            raise SpeciesBuildError(
+                f"{species_id}/{character_id}: "
+                "estado_esperado debe ser array."
+            )
 
-            "masterId":
-                clean_value(
-                    species[
-                        "species_id"
-                    ]
-                ),
+        expected_states.update(
+            state
+            for state in states
+            if isinstance(state, str)
+        )
 
-            "scientificName":
-                clean_value(
-                    species[
-                        "nombre_cientifico"
-                    ]
+        botanical_characters.append(
+            {
+                "character": character,
+                "relation": relation,
+                "source": source,
+                "computable": (
+                    character.get("estado_piloto")
+                    == computable_status
                 ),
+            }
+        )
 
-            "commonName":
-                clean_value(
-                    species[
-                        "nombre_comun"
-                    ]
-                ),
+    species_photos = [
+        record
+        for record in photos
+        if record.get("species_id") == species_id
+    ]
 
-            "family":
-                clean_value(
-                    species[
-                        "familia"
-                    ]
-                ),
+    species_errors = [
+        record
+        for record in model_errors
+        if record.get("species_id_real") == species_id
+    ]
 
-            "order":
-                clean_value(
-                    species[
-                        "orden"
-                    ]
-                ),
+    glossary_terms = [
+        record
+        for record in glossary
+        if record.get("termino") in expected_states
+    ]
 
-            "habit":
-                clean_value(
-                    species[
-                        "habito"
-                    ]
-                ),
+    for term in glossary_terms:
+        source_id = term.get("fuente_id")
+        if source_id:
+            if source_id not in source_by_id:
+                raise SpeciesBuildError(
+                    f"{species_id}: glosario referencia fuente "
+                    f"inexistente {source_id}"
+                )
+            used_source_ids.add(source_id)
 
-            "origin":
-                clean_value(
-                    species[
-                        "origen"
-                    ]
-                ),
+    relevant_sources = [
+        source
+        for source in source_by_id.values()
+        if source["fuente_id"] in used_source_ids
+    ]
 
-            "endemicChile":
-                clean_value(
-                    species[
-                        "endemismo"
-                    ]
-                ),
-
-            "pilotStatus":
-                clean_value(
-                    species[
-                        "estado_piloto"
-                    ]
-                ),
-
-            "notes":
-                clean_value(
-                    species[
-                        "notas"
-                    ]
-                ),
+    return {
+        "view_schema": "arboris.species-card.v2",
+        "generated_from": {
+            "master_name": metadata.get("master_name"),
+            "master_version": metadata.get("master_version"),
+            "schema_version": metadata.get("schema_version"),
+            "source_file": metadata.get("source_file"),
+            "source_sha256": metadata.get("source_sha256"),
+            "source_of_truth": metadata.get("source_of_truth"),
         },
-
-        "characters":
-            output_characters,
-
-        "validation": {
-            "warningCount":
-                len(warnings),
-
-            "warnings":
-                warnings,
-        },
+        "species": species_record,
+        "botanical_characters": botanical_characters,
+        "photos": species_photos,
+        "sources": relevant_sources,
+        "glossary": glossary_terms,
+        "model_errors": species_errors,
     }
-
-    return output
 
 
 def main():
+    print("ÁRBORIS — GENERACIÓN DE FICHAS CANÓNICAS POR ESPECIE")
+    print("=" * 72)
 
-    print(
-        "\nÁRBORIS — VALIDADOR BOTÁNICO DEL PILOTO"
+    data = load_canonical_data()
+
+    metadata = data["metadata"]
+    species = data["species"]
+    characters = data["characters"]
+    relations = data["species_characters"]
+    sources = data["sources"]
+    photos = data["photos"]
+    glossary = data["glossary"]
+    model_errors = data["model_errors"]
+
+    character_by_id = index_unique(
+        characters,
+        "caracter_id",
+        "characters.json",
+    )
+    source_by_id = index_unique(
+        sources,
+        "fuente_id",
+        "sources.json",
     )
 
-    print("=" * 60)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # ---------------------------------------------------------
-    # Cargar hojas
-    # ---------------------------------------------------------
+    generated_paths = []
 
-    species_df = load_sheet(
-        "Especies_Piloto"
-    )
+    for species_record in species:
+        species_id = species_record.get("species_id")
+        scientific_name = species_record.get("nombre_cientifico")
 
-    characters_df = load_sheet(
-        "Caracteres"
-    )
+        if not species_id or not scientific_name:
+            raise SpeciesBuildError(
+                "Cada especie debe tener species_id y "
+                "nombre_cientifico."
+            )
 
-    relations_df = load_sheet(
-        "Especie_Caracter"
-    )
-
-    sources_df = load_sheet(
-        "Fuentes"
-    )
-
-    # ---------------------------------------------------------
-    # Lookups
-    # ---------------------------------------------------------
-
-    character_lookup = (
-        characters_df
-        .set_index("caracter_id")
-        .to_dict("index")
-    )
-
-    source_lookup = {}
-
-    if "fuente_id" in sources_df.columns:
-
-        source_lookup = (
-            sources_df
-            .set_index("fuente_id")
-            .to_dict("index")
+        filename = (
+            f"{runtime_species_id(species_id)}_"
+            f"{slugify(scientific_name)}.json"
         )
 
-    # ---------------------------------------------------------
-    # Preparar salida
-    # ---------------------------------------------------------
+        output_path = OUTPUT_DIR / filename
 
-    OUTPUT_DIR.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    total_warnings = 0
-    summary = []
-
-    # ---------------------------------------------------------
-    # Validar todas las especies piloto
-    # ---------------------------------------------------------
-
-    for _, species in species_df.iterrows():
-
-        master_id = clean_value(
-            species.get("species_id")
-        )
-
-        if master_id is None:
-            continue
-
-        relations = relations_df[
-            relations_df[
-                "species_id"
-            ] == master_id
-        ]
-
-        output = build_species(
-            species=species,
+        payload = build_species_view(
+            species_record,
+            metadata=metadata,
+            character_by_id=character_by_id,
+            source_by_id=source_by_id,
             relations=relations,
-            character_lookup=
-                character_lookup,
-            source_lookup=
-                source_lookup,
+            photos=photos,
+            glossary=glossary,
+            model_errors=model_errors,
         )
 
-        normalized_id = (
-            normalize_species_id(
-                master_id
-            )
-        )
-
-        scientific_name = clean_value(
-            species.get(
-                "nombre_cientifico"
-            )
-        )
-
-        common_name = clean_value(
-            species.get(
-                "nombre_comun"
-            )
-        )
-
-        species_slug = safe_filename(
-            scientific_name
-        )
-
-        output_file = (
-            OUTPUT_DIR
-            / (
-                f"{normalized_id}_"
-                f"{species_slug}"
-                ".preview.json"
-            )
-        )
-
-        with output_file.open(
-            "w",
-            encoding="utf-8",
-        ) as f:
-
-            json.dump(
-                output,
-                f,
-                ensure_ascii=False,
-                indent=2,
-            )
-
-        warning_count = (
-            output[
-                "validation"
-            ][
-                "warningCount"
-            ]
-        )
-
-        character_count = len(
-            output["characters"]
-        )
-
-        total_warnings += (
-            warning_count
-        )
-
-        summary.append(
-            {
-                "id":
-                    normalized_id,
-
-                "commonName":
-                    common_name,
-
-                "scientificName":
-                    scientific_name,
-
-                "characters":
-                    character_count,
-
-                "warnings":
-                    warning_count,
-
-                "output":
-                    str(
-                        output_file.relative_to(
-                            ROOT
-                        )
-                    ),
-            }
-        )
-
-        # -----------------------------------------------------
-        # Resultado individual
-        # -----------------------------------------------------
+        write_json(output_path, payload)
+        generated_paths.append(output_path)
 
         print(
-            f"\n{normalized_id} — "
-            f"{common_name}"
+            f"Created: {output_path.relative_to(ROOT)} "
+            f"| {len(payload['botanical_characters'])} caracteres "
+            f"| {len(payload['photos'])} fotos"
         )
 
-        print(
-            f"  Especie: "
-            f"{scientific_name}"
-        )
+    expected_names = {path.name for path in generated_paths}
 
-        print(
-            f"  Caracteres: "
-            f"{character_count}"
-        )
-
-        print(
-            f"  Advertencias: "
-            f"{warning_count}"
-        )
-
-        for warning in (
-            output[
-                "validation"
-            ][
-                "warnings"
-            ]
-        ):
-
-            print(
-                "\n  ADVERTENCIA:"
+    for existing in OUTPUT_DIR.glob("SP*.json"):
+        if existing.name not in expected_names:
+            raise SpeciesBuildError(
+                "Existe una ficha SP*.json no generada por el Master "
+                f"actual: {existing.relative_to(ROOT)}. "
+                "No se borra automáticamente."
             )
 
-            print(
-                json.dumps(
-                    warning,
-                    ensure_ascii=False,
-                    indent=2,
-                )
-            )
-
-    # ---------------------------------------------------------
-    # Guardar resumen JSON
-    # ---------------------------------------------------------
-
-    summary_file = (
-        OUTPUT_DIR
-        / "validation_summary.json"
-    )
-
-    with summary_file.open(
-        "w",
-        encoding="utf-8",
-    ) as f:
-
-        json.dump(
-            {
-                "speciesCount":
-                    len(summary),
-
-                "totalWarnings":
-                    total_warnings,
-
-                "species":
-                    summary,
-            },
-            f,
-            ensure_ascii=False,
-            indent=2,
-        )
-
-    # ---------------------------------------------------------
-    # Resumen final
-    # ---------------------------------------------------------
-
+    print()
     print(
-        "\n"
-        + "=" * 60
+        f"OK — {len(generated_paths)} fichas canónicas generadas "
+        "desde data/botanical/."
     )
-
     print(
-        "RESUMEN DEL PILOTO"
-    )
-
-    print(
-        "=" * 60
-    )
-
-    for item in summary:
-
-        status = (
-            "OK"
-            if item[
-                "warnings"
-            ] == 0
-            else "REVISAR"
-        )
-
-        print(
-            f"{status:7} "
-            f"{item['id']}  "
-            f"{item['commonName']:<12} "
-            f"caracteres="
-            f"{item['characters']:<2} "
-            f"advertencias="
-            f"{item['warnings']}"
-        )
-
-    print(
-        "\nEspecies validadas: "
-        f"{len(summary)}"
-    )
-
-    print(
-        "Advertencias totales: "
-        f"{total_warnings}"
-    )
-
-    print(
-        "\nResumen guardado en:"
-    )
-
-    print(
-        summary_file.relative_to(
-            ROOT
-        )
-    )
-
-    print(
-        "\nSe generaron únicamente "
-        "archivos de vista previa."
-    )
-
-    print(
-        "No se modificó ningún archivo "
-        "de data/species/."
+        "Estas fichas son vistas derivadas: no deben editarse "
+        "manualmente."
     )
 
 
