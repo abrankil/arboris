@@ -86,34 +86,13 @@ export function observerResultToEvidence(dataset, input) {
 
   const normalized = result.normalized;
 
-  if (normalized.status === 'observed') {
-    return {
-      characterId: normalized.characterId,
-      observationStatus: 'observed',
-      observedStates: [normalized.observedState],
-      source: normalized.source,
-      confidence: normalized.confidence,
-      model: normalized.model,
-      notes: normalized.notes,
-    };
-  }
-
-  if (normalized.status === 'not_observable') {
-    return {
-      characterId: normalized.characterId,
-      observationStatus: 'not_observable',
-      observedStates: ['not_observable'],
-      source: normalized.source,
-      confidence: normalized.confidence,
-      model: normalized.model,
-      notes: normalized.notes,
-    };
-  }
-
   return {
     characterId: normalized.characterId,
-    observationStatus: 'uncertain',
-    observedStates: [],
+    observationStatus: normalized.status,
+    observedStates:
+      normalized.status === 'observed'
+        ? [normalized.observedState]
+        : [],
     source: normalized.source,
     confidence: normalized.confidence,
     model: normalized.model,
