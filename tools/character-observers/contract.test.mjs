@@ -116,7 +116,7 @@ test('not observable remains distinct and non-eliminating', () => {
 
   assert.equal(evidence.characterId, 'CH-003');
   assert.equal(evidence.observationStatus, 'not_observable');
-  assert.deepEqual(evidence.observedStates, ['not_observable']);
+  assert.deepEqual(evidence.observedStates, []);
   assert.equal(evidence.confidence, 0.2);
   assert.equal(evidence.model, 'test-observer');
   assert.equal(evidence.notes, 'margin outside frame');
