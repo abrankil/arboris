@@ -17,6 +17,18 @@ Esta guía es una referencia rápida y didáctica. No reemplaza la definición n
 | **prueba ASC** | Experimento controlado para comprobar una hipótesis de compilación, traducción o representación. | `TOPOLOGY-STRESS-TEST-001` |
 | **contrato de entrada** | Relaciones, restricciones y estados que ASC debe preservar durante la compilación. | “El puente antes de la reja pertenece al contrato de entrada.” |
 
+### Convención de lenguaje: para ASC · con ASC · de ASC
+
+Estas tres relaciones no son tratamientos, estados ni operaciones nuevas. Son una convención de lenguaje para reducir ambigüedad al describir la posición de algo respecto del flujo ASC.
+
+| Forma | Indica | Ejemplo |
+| --- | --- | --- |
+| **para ASC** | El objeto está aguas arriba de la compilación: se prepara, revisa o audita antes de entrar a ASC. | “Auditar propuesta para ASC” — revisar la propuesta antes de usarla en el flujo de compilación. No significa “ASC audita la propuesta” ni autoriza corregir, aprobar, compilar o ejecutar por sí sola. |
+| **con ASC** | La operación utiliza ASC dentro del flujo. La operación concreta determina si termina en compilación o continúa hacia ejecución externa. | “Compila con ASC el acceso principal” — produce el prompt ASC sin ejecutar generación. Para la distinción entre “Compila con ASC” y “Genera con ASC / Ejecuta con ASC”, ver la sección 2. |
+| **de ASC** | El objeto tiene procedencia demostrable dentro del flujo ASC; su tipo concreto determina si fue producido por la compilación ASC o por un ejecutor externo a partir de un prompt ASC. | “Auditar resultado de ASC contra contrato v2.1” — identifica su procedencia en el flujo sin convertirlo en evidencia ni atribuir su generación al compilador. |
+
+Esta convención no crea autoridad, no modifica tratamientos ASC ni sustituye la definición normativa de `ARBORIS_SCENE_COMPILER.md`. Su único propósito es lingüístico.
+
 ## 2. Órdenes de trabajo con ASC
 
 | Orden | Qué hace | Ejemplo |
