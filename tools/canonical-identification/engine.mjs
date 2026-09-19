@@ -142,6 +142,7 @@ export function compatible(
 
 function normalizeEvidenceItem(item) {
   return {
+    ...item,
     characterId:
       item.characterId
       ?? item.character_id,
@@ -183,6 +184,11 @@ function normalizeEvidenceItem(item) {
     provenance:
       item.provenance
       ?? null,
+
+    evidence:
+      Array.isArray(item.evidence)
+        ? item.evidence.map(evidenceItem => ({ ...evidenceItem }))
+        : [],
 
     evidenceRef:
       item.evidenceRef
