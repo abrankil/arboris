@@ -21,6 +21,7 @@ desarrollo seguro
 
 compilación de escenas / prompts generativos
 → ARBORIS_SCENE_COMPILER.md
+→ ASC_WORKFLOW_GUIDE.md         # flujo operativo end-to-end, no normativo
 → ASC_V0_1_EXECUTABLE_SPEC.md   # implementación v0.1 compile-only
 → ASC_VOCABULARY_GUIDE.md       # referencia rápida, no normativa
 
@@ -46,9 +47,10 @@ ambientes / mapas
 - [`GENERAL_VOCABULARY_GUIDE.md`](GENERAL_VOCABULARY_GUIDE.md): vocabulario transversal para desarrollo, territorio, revisión, GitHub y trabajo diario. Es una guía operativa aprobada provisionalmente; las autoridades normativas de cada dominio siguen prevaleciendo.
 - [`ASC_VOCABULARY_GUIDE.md`](ASC_VOCABULARY_GUIDE.md): referencia rápida para términos, órdenes y tratamientos de información de ASC. La autoridad normativa sigue siendo `ARBORIS_SCENE_COMPILER.md`.
 
-## Implementación ASC
+## ASC: flujo e implementación
 
 - [`ARBORIS_SCENE_COMPILER.md`](ARBORIS_SCENE_COMPILER.md): autoridad normativa de ASC.
+- [`ASC_WORKFLOW_GUIDE.md`](ASC_WORKFLOW_GUIDE.md): guía operativa no normativa para preparar, compilar, ejecutar, auditar y validar trabajo con ASC; incluye aseguramiento avanzado opcional y activado por necesidad.
 - [`ASC_V0_1_EXECUTABLE_SPEC.md`](ASC_V0_1_EXECUTABLE_SPEC.md): contrato de implementación del compilador determinista `compile-only` v0.1.
 - `tools/asc/`: implementación ejecutable, pruebas y fixture mínimo de v0.1.
 
@@ -60,7 +62,7 @@ Si la tarea es decisión de producto, alcance, arquitectura, datos o estado del 
 
 Para consultas rápidas de terminología transversal se puede abrir `GENERAL_VOCABULARY_GUIDE.md`, sin tratarla como sustituto del documento normativo correspondiente.
 
-Si la tarea consiste en generar o auditar una escena mediante IA/herramienta generativa, usar `ARBORIS_SCENE_COMPILER.md` como autoridad de compilación y abrir después únicamente los contratos y documentos de dominio necesarios. `ASC_VOCABULARY_GUIDE.md` sirve como recordatorio operativo. Para trabajar en el compilador ejecutable, continuar con `ASC_V0_1_EXECUTABLE_SPEC.md` y `tools/asc/README.md`.
+Si la tarea consiste en preparar, generar, auditar o validar trabajo con ASC, usar `ARBORIS_SCENE_COMPILER.md` como autoridad normativa y `ASC_WORKFLOW_GUIDE.md` como guía operativa cuando se necesite el flujo end-to-end o aseguramiento avanzado. Abrir después únicamente los contratos y documentos de dominio necesarios. `ASC_VOCABULARY_GUIDE.md` sirve como recordatorio operativo. Para trabajar en el compilador ejecutable, continuar con `ASC_V0_1_EXECUTABLE_SPEC.md` y `tools/asc/README.md`.
 
 ## Para Álvaro
 
