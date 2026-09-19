@@ -260,11 +260,7 @@ export async function loadCanonicalDataset(options = {}) {
   const computableStatus =
     metadata.computable_status ?? 'activo';
 
-  const activeCharacters = characters
-    .filter(
-      character =>
-        character.estado_piloto === computableStatus,
-    )
+  const allCharacters = characters
     .map(character => ({
       characterId: character.caracter_id,
       group: character.grupo ?? null,
@@ -286,6 +282,11 @@ export async function loadCanonicalDataset(options = {}) {
       raw: character,
     }));
 
+  const activeCharacters = allCharacters.filter(
+    character =>
+      character.pilotStatus === computableStatus,
+  );
+
   const normalizedSpecies = species.map(item => ({
     speciesId: item.species_id,
     scientificName: item.nombre_cientifico,
@@ -303,6 +304,12 @@ export async function loadCanonicalDataset(options = {}) {
   const speciesById = new Map(
     normalizedSpecies.map(
       item => [item.speciesId, item],
+    ),
+  );
+
+  const allCharactersById = new Map(
+    allCharacters.map(
+      item => [item.characterId, item],
     ),
   );
 
@@ -339,6 +346,8 @@ export async function loadCanonicalDataset(options = {}) {
     characterVariability,
     speciesById,
     charactersById,
+    allCharactersById,
+    computableStatus,
     contextsById,
     sourcesById,
     relationsBySpecies,
@@ -353,6 +362,7 @@ export async function loadCanonicalDataset(options = {}) {
     metadata,
     species: normalizedSpecies,
     characters: activeCharacters,
+    allCharacters,
     relations: activeRelations,
     contexts,
     sources,
