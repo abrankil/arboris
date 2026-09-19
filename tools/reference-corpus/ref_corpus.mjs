@@ -1,4 +1,4 @@
-const REF_RE = /^REF-(\\d{3,})$/;
+const REF_RE = /^REF-(\d{3,})$/;
 
 export const SCHEMA_VERSION = "1.0.0";
 export const CORPUS_ID = "ARBORIS_GRAPHIC_REFERENCES";
