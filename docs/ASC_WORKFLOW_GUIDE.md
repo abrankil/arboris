@@ -172,7 +172,9 @@ KNOWN
 → información suficientemente respaldada para trasladarse a compilación
 
 OPEN
-→ información mantenida abierta por la autoridad/contrato aplicable
+→ tratamiento ASC para información respecto de la cual no existe evidencia o decisión suficiente y que debe permanecer abierta
+→ su asignación se determina explícitamente cuando corresponda
+→ no sustituye el estado original del dominio
 
 PROHIBIDO INFERIR / DO NOT INFER
 → el ejecutor no puede completar el vacío por plausibilidad
@@ -181,15 +183,17 @@ ART-PROVISIONAL
 → decisión visual temporal autorizada, sin valor de evidencia de dominio
 ```
 
-`prohibited` permanece separado:
+En ASC v0.1 y en contratos que distingan explícitamente ambos campos, mantener operativamente separados:
 
 ```text
-PROHIBIDO INFERIR
-→ bloquea una inferencia
+PROHIBIDO INFERIR / DO NOT INFER
+→ bloquea una inferencia no respaldada
 
 prohibited
-→ bloquea un output, contenido o relación
+→ bloquea un output, contenido o relación declarado como prohibido por el contrato
 ```
+
+Esta separación operativa no cierra una frontera semántica universal entre ambos conceptos fuera del contrato o implementación que la declare.
 
 Los estados de dominio se preservan; ASC no los reemplaza por sus tratamientos.
 
