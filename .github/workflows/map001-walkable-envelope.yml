@@ -34,7 +34,7 @@ jobs:
         run: node --version
 
       - name: Tests
-        run: npm run test:walkable-envelope
+        run: node --test tools/map-navigation/materialize_walkable_envelope_001.test.mjs
 
       - name: Materialize A (authority manifest -> authorized candidate -> envelope -> raster)
         run: node tools/map-navigation/materialize_walkable_envelope_001.mjs --out-dir build/walkable-envelope/a
@@ -58,18 +58,6 @@ jobs:
           if (report.metricScale !== 'OPEN') throw new Error('metric scale must remain OPEN');
           if (report.worldBearing !== 'OPEN') throw new Error('world bearing must remain OPEN');
           if (report.territorialGeometryClaim !== false) throw new Error('must not claim territorial geometry');
-          EOF
-
-      - name: Independence check (authority-runtime PASS without Candidate 002)
-        shell: bash
-        run: |
-          mv data/maps/map-001-blockout-candidate-002.json data/maps/map-001-blockout-candidate-002.json.movedfortest
-          node tools/map-navigation/materialize_walkable_envelope_001.mjs --out-dir build/walkable-envelope/independence
-          mv data/maps/map-001-blockout-candidate-002.json.movedfortest data/maps/map-001-blockout-candidate-002.json
-          node --input-type=module <<'EOF'
-          import fs from 'node:fs';
-          const report = JSON.parse(fs.readFileSync('build/walkable-envelope/independence/validation.json','utf8'));
-          if (report.status !== 'PASS') throw new Error('authority-runtime must PASS even with Candidate 002 absent');
           EOF
 
       - name: Hash evidence (new evidence record for this rectification; does not touch freeze evidence)
@@ -106,6 +94,9 @@ jobs:
 
       - name: Runtime
         run: node --version
+
+      - name: Migration test suite
+        run: node --test tools/map-navigation/materialize_walkable_envelope_001.migration.test.mjs
 
       - name: Validate migration compatibility
         run: node tools/map-navigation/materialize_walkable_envelope_001.mjs --mode migration --out-dir build/walkable-envelope-migration

@@ -5,14 +5,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   analyzeDerivedRaster,
-  compareLegacyRaster,
   loadAuthorityManifest,
   materializeWalkableEnvelopeAuthority,
   rasterizeEnvelope,
   validateAuthorityManifest,
   validateEnvelopeModel,
   validateFrameBoundaryPolicy,
-  validateWalkableEnvelopeMigration,
   verifyAuthorizedCandidate,
   WalkableEnvelopeAuthorityError,
   DEFAULT_AUTHORITY_PATH
@@ -21,28 +19,30 @@ import {
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
 const MODEL_PATH = path.join(ROOT, 'data/maps/map-001-walkable-envelope-candidate-001.json');
-const LEGACY_PATH = path.join(ROOT, 'data/maps/map-001-blockout-candidate-002.json');
 const AUTHORITY_PATH = path.join(ROOT, DEFAULT_AUTHORITY_PATH);
+const CANDIDATE_REL = 'data/maps/map-001-walkable-envelope-candidate-001.json';
 
 const model = JSON.parse(fs.readFileSync(MODEL_PATH, 'utf8'));
-const legacy = JSON.parse(fs.readFileSync(LEGACY_PATH, 'utf8'));
 const authorityManifest = JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8'));
 
-function sortCells(cells) {
-  return cells.slice().sort((a,b) => a[0]-b[0] || a[1]-b[1]);
-}
+// This suite is authority-runtime only (RECTIFICATION 001, objective 1): it
+// never opens, moves, copies, or requires Candidate 002
+// (data/maps/map-001-blockout-candidate-002.json). Migration/legacy
+// comparison behavior is covered exclusively by
+// materialize_walkable_envelope_001.migration.test.mjs.
 
-// Temporarily moves a real file out of the way and back, so "absent input"
-// tests exercise real filesystem absence without ever deleting or mutating
-// a frozen artifact. Never touches the file's content.
-function withFileTemporarilyMoved(filePath, fn) {
-  const tempPath = filePath + '.tmp-test-moved';
-  fs.renameSync(filePath, tempPath);
-  try {
-    return fn();
-  } finally {
-    fs.renameSync(tempPath, filePath);
-  }
+// Builds a temp root containing byte-for-byte copies of only the authority
+// manifest and Candidate 001 — Candidate 002 is never copied and is verified
+// absent. Caller must clean up the returned dir in a finally block.
+function buildAuthorityOnlyRoot() {
+  const tempRoot = fs.mkdtempSync(path.join(ROOT, 'tools/map-navigation/.tmp-authority-only-root-'));
+  const authorityDest = path.join(tempRoot, DEFAULT_AUTHORITY_PATH);
+  const candidateDest = path.join(tempRoot, CANDIDATE_REL);
+  fs.mkdirSync(path.dirname(authorityDest), { recursive: true });
+  fs.mkdirSync(path.dirname(candidateDest), { recursive: true });
+  fs.copyFileSync(AUTHORITY_PATH, authorityDest);
+  fs.copyFileSync(MODEL_PATH, candidateDest);
+  return tempRoot;
 }
 
 // ---------------------------------------------------------------------------
@@ -83,11 +83,12 @@ test('open ports touch screen boundaries while lateral edges remain closed', () 
   assert.ok(maxX < 9);
 });
 
-test('changing envelope geometry changes derived raster rather than consulting legacy cells', () => {
+test('changing envelope geometry changes derived raster rather than a fixed/frozen answer', () => {
+  const original = rasterizeEnvelope(model);
   const changed = structuredClone(model);
   changed.geometry.centerline = [[4.5,15],[4.5,0]];
   const derived = rasterizeEnvelope(changed);
-  assert.notDeepEqual(derived, sortCells(legacy.grid.walkableCells));
+  assert.notDeepEqual(derived, original);
   assert.equal(derived.length, 15);
 });
 
@@ -129,18 +130,48 @@ test('two disjoint open-port crossings (gap > epsilon) -> fail closed, regions s
   );
 });
 
-test('two near-duplicate crossings (gap <= epsilon) merge into one region -> PASS', () => {
-  const mutated = structuredClone(model);
-  // screen_down (y=15) is touched once, exactly as in the real candidate
-  // (P-IN anchor unaffected). screen_up (y=0) is touched TWICE, by two
-  // vertical stubs at x=4.5 and x=4.5+1e-10: their capsule intervals
-  // overlap almost entirely (halfWidth 0.49 >> 1e-10), so the gap between
-  // them is far below FRAME_BOUNDARY_EPSILON and they must merge into a
-  // single region containing the real P-OUT anchor (x=4.5).
-  mutated.geometry.centerline = [
-    [4.5, 15], [4.5, 3], [4.5, 0], [4.5 + 1e-10, 3], [4.5 + 1e-10, 0]
+// Builds two clean vertical "spike" touches on screen_up (y=0) at x=4.5 and
+// x=4.5+separation, joined by a connector segment held at y=3 (far enough
+// from y=0, relative to halfWidth=0.05, to contribute no interval there).
+// Each spike is a pure vertical segment ending exactly at y=0, so its
+// boundary interval is exactly [x-halfWidth, x+halfWidth] with no
+// contribution from any other segment — this makes the gap between the two
+// raw intervals (before merging) exactly `separation - 2*halfWidth`,
+// independent of Candidate 001's own geometry/halfWidth.
+function twoSpikeCenterline(separation) {
+  const halfWidth = 0.05;
+  const centerline = [
+    [4.5, 15],
+    [4.5, 3],
+    [4.5, 0],
+    [4.5, 3],
+    [4.5 + separation, 3],
+    [4.5 + separation, 0]
   ];
+  return { centerline, halfWidth };
+}
+
+test('two near-duplicate crossings (0 < gap <= epsilon) merge into one region -> PASS', () => {
+  const mutated = structuredClone(model);
+  // separation - 2*halfWidth = 0.1000000005 - 0.1 = 5e-10, i.e. 0 < gap <= 1e-9.
+  const { centerline, halfWidth } = twoSpikeCenterline(0.1000000005);
+  mutated.geometry.centerline = centerline;
+  mutated.geometry.halfWidth = halfWidth;
   assert.equal(validateFrameBoundaryPolicy(mutated), true);
+});
+
+test('two crossings with gap just above epsilon (gap > 1e-9) -> fail closed, regions stay separate', () => {
+  const mutated = structuredClone(model);
+  // separation - 2*halfWidth = 0.100000002 - 0.1 = 2e-9, i.e. gap > 1e-9.
+  const { centerline, halfWidth } = twoSpikeCenterline(0.100000002);
+  mutated.geometry.centerline = centerline;
+  mutated.geometry.halfWidth = halfWidth;
+  assert.throws(
+    () => validateFrameBoundaryPolicy(mutated),
+    (err) => err instanceof WalkableEnvelopeAuthorityError
+      && err.code === 'FRAME_BOUNDARY_OPEN_PORT_NOT_SINGLE_REGION'
+      && err.details.regions.length === 2
+  );
 });
 
 test('single open-port region whose anchor was moved outside it -> fail closed', () => {
@@ -234,6 +265,8 @@ test('candidate SHA mismatch -> fail closed (temp candidate copy, frozen file un
 
 // ---------------------------------------------------------------------------
 // authority-runtime: PASS / independence from Candidate 002 / determinism.
+// Independence is proven by constructing a root where Candidate 002 cannot
+// possibly be read (it was never copied there), not by moving the real file.
 // ---------------------------------------------------------------------------
 
 test('authority-runtime: valid manifest + valid candidate -> PASS', () => {
@@ -245,10 +278,19 @@ test('authority-runtime: valid manifest + valid candidate -> PASS', () => {
   assert.equal(report.frameBoundaryPolicy, 'OPEN_PORTS_MAY_CROSS_FRAME');
 });
 
-test('authority-runtime: valid manifest + valid candidate + Candidate 002 absent -> PASS', () => {
-  const result = withFileTemporarilyMoved(LEGACY_PATH, () => materializeWalkableEnvelopeAuthority(ROOT));
-  assert.equal(result.report.status, 'PASS');
-  assert.equal(result.report.derivedRaster.walkableCellCount, 17);
+test('authority-runtime: valid manifest + valid candidate + Candidate 002 absent from root -> PASS', () => {
+  const tempRoot = buildAuthorityOnlyRoot();
+  try {
+    const legacyAbsolute = path.join(tempRoot, 'data/maps/map-001-blockout-candidate-002.json');
+    assert.equal(fs.existsSync(legacyAbsolute), false);
+
+    const { report } = materializeWalkableEnvelopeAuthority(tempRoot);
+    assert.equal(report.status, 'PASS');
+    assert.equal(report.derivedRaster.walkableCellCount, 17);
+    assert.equal(report.candidate002Dependency, false);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
 });
 
 test('authority-runtime: manifest invariant mismatch -> fail closed, no PASS', () => {
@@ -265,31 +307,4 @@ test('authority-runtime materialization is deterministic (A/B)', () => {
   const b = materializeWalkableEnvelopeAuthority(ROOT);
   assert.equal(JSON.stringify(a.report), JSON.stringify(b.report));
   assert.equal(a.svg, b.svg);
-});
-
-// ---------------------------------------------------------------------------
-// migration-evidence: separate entry point, structured missing-input result.
-// ---------------------------------------------------------------------------
-
-test('migration-evidence: valid Candidate 002 -> compatibility verdict produced', () => {
-  const result = validateWalkableEnvelopeMigration(ROOT);
-  assert.equal(result.status, 'MIGRATION_PASS');
-  assert.ok(result.comparison);
-  assert.equal(result.comparison.legacyHashMatches, true);
-  assert.equal(result.comparison.exactCellSetMatch, true);
-});
-
-test('migration-evidence: Candidate 002 missing -> structured missing-input failure, no PASS/REVISE verdict', () => {
-  const result = withFileTemporarilyMoved(LEGACY_PATH, () => validateWalkableEnvelopeMigration(ROOT));
-  assert.equal(result.status, 'MIGRATION_INPUT_MISSING');
-  assert.equal(result.failureClass, 'MIGRATION_INPUT_FAILURE');
-  assert.equal(result.code, 'LEGACY_CANDIDATE_ABSENT');
-  assert.notEqual(result.status, 'MIGRATION_PASS');
-  assert.notEqual(result.status, 'MIGRATION_REVISE');
-});
-
-test('compareLegacyRaster (reused, unchanged core) still matches legacy Candidate 002 exactly', () => {
-  const comparison = compareLegacyRaster(model, ROOT);
-  assert.equal(comparison.exactCellSetMatch, true);
-  assert.equal(comparison.legacyHashMatches, true);
 });
