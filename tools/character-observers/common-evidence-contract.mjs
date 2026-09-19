@@ -14,6 +14,24 @@ function fail(errors) {
   return { valid: false, errors, normalized: null };
 }
 
+function getKnownCharacter(dataset, characterId) {
+  if (!dataset?.allCharactersById?.get) {
+    throw new TypeError('dataset.allCharactersById Map is required');
+  }
+  const character = dataset.allCharactersById.get(characterId);
+  if (!character) throw new Error(`Unknown characterId: ${characterId}`);
+  return character;
+}
+
+export function assessAceEligibility(dataset, characterId) {
+  const character = dataset?.allCharactersById?.get?.(characterId);
+  if (!character) return { eligible: false, reason: 'unknown_character' };
+  if (character.pilotStatus !== dataset.computableStatus) {
+    return { eligible: false, reason: 'retired_character' };
+  }
+  return { eligible: true, reason: null };
+}
+
 export function validatePhotoEvidence(input) {
   const errors = [];
   const photoEvidenceId = textValue(input?.photoEvidenceId);
@@ -70,7 +88,7 @@ export function validateCharacterObservation(dataset, input, photoEvidenceById =
   if (!characterId) {
     errors.push('characterId is required');
   } else {
-    try { getCharacterDefinition(dataset, characterId); } catch (error) { errors.push(error.message); }
+    try { getKnownCharacter(dataset, characterId); } catch (error) { errors.push(error.message); }
   }
 
   if (!STATUS_SET.has(status)) errors.push(`status must be one of: ${H16_STATUSES.join(', ')}`);
@@ -79,7 +97,7 @@ export function validateCharacterObservation(dataset, input, photoEvidenceById =
     if (!observedState) errors.push('observedState is required when status=observed');
     else if (characterId) {
       try {
-        const character = getCharacterDefinition(dataset, characterId);
+        const character = getKnownCharacter(dataset, characterId);
         if (!character.allowedStates.includes(observedState)) errors.push(`observedState is not allowed for ${characterId}`);
       } catch {}
     }
@@ -103,8 +121,15 @@ export function validateCharacterObservation(dataset, input, photoEvidenceById =
       errors.push('prefilled observation requires acquisition.basis');
     } else {
       if (basis.type !== 'prior_observations') errors.push('prefilled acquisition.basis.type must be prior_observations');
-      if (!Array.isArray(basis.refs) || basis.refs.length === 0 || basis.refs.some(ref => !textValue(ref))) {
-        errors.push('prefilled acquisition.basis.refs must contain at least one prior observation reference');
+      const refs = basis.photoEvidenceRefs;
+      if (!Array.isArray(refs) || refs.length === 0 || refs.some(ref => !textValue(ref))) {
+        errors.push('prefilled acquisition.basis.photoEvidenceRefs must contain at least one prior PhotoEvidence reference');
+      } else if (photoEvidenceById instanceof Map) {
+        for (const ref of refs) {
+          if (!photoEvidenceById.has(textValue(ref))) {
+            errors.push(`Unknown acquisition.basis.photoEvidenceRef: ${textValue(ref)}`);
+          }
+        }
       }
     }
   }
@@ -165,6 +190,13 @@ export function characterObservationToAceEvidence(dataset, input, photoEvidenceB
   }
 
   const observation = result.normalized;
+  const eligibility = assessAceEligibility(dataset, observation.characterId);
+  if (!eligibility.eligible) {
+    const error = new Error(`CharacterObservation is not ACE-eligible: ${eligibility.reason}`);
+    error.code = 'ACE_INELIGIBLE';
+    error.aceEligibility = eligibility;
+    throw error;
+  }
   return {
     characterId: observation.characterId,
     observationStatus: observation.status,
