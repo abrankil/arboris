@@ -23,7 +23,8 @@ export function validatePhotoEvidence(input) {
   if (!photoEvidenceId) errors.push('photoEvidenceId is required');
   if (!sourcePhoto || typeof sourcePhoto !== 'object') errors.push('sourcePhoto is required');
   if (sourcePhoto && !textValue(sourcePhoto.photoRef)) errors.push('sourcePhoto.photoRef is required');
-  if (fingerprintSha256 && !/^[a-f0-9]{64}$/i.test(fingerprintSha256)) {
+  if (!fingerprintSha256) errors.push('sourcePhoto.fingerprintSha256 is required for stable asset identity');
+  else if (!/^[a-f0-9]{64}$/i.test(fingerprintSha256)) {
     errors.push('sourcePhoto.fingerprintSha256 must be a SHA-256 hex digest');
   }
   if (input?.visibleStructures != null && !Array.isArray(input.visibleStructures)) {
@@ -60,7 +61,9 @@ export function validateCharacterObservation(dataset, input, photoEvidenceById =
   const acquisition = input?.acquisition;
 
   if (!photoEvidenceRef) errors.push('photoEvidenceRef is required');
-  if (photoEvidenceById && photoEvidenceRef && !photoEvidenceById.has(photoEvidenceRef)) {
+  if (!(photoEvidenceById instanceof Map)) {
+    errors.push('photoEvidenceById Map is required to validate referential integrity');
+  } else if (photoEvidenceRef && !photoEvidenceById.has(photoEvidenceRef)) {
     errors.push(`Unknown photoEvidenceRef: ${photoEvidenceRef}`);
   }
 
@@ -91,8 +94,19 @@ export function validateCharacterObservation(dataset, input, photoEvidenceById =
 
   if (!acquisition || !ACQUISITION_MODES.has(acquisition.mode)) {
     errors.push('acquisition.mode must be manual, prefilled or automatic');
-  } else if (acquisition.mode === 'prefilled' && acquisition.confirmedOnCurrentPhoto !== true) {
-    errors.push('prefilled observation must be confirmedOnCurrentPhoto=true');
+  } else if (acquisition.mode === 'prefilled') {
+    if (acquisition.confirmedOnCurrentPhoto !== true) {
+      errors.push('prefilled observation must be confirmedOnCurrentPhoto=true');
+    }
+    const basis = acquisition.basis;
+    if (!basis || typeof basis !== 'object') {
+      errors.push('prefilled observation requires acquisition.basis');
+    } else {
+      if (basis.type !== 'prior_observations') errors.push('prefilled acquisition.basis.type must be prior_observations');
+      if (!Array.isArray(basis.refs) || basis.refs.length === 0 || basis.refs.some(ref => !textValue(ref))) {
+        errors.push('prefilled acquisition.basis.refs must contain at least one prior observation reference');
+      }
+    }
   }
 
   if (confidence != null && (typeof confidence !== 'number' || Number.isNaN(confidence) || confidence < 0 || confidence > 1)) {
@@ -160,7 +174,9 @@ export function characterObservationToAceEvidence(dataset, input, photoEvidenceB
     model: observation.observer?.model ?? null,
     notes: observation.notes,
     provenance: observation.provenance,
-    evidenceRef: observation.evidence?.[0]?.evidenceRef ?? null,
-    regionOfInterest: observation.evidence?.[0]?.regionOfInterest ?? null,
+    evidence: observation.evidence.map(item => ({ ...item })),
+    // Legacy singular projections remain explicit conveniences for current ACE consumers.
+    evidenceRef: observation.evidence.length === 1 ? observation.evidence[0]?.evidenceRef ?? null : null,
+    regionOfInterest: observation.evidence.length === 1 ? observation.evidence[0]?.regionOfInterest ?? null : null,
   };
 }
