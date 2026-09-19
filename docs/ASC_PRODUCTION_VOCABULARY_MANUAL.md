@@ -48,7 +48,7 @@ Para esos términos, consultar `ASC_VOCABULARY_GUIDE.md` y `GENERAL_VOCABULARY_G
 | Término | Definición operativa | No confundir con |
 | --- | --- | --- |
 | **blockout** | Representación técnica simplificada de los contratos de una Instancia. Permite probar conectividad, ruta, alturas relativas, bloqueos, interacción, cámara y oclusión antes del arte final. | prototipo visual, asset |
-| **prototipo visual** | Representación experimental utilizada para comprobar cómo una estructura autorizada se traduce visualmente. | evidencia, asset final |
+| **prototipo visual** | Representación experimental utilizada para comprobar cómo una estructura autorizada se traduce visualmente. Puede aportar evidencia experimental para criterios compatibles con una salida visual, pero no constituye evidencia de dominio por sí mismo. | evidencia de dominio, asset final |
 | **asset de producción** | Recurso utilizado o preparado bajo la especificación técnica y artística correspondiente. Su existencia no implica aprobación final. | imagen conceptual, resultado generativo |
 | **preview** | Vista compuesta preparada para revisión de un mapa, prototipo o asset. | master, autoridad espacial |
 | **walkableEnvelope** | Región transitable continua que actúa como autoridad geométrica de navegación. | raster, celdas, sendero dibujado |
@@ -110,6 +110,8 @@ resultado ASC
 ```
 
 Eso no lo convierte automáticamente en un asset aprobado.
+
+Un resultado ASC o prototipo visual tampoco se convierte por sí mismo en evidencia territorial, botánica, ecológica o científica. Puede usarse como evidencia experimental únicamente para criterios que su clase de salida realmente pueda demostrar.
 
 No crear la categoría formal `referencia experimental`. Cuando corresponda, usar:
 
@@ -189,7 +191,7 @@ MAP ≠ etapa de producción
 
 blockout ≠ prototipo visual
 prototipo visual ≠ asset
-resultado ASC ≠ evidencia
+resultado ASC ≠ evidencia de dominio por sí mismo
 preview ≠ master
 
 walkableEnvelope ≠ discretización
@@ -245,7 +247,7 @@ No debe utilizarse para:
 - cerrar decisiones OPEN;
 - alterar autoridad territorial, botánica o espacial;
 - crear nuevos estados de producción;
-- convertir resultados generativos en evidencia;
+- convertir resultados generativos en evidencia de dominio por sí mismos;
 - sustituir documentos normativos.
 
 ## 12. Auditoría
