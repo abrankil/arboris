@@ -61,3 +61,34 @@ The local replacement prevents a known-invalid candidate from replacing the
 corpus, but V1 does not promise automatic rollback after a replacement has
 already completed. Exact V3 artifact preservation and concurrency/locking remain
 OPEN.
+
+## Operational verification — REF-002
+
+The first real incorporation cycle was completed on 2026-09-19 using the reviewed
+Laysara V3 candidate #2, `Laysara: Summit Kingdom Presskit`.
+
+The initial trial persisted a manually constructed corpus compatible with the
+command but did not prove command execution. That limitation was detected during
+audit and the trial was corrected before integration. The corrected trial executed
+REF Incorporation Command V1 from the canonical pre-state containing only
+`REF-001`. The command reported `INCORPORATED REF-002`, persisted `REF-002`
+as an active REF, and advanced `nextRefNumber` from 2 to 3.
+
+The corrected HEAD `59e1cfecbd2145b9cde6abf68c129679ea255bce` passed CI #131
+and Audit Protocol Check #78/#79. PR #37 was then validated and merged into
+`main` as merge commit `726015157d1b07246b463604cc7fe3a09dad5908`.
+
+This verifies the V1 operational path for the tested environment:
+
+`reviewed V3 candidate → NEW decision → incorporation command → REF allocation → persisted corpus → corpus validation → CI → audit → integration`
+
+The verification does **not** close two known limits:
+
+- `registrationProvenance.sourceArtifact` and `sourceRecordNumber` remain
+  `null` until the exact V3 source artifact is canonically preserved; no
+  provenance identifier or hash may be invented.
+- The corrected operational execution was verified in Linux/CI. Windows-specific
+  replacement behavior for `fs.renameSync` remains unverified.
+
+These limits do not invalidate the REF-002 incorporation. They remain explicit
+OPEN items for future work.
