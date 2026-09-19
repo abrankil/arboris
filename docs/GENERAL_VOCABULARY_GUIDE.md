@@ -64,6 +64,8 @@ Estos estados corresponden a derivados como Instancias, MAP, blockouts o prototi
 | **Implementar** | Desarrollar en código, motor o repositorio. |
 | **Probar** | Evaluar y verificar comportamiento. |
 | **Auditar** | Revisar contra criterios, autoridad y protocolos. |
+| **Trazar** | Reconstruir la procedencia demostrable de un dato, decisión, instrucción o resultado, sin modificarlo. Ejemplo: “Trazar el origen de la instrucción de densidad vegetal.” |
+| **Diagnosticar** | Localizar la capa responsable o probablemente responsable de un defecto observado, antes de decidir qué objeto corregir. No implica autorización para corregir. Ejemplo: “Diagnosticar la baja densidad vegetal en ASC-TEST-017.” |
 | **Iterar** | Mejorar a partir de resultados. |
 | **Validar** | Confirmar que se cumplen criterios definidos. |
 
