@@ -51,6 +51,12 @@ For ASC semantics:
 
 - `docs/ARBORIS_SCENE_COMPILER.md`
 
+For end-to-end ASC workflow, upstream contract preparation, result review, repository integration, or advanced assurance such as negative harness, smoke, blind / isolated reproduction, freeze, provenance/manifests/evidence packages, reproducibility, or scoring:
+
+- `docs/ASC_WORKFLOW_GUIDE.md`
+
+Do not require `ASC_WORKFLOW_GUIDE.md` for a simple compile of an already prepared and authorized contract.
+
 For executable ASC v0.1 behavior:
 
 - `docs/ASC_V0_1_EXECUTABLE_SPEC.md`
