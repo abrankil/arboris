@@ -3,29 +3,50 @@
   "category": "support-guide",
   "name": "Piedra-guía",
   "displayName": "La Piedra-guía de líquen",
-  "status": "diseño vigente — limpieza manual v1",
-  "role": "Guía y asistencia durante la exploración, observación y navegación del juego.",
+  "status": "personaje canon — limpieza manual v4; sujeto a cambios posteriores",
+  "role": "Guía de tutoriales, misiones y logros; consejera y asistente permanente del jugador durante la exploración.",
   "botanicalEntity": false,
+  "personality": ["sabia", "curiosa"],
+  "communication": {
+    "primary": "burbujas de texto",
+    "secondary": "expresiones faciales",
+    "voice": "no definida"
+  },
+  "gameplayFunctions": [
+    "guía de tutorial",
+    "orientación de misiones",
+    "seguimiento y explicación de logros",
+    "consejo contextual",
+    "asistencia permanente al jugador"
+  ],
+  "narrative": {
+    "lichen": "rasgo visual; no tiene valor narrativo propio definido",
+    "presence": "permanente durante el juego"
+  },
   "visualIdentity": {
     "characterBasis": "Piedra redondeada cubierta parcialmente por líquen; personaje auxiliar no asociado a una especie botánica del catálogo.",
     "body": "Roca compacta, baja y ligeramente irregular, con planos minerales legibles en tonos gris cálido, taupe y café grisáceo.",
     "lichen": "Manto de líquen verde salvia y chartreuse pálido, asimétrico, sobre la zona superior izquierda; funciona como rasgo distintivo.",
     "face": "Dos ojos pequeños y oscuros con brillos discretos, más una boca mínima y amable.",
-    "locomotion": "Personaje auxiliar flotante o anclado según la escena; el sprite base no incluye suelo, sombra ni escenario.",
-    "style": "HD-2D pixel art 1:1, píxeles cuadrados, contorno escalonado, clusters legibles, paleta limitada y transparencia real."
+    "locomotion": "Puede permanecer apoyada en el entorno; otras formas de desplazamiento se definirán según la escena. El sprite base no incluye suelo, sombra ni escenario.",
+    "animationStates": ["reposo", "atención", "descubrimiento", "celebración"],
+    "style": "HD-2D pixel art 1:1, píxeles cuadrados construidos individualmente con pincel de 1 px, contorno escalonado, paleta limitada y transparencia real; sin clusters 2×2 ni bloques mayores."
   },
   "selectedDesign": {
-    "version": "manual-cleanup-v1",
+    "version": "manual-cleanup-v4",
     "asset": "shared/guides/piedra-guia-pixelorama-125x125.png",
+    "editableSource": "shared/guides/piedra-guia-pixelorama-125x125.pxo",
     "dimensions": "125x125",
     "isCanonical": true,
     "format": "PNG RGBA",
-    "alpha": "binario: 0 o 255"
+    "alpha": "binario: 0 o 255",
+    "pixelConstruction": "píxeles individuales 1×1 px; sin clusters 2×2 ni mayores"
   },
   "provenance": {
-    "source": "PNG limpiado manualmente entregado por Alvaro: output/piedra-guia/piedra-guia-pixelorama-125x125.png, relativo al espacio de trabajo Proyectos.",
-    "sha256": "e27466cbd693267fb63354675a631f42cbf8eb09b8ff16bb00f35ab8e1232660",
-    "designDecision": "La propuesta aprobada por Alejandra se integra como personaje auxiliar de guía y asistencia. Se conserva la roca con líquen, el rostro y la paleta de la limpieza manual; el archivo no representa una especie ni amplía el catálogo botánico por sí mismo.",
+    "source": "PNG y proyecto Pixelorama limpiados manualmente y entregados por Alvaro: output/piedra-guia/piedra-guia-pixelorama-revision-v4.png y .pxo, relativos al espacio de trabajo Proyectos.",
+    "sha256": "c91667be832625901b0b0e57b72e19aa12e34a66b8d4e9098514ccc2faaaa6c2",
+    "editableSourceSha256": "54332f611f893a8e7f983c9f9465ccabe15bcf95a495f365394c802f98ea40d0",
+    "designDecision": "La propuesta aprobada por Alejandra se integra como personaje auxiliar canon de guía y asistencia. Alvaro registra la limpieza manual v4 como referencia oficial vigente, sujeta a cambios posteriores; el archivo no representa una especie ni amplía el catálogo botánico por sí mismo.",
     "reference": "Piedra liquen.jpg, referencia visual entregada por el usuario; se usó para forma y cobertura de líquen, no para copiar fondo, suelo o elementos vegetales."
   }
 }
