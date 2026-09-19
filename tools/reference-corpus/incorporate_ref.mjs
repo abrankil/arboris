@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { incorporateReviewed, resolveRef, validateRefCorpus } from "./ref_corpus.mjs";
+import { incorporateReviewed, validateRefCorpus } from "./ref_corpus.mjs";
 
 export const COMMAND_VERSION = "1.0.0";
 export const CANONICAL_CORPUS_PATH = "data/references/graphic_references.json";
