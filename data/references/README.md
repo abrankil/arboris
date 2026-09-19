@@ -34,3 +34,30 @@ artifact has not been preserved in a stable project location, both fields remain
 `null`; do not invent a hash or locator. This is valid V1 provenance, but weaker
 than artifact-bound provenance and should be upgraded when the source artifact is
 canonically preserved.
+
+## Repeatable incorporation command
+
+Reviewed incorporation decisions are executed with:
+
+`npm.cmd run incorporate:reference -- <input.json>`
+
+The command contract is versioned independently as `commandVersion: "1.0.0"`.
+It accepts exactly `commandVersion`, `identityDecision`, `existingRefId`, and
+`record` at the top level. A `new` record must not provide the REF-managed
+fields `refId`, `identityStatus`, or `canonicalRefId`.
+
+The command validates the canonical corpus before acting, delegates REF allocation
+and record validation to `incorporateReviewed()` / `validateRefCorpus()`, writes
+a canonically serialized temporary file in the corpus directory, validates that
+temporary file, replaces the corpus, then reloads and validates the persisted
+result before reporting `INCORPORATED REF-###`.
+
+`existing` resolves the active canonical REF without writing the corpus.
+`uncertain` performs no write and exits with code 2 for human review. Errors
+exit with code 1 and never report incorporation.
+
+V1 is **single-writer**. Concurrent incorporations are not a supported operation.
+The local replacement prevents a known-invalid candidate from replacing the
+corpus, but V1 does not promise automatic rollback after a replacement has
+already completed. Exact V3 artifact preservation and concurrency/locking remain
+OPEN.

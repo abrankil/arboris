@@ -40,7 +40,8 @@
     "materialize:walkable-envelope": "node tools/map-navigation/materialize_walkable_envelope_001.mjs --out-dir build/map001-walkable-envelope",
     "validate:walkable-envelope-migration": "node tools/map-navigation/materialize_walkable_envelope_001.mjs --mode migration --out-dir build/map001-walkable-envelope-migration",
     "test:reference-corpus": "node --test tools/reference-corpus/*.test.mjs",
-    "validate:reference-corpus": "node tools/reference-corpus/validate_corpus.mjs data/references/graphic_references.json"
+    "validate:reference-corpus": "node tools/reference-corpus/validate_corpus.mjs data/references/graphic_references.json",
+    "incorporate:reference": "node tools/reference-corpus/incorporate_ref.mjs"
   },
   "dependencies": {
     "expo": "~57.0.24",
