@@ -38,7 +38,8 @@
     "run:map001-tilegrammar-preintegration": "node tools/integration/map001_tilegrammar_preintegration_001.mjs",
     "test:walkable-envelope": "node --test tools/map-navigation/*.test.mjs",
     "materialize:walkable-envelope": "node tools/map-navigation/materialize_walkable_envelope_001.mjs --out-dir build/map001-walkable-envelope",
-    "validate:walkable-envelope-migration": "node tools/map-navigation/materialize_walkable_envelope_001.mjs --mode migration --out-dir build/map001-walkable-envelope-migration"
+    "validate:walkable-envelope-migration": "node tools/map-navigation/materialize_walkable_envelope_001.mjs --mode migration --out-dir build/map001-walkable-envelope-migration",
+    "test:reference-corpus": "node --test tools/reference-corpus/*.test.mjs"
   },
   "dependencies": {
     "expo": "~57.0.24",
