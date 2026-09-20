@@ -46,7 +46,7 @@ La zona segura mínima alrededor del logotipo equivale a la altura de la `o`/hoj
 
 Se conserva el diseño canónico provisional del proyecto: silueta, proporciones, composición de letras, acento, hoja, separadores, eslogan, espaciado y elementos aprobados de la referencia. La limpieza elimina únicamente ruido JPEG, antialiasing accidental, bordes irregulares y desalineaciones respecto de la retícula.
 
-La referencia canónica vigente está en [`output/arboris/brand/canonical/arboris-logo-canonical-reference.jpg`](../../output/arboris/brand/canonical/arboris-logo-canonical-reference.jpg). El brillo/estrella que aparece en esa referencia se trata como elemento existente de la composición elegida, no como permiso para añadir efectos nuevos.
+La referencia canónica vigente está en [`assets/brand/canonical/arboris-logo-canonical-reference.jpg`](../assets/brand/canonical/arboris-logo-canonical-reference.jpg) (registrada en el repositorio; metadatos en [`arboris-logo-canonical-reference.meta.json`](../assets/brand/canonical/arboris-logo-canonical-reference.meta.json)). El brillo/estrella que aparece en esa referencia se trata como elemento existente de la composición elegida, no como permiso para añadir efectos nuevos.
 
 ## Prohibiciones
 

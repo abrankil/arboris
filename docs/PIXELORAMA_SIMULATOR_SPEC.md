@@ -36,7 +36,7 @@ PNG lógico + PNG de presentación + edición final en Pixelorama
 
 La única referencia visual activa para pruebas es la **referencia canónica provisional**, definida en [LOGO_PROTOTYPE.md](LOGO_PROTOTYPE.md), aplicada bajo el contrato extraído de [LOGOPIXEL_MANUAL_EXTRACTED.md](LOGOPIXEL_MANUAL_EXTRACTED.md). Las rutas históricas siguientes documentan referencias y proyectos anteriores; no son entregas alternativas activas.
 
-- referencia canónica provisional: `output/arboris/brand/canonical/arboris-logo-canonical-reference.jpg`;
+- referencia canónica provisional: `assets/brand/canonical/arboris-logo-canonical-reference.jpg`, relativo al repositorio (registrada; metadatos en `assets/brand/canonical/arboris-logo-canonical-reference.meta.json`);
 - manual: `../output/arboris/brand/logopixel-manual-original.png`, relativo al repositorio;
 - proyecto guardado: `../output/arboris/brand/arboris-logo-logopixel-v01.pxo`; verificar contenido antes de afirmar coincidencia con un PNG;
 - módulo visual del manual: 4×4 px;

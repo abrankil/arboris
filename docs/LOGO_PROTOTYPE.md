@@ -2,7 +2,7 @@
 
 Versión activa: **referencia canónica provisional**.
 
-- Referencia exacta: `../../output/arboris/brand/canonical/arboris-logo-canonical-reference.jpg`.
+- Referencia exacta: [`../assets/brand/canonical/arboris-logo-canonical-reference.jpg`](../assets/brand/canonical/arboris-logo-canonical-reference.jpg) (registrada en el repositorio; metadatos en [`arboris-logo-canonical-reference.meta.json`](../assets/brand/canonical/arboris-logo-canonical-reference.meta.json)).
 - Banco de pruebas: `../../output/arboris/brand/prototype/index.html`.
 - Procedencia y verificaciones: `../../output/arboris/brand/prototype/README.md`.
 
