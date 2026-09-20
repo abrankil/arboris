@@ -1,5 +1,3 @@
-import { getCharacterDefinition } from './contract.mjs';
-
 export const H16_STATUSES = Object.freeze(['observed', 'not_observable', 'uncertain']);
 const STATUS_SET = new Set(H16_STATUSES);
 const ACQUISITION_MODES = new Set(['manual', 'prefilled', 'automatic']);
@@ -25,11 +23,28 @@ function getKnownCharacter(dataset, characterId) {
 
 export function assessAceEligibility(dataset, characterId) {
   const character = dataset?.allCharactersById?.get?.(characterId);
-  if (!character) return { eligible: false, reason: 'unknown_character' };
-  if (character.pilotStatus !== dataset.computableStatus) {
-    return { eligible: false, reason: 'retired_character' };
+  if (!character) {
+    return {
+      eligible: false,
+      reason: 'unknown_character',
+      canonicalStatus: null,
+    };
   }
-  return { eligible: true, reason: null };
+
+  const canonicalStatus = character.pilotStatus ?? null;
+  if (canonicalStatus !== dataset.computableStatus) {
+    return {
+      eligible: false,
+      reason: 'non_computable_character',
+      canonicalStatus,
+    };
+  }
+
+  return {
+    eligible: true,
+    reason: null,
+    canonicalStatus,
+  };
 }
 
 export function validatePhotoEvidence(input) {
