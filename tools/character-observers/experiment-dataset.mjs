@@ -153,14 +153,26 @@ export async function loadExperimentDataset(options = {}) {
     readJson(join(botanicalDir, 'photos.json')),
   ]);
 
-  const photosById = buildPhotosIndex(photos);
+  const allPhotosById = buildPhotosIndex(photos);
   const individualToPartition = buildIndividualPartitionIndex(
     split.partitions ?? {},
-    photosById,
+    allPhotosById,
   );
   const excludedPhotos = split.excludedPhotos ?? {};
 
-  validateExcludedPhotos(excludedPhotos, photosById);
+  validateExcludedPhotos(excludedPhotos, allPhotosById);
+
+  // H16-EXP-001 is a closed experimental universe defined by its split:
+  // only photos belonging to a declared partition, plus explicitly excluded
+  // photos retained for exclusion/provenance checks, are part of this dataset.
+  // data/botanical/photos.json is a broader canonical photo registry and must
+  // not silently expand the experiment when new photos are added there.
+  const experimentPhotos = photos.filter(photo => (
+    Object.prototype.hasOwnProperty.call(excludedPhotos, photo.photo_id)
+    || individualToPartition.has(photo.individual_id)
+  ));
+  const photosById = buildPhotosIndex(experimentPhotos);
+
   validateAnnotations(annotations, photosById);
 
   // Trusted layer only: repoPath must never be exposed by buildObserverInput().
