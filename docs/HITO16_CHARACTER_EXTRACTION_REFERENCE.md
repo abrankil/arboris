@@ -1497,19 +1497,21 @@ EN REVISIÓN
 
 # PARTE VIII — ESTADO DE IMPLEMENTACIÓN Y PRÓXIMAS ACCIONES
 
-## 26. Estado ya validado
+## 26. Snapshot histórico de implementación al 2026-09-18
 
-A fecha de esta revisión:
+La lista siguiente describe el estado registrado para esta referencia el 2026-09-18. Es evidencia histórica de esa revisión, no una declaración del estado actual de la rama. El cierre posterior de H16 C1.3 R1.1 se registra en [`H16_C1_3_R1_1_CLOSEOUT_2026-09-20.md`](H16_C1_3_R1_1_CLOSEOUT_2026-09-20.md).
+
+En el snapshot del 2026-09-18:
 
 - [x] Estado documental corregido a `EN REVISIÓN`.
 - [x] Vocabulario conceptual y serializado normalizado.
 - [x] `uncertain` y `not_observable` preservados por separado.
 - [x] Metadata rica preservada durante normalización de evidencia.
 - [x] Integración con ciclo `attempted / resolved / retry` validada.
-- [x] Rama de Hito 16 rebasada sobre el `main` vigente.
+- [x] En aquel snapshot se registró la rama de Hito 16 como rebasada sobre el `main` vigente. Este dato histórico no describe ni autoriza sincronizar la rama de trabajo actual.
 - [x] Tests de ACE: `24/24 PASS`.
 - [x] Tests de observadores e integración H16: `29/29 PASS`.
-- [x] Gate integrado `npm test`: PASS.
+- [x] En aquel snapshot se registró el gate integrado `npm test`: PASS. No es el resultado de pruebas ejecutadas para el cierre R1.1 del 2026-09-20.
 - [x] Protocolo mínimo de dataset `CH-003` definido.
 - [x] Cobertura de `finamente_serrado` revisada.
 - [x] `finamente_serrado` mantenido en el vocabulario canónico sin inventar cobertura experimental.
