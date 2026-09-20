@@ -364,6 +364,7 @@ export async function loadCanonicalDataset(options = {}) {
 
   return {
     metadata,
+    computableStatus,
     species: normalizedSpecies,
     characters: activeCharacters,
     allCharacters,

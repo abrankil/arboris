@@ -102,19 +102,19 @@ test('canonical and computable relation views remain structurally separate', asy
 
   assert.ok(dataset.allRelationsBySpecies instanceof Map);
   assert.ok(dataset.relationsBySpecies instanceof Map);
-  assert.ok(dataset.allCharactersById.has('CH-007'));
-  assert.ok(!dataset.charactersById.has('CH-007'));
+  assert.ok(dataset.allCharactersById.has('CH-024'));
+  assert.ok(!dataset.charactersById.has('CH-024'));
 
   const historicalRelation = dataset.allRelationsBySpecies
-    .get('SP-002')
-    ?.get('CH-007');
+    .get('SP-005')
+    ?.get('CH-024');
 
   assert.ok(
     historicalRelation,
     'test setup requires an explicit non-computable species-character relation',
   );
   assert.equal(
-    dataset.relationsBySpecies.get('SP-002')?.has('CH-007') ?? false,
+    dataset.relationsBySpecies.get('SP-005')?.has('CH-024') ?? false,
     false,
   );
 });
@@ -131,17 +131,17 @@ test('non-computable variability is preserved descriptively but excluded from AC
     );
 
     const retiredRelation = relations.find(
-      relation => relation.caracter_id === 'CH-007',
+      relation => relation.caracter_id === 'CH-024',
     );
     assert.ok(
       retiredRelation,
-      'test setup requires an explicit CH-007 relation in species_characters.json',
+      'test setup requires an explicit CH-024 relation in species_characters.json',
     );
 
     const descriptiveEntry = {
       species_id: retiredRelation.species_id,
-      caracter_id: 'CH-007',
-      estado_alternativo: 'ausente',
+      caracter_id: 'CH-024',
+      estado_alternativo: 'presente',
       contexto_id: null,
       frecuencia: 'baja',
       fuente_id: retiredRelation.fuente_id,
@@ -157,23 +157,23 @@ test('non-computable variability is preserved descriptively but excluded from AC
     const withDescriptive = await loadCanonicalDataset({ botanicalDir });
     const preserved = withDescriptive.variabilityBySpecies
       .get(descriptiveEntry.species_id)
-      ?.get('CH-007');
+      ?.get('CH-024');
 
     assert.ok(Array.isArray(preserved));
     assert.ok(
-      preserved.some(entry => entry.alternativeState === 'ausente'),
+      preserved.some(entry => entry.alternativeState === 'presente'),
       'non-computable variability must remain descriptively recoverable',
     );
     assert.ok(
       withDescriptive.allRelationsBySpecies
         .get(descriptiveEntry.species_id)
-        ?.has('CH-007'),
+        ?.has('CH-024'),
       'canonical relation must remain in allRelations',
     );
     assert.equal(
       withDescriptive.relationsBySpecies
         .get(descriptiveEntry.species_id)
-        ?.has('CH-007') ?? false,
+        ?.has('CH-024') ?? false,
       false,
       'non-computable relation must not enter the ACE relation view',
     );
@@ -311,7 +311,7 @@ test('canonical dataset rejects variability for an unknown character', async () 
 
     await assert.rejects(
       () => loadCanonicalDataset({ botanicalDir }),
-      /variability references unknown or inactive caracter_id CH-999/i,
+      /variability references unknown caracter_id CH-999/i,
     );
   });
 });
