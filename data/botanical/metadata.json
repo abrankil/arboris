@@ -10,6 +10,8 @@
   "computable_status": "activo",
   "excluded_status": "retirado|pendiente_revision",
   "export_integrity": "SHA-256",
+  "controlled_vocabulary_spec_id": "arboris-controlled-vocabularies",
+  "controlled_vocabulary_spec_version": "1.0.0",
   "source_file": "Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx",
-  "source_sha256": "ee3c6d47a33a835f6a6e8f2622dfeb75a536f13b08f3b3cba5a5707f56b6e1f8"
+  "source_sha256": "52cc20777698f1f92d3455e30abac0be4925aa4f9a2b2195a048d871fc75a319"
 }
