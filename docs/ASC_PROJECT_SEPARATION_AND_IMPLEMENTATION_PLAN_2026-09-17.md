@@ -236,3 +236,20 @@ No se modificaron:
 - configuración de ejecución.
 
 La siguiente modificación de código debe esperar a la disponibilidad de la plataforma/repositorio de ASC y al diagnóstico de Fase 1.
+
+## 11. Estado de la rama de trabajo v0.2 (no fusionada)
+
+**Fecha del registro:** 2026-09-19  
+**Estatus de la evidencia:** `DECLARED` por el usuario en conversación con un agente Claude Code; no verificado de forma independiente por esa sesión más allá de confirmar que la rama existe y no está fusionada.
+
+Existe una rama remota, `fix/hito16-engine-applicability`, con un commit (`53740df`, 2026-09-18) titulado "Add ASC v0.2 workflow capabilities" que añade `docs/ASC_V0_2_EXECUTABLE_SPEC.md` y modifica `tools/asc/compile_asc.mjs` y sus pruebas. Esa rama no está fusionada a `main`; `main` no contiene ese archivo ni esos cambios.
+
+El usuario declaró explícitamente el motivo: **la versión 2.0 está en pausa porque la versión 1 (`ASC v0.1`, `compile-only`) sigue funcionando para las necesidades actuales.**
+
+Esta declaración:
+
+- no cierra ninguno de los elementos `OPEN` listados en la sección 7;
+- no constituye por sí sola el diagnóstico de Fase 1 ni autoriza avanzar a Fase 1 sin la plataforma/repositorio destino;
+- sí aclara que la existencia de trabajo ya escrito para v0.2 en una rama no fusionada es una pausa intencional, no un incumplimiento del gate descrito al cierre de la sección 10 ni una migración parcial en curso.
+
+No se fusiona, revisa técnicamente ni se promueve aquí el contenido de esa rama. Este registro documenta únicamente el motivo declarado de la pausa, para trazabilidad futura.
