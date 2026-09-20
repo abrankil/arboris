@@ -97,6 +97,131 @@ test('loads the Master 2.0 canonical identification dataset', async () => {
   assert.ok(!dataset.charactersById.has('CH-017'));
 });
 
+test('canonical and computable relation views remain structurally separate', async () => {
+  dataset ??= await loadCanonicalDataset();
+
+  assert.ok(dataset.allRelationsBySpecies instanceof Map);
+  assert.ok(dataset.relationsBySpecies instanceof Map);
+  assert.ok(dataset.allCharactersById.has('CH-007'));
+  assert.ok(!dataset.charactersById.has('CH-007'));
+
+  const historicalRelation = dataset.allRelationsBySpecies
+    .get('SP-002')
+    ?.get('CH-007');
+
+  assert.ok(
+    historicalRelation,
+    'test setup requires an explicit non-computable species-character relation',
+  );
+  assert.equal(
+    dataset.relationsBySpecies.get('SP-002')?.has('CH-007') ?? false,
+    false,
+  );
+});
+
+test('non-computable variability is preserved descriptively but excluded from ACE inference', async () => {
+  await withTemporaryBotanicalData(async botanicalDir => {
+    const relations = await readBotanicalJson(
+      botanicalDir,
+      'species_characters.json',
+    );
+    const variability = await readBotanicalJson(
+      botanicalDir,
+      'character_variability.json',
+    );
+
+    const retiredRelation = relations.find(
+      relation => relation.caracter_id === 'CH-007',
+    );
+    assert.ok(
+      retiredRelation,
+      'test setup requires an explicit CH-007 relation in species_characters.json',
+    );
+
+    const descriptiveEntry = {
+      species_id: retiredRelation.species_id,
+      caracter_id: 'CH-007',
+      estado_alternativo: 'ausente',
+      contexto_id: null,
+      frecuencia: 'baja',
+      fuente_id: retiredRelation.fuente_id,
+      nota: 'R1.1 structural-isolation regression fixture',
+    };
+    variability.push(descriptiveEntry);
+    await writeBotanicalJson(
+      botanicalDir,
+      'character_variability.json',
+      variability,
+    );
+
+    const withDescriptive = await loadCanonicalDataset({ botanicalDir });
+    const preserved = withDescriptive.variabilityBySpecies
+      .get(descriptiveEntry.species_id)
+      ?.get('CH-007');
+
+    assert.ok(Array.isArray(preserved));
+    assert.ok(
+      preserved.some(entry => entry.alternativeState === 'ausente'),
+      'non-computable variability must remain descriptively recoverable',
+    );
+    assert.ok(
+      withDescriptive.allRelationsBySpecies
+        .get(descriptiveEntry.species_id)
+        ?.has('CH-007'),
+      'canonical relation must remain in allRelations',
+    );
+    assert.equal(
+      withDescriptive.relationsBySpecies
+        .get(descriptiveEntry.species_id)
+        ?.has('CH-007') ?? false,
+      false,
+      'non-computable relation must not enter the ACE relation view',
+    );
+
+    const baselineDir = join(
+      resolve(botanicalDir, '..'),
+      'baseline-botanical',
+    );
+    await cp(botanicalDir, baselineDir, { recursive: true });
+    const baselineVariability = await readBotanicalJson(
+      baselineDir,
+      'character_variability.json',
+    );
+    baselineVariability.pop();
+    await writeBotanicalJson(
+      baselineDir,
+      'character_variability.json',
+      baselineVariability,
+    );
+    const withoutDescriptive = await loadCanonicalDataset({
+      botanicalDir: baselineDir,
+    });
+
+    const evidence = [{
+      characterId: 'CH-003',
+      observedStates: ['entero'],
+    }];
+    const candidateIds = ['SP-001', 'SP-002'];
+
+    assert.deepEqual(
+      filterCandidates(withDescriptive, evidence, candidateIds),
+      filterCandidates(withoutDescriptive, evidence, candidateIds),
+    );
+    assert.deepEqual(
+      assessIdentification(withDescriptive, evidence, candidateIds),
+      assessIdentification(withoutDescriptive, evidence, candidateIds),
+    );
+    assert.equal(
+      nextCharacter(withDescriptive, evidence, candidateIds)?.characterId ?? null,
+      nextCharacter(withoutDescriptive, evidence, candidateIds)?.characterId ?? null,
+    );
+    assert.equal(
+      retryCharacter(withDescriptive, evidence, 'CH-003', candidateIds)?.characterId ?? null,
+      retryCharacter(withoutDescriptive, evidence, 'CH-003', candidateIds)?.characterId ?? null,
+    );
+  });
+});
+
 test('loads the complementary context and variability layer', async () => {
   dataset ??= await loadCanonicalDataset();
 
