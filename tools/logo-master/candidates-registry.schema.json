@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "arboris:logo-master:candidates-registry",
+  "title": "Árboris Logo Master — Registro central de candidatas",
+  "description": "Índice de todas las candidatas de master existentes. El status de cada entrada debe coincidir con el status del manifest.json de esa candidata; no es una segunda fuente de verdad independiente. Usado para validar supersededBy.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "candidates"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["candidateId", "manifestPath", "status", "createdAt"],
+        "properties": {
+          "candidateId": { "type": "string", "pattern": "^candidate-[0-9]{3}$" },
+          "manifestPath": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "technical-review",
+              "technical-validated",
+              "art-approved",
+              "rejected",
+              "superseded"
+            ]
+          },
+          "createdAt": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "arboris:logo-master:manifest",
+  "title": "Árboris Logo Master Manifest",
+  "description": "Contrato estructural del manifiesto de una candidata de master de logo. Las reglas de transición de estado y las obligaciones condicionales (decision, supersededBy, exports por status) se aplican en tools/logo-master/validate_manifest.mjs, no solo en este esquema estructural.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "candidateId",
+    "status",
+    "reference",
+    "sourcePxo",
+    "layers",
+    "exports",
+    "approval",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "candidateId": {
+      "type": "string",
+      "pattern": "^candidate-[0-9]{3}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "technical-review",
+        "technical-validated",
+        "art-approved",
+        "rejected",
+        "superseded"
+      ]
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256Expected"],
+      "properties": {
+        "path": { "type": "string" },
+        "sha256Expected": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "sourcePxo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "producedIn", "layerCountDeclared", "verifiedAt"],
+      "properties": {
+        "path": { "type": "string" },
+        "producedIn": { "type": "string", "const": "Pixelorama" },
+        "layerCountDeclared": { "type": "integer", "const": 7 },
+        "verifiedAt": { "type": ["string", "null"] }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "order", "layerConvention", "path", "visible", "locked", "gridCompliant"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["fondo", "wordmark", "hoja", "nervaduras", "tilde", "lema", "destello"]
+          },
+          "order": { "type": "integer", "minimum": 1, "maximum": 7 },
+          "layerConvention": {
+            "type": "string",
+            "const": "PROPOSED",
+            "description": "Convención de dirección de arte para esta candidata, no regla histórica extraída de ningún documento normativo."
+          },
+          "path": {
+            "type": ["string", "null"],
+            "description": "PNG nativo autoritativo único de la capa, ej. layers/02-wordmark.png. No existe variante 'presentation' por capa."
+          },
+          "visible": { "type": "boolean" },
+          "locked": { "type": "boolean" },
+          "gridCompliant": { "type": ["boolean", "null"] }
+        }
+      }
+    },
+    "exports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compositeNative", "compositePresentation"],
+      "description": "Solo el compuesto de las 7 capas. No hay exports por capa (ver layers[].path).",
+      "properties": {
+        "compositeNative": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["path", "format", "colorMode"],
+          "properties": {
+            "path": { "type": "string" },
+            "format": { "type": "string", "const": "png" },
+            "colorMode": { "type": "string", "const": "RGBA" }
+          }
+        },
+        "compositePresentation": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["path", "format", "scale", "resampling"],
+          "properties": {
+            "path": { "type": "string" },
+            "format": { "type": "string", "const": "png" },
+            "scale": { "type": "integer", "minimum": 1 },
+            "resampling": { "type": "string", "const": "nearest-neighbor" }
+          }
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artisticApprovalBy", "artisticApprovalStatus"],
+      "properties": {
+        "artisticApprovalBy": { "type": ["string", "null"] },
+        "artisticApprovalStatus": { "type": "string" }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason"],
+      "properties": {
+        "reason": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string" }
+      },
+      "description": "Obligatorio cuando status = rejected. Ausente en cualquier otro estado."
+    },
+    "supersededBy": {
+      "type": "string",
+      "pattern": "^candidate-[0-9]{3}$",
+      "description": "Obligatorio cuando status = superseded. Debe existir como candidateId en candidates-registry.json."
+    },
+    "createdAt": { "type": "string" },
+    "updatedAt": { "type": "string" },
+    "notes": { "type": "string" }
+  }
+}

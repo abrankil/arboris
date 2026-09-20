@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "candidateId": "candidate-001",
+  "status": "draft",
+  "reference": {
+    "path": "assets/brand/canonical/arboris-logo-canonical-reference.jpg",
+    "sha256Expected": "20957aeaf262defad7cd13e6274dcfd0cb6410c213f5dbbc05ffe7a420e761c8"
+  },
+  "sourcePxo": {
+    "path": "assets/brand/master/candidate-001/arboris-logo-master.pxo",
+    "producedIn": "Pixelorama",
+    "layerCountDeclared": 7,
+    "verifiedAt": null
+  },
+  "layers": [
+    { "id": "fondo", "order": 1, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
+    { "id": "wordmark", "order": 2, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
+    { "id": "hoja", "order": 3, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
+    { "id": "nervaduras", "order": 4, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
+    { "id": "tilde", "order": 5, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
+    { "id": "lema", "order": 6, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
+    { "id": "destello", "order": 7, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null }
+  ],
+  "exports": {
+    "compositeNative": null,
+    "compositePresentation": null
+  },
+  "approval": {
+    "artisticApprovalBy": null,
+    "artisticApprovalStatus": "OPEN"
+  },
+  "createdAt": "2026-09-20",
+  "updatedAt": "2026-09-20",
+  "notes": "Instancia inicial de candidate-001 en estado draft. No existen aún capas, .pxo ni exports físicos; assets/brand/master/candidate-001/ todavía no fue creado."
+}

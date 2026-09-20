@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "candidates": [
+    {
+      "candidateId": "candidate-001",
+      "manifestPath": "tools/logo-master/manifest.json",
+      "status": "draft",
+      "createdAt": "2026-09-20"
+    }
+  ]
+}
