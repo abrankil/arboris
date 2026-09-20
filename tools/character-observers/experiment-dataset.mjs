@@ -153,7 +153,31 @@ export async function loadExperimentDataset(options = {}) {
     readJson(join(botanicalDir, 'photos.json')),
   ]);
 
-  const photosById = buildPhotosIndex(photos);
+  const allPhotosById = buildPhotosIndex(photos);
+  const experimentPhotoIds = split.photoIds ?? [];
+
+  if (!Array.isArray(experimentPhotoIds) || experimentPhotoIds.length !== 45) {
+    throw new Error(
+      'H16-EXP-001 requires an explicit 45-photo manifest; received ' +
+      (Array.isArray(experimentPhotoIds) ? experimentPhotoIds.length : 'non-array'),
+    );
+  }
+
+  const uniquePhotoIds = new Set(experimentPhotoIds);
+  if (uniquePhotoIds.size !== experimentPhotoIds.length) {
+    throw new Error('H16-EXP-001 photo manifest contains duplicate photo_id values');
+  }
+
+  for (const photoId of experimentPhotoIds) {
+    if (!allPhotosById.has(photoId)) {
+      throw new Error('H16-EXP-001 photo manifest references unknown photo_id ' + photoId);
+    }
+  }
+
+  const photosById = buildPhotosIndex(
+    experimentPhotoIds.map(photoId => allPhotosById.get(photoId)),
+  );
+
   const individualToPartition = buildIndividualPartitionIndex(
     split.partitions ?? {},
     photosById,
