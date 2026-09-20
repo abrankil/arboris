@@ -130,10 +130,10 @@ function buildRelationIndex(relations) {
 function validateVariabilityEntries(
   variabilityEntries,
   speciesById,
-  charactersById,
+  allCharactersById,
   contextsById,
   sourcesById,
-  relationsBySpecies,
+  allRelationsBySpecies,
 ) {
   for (const entry of variabilityEntries) {
     const speciesId = entry.species_id;
@@ -148,14 +148,14 @@ function validateVariabilityEntries(
       );
     }
 
-    if (!characterId || !charactersById.has(characterId)) {
+    if (!characterId || !allCharactersById.has(characterId)) {
       throw new Error(
-        `Variability references unknown or inactive caracter_id ${characterId}`,
+        `Variability references unknown caracter_id ${characterId}`,
       );
     }
 
     if (
-      !relationsBySpecies
+      !allRelationsBySpecies
         .get(speciesId)
         ?.has(characterId)
     ) {
@@ -170,7 +170,7 @@ function validateVariabilityEntries(
       );
     }
 
-    const character = charactersById.get(characterId);
+    const character = allCharactersById.get(characterId);
 
     if (
       character.allowedStates.length > 0
@@ -325,8 +325,14 @@ export async function loadCanonicalDataset(options = {}) {
     ),
   );
 
+  // species_characters.json is the canonical authority for relation existence.
+  // Keep the complete relation registry separate from the computable ACE view.
+  const allRelations = speciesCharacters;
+  const allRelationsBySpecies =
+    buildRelationIndex(allRelations);
+
   const activeRelations =
-    speciesCharacters.filter(
+    allRelations.filter(
       relation =>
         activeCharacterIds.has(
           relation.caracter_id,
@@ -345,12 +351,10 @@ export async function loadCanonicalDataset(options = {}) {
   validateVariabilityEntries(
     characterVariability,
     speciesById,
-    charactersById,
     allCharactersById,
-    computableStatus,
     contextsById,
     sourcesById,
-    relationsBySpecies,
+    allRelationsBySpecies,
   );
 
   const variabilityBySpecies =
@@ -364,18 +368,22 @@ export async function loadCanonicalDataset(options = {}) {
     characters: activeCharacters,
     allCharacters,
     relations: activeRelations,
+    allRelations,
     contexts,
     sources,
     speciesById,
     charactersById,
+    allCharactersById,
     contextsById,
     sourcesById,
     relationsBySpecies,
+    allRelationsBySpecies,
     variabilityBySpecies,
     stats: {
       species: normalizedSpecies.length,
       activeCharacters: activeCharacters.length,
       activeRelations: activeRelations.length,
+      allRelations: allRelations.length,
       contexts: contextsById.size,
       sources: sourcesById.size,
       variabilityEntries: characterVariability.length,
