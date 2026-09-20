@@ -20,6 +20,8 @@ Explore a real area
 → access its species card and knowledge
 → continue exploring to find missing species.
 
+For Pilot 1.0, this loop is intentionally focused: the player receives a target species, consults its guide, explores for a candidate leaf, captures one complete leaf through a guided oval, marks the leaf–branch junction, and verifies the result against the six-species pilot library. The system must answer whether the scanned leaf corresponds to the target species; it is not a general-purpose plant identifier.
+
 Species should initially appear as undiscovered when appropriate.
 
 Collections can be associated with geographic areas, habitats, or ecosystems. As users explore new areas, new groups of native species can become available to discover.
@@ -67,6 +69,10 @@ A real-world observation is the underlying source of truth.
 
 The game layer may interpret a sufficiently supported observation as a discovery, unlock, collection entry, progress event, or achievement.
 
+Pilot 1.0 keeps the game result deliberately simple: an incorrect candidate returns “Incorrecto. Sigue intentando.”; a verified target returns “¡Correcto!” and unlocks the species and its library. Internal candidates and uncertainty remain available to the scientific and diagnostic layers without overloading the mission interface.
+
+These messages describe outcomes after evidence evaluation. Insufficient or unobservable evidence must instead preserve the observation and request a useful character or remain unresolved; it must not be translated into “Incorrecto” or “¡Correcto!”. The Python integration currently produces experimental hypotheses, not a validated target-verification or unlocking decision. See the [integration checkpoint](INTEGRATION_2026-09-15.md).
+
 The scientific layer exposes the underlying evidence and structured observation data.
 
 Conceptually:
@@ -97,6 +103,10 @@ Assisted identification should expose meaningful visible characters and ecologic
 
 The player should gradually become better at recognizing plants through exploration.
 
+## Adopted gameplay interaction rule
+
+The gameplay layer follows **observe → interpret → unlock**. Encounters begin with visible botanical or environmental evidence, let the player form or refine an interpretation, and produce a clear consequence such as new evidence, fewer candidates, a species card, a discovery, or progress. Alternative routes are allowed when they arise from different available evidence, but uncertainty and the original observation must remain intact. The detailed system rules are in [gameplay systems direction](GAMEPLAY_SYSTEMS_DIRECTION.md).
+
 ## MVP scope
 
 Version 0.1 should remain intentionally small:
@@ -111,6 +121,10 @@ Version 0.1 should remain intentionally small:
 - evidence-based unlocking;
 - species cards;
 - collection progress.
+
+The Pilot 1.0 acquisition protocol is also part of the MVP boundary: one dominant, complete and centered leaf per capture; quality control before acceptance; user-marked leaf–branch junction; segmentation, orientation and foliar character extraction; adaptive diagnostic questions only when needed. Flowers, fruits, bark, arbitrary plant recognition and systematic adaxial/abaxial capture remain outside 1.0.
+
+Pilot 1.0 also includes an exploration-companion layer: after receiving a target mission and clues, the user walks toward a plausible real-world destination while the phone detects movement and animates a looping procedural pixel-art environment with optional environmental clues, related species, and lightweight observation activities. This layer gives the user something meaningful to do during the journey; it never counts movement or a visual appearance as botanical evidence. The user decides when to open the scanner, and only validated foliar evidence unlocks the target species. See [Pilot 1.0 exploration companion](PILOT_1_0_EXPLORATION_COMPANION.md).
 
 Do not add social networks, leaderboards, competitive mechanics, complex achievements, cloud synchronization, or other large systems merely because they are common in games.
 

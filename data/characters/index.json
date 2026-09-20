@@ -42,7 +42,8 @@
       "shared/promotional/arboris-tres-personajes-125x125.png"
     ],
     "guides": [
-      "shared/guides/piedra-guia-pixelorama-125x125.png"
+      "shared/guides/piedra-guia-pixelorama-125x125.png",
+      "shared/guides/piedra-guia-pixelorama-125x125.pxo"
     ],
     "discardedProposals": []
   }

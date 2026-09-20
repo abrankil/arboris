@@ -6,6 +6,10 @@ Las referencias vegetales canónicas de Alejandra están registradas en el [cat�
 
 Los nuevos escenarios deben seguir la [especificación de producción](../../ENVIRONMENT_PRODUCTION_SPEC.md). Las imágenes listadas aquí son referencias y ensayos anteriores a ese contrato.
 
+## Módulos ambientales aprobados
+
+Los módulos individuales se preparan para reconstruir posteriormente las capas completas de parallax. El primer módulo aprobado es `data/environment/modules/arbol-modulo-v2.png`, de 480×270 px y transparencia real, acompañado por su fuente editable `arbol-modulo-v2.png.pxo`. La limpieza manual fue verificada en el repositorio. El árbol queda aprobado como dirección visual, pero requiere auditoría de contorno negro de 1 px antes de declararse master definitivo. Las siguientes revisiones deben incorporar ese delineado continuo establecido para todo asset ambiental. Su tratamiento visual toma como referencia la línea de los personajes de Arboris; Alejandra lo identifica como cercano al Peumo en apariencia. Esa semejanza es una decisión estilística ambiental y no constituye una nueva ficha botánica ni una identificación taxonómica.
+
 ## Referencias visuales vigentes
 
 | Archivo | Dimensiones verificadas | Uso |
