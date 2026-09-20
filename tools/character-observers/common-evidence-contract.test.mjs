@@ -159,11 +159,27 @@ test('retired character remains structurally valid but is explicitly ACE-ineligi
     acquisition: { mode: 'manual' },
   }, photoMap);
   assert.equal(retired.valid, true);
-  assert.deepEqual(assessAceEligibility(dataset, 'CH-007'), { eligible: false, reason: 'retired_character' });
-  assert.deepEqual(assessAceEligibility(dataset, 'CH-NOT-REAL'), { eligible: false, reason: 'unknown_character' });
+  assert.deepEqual(assessAceEligibility(dataset, 'CH-007'), {
+    eligible: false,
+    reason: 'non_computable_character',
+    canonicalStatus: 'retirado',
+  });
+  assert.deepEqual(assessAceEligibility(dataset, 'CH-024'), {
+    eligible: false,
+    reason: 'non_computable_character',
+    canonicalStatus: 'pendiente_revision',
+  });
+  assert.deepEqual(assessAceEligibility(dataset, 'CH-NOT-REAL'), {
+    eligible: false,
+    reason: 'unknown_character',
+    canonicalStatus: null,
+  });
   assert.throws(
     () => characterObservationToAceEvidence(dataset, retired.normalized, photoMap),
-    error => error?.code === 'ACE_INELIGIBLE' && error?.aceEligibility?.reason === 'retired_character',
+    error =>
+      error?.code === 'ACE_INELIGIBLE'
+      && error?.aceEligibility?.reason === 'non_computable_character'
+      && error?.aceEligibility?.canonicalStatus === 'retirado',
   );
 });
 
