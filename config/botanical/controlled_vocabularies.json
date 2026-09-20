@@ -1,0 +1,29 @@
+﻿{
+  "specification_id": "arboris-controlled-vocabularies",
+  "specification_version": "1.0.0",
+  "contract_id": "ASC-MASTER2-CONTROLLED-VOCABULARY-CONTRACT",
+  "contract_version": "1.0.0",
+  "scope": [
+    "Especie_Caracter.variabilidad",
+    "Especie_Caracter.interaction_safety"
+  ],
+  "fields": {
+    "Especie_Caracter.variabilidad": {
+      "nullable": true,
+      "allowed_values": [
+        "baja",
+        "media",
+        "alta"
+      ]
+    },
+    "Especie_Caracter.interaction_safety": {
+      "nullable": false,
+      "allowed_values": [
+        "seguro",
+        "precaucion",
+        "evaluar_antes",
+        "no_provocar"
+      ]
+    }
+  }
+}
