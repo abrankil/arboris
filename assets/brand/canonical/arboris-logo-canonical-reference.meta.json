@@ -1,0 +1,21 @@
+{
+  "role": "canonical-reference",
+  "filename": "arboris-logo-canonical-reference.jpg",
+  "status": "registered",
+  "sha256": "20957aeaf262defad7cd13e6274dcfd0cb6410c213f5dbbc05ffe7a420e761c8",
+  "dimensions": { "width": 1600, "height": 656 },
+  "aspectRatio": "100:41",
+  "sourceProvenance": {
+    "incorporationMethod": "chat-attachment-from-project-direction",
+    "registeredAt": "2026-09-20",
+    "priorProvenance": "UNRESOLVED",
+    "evidenceNote": "SHA-256 verified after copy into assets/brand/canonical/; matches the fingerprint declared at incorporation time."
+  },
+  "registeredAt": "2026-09-20",
+  "registeredBy": "alesotoprado@gmail.com",
+  "approval": {
+    "artisticApprovalBy": null,
+    "artisticApprovalStatus": "OPEN"
+  },
+  "notes": "Referencia canónica provisional. No es máster editable ni aprobación artística. Ver docs/LOGO_PROTOTYPE.md y docs/LOGOPIXEL_MANUAL_EXTRACTED.md."
+}
