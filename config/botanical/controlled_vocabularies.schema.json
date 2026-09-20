@@ -1,0 +1,68 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "arboris-controlled-vocabularies-schema",
+  "title": "Árboris Controlled Vocabularies Specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "specification_id",
+    "specification_version",
+    "contract_id",
+    "contract_version",
+    "scope",
+    "fields"
+  ],
+  "properties": {
+    "specification_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "specification_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "fields": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nullable",
+          "allowed_values"
+        ],
+        "properties": {
+          "nullable": {
+            "type": "boolean"
+          },
+          "allowed_values": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

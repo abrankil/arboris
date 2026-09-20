@@ -10,6 +10,13 @@ from pathlib import Path
 
 from openpyxl import load_workbook
 
+from controlled_vocabulary import (
+    ControlledVocabularyError,
+    load_spec,
+    resolve_field,
+    validate_spec,
+)
+
 
 ROOT = Path(__file__).resolve().parents[2]
 MASTER = (
@@ -415,6 +422,96 @@ def validate_json_value(value, spec, *, location, errors):
         )
 
 
+def validate_controlled_vocabulary_records(
+    records,
+    *,
+    sheet_name,
+    spec,
+    errors,
+):
+    """Validate governed vocabulary fields without normalization or coercion."""
+
+    try:
+        validate_spec(spec)
+    except ControlledVocabularyError as exc:
+        raise ValidationError(
+            f"Controlled-vocabulary specification invalid: {exc}"
+        ) from exc
+
+    governed_fields = []
+
+    for scoped_name in spec["scope"]:
+        prefix, separator, field_name = scoped_name.partition(".")
+
+        if not separator or not prefix or not field_name:
+            raise ValidationError(
+                f"Invalid governed field reference: {scoped_name!r}"
+            )
+
+        if prefix == sheet_name:
+            governed_fields.append((scoped_name, field_name))
+
+    if not governed_fields:
+        raise ValidationError(
+            f"No controlled-vocabulary fields governed for sheet "
+            f"{sheet_name!r}."
+        )
+
+    for record_number, record in enumerate(records, start=1):
+        if not isinstance(record, dict):
+            errors.append(
+                f"{sheet_name} registro {record_number}: "
+                f"esperaba objeto, recibi? {type(record).__name__}."
+            )
+            continue
+
+        sid = record.get("species_id")
+        cid = record.get("caracter_id")
+
+        if sid is not None or cid is not None:
+            location = f"{sid}/{cid}"
+        else:
+            location = f"{sheet_name} registro {record_number}"
+
+        for scoped_name, field_name in governed_fields:
+            try:
+                contract = resolve_field(scoped_name, spec)
+            except ControlledVocabularyError as exc:
+                raise ValidationError(
+                    f"Cannot resolve controlled vocabulary "
+                    f"{scoped_name!r}: {exc}"
+                ) from exc
+
+            if field_name not in record:
+                errors.append(
+                    f"{location}: falta campo gobernado {field_name!r}."
+                )
+                continue
+
+            value = record[field_name]
+
+            if value is None:
+                if not contract["nullable"]:
+                    errors.append(
+                        f"{location}.{field_name}: null no permitido."
+                    )
+                continue
+
+            if not isinstance(value, str):
+                errors.append(
+                    f"{location}.{field_name}: esperaba string, "
+                    f"recibi? {type(value).__name__}."
+                )
+                continue
+
+            if value not in contract["allowed_values"]:
+                errors.append(
+                    f"{location}.{field_name}: valor no permitido "
+                    f"{value!r}; permitidos="
+                    f"{list(contract['allowed_values'])!r}."
+                )
+
+
 def first_difference(expected, actual):
     if len(expected) != len(actual):
         return f"cantidad de registros: Master={len(expected)}, JSON={len(actual)}"
@@ -472,6 +569,38 @@ def main():
         export_plan = load_export_plan(workbook)
         schema = load_schema(workbook)
         master_metadata = metadata_from_master(workbook)
+
+        try:
+            controlled_vocabulary_spec = load_spec()
+        except ControlledVocabularyError as exc:
+            raise ValidationError(
+                f"Controlled-vocabulary specification invalid: {exc}"
+            ) from exc
+
+        controlled_vocabulary_bindings = {
+            "controlled_vocabulary_spec_id":
+                controlled_vocabulary_spec["specification_id"],
+            "controlled_vocabulary_spec_version":
+                controlled_vocabulary_spec["specification_version"],
+        }
+
+        for binding_key, expected_value in (
+            controlled_vocabulary_bindings.items()
+        ):
+            actual_value = master_metadata.get(binding_key)
+
+            if actual_value != expected_value:
+                errors.append(
+                    f"{METADATA_SHEET}.{binding_key}: "
+                    f"Master={actual_value!r}, "
+                    f"SPEC={expected_value!r}."
+                )
+
+        if errors:
+            raise ValidationError(
+                "controlled-vocabulary binding mismatch"
+            )
+
         separator = str(master_metadata.get("multi_state_separator") or "|")
 
         expected_filenames = {item["filename"] for item in export_plan}
@@ -606,6 +735,13 @@ def main():
         characters = datasets.get("characters", [])
         species_characters = datasets.get("species_characters", [])
         sources = datasets.get("sources", [])
+
+        validate_controlled_vocabulary_records(
+            species_characters,
+            sheet_name="Especie_Caracter",
+            spec=controlled_vocabulary_spec,
+            errors=errors,
+        )
         glossary = datasets.get("glossary", [])
         photos = datasets.get("photos", [])
         model_errors = datasets.get("model_errors", [])
