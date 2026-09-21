@@ -199,7 +199,7 @@ test('T-I9-08 rejects OPEN contradiction when current operational set no longer 
     areStatesIncompatible: incompatible,
   });
   assert.equal(r.valid, false);
-  assert.match(r.errors.join(' '), /trigger evidenceRefs must contain at least one incompatible pair|OPEN contradiction but no current incompatible pair/);
+  assert.match(r.errors.join(' '), /OPEN contradiction but no current incompatible pair/);
 });
 
 test('T-I9-09 transition creates contradiction only from current CONFIRMED OBSERVED trigger evidence', () => {
@@ -244,20 +244,25 @@ test('T-I9-10 OPEN->RESOLVED is valid only after current incompatibility disappe
   assert.equal(validateApcContradictionTransition(before, afterResolved, { areStatesIncompatible: incompatible }).valid, true);
 });
 
-test('T-I9-11 RESOLVED contradiction is terminal and immutable', () => {
+test('T-I9-11 RESOLVED contradiction is terminal and evidenceRefs are immutable', () => {
   const base = session({
     evidenceItems: conflictingEvidence(),
     contradictions: [contradiction({ status: 'RESOLVED' })],
   });
-  const next = structuredClone(base);
-  next.contradictions[0].status = 'OPEN';
-  next.contradictions[0].evidenceRefs = [
-    { evidenceId: 'EV-001', revision: 1 },
-    { evidenceId: 'EV-002', revision: 1 },
-  ];
-  const r = validateApcContradictionTransition(base, next, { areStatesIncompatible: incompatible });
+  const reopened = structuredClone(base);
+  reopened.contradictions[0].status = 'OPEN';
+  let r = validateApcContradictionTransition(base, reopened, { areStatesIncompatible: incompatible });
   assert.equal(r.valid, false);
   assert.match(r.errors.join(' '), /RESOLVED status is terminal/);
+
+  const mutated = structuredClone(base);
+  mutated.contradictions[0].evidenceRefs = [
+    { evidenceId: 'EV-001', revision: 1 },
+    { evidenceId: 'EV-001', revision: 1 },
+  ];
+  r = validateApcContradictionTransition(base, mutated, { areStatesIncompatible: incompatible });
+  assert.equal(r.valid, false);
+  assert.match(r.errors.join(' '), /immutable field evidenceRefs/);
 });
 
 test('T-I9-12 recurrence requires resolved direct predecessor and preserves series', () => {
@@ -288,4 +293,29 @@ test('T-I9-13 recurrence chain cannot fork', () => {
   const r = validateApcSession(session({ evidenceItems: conflictingEvidence(), contradictions: [root, a, b] }));
   assert.equal(r.valid, false);
   assert.match(r.errors.join(' '), /forks at CON-001/);
+});
+
+
+test('T-I9-14 RESOLVED historical trigger is not revalidated under later incompatibility semantics', () => {
+  const evs = [
+    evidence({ evidenceId: 'EV-001', photoId: 'PH-001', photoEvidenceRef: 'PE-001', observedState: 'entero' }),
+    evidence({ evidenceId: 'EV-002', photoId: 'PH-002', photoEvidenceRef: 'PE-002', observedState: 'entero' }),
+  ];
+  const s = session({
+    evidenceItems: evs,
+    contradictions: [contradiction({ status: 'RESOLVED' })],
+  });
+  const alwaysCompatible = () => false;
+  const r = validateApcContradictions(s, { areStatesIncompatible: alwaysCompatible });
+  assert.equal(r.valid, true);
+});
+
+test('T-I9-15 new contradiction creation still requires incompatible trigger evidence at transition time', () => {
+  const evs = conflictingEvidence();
+  const before = session({ evidenceItems: evs, contradictions: [] });
+  const after = session({ evidenceItems: evs, contradictions: [contradiction()] });
+  const alwaysCompatible = () => false;
+  const r = validateApcContradictionTransition(before, after, { areStatesIncompatible: alwaysCompatible });
+  assert.equal(r.valid, false);
+  assert.match(r.errors.join(' '), /trigger evidence must contain an incompatible pair/);
 });
