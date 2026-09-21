@@ -529,12 +529,23 @@ test('T-I10-B contradiction relevance dependency is mandatory when contradiction
   assert.match(result.errors.join(' '), /isContradictionRelevant callback is required/);
 });
 
-test('T-I10-B2 material contradiction change forces semantic increment when classifier marks it relevant', () => {
-  const before = session({ semanticRevision: 8 });
+test('T-I10-B2 material contradiction change alone forces semantic increment when classifier marks it relevant', () => {
   const evs = [
     evidence({ evidenceId: 'EV-001', photoId: 'PH-001', photoEvidenceRef: 'PE-001', observedState: 'entero' }),
     evidence({ evidenceId: 'EV-002', photoId: 'PH-002', photoEvidenceRef: 'PE-002', observedState: 'serrado' }),
   ];
+  const before = session({
+    semanticRevision: 8,
+    evidenceItems: evs,
+    contradictions: [],
+    objectiveAssessment: {
+      status: 'OPEN',
+      assessedRevision: null,
+      assessedBy: null,
+      assessedAt: null,
+      notes: null,
+    },
+  });
   const after = session({
     semanticRevision: 8,
     evidenceItems: evs,
@@ -549,6 +560,7 @@ test('T-I10-B2 material contradiction change forces semantic increment when clas
   });
   const result = validateApcSemanticTransition(before, after, { isContradictionRelevant: () => true });
   assert.equal(result.valid, false);
+  assert.equal(result.semanticChanged, true);
   assert.match(result.errors.join(' '), /semanticRevision must change 8→9; found 8/);
 });
 
