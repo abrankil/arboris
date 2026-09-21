@@ -64,7 +64,6 @@ viewer
 session handling
 provenance
 authority-binding principles
-non-destructive historical preservation
 ~~~
 
 R2.2 no hereda automáticamente:
@@ -73,7 +72,7 @@ R2.2 no hereda automáticamente:
 el schema exacto de evidence de R2.1.3
 el vocabulario limitado OBSERVED | NOT_OBSERVABLE
 el modelo de sesión de un solo perfil
-comportamientos destructivos de UI
+comportamientos destructivos de UI, incluido el borrado físico de evidence committed
 la interpretación de OPEN-01 / OPEN-02 / OPEN-03
 ~~~
 
@@ -138,6 +137,33 @@ Workbench
 → export_master.py
 → data/botanical/*.json
 ~~~
+
+### 4.4 Corrección de Corpus Evidence committed
+
+La corrección de un registro de Corpus Evidence ya committed no debe borrar ni reemplazar físicamente el registro previo.
+
+~~~text
+committed Corpus Evidence
+        ↓ corrección explícita
+nuevo Corpus Evidence record
++ lineage al registro corregido
+~~~
+
+El registro anterior permanece disponible para provenance e historial de revisión.
+
+La implementación exacta del identificador de lineage se fija en la especificación ejecutable, pero debe cumplir como mínimo:
+
+~~~text
+target evidence exists
+same observation_id
+same character_id
+no self-reference
+no cycle in correction lineage
+~~~
+
+El borrado físico puede existir únicamente para estado de UI todavía no committed. No puede utilizarse como mecanismo de corrección de evidencia ya registrada.
+
+Esta regla de conservación histórica no decide cuál de múltiples evidencias independientes debe prevalecer, fusionarse o considerarse contradictoria. Esa interpretación continúa bajo OPEN-01. Tampoco promueve Corpus Evidence a benchmark ground truth ni a evidencia ACE.
 
 ---
 
@@ -554,6 +580,7 @@ Antes de congelar este contrato debe comprobarse como mínimo:
 SCOPE PRESERVATION
 TWO-PROFILE SEPARATION
 CORPUS / BENCHMARK DATA-MODEL SEPARATION
+CORPUS EVIDENCE NON-DESTRUCTIVE CORRECTION HISTORY
 CHARACTER ELIGIBILITY RULE
 ELIGIBILITY / APPLICABILITY / OBSERVABILITY DISTINCTION
 OBSERVED SEMANTICS
