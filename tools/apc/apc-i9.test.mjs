@@ -297,12 +297,8 @@ test('T-I9-13 recurrence chain cannot fork', () => {
 
 
 test('T-I9-14 RESOLVED historical trigger is not revalidated under later incompatibility semantics', () => {
-  const evs = [
-    evidence({ evidenceId: 'EV-001', photoId: 'PH-001', photoEvidenceRef: 'PE-001', observedState: 'entero' }),
-    evidence({ evidenceId: 'EV-002', photoId: 'PH-002', photoEvidenceRef: 'PE-002', observedState: 'entero' }),
-  ];
   const s = session({
-    evidenceItems: evs,
+    evidenceItems: conflictingEvidence(),
     contradictions: [contradiction({ status: 'RESOLVED' })],
   });
   const alwaysCompatible = () => false;
