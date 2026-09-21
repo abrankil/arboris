@@ -9,6 +9,7 @@ import {
 
 const compatible = () => false;
 const incompatibleByState = (a, b) => a !== b;
+const dataset = { allCharactersById: new Map([['CH-003', { characterId: 'CH-003' }]]) };
 
 function evidence(overrides = {}) {
   return {
@@ -167,8 +168,8 @@ function session({
   };
 }
 
-function exportable(s, areStatesIncompatible = compatible) {
-  return validateApcSessionForExport(s, { areStatesIncompatible });
+function exportable(s, areStatesIncompatible = compatible, datasetOverride = dataset) {
+  return validateApcSessionForExport(s, { areStatesIncompatible, dataset: datasetOverride });
 }
 
 test('T-I10-01 EXPORTABLE and PASS are distinct derived results', () => {
@@ -182,14 +183,14 @@ test('T-I10-01 EXPORTABLE and PASS are distinct derived results', () => {
     },
   });
   assert.equal(exportable(s).exportable, true);
-  const pass = assessApcSessionPass(s, { areStatesIncompatible: compatible });
+  const pass = assessApcSessionPass(s, { areStatesIncompatible: compatible, dataset });
   assert.equal(pass.pass, false);
   assert.deepEqual(pass.reasons, ['OBJECTIVE_NOT_SATISFIED']);
 });
 
 test('T-I10-02 PASS does not require CLOSED', () => {
   const s = session({ status: 'OPEN' });
-  assert.equal(assessApcSessionPass(s, { areStatesIncompatible: compatible }).pass, true);
+  assert.equal(assessApcSessionPass(s, { areStatesIncompatible: compatible, dataset }).pass, true);
 });
 
 test('T-I10-03 CLOSED does not imply PASS', () => {
@@ -203,7 +204,7 @@ test('T-I10-03 CLOSED does not imply PASS', () => {
       notes: null,
     },
   });
-  const result = assessApcSessionPass(s, { areStatesIncompatible: compatible });
+  const result = assessApcSessionPass(s, { areStatesIncompatible: compatible, dataset });
   assert.equal(result.pass, false);
   assert.deepEqual(result.reasons, ['OBJECTIVE_NOT_SATISFIED']);
 });
@@ -233,21 +234,21 @@ test('T-I10-05 satisfied requirement requires zero OPEN unresolved pending', () 
 
 test('T-I10-06 required does not imply critical and noncritical unresolved pending does not block PASS', () => {
   const s = session({ requirements: [requirement()], pendingItems: [unresolvedPending({ critical: false })] });
-  const result = assessApcSessionPass(s, { areStatesIncompatible: compatible });
+  const result = assessApcSessionPass(s, { areStatesIncompatible: compatible, dataset });
   assert.equal(result.pass, true);
 });
 
 test('T-I10-07 critical OPEN pending blocks PASS but not export', () => {
   const s = session({ pendingItems: [gap({ critical: true })] });
   assert.equal(exportable(s).exportable, true);
-  const result = assessApcSessionPass(s, { areStatesIncompatible: compatible });
+  const result = assessApcSessionPass(s, { areStatesIncompatible: compatible, dataset });
   assert.equal(result.pass, false);
   assert.deepEqual(result.reasons, ['CRITICAL_PENDING_OPEN']);
 });
 
 test('T-I10-08 noncritical representation gap does not block PASS', () => {
   const s = session({ pendingItems: [gap({ critical: false })] });
-  assert.equal(assessApcSessionPass(s, { areStatesIncompatible: compatible }).pass, true);
+  assert.equal(assessApcSessionPass(s, { areStatesIncompatible: compatible, dataset }).pass, true);
 });
 
 test('T-I10-09 OPEN contradiction does not block PASS by itself', () => {
@@ -256,7 +257,7 @@ test('T-I10-09 OPEN contradiction does not block PASS by itself', () => {
     evidence({ evidenceId: 'EV-002', photoId: 'PH-002', photoEvidenceRef: 'PE-002', observedState: 'serrado' }),
   ];
   const s = session({ evidenceItems: evs, contradictions: [contradiction()] });
-  assert.equal(assessApcSessionPass(s, { areStatesIncompatible: incompatibleByState }).pass, true);
+  assert.equal(assessApcSessionPass(s, { areStatesIncompatible: incompatibleByState, dataset }).pass, true);
 });
 
 test('T-I10-10 DRAFT is exportable and is preserved by export serialization', () => {
@@ -267,7 +268,7 @@ test('T-I10-10 DRAFT is exportable and is preserved by export serialization', ()
     reason: 'draft observation',
   });
   const s = session({ evidenceItems: [draft] });
-  const built = buildApcSessionExport(s, { areStatesIncompatible: compatible });
+  const built = buildApcSessionExport(s, { areStatesIncompatible: compatible, dataset });
   assert.equal(built.exportable, true);
   assert.equal(built.filename, 'APC-S-I10.apc.json');
   const parsed = JSON.parse(built.json);
@@ -302,7 +303,7 @@ test('T-I10-12 stale assessment is NOT_EXPORTABLE and PASS=false', () => {
   const exp = exportable(s);
   assert.equal(exp.exportable, false);
   assert.deepEqual(exp.reasons, ['NOT_EXPORTABLE', 'ASSESSMENT_STALE']);
-  const pass = assessApcSessionPass(s, { areStatesIncompatible: compatible });
+  const pass = assessApcSessionPass(s, { areStatesIncompatible: compatible, dataset });
   assert.equal(pass.pass, false);
   assert.deepEqual(pass.reasons, ['NOT_EXPORTABLE', 'ASSESSMENT_STALE']);
 });
@@ -322,7 +323,7 @@ test('T-I10-63 final SATISFIED assessment binds current revision without increme
   const transition = validateApcSemanticTransition(before, after);
   assert.equal(transition.valid, true);
   assert.equal(transition.semanticChanged, false);
-  assert.equal(assessApcSessionPass(after, { areStatesIncompatible: compatible }).pass, true);
+  assert.equal(assessApcSessionPass(after, { areStatesIncompatible: compatible, dataset }).pass, true);
 });
 
 test('T-I10-64 multiple substrate changes in one semantic transaction increment exactly once', () => {
@@ -488,7 +489,7 @@ test('T-I10-75 semanticRevision decrease 8→7 fails', () => {
 test('T-I10-77 fresh SATISFIED assessment at revision 9 is exportable', () => {
   const s = session({ semanticRevision: 9 });
   assert.equal(exportable(s).exportable, true);
-  assert.equal(assessApcSessionPass(s, { areStatesIncompatible: compatible }).pass, true);
+  assert.equal(assessApcSessionPass(s, { areStatesIncompatible: compatible, dataset }).pass, true);
 });
 
 test('T-I10-78 stale SATISFIED assessment at revision 9/8 is not exportable', () => {
@@ -503,4 +504,77 @@ test('T-I10-78 stale SATISFIED assessment at revision 9/8 is not exportable', ()
     },
   });
   assert.equal(exportable(s).exportable, false);
+});
+
+
+test('T-I10-A unknown requirement character in dataset is NOT_EXPORTABLE', () => {
+  const s = session({
+    requirements: [requirement({ characterId: 'CH-UNKNOWN' })],
+    pendingItems: [unresolvedPending({ characterId: 'CH-UNKNOWN' })],
+  });
+  const result = validateApcSessionForExport(s, { dataset, areStatesIncompatible: compatible });
+  assert.equal(result.exportable, false);
+  assert.match(result.errors.join(' '), /I7 dataset: requirement REQ-001 references unknown dataset characterId CH-UNKNOWN/);
+});
+
+test('T-I10-B contradiction relevance dependency is mandatory when contradictions exist', () => {
+  const evs = [
+    evidence({ evidenceId: 'EV-001', photoId: 'PH-001', photoEvidenceRef: 'PE-001', observedState: 'entero' }),
+    evidence({ evidenceId: 'EV-002', photoId: 'PH-002', photoEvidenceRef: 'PE-002', observedState: 'serrado' }),
+  ];
+  const before = session({ semanticRevision: 8, evidenceItems: evs, contradictions: [contradiction()] });
+  const after = session({ semanticRevision: 8, evidenceItems: evs, contradictions: [contradiction()] });
+  const result = validateApcSemanticTransition(before, after);
+  assert.equal(result.valid, false);
+  assert.match(result.errors.join(' '), /isContradictionRelevant callback is required/);
+});
+
+test('T-I10-B2 material contradiction change forces semantic increment when classifier marks it relevant', () => {
+  const before = session({ semanticRevision: 8 });
+  const evs = [
+    evidence({ evidenceId: 'EV-001', photoId: 'PH-001', photoEvidenceRef: 'PE-001', observedState: 'entero' }),
+    evidence({ evidenceId: 'EV-002', photoId: 'PH-002', photoEvidenceRef: 'PE-002', observedState: 'serrado' }),
+  ];
+  const after = session({
+    semanticRevision: 8,
+    evidenceItems: evs,
+    contradictions: [contradiction()],
+    objectiveAssessment: {
+      status: 'OPEN',
+      assessedRevision: null,
+      assessedBy: null,
+      assessedAt: null,
+      notes: null,
+    },
+  });
+  const result = validateApcSemanticTransition(before, after, { isContradictionRelevant: () => true });
+  assert.equal(result.valid, false);
+  assert.match(result.errors.join(' '), /semanticRevision must change 8→9; found 8/);
+});
+
+test('T-I10-C OPEN assessment requires explicit null binding fields', () => {
+  const s = session({ objectiveAssessment: { status: 'OPEN', notes: null } });
+  const result = validateApcSessionForExport(s, { dataset, areStatesIncompatible: compatible });
+  assert.equal(result.exportable, false);
+  assert.match(result.errors.join(' '), /assessedRevision must be explicitly null/);
+  assert.match(result.errors.join(' '), /assessedBy must be explicitly null/);
+  assert.match(result.errors.join(' '), /assessedAt must be explicitly null/);
+});
+
+test('T-I10-D export API without semantic options succeeds when I7/I9 external checks are not applicable', () => {
+  const s = session();
+  const result = buildApcSessionExport(s);
+  assert.equal(result.exportable, true);
+  assert.equal(result.filename, 'APC-S-I10.apc.json');
+});
+
+test('T-I10-D2 export requires I9 incompatibility callback when semantic contradiction validation is applicable', () => {
+  const evs = [
+    evidence({ evidenceId: 'EV-001', photoId: 'PH-001', photoEvidenceRef: 'PE-001', observedState: 'entero' }),
+    evidence({ evidenceId: 'EV-002', photoId: 'PH-002', photoEvidenceRef: 'PE-002', observedState: 'serrado' }),
+  ];
+  const s = session({ evidenceItems: evs, contradictions: [contradiction()] });
+  const result = validateApcSessionForExport(s, { dataset });
+  assert.equal(result.exportable, false);
+  assert.match(result.errors.join(' '), /areStatesIncompatible callback is required for export/);
 });
