@@ -352,11 +352,10 @@ export async function loadCanonicalDataset(options = {}) {
   validateVariabilityEntries(
     characterVariability,
     speciesById,
-    charactersById,
     allCharactersById,
     contextsById,
     sourcesById,
-    relationsBySpecies,
+    allRelationsBySpecies,
   );
 
   const variabilityBySpecies =
@@ -376,6 +375,7 @@ export async function loadCanonicalDataset(options = {}) {
     sources,
     speciesById,
     charactersById,
+    allCharactersById,
     contextsById,
     sourcesById,
     relationsBySpecies,
