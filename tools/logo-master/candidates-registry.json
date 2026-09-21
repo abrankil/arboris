@@ -4,7 +4,7 @@
     {
       "candidateId": "candidate-001",
       "manifestPath": "tools/logo-master/manifest.json",
-      "status": "draft",
+      "status": "technical-validated",
       "createdAt": "2026-09-20"
     }
   ]
