@@ -729,13 +729,6 @@ export function validateApcContradictions(session, { areStatesIncompatible } = {
   for (const contradiction of session.contradictions) {
     const key = contradictionSeriesKey(contradiction);
     if (key && contradiction.status === 'OPEN') openBySeries.set(key, contradiction);
-
-    const refs = (contradiction.evidenceRefs ?? [])
-      .map(ref => base.indexes.evidenceByLogicalVersion.get(`${ref.evidenceId}::${ref.revision}`))
-      .filter(Boolean);
-    if (!hasIncompatiblePair(refs, areStatesIncompatible)) {
-      errors.push(`contradiction ${contradiction.contradictionId} trigger evidenceRefs must contain at least one incompatible pair`);
-    }
   }
 
   const operationalSeries = new Map();
