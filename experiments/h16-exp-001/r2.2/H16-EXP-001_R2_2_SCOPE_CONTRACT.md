@@ -187,7 +187,29 @@ CH-008 CH-009 CH-010 CH-011 CH-012 CH-013
 CH-014 CH-019 CH-026 CH-027 CH-028
 ~~~
 
-Quedan fuera del auto-offer los caracteres con observable_foto = No, estado_piloto distinto de activo o aplica_si no nulo. R2.2 no ejecuta automáticamente aplica_si.
+La clasificación base queda:
+
+~~~text
+DIRECT_PHOTO_ELIGIBLE
+→ estado_piloto = activo
+→ observable_foto ∈ {Sí, Parcial}
+→ aplica_si = null
+
+NON_PHOTOGRAPHIC
+→ observable_foto = No
+
+INACTIVE_FOR_PILOT
+→ estado_piloto != activo
+
+CONDITIONAL_UNRESOLVED
+→ aplica_si != null
+~~~
+
+Solo DIRECT_PHOTO_ELIGIBLE puede producir un commit de Corpus Evidence derivado de fotografía en el alcance base de R2.2.
+
+NON_PHOTOGRAPHIC, INACTIVE_FOR_PILOT y CONDITIONAL_UNRESOLVED pueden conservarse como referencia de catálogo cuando corresponda, pero no pueden utilizarse para registrar evidencia fotográfica committed hasta que un contrato posterior autorice explícitamente ese caso.
+
+R2.2 no ejecuta automáticamente aplica_si y no debe representar ninguno de estos casos retenidos mediante NOT_OBSERVABLE.
 
 ---
 
@@ -306,6 +328,30 @@ model prediction
 
 La restricción constituye metadata masking operacional. No pretende ser anonimización criptográfica ni protección frente a inspección deliberada del repositorio.
 
+### 8.4 Allowlist del blind workset
+
+La metadata prohibida no debe limitarse a quedar visualmente oculta: no debe formar parte del payload semántico importado por el perfil BLIND.
+
+El blind workset debe construirse por allowlist. Puede contener, como mínimo conceptual:
+
+~~~text
+opaque workset identity
+experiment identity
+character guide snapshot
+authority fingerprints
+images:
+  blind_image_id
+  asset_sha256
+  size_bytes
+  mime_type cuando sea necesario
+~~~
+
+Los bytes de imagen pueden cargarse o relinkearse por separado siempre que su SHA-256 coincida con el binding del workset.
+
+Los identificadores visibles en BLIND deben ser opacos y no codificar taxón, individuo, filename ni cohorte. La información de cohort gating pertenece a trusted preparation y no se importa como metadata de decisión.
+
+Un payload que contenga claves prohibidas, un schema TRUSTED o referencias que permitan recuperar automáticamente metadata TRUSTED desde el perfil BLIND debe rechazarse fail-closed.
+
 ---
 
 ## 9. Annotation guide
@@ -324,6 +370,21 @@ state definitions
 siempre que el workset preserve fingerprints verificables de las autoridades exactas usadas.
 
 El snapshot derivado no constituye una nueva fuente de verdad.
+
+Para cada estado permitido del carácter anotado, la derivación del guide debe resolver exactamente una definición autorizada en glossary.json.
+
+~~~text
+0 matching definitions
+→ GUIDE_BINDING_INVALID
+
+1 matching definition
+→ VERIFIED
+
+>1 matching definitions
+→ GUIDE_BINDING_AMBIGUOUS
+~~~
+
+Los estados inválidos o ambiguos bloquean el workset; no se elige una definición por orden de aparición, similitud textual ni heurística.
 
 ---
 
@@ -400,7 +461,30 @@ Para el benchmark primario, un cambio que afecte CH-003 o las definiciones de su
 
 ---
 
-## 14. Correcciones append-only
+## 14. Ledger mínimo y correcciones append-only
+
+Toda Benchmark Annotation committed debe conservar, como mínimo:
+
+~~~text
+annotation_id
+blind_image_id
+character_id
+observability_status
+observed_state
+annotator_id
+annotated_at
+supersedes_annotation_ids[]
+note opcional
+~~~
+
+Reglas mínimas:
+
+- annotation_id es opaco, estable y único dentro del ledger;
+- annotator_id es un identificador estable de provenance y no debe codificar metadata botánica o de partición;
+- observability_status pertenece a OBSERVED | NOT_OBSERVABLE | UNCERTAIN;
+- OBSERVED exige exactamente un observed_state autorizado;
+- NOT_OBSERVABLE y UNCERTAIN prohíben observed_state;
+- annotated_at conserva provenance temporal y nunca decide qué anotación prevalece.
 
 Una anotación committed no debe corregirse mediante borrado o reemplazo destructivo.
 
@@ -446,20 +530,27 @@ Si existen varios active heads, una adjudicación que pretenda resolver el confl
 
 ## 15. Anotación efectiva
 
-Para cada par blind_image_id + character_id, una anotación válida es un active head cuando no ha sido superseded por otra anotación válida.
+Para cada par blind_image_id + character_id, primero debe validarse el ledger. La selección de active heads solo ocurre sobre un ledger estructuralmente válido.
 
 ~~~text
-0 active heads
-→ MISSING / INVALID
+schema / reference / cycle validation fails
+→ LEDGER_INVALID
+→ fail closed
 → no effective ground truth
 
-1 active head
+valid ledger + 0 annotation records
+→ MISSING
+→ no effective ground truth
+
+valid ledger + 1 active head
 → EFFECTIVE ANNOTATION
 
->1 active heads
+valid ledger + >1 active heads
 → CONFLICT_REQUIRES_REVIEW
 → no effective ground truth
 ~~~
+
+En un ledger válido y finito que contiene al menos una anotación para el par, debe existir al menos un active head. Cero active heads con registros presentes indica una falla estructural y no se normaliza como MISSING.
 
 No se permite desempatar mediante last-write-wins, timestamp-wins, confidence-wins, annotator-priority ni insertion-order-wins.
 
@@ -582,18 +673,23 @@ TWO-PROFILE SEPARATION
 CORPUS / BENCHMARK DATA-MODEL SEPARATION
 CORPUS EVIDENCE NON-DESTRUCTIVE CORRECTION HISTORY
 CHARACTER ELIGIBILITY RULE
+PHOTO-EVIDENCE COMMIT ELIGIBILITY
 ELIGIBILITY / APPLICABILITY / OBSERVABILITY DISTINCTION
 OBSERVED SEMANTICS
 NOT_OBSERVABLE SEMANTICS
 UNCERTAIN SEMANTICS
 CH-003 PRIMARY BENCHMARK RESTRICTION
 CHARACTERS + GLOSSARY GUIDE BINDING
+EXACT-ONE GLOSSARY STATE DEFINITION
 METADATA MASKING CONTRACT
+BLIND WORKSET ALLOWLIST / FORBIDDEN-KEY REJECTION
 BYTE-BASED IMAGE IDENTITY
+ANNOTATION MINIMUM IDENTITY / PROVENANCE
 APPEND-ONLY CORRECTION HISTORY
 SUPERSESSION REFERENTIAL INTEGRITY
 MULTI-HEAD ADJUDICATION WITHOUT DELETION
 ACTIVE-HEAD DETERMINISM
+LEDGER_INVALID / MISSING SEPARATION
 TRUSTED PERSISTENT-STATE ISOLATION
 DEVELOPMENT / HOLDOUT WORKSET SEPARATION
 HOLDOUT PREDICTION-SEAL GATE
