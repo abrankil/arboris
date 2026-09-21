@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "candidateId": "candidate-001",
-  "status": "technical-validated",
+  "status": "art-approved",
   "reference": {
     "path": "assets/brand/canonical/arboris-logo-canonical-reference.jpg",
     "sha256Expected": "20957aeaf262defad7cd13e6274dcfd0cb6410c213f5dbbc05ffe7a420e761c8"
@@ -26,10 +26,10 @@
     "compositePresentation": { "path": "exports/composite-presentation.png", "format": "png", "scale": 2, "resampling": "nearest-neighbor" }
   },
   "approval": {
-    "artisticApprovalBy": null,
-    "artisticApprovalStatus": "OPEN"
+    "artisticApprovalBy": "Álvaro",
+    "artisticApprovalStatus": "APPROVED"
   },
   "createdAt": "2026-09-20",
   "updatedAt": "2026-09-21",
-  "notes": "candidate-001 en technical-validated: .pxo con 7 capas verificado byte a byte contra las exportaciones (sesión remota, independiente del reporte local), grilla 4x4 confirmada al 100% en las 7 capas, compuestos generados y verificados. Aprobación artística sigue OPEN, pendiente de Alejandra."
+  "notes": "candidate-001 en art-approved: .pxo con 7 capas verificado byte a byte contra las exportaciones (sesión remota, independiente del reporte local), grilla 4x4 confirmada al 100% en las 7 capas, compuestos generados y verificados. Aprobación gráfica explícita de Álvaro registrada el 2026-09-21."
 }
