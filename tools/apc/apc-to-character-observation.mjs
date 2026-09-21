@@ -47,7 +47,7 @@ export function adaptRegisteredApcEvidenceToCharacterObservation(dataset, sessio
   if (evidence.sessionId !== session.sessionId) throw new Error(`Evidence ${evidenceId} does not belong to session ${session.sessionId}`);
   if (!indexes.photosById.has(evidence.photoId)) throw new Error(`Unknown photoId: ${evidence.photoId}`);
   if (!indexes.photoEvidenceById.has(evidence.photoEvidenceRef)) throw new Error(`Unknown photoEvidenceRef: ${evidence.photoEvidenceRef}`);
-  if (!indexes.individualsById.has(evidence.individualId)) throw new Error((Unknown individualId: ${evidence.individualId}`));
+  if (!indexes.individualsById.has(evidence.individualId)) throw new Error(`Unknown individualId: ${evidence.individualId}`);
 
   const photo = indexes.photosById.get(evidence.photoId);
   if (photo.photoEvidenceId !== evidence.photoEvidenceRef) throw new Error((`Evidence photoEvidenceRef does not match PHOTO ${evidence.photoId}`));
