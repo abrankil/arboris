@@ -1,0 +1,31 @@
+{
+  "artifact_id": "H16-EXP-001",
+  "artifact_name": "Annotation Interface",
+  "version": "R2.1.3",
+  "status": "VALIDATED_FROZEN_EXPERIMENTAL_DESIGN",
+  "validation_result": "PASS",
+  "blockers": 0,
+  "freeze_date": "2026-09-21",
+  "artifacts": [
+    {
+      "path": "H16-EXP-001_annotation_interface_R2_1_3.html",
+      "sha256": "6610de196bcc518ee45bef6c509693ecdc9c4053f399bf5397424b96eef6a4c5"
+    },
+    {
+      "path": "H16-EXP-001_character_catalog_template_R2_1_3.json",
+      "sha256": "3d4f22d5897646a518213dfb2a1ce951f3fd8d23cc5a99fd8a1cea2e4eca1217"
+    }
+  ],
+  "authority": {
+    "botanical_characters_path": "data/botanical/characters.json",
+    "botanical_characters_git_blob_sha": "042c4f701615066083881cad54f15367ef838d18"
+  },
+  "open_decisions": [
+    "OPEN-01 repeated/contradictory evidence semantics",
+    "OPEN-02 photo membership in multiple observations",
+    "OPEN-03 view-specific character applicability"
+  ],
+  "asc_change_required": false,
+  "ace_change_required": false,
+  "hito16_complete": false
+}

@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Árboris — H16-EXP-001 Annotation Interface R2.1.3</title>
+<style>
+:root{
+  --bg:#f4f6f3;--panel:#fff;--ink:#182019;--muted:#68716a;--line:#dde4de;
+  --accent:#2e5b38;--accent2:#e8f0e9;--warn:#8a5b00;--danger:#9a3030;--dark:#1a1d1a;
+}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{height:60px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 14px;position:sticky;top:0;z-index:30}
+header strong{font-size:16px}.tag{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--accent2);color:var(--accent)}
+.spacer{flex:1}.muted{color:var(--muted)}.tiny{font-size:11px}
+button,.button,input,select,textarea{font:inherit}
+button,.button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 10px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{color:var(--danger)}
+button:disabled{opacity:.45;cursor:not-allowed}
+input[type=text],select,textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:8px;background:#fff}
+textarea{resize:vertical;min-height:60px}
+#app{display:grid;grid-template-columns:300px minmax(420px,1fr) 430px;height:calc(100vh - 60px)}
+aside,main{min-height:0}.panel{background:var(--panel)}
+#left{border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+#center{display:flex;flex-direction:column;min-width:0}
+#right{border-left:1px solid var(--line);overflow:auto}
+.section{padding:12px 14px;border-bottom:1px solid var(--line)}
+.section h3{margin:0 0 9px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.tabs{display:flex;gap:6px}.tabs button.on{background:var(--accent2);color:var(--accent);border-color:#8eaa93}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+label.small{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+#drop{margin:10px;border:1px dashed #adb8af;border-radius:10px;padding:13px;text-align:center;color:var(--muted)}
+#groupList,#photoList{overflow:auto;padding:8px;display:flex;flex-direction:column;gap:6px}
+.row{border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff;cursor:pointer}
+.row.active{border-color:var(--accent);background:var(--accent2)}
+.row .title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .meta{font-size:11px;color:var(--muted);margin-top:2px}
+.photoRow{display:grid;grid-template-columns:54px 1fr auto;gap:8px;align-items:center}
+.photoRow img{width:54px;height:54px;object-fit:cover;border-radius:6px;background:#ddd}
+#viewer{flex:1;background:var(--dark);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+#viewer img{max-width:100%;max-height:100%;object-fit:contain;transform-origin:center}
+.empty{color:#c9cfca;text-align:center;padding:20px}
+#toolbar{height:52px;background:#fff;border-top:1px solid var(--line);display:flex;align-items:center;gap:7px;padding:8px}
+#toolbar .filename{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
+.notice{padding:9px;border-radius:8px;background:#f3f5f2;border:1px solid var(--line);font-size:12px}
+.notice.warn{background:#faf6ea;border-color:#ddcfad;color:#6f510d}
+.notice.good{background:#eef6ef;border-color:#bfd1c1;color:#2e5b38}
+.charCard{border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px}
+.charCard.inactive{opacity:.58}
+.charHead{display:flex;gap:8px;align-items:flex-start}.charHead .name{font-weight:650;flex:1}
+.pills{display:flex;gap:5px;flex-wrap:wrap}.pill{font-size:10px;border:1px solid var(--line);border-radius:999px;padding:3px 6px;color:var(--muted)}
+.stateBtns{display:flex;gap:6px;margin-top:8px}.stateBtns button{font-size:11px;padding:6px 8px}
+.stateBtns button.on{background:var(--accent2);border-color:#8eaa93;color:var(--accent)}
+.stateBtns button.no{background:#f5f1e8;border-color:#d6c6a4;color:var(--warn)}
+.photoStrip{display:flex;gap:7px;overflow:auto;padding:7px 0}.photoStrip label{position:relative;display:block;cursor:pointer}
+.photoStrip img{width:82px;height:82px;object-fit:cover;border:2px solid transparent;border-radius:7px;background:#ddd}
+.photoStrip input{position:absolute;left:5px;top:5px}.photoStrip input:checked+img{border-color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:10px 0}
+details{border-top:1px solid var(--line)}summary{cursor:pointer;padding:12px 14px;font-weight:600}details .inside{padding:0 14px 14px}
+pre{white-space:pre-wrap;word-break:break-word;background:#111;color:#d9efdc;padding:10px;border-radius:8px;font-size:11px;max-height:320px;overflow:auto}
+.badge{font-size:10px;border-radius:999px;padding:3px 6px;background:#eee;color:#555}
+.badge.good{background:#e7f0e8;color:#315b3a}.badge.warn{background:#f6eedf;color:#7b5710}
+.kbd{font-family:ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:#fff}
+.hidden{display:none!important}
+@media(max-width:1150px){#app{grid-template-columns:260px 1fr 370px}}
+</style>
+</head>
+<body>
+<header>
+  <strong>Árboris · H16 Annotation Interface R2.1.3</strong>
+  <span class="tag">H16-EXP-001</span>
+  <span class="tag">sin cambios a ASC / ACE</span>
+  <span id="statusTop" class="tiny muted">catálogo no cargado</span>
+  <div class="spacer"></div>
+  <label class="button">Importar autoridad<input id="authorityInput" type="file" accept="application/json" hidden></label>
+  <label class="button">Importar catálogo<input id="catalogInput" type="file" accept="application/json" hidden></label>
+  <button id="saveSession">Guardar sesión</button>
+  <label class="button">Cargar sesión<input id="sessionInput" type="file" accept="application/json" hidden></label>
+  <button class="primary" id="exportData">Exportar H16</button>
+</header>
+
+<div id="app">
+  <aside id="left" class="panel">
+    <div class="section">
+      <h3>Modo</h3>
+      <div class="tabs">
+        <button id="tabBatch" class="on">Lote</button>
+        <button id="tabCharacter">Carácter</button>
+      </div>
+    </div>
+
+    <div id="batchNav">
+      <div class="section">
+        <h3>Unidades de observación</h3>
+        <div class="grid2">
+          <button id="newGroup">+ Nueva</button>
+          <button id="renameGroup">Renombrar</button>
+        </div>
+      </div>
+      <div id="groupList"></div>
+      <div class="section">
+        <h3>Fotografías</h3>
+        <label class="button" style="display:block;text-align:center">Añadir / relink fotos<input id="photoInput" type="file" accept="image/*" multiple hidden></label>
+        <div id="drop">Arrastra aquí fotografías.<br><span class="tiny">Se enlazan por SHA-256 cuando existe una sesión previa.</span></div>
+      </div>
+      <div id="photoList"></div>
+    </div>
+
+    <div id="characterNav" class="hidden">
+      <div class="section">
+        <h3>Catálogo cargado</h3>
+        <div id="catalogInfo" class="notice warn">No hay catálogo de caracteres.</div>
+      </div>
+      <div id="characterList"></div>
+    </div>
+  </aside>
+
+  <main id="center">
+    <div id="viewer"><div class="empty">Carga fotografías y crea una unidad de observación.</div></div>
+    <div id="toolbar">
+      <button id="prev">←</button><button id="next">→</button>
+      <button id="zoomOut">−</button><button id="zoomIn">+</button><button id="rotate">↻</button>
+      <span id="filename" class="filename">Sin imagen activa</span>
+      <span class="tiny muted"><span class="kbd">←</span> <span class="kbd">→</span></span>
+    </div>
+  </main>
+
+  <aside id="right" class="panel">
+    <div id="batchRight">
+      <div class="section">
+        <h3>Unidad de observación</h3>
+        <div class="notice">
+          Agrupa fotos del mismo ejemplar/observación. El taxón puede quedar vacío.
+          La identidad no se infiere desde las imágenes.
+        </div>
+        <div style="margin-top:9px">
+          <label class="small">ID</label><input id="groupId" type="text" readonly>
+        </div>
+        <div style="margin-top:8px">
+          <label class="small">Nombre operativo</label><input id="groupName" type="text" placeholder="p. ej. Ejemplar 07">
+        </div>
+        <div class="grid2" style="margin-top:8px">
+          <div><label class="small">Taxón conocido (opcional)</label><input id="groupTaxon" type="text" placeholder="sin inferir"></div>
+          <div><label class="small">Procedencia del taxón</label><input id="groupTaxonSource" type="text" placeholder="etiqueta, registro, persona..."></div>
+        </div>
+        <div style="margin-top:8px"><label class="small">Notas comunes</label><textarea id="groupNotes"></textarea></div>
+      </div>
+
+      <div class="section">
+        <h3>Foto activa</h3>
+        <div class="grid2">
+          <div><label class="small">Órgano</label><select id="photoOrgan"><option value="">— catálogo requerido —</option></select></div>
+          <div><label class="small">Vista</label><select id="photoView"><option value="">— catálogo requerido —</option></select></div>
+        </div>
+        <div style="margin-top:8px"><label class="small">Notas de esta foto</label><textarea id="photoNotes"></textarea></div>
+        <div style="margin-top:8px" class="notice warn">
+          La edición masiva se limita a metadatos de contexto. No copia evidencia visual entre fotografías.
+        </div>
+        <div style="margin-top:8px"><button id="assignSelected">Asignar seleccionadas a esta unidad</button></div>
+      </div>
+
+      <details open>
+        <summary>Sesión / relink</summary>
+        <div class="inside tiny muted">
+          La sesión conserva estado de trabajo y hashes de archivo. Si vuelves a cargar las fotos después,
+          la interfaz intenta relinkearlas automáticamente por SHA-256.
+        </div>
+      </details>
+    </div>
+
+    <div id="characterRight" class="hidden">
+      <div class="section">
+        <h3>Registrar evidencia</h3>
+        <div id="charSummary" class="notice warn">Carga un catálogo y elige un carácter.</div>
+        <div id="applicability" class="tiny muted" style="margin-top:8px"></div>
+        <div style="margin-top:9px">
+          <label class="small">Unidad de observación</label>
+          <select id="evidenceGroup"></select>
+        </div>
+        <div style="margin-top:8px">
+          <label class="small">Fotos fuente</label>
+          <div id="sourcePhotos" class="photoStrip"></div>
+        </div>
+        <div class="stateBtns">
+          <button id="stateObserved">OBSERVED</button>
+          <button id="stateNotObservable">NOT_OBSERVABLE</button>
+        </div>
+        <div id="valueArea" style="margin-top:8px"></div>
+        <div style="margin-top:8px"><label class="small">Nota de anotación</label><textarea id="evidenceNote" placeholder="Descripción literal, sin inferencia taxonómica."></textarea></div>
+        <div class="grid2" style="margin-top:8px">
+          <div><label class="small">Observador</label><input id="observerName" type="text" placeholder="opcional"></div>
+          <div><label class="small">Método</label><input id="observerMethod" type="text" value="human-annotation" readonly></div>
+        </div>
+        <div style="margin-top:10px"><button class="primary" id="commitEvidence">Registrar evidencia</button></div>
+        <div id="evidenceWarning" class="tiny" style="margin-top:8px"></div>
+      </div>
+
+      <div class="section">
+        <h3>Evidencia de la unidad</h3>
+        <div id="evidenceList"></div>
+      </div>
+    </div>
+
+    <details>
+      <summary>Validación y salida</summary>
+      <div class="inside">
+        <div id="validation" class="notice"></div>
+        <div style="margin:10px 0;display:flex;gap:8px">
+          <button id="previewJson">Actualizar JSON</button>
+          <button id="copyJson">Copiar</button>
+        </div>
+        <pre id="jsonPreview">{}</pre>
+      </div>
+    </details>
+
+    <details>
+      <summary>Contrato del prototipo R2</summary>
+      <div class="inside tiny muted">
+        R2.1.3 no contiene catálogo botánico propio. Consume un catálogo externo/versionado, exige una copia exacta verificable de data/botanical/characters.json y valida contra ella IDs, labels y estados antes de aceptar el catálogo.
+        Separa unidad de observación, fotografía y evidencia por carácter.
+        Toda evidencia guarda las fotografías que la sustentan. NOT_OBSERVABLE no significa ausencia.
+        Órgano y vista se seleccionan exclusivamente desde vocabularios autorizados por el catálogo.
+        La evidencia repetida/contradictoria y la cardinalidad foto↔observación múltiple permanecen OPEN.
+        El SHA-256 del archivo de catálogo queda VERIFIED solo tras importación directa; al restaurar sesión pasa a PRESERVED_UNVERIFIED. Ese estado histórico se conserva por evidencia como source_file_sha256_status_at_annotation.
+        La completitud total no se presume: la interfaz informa cobertura sin convertirla en gate científico.
+      </div>
+    </details>
+  </aside>
+</div>
+
+<script>
+const AUTHORITY_REGISTRY = Object.freeze({
+  "data/botanical/characters.json":{
+    git_blob_sha:"042c4f701615066083881cad54f15367ef838d18",
+    derivation_contract:"H16-EXP-001-CATALOG-DERIVATION-001"
+  }
+});
+
+let authorityRef = null;
+let authorityGitBlobSha = null;
+let authoritySourceSha256 = null;
+let authoritySourceBytesB64 = null;
+let authoritySnapshot = null;
+let authorityVerificationStatus = null; // VERIFIED_DIRECT | VERIFIED_SESSION_BYTES
+
+let catalog = null;
+let catalogHash = null; // SHA-256 de bytes del archivo de catálogo importado
+let catalogContentHash = null; // SHA-256 de representación JSON canónica
+let catalogSourceFileHashStatus = null; // VERIFIED | PRESERVED_UNVERIFIED
+let groups = [];
+let photos = [];
+let evidence = [];
+let activeGroupId = null;
+let activePhotoId = null;
+let activeCharacterId = null;
+let mode = "batch";
+let zoom = 1, rotation = 0;
+let draftState = null;
+
+const $ = s => document.querySelector(s);
+const uid = p => `${p}-${crypto.randomUUID()}`;
+
+function currentGroup(){return groups.find(g=>g.observation_id===activeGroupId)||null}
+function currentPhoto(){return photos.find(p=>p.photo_id===activePhotoId)||null}
+function currentCharacter(){return catalog?.characters?.find(c=>c.id===activeCharacterId)||null}
+function groupPhotos(gid){return photos.filter(p=>p.observation_id===gid)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+
+async function sha256(file){
+  const buf=await file.arrayBuffer();
+  const hash=await crypto.subtle.digest("SHA-256",buf);
+  return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+function canonicalize(value){
+  if(Array.isArray(value)) return value.map(canonicalize);
+  if(value && typeof value==="object"){
+    return Object.keys(value).sort().reduce((out,k)=>{
+      out[k]=canonicalize(value[k]); return out;
+    },{});
+  }
+  return value;
+}
+function canonicalJSONString(value){
+  return JSON.stringify(canonicalize(value));
+}
+async function sha256Text(value){
+  const buf=new TextEncoder().encode(value);
+  const hash=await crypto.subtle.digest("SHA-256",buf);
+  return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function catalogLogicalHash(value){
+  return sha256Text(canonicalJSONString(value));
+}
+function isPlaceholder(v){
+  return typeof v==="string" && /^REPLACE_WITH_/i.test(v.trim());
+}
+function nonEmptyString(v){
+  return typeof v==="string" && v.trim().length>0;
+}
+function hasDuplicates(arr){
+  return new Set(arr).size !== arr.length;
+}
+function isRecognizedAuthorityRef(v){
+  return Object.prototype.hasOwnProperty.call(AUTHORITY_REGISTRY,v);
+}
+function bytesToHex(bytes){
+  return [...bytes].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function digestBytes(algorithm, bytes){
+  const hash=await crypto.subtle.digest(algorithm, bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength));
+  return bytesToHex(new Uint8Array(hash));
+}
+async function gitBlobSha1(bytes){
+  const prefix=new TextEncoder().encode(`blob ${bytes.byteLength}\0`);
+  const combined=new Uint8Array(prefix.length+bytes.byteLength);
+  combined.set(prefix,0); combined.set(bytes,prefix.length);
+  return digestBytes("SHA-1",combined);
+}
+function bytesToBase64(bytes){
+  let binary="";
+  const chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+chunk,bytes.length)));
+  }
+  return btoa(binary);
+}
+function base64ToBytes(b64){
+  const binary=atob(b64);
+  const out=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) out[i]=binary.charCodeAt(i);
+  return out;
+}
+async function verifyAuthorityBytes(ref, bytes, verificationStatus){
+  const reg=AUTHORITY_REGISTRY[ref];
+  if(!reg) throw new Error(`authority_ref no reconocida: ${ref}`);
+  const gitSha=await gitBlobSha1(bytes);
+  if(gitSha!==reg.git_blob_sha)
+    throw new Error(`La autoridad no coincide con la versión fijada. Git blob esperado ${reg.git_blob_sha}; recibido ${gitSha}.`);
+  const parsed=JSON.parse(new TextDecoder("utf-8").decode(bytes));
+  if(!Array.isArray(parsed)) throw new Error("La autoridad characters.json debe ser un array.");
+  const ids=new Set();
+  for(const c of parsed){
+    if(!c || !nonEmptyString(c.caracter_id)) throw new Error("Autoridad inválida: caracter_id ausente.");
+    if(ids.has(c.caracter_id)) throw new Error(`Autoridad inválida: caracter_id duplicado ${c.caracter_id}.`);
+    ids.add(c.caracter_id);
+  }
+  authorityRef=ref;
+  authorityGitBlobSha=gitSha;
+  authoritySourceSha256=await digestBytes("SHA-256",bytes);
+  authoritySourceBytesB64=bytesToBase64(bytes);
+  authoritySnapshot=parsed;
+  authorityVerificationStatus=verificationStatus;
+}
+function currentAuthorityBinding(){
+  if(!authoritySnapshot) return null;
+  return {
+    authority_ref:authorityRef,
+    authority_git_blob_sha:authorityGitBlobSha,
+    authority_source_sha256:authoritySourceSha256,
+    derivation_contract:AUTHORITY_REGISTRY[authorityRef].derivation_contract,
+    verification_status:authorityVerificationStatus
+  };
+}
+function arraysEqual(a,b){
+  return Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&a.every((v,i)=>v===b[i]);
+}
+function validateCatalogAgainstAuthority(data){
+  if(!authoritySnapshot) return "Debe importarse y verificarse data/botanical/characters.json antes del catálogo H16.";
+  if(data.authority_ref!==authorityRef) return "authority_ref del catálogo no coincide con la autoridad cargada.";
+  const byId=new Map(authoritySnapshot.map(c=>[c.caracter_id,c]));
+  for(const c of data.characters){
+    const src=byId.get(c.id);
+    if(!src) return `Carácter ${c.id} no existe en la autoridad cargada.`;
+    if(c.label!==src.nombre_caracter) return `Label de ${c.id} no coincide con nombre_caracter canónico.`;
+    const srcStates=Array.isArray(src.estados_permitidos)?src.estados_permitidos:[];
+    const catStates=Array.isArray(c.states)?c.states:[];
+    if(!arraysEqual(catStates,srcStates))
+      return `states[] de ${c.id} no coincide exactamente con estados_permitidos canónicos.`;
+  }
+  return null;
+}
+
+function createGroup(){
+  const g={observation_id:uid("obs"),name:`Observación ${groups.length+1}`,taxon:null,taxon_source:null,notes:null,created_at:new Date().toISOString()};
+  groups.push(g); activeGroupId=g.observation_id; renderAll();
+}
+
+async function addPhotoFiles(fileList){
+  for(const file of [...fileList].filter(f=>f.type.startsWith("image/"))){
+    const hash=await sha256(file);
+    const existing=photos.find(p=>p.sha256===hash && p.size_bytes===file.size);
+    if(existing){
+      if(existing.object_url) URL.revokeObjectURL(existing.object_url);
+      existing.object_url=URL.createObjectURL(file);
+      existing.filename=file.name;
+      existing.mime_type=file.type;
+      existing.relinked_at=new Date().toISOString();
+      if(!activePhotoId) activePhotoId=existing.photo_id;
+      continue;
+    }
+    const p={
+      photo_id:uid("photo"),observation_id:activeGroupId,filename:file.name,mime_type:file.type,size_bytes:file.size,
+      sha256:hash,organ:null,view:null,notes:null,selected:false,object_url:URL.createObjectURL(file),
+      added_at:new Date().toISOString()
+    };
+    photos.push(p); if(!activePhotoId) activePhotoId=p.photo_id;
+  }
+  renderAll();
+}
+
+function setMode(m){
+  mode=m;
+  $("#tabBatch").classList.toggle("on",m==="batch");
+  $("#tabCharacter").classList.toggle("on",m==="character");
+  $("#batchNav").classList.toggle("hidden",m!=="batch");
+  $("#batchRight").classList.toggle("hidden",m!=="batch");
+  $("#characterNav").classList.toggle("hidden",m!=="character");
+  $("#characterRight").classList.toggle("hidden",m!=="character");
+  renderAll();
+}
+
+function renderGroups(){
+  const root=$("#groupList"); root.innerHTML="";
+  groups.forEach(g=>{
+    const n=groupPhotos(g.observation_id).length;
+    const ev=evidence.filter(x=>x.observation_id===g.observation_id).length;
+    const d=document.createElement("div");d.className="row"+(g.observation_id===activeGroupId?" active":"");
+    d.innerHTML=`<div class="title">${esc(g.name)}</div><div class="meta">${n} fotos · ${ev} evidencias</div>`;
+    d.onclick=()=>{activeGroupId=g.observation_id;const first=groupPhotos(g.observation_id)[0];if(first)activePhotoId=first.photo_id;renderAll()};
+    root.appendChild(d);
+  });
+}
+
+function renderPhotos(){
+  const root=$("#photoList");root.innerHTML="";
+  const list=activeGroupId?groupPhotos(activeGroupId):photos;
+  list.forEach(p=>{
+    const d=document.createElement("div");d.className="row photoRow"+(p.photo_id===activePhotoId?" active":"");
+    d.innerHTML=`<img src="${p.object_url||""}"><div><div class="title">${esc(p.filename)}</div><div class="meta">${esc(p.organ||"sin órgano")} · ${p.object_url?"linked":"sin relink"}</div></div><input type="checkbox" ${p.selected?"checked":""}>`;
+    d.addEventListener("click",e=>{if(e.target.type!=="checkbox"){activePhotoId=p.photo_id;activeGroupId=p.observation_id||activeGroupId;resetView();renderAll()}});
+    d.querySelector("input").onchange=e=>{p.selected=e.target.checked};
+    root.appendChild(d);
+  });
+}
+
+function renderViewer(){
+  const p=currentPhoto();
+  if(!p||!p.object_url){$("#viewer").innerHTML=`<div class="empty">${p?"Foto registrada pero no relinkeada. Vuelve a seleccionarla para asociarla por SHA-256.":"Sin foto activa."}</div>`;$("#filename").textContent=p?.filename||"Sin imagen activa";return}
+  $("#viewer").innerHTML=`<img id="mainImage" src="${p.object_url}">`;$("#filename").textContent=p.filename;applyTransform();
+}
+
+function renderBatchForm(){
+  const g=currentGroup(), p=currentPhoto();
+  $("#groupId").value=g?.observation_id||"";
+  $("#groupName").value=g?.name||"";
+  $("#groupTaxon").value=g?.taxon||"";
+  $("#groupTaxonSource").value=g?.taxon_source||"";
+  $("#groupNotes").value=g?.notes||"";
+
+  const organValues = catalog?.organs || [];
+  const viewValues = catalog?.views || [];
+  $("#photoOrgan").innerHTML = `<option value="">—</option>` + organValues.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+  $("#photoView").innerHTML = `<option value="">—</option>` + viewValues.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+  $("#photoOrgan").disabled = !catalog;
+  $("#photoView").disabled = !catalog;
+
+  $("#photoOrgan").value=p?.organ||"";
+  $("#photoView").value=p?.view||"";
+  $("#photoNotes").value=p?.notes||"";
+}
+
+function renderCatalog(){
+  $("#catalogInfo").className="notice "+(catalog?"good":"warn");
+  $("#catalogInfo").textContent=catalog?`${catalog.catalog_id} · ${catalog.version} · ${catalog.characters.length} caracteres · file ${catalogHash?.slice(0,10)||"?"}… · content ${catalogContentHash?.slice(0,10)||"?"}…`:"No hay catálogo de caracteres.";
+  const root=$("#characterList");root.innerHTML="";
+  if(!catalog)return;
+  catalog.characters.forEach(c=>{
+    const d=document.createElement("div");d.className="row"+(c.id===activeCharacterId?" active":"");
+    d.innerHTML=`<div class="title">${esc(c.label||c.id)}</div><div class="meta">${esc(c.id)}${c.applies_to?.length?` · ${c.applies_to.join(", ")}`:""}</div>`;
+    d.onclick=()=>{activeCharacterId=c.id;draftState=null;renderAll()};root.appendChild(d);
+  });
+}
+
+function isApplicable(c,p){
+  if(!c||!p)return false;
+  if(!Array.isArray(c.applies_to)||!c.applies_to.length)return true;
+  return p.organ && c.applies_to.includes(p.organ);
+}
+
+function renderEvidenceEditor(){
+  const c=currentCharacter(), g=currentGroup();
+  $("#evidenceGroup").innerHTML=groups.map(x=>`<option value="${x.observation_id}" ${x.observation_id===activeGroupId?"selected":""}>${esc(x.name)}</option>`).join("");
+  if(!c){
+    $("#charSummary").className="notice warn";$("#charSummary").textContent="Carga un catálogo y elige un carácter.";
+    $("#sourcePhotos").innerHTML="";$("#valueArea").innerHTML="";$("#applicability").textContent="";return;
+  }
+  $("#charSummary").className="notice good";$("#charSummary").innerHTML=`<b>${esc(c.label||c.id)}</b><br><span class="tiny">${esc(c.id)}</span>`;
+  $("#applicability").textContent=c.applies_to?.length?`Órganos aplicables: ${c.applies_to.join(", ")}`:"Sin filtro de órgano declarado por catálogo.";
+  const imgs=groupPhotos(activeGroupId);
+  $("#sourcePhotos").innerHTML=imgs.map(p=>{
+    const applicable=isApplicable(c,p);
+    return `<label title="${applicable?"aplicable":"no aplicable según catálogo"}"><input type="checkbox" data-photo="${p.photo_id}" ${applicable?"":"disabled"}><img src="${p.object_url||""}" style="${applicable?"":"opacity:.35"}"></label>`;
+  }).join("");
+  renderValueArea();
+  renderEvidenceList();
+}
+
+function renderValueArea(){
+  const c=currentCharacter(); const root=$("#valueArea");root.innerHTML=""; if(!c)return;
+  $("#stateObserved").classList.toggle("on",draftState==="OBSERVED");
+  $("#stateNotObservable").classList.toggle("no",draftState==="NOT_OBSERVABLE");
+  if(draftState==="OBSERVED"){
+    if(Array.isArray(c.states)&&c.states.length){
+      root.innerHTML=`<label class="small">Estado botánico observado</label><select id="evidenceValue"><option value="">— seleccionar —</option>${c.states.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("")}</select>`;
+    }else{
+      root.innerHTML=`<label class="small">Valor observado</label><input id="evidenceValue" type="text" placeholder="según el contrato del carácter">`;
+    }
+  }else if(draftState==="NOT_OBSERVABLE"){
+    root.innerHTML=`<div class="notice">NOT_OBSERVABLE registra imposibilidad de resolver este carácter desde las fotos seleccionadas. No significa “ausente”.</div>`;
+  }
+}
+
+function renderEvidenceList(){
+  const root=$("#evidenceList");root.innerHTML="";
+  const list=evidence.filter(e=>e.observation_id===activeGroupId);
+  if(!list.length){root.innerHTML=`<div class="tiny muted">Sin evidencia registrada para esta unidad.</div>`;return}
+  list.slice().reverse().forEach(e=>{
+    const c=catalog?.characters?.find(x=>x.id===e.character_id);
+    const d=document.createElement("div");d.className="charCard";
+    d.innerHTML=`<div class="charHead"><div class="name">${esc(c?.label||e.character_id)}</div><span class="badge ${e.observability_status==="OBSERVED"?"good":"warn"}">${e.observability_status}</span></div>
+      <div class="tiny muted">${e.observed_state?`estado: ${esc(e.observed_state)} · `:(e.observed_value?`valor: ${esc(e.observed_value)} · `:"")}${e.source_photo_ids.length} foto(s) fuente</div>
+      <div class="tiny muted">${esc(e.annotated_at)}</div><div style="margin-top:6px"><button class="danger" data-del="${e.evidence_id}">Eliminar</button></div>`;
+    d.querySelector("button").onclick=()=>{evidence=evidence.filter(x=>x.evidence_id!==e.evidence_id);renderAll()};
+    root.appendChild(d);
+  });
+}
+
+function validateCatalog(data){
+  if(!data || typeof data!=="object") return "El catálogo debe ser un objeto JSON.";
+  for(const key of ["catalog_id","version","authority_ref"]){
+    if(!nonEmptyString(data[key])) return `El catálogo requiere ${key} como string no vacío.`;
+    if(isPlaceholder(data[key])) return `${key} contiene un placeholder no autorizado.`;
+  }
+  if(!isRecognizedAuthorityRef(data.authority_ref))
+    return `authority_ref no reconocida. R2.1.3 admite únicamente data/botanical/characters.json para este catálogo.`;
+  if(!Array.isArray(data.characters)) return "El catálogo requiere characters[].";
+  if(!Array.isArray(data.organs)||!Array.isArray(data.views))
+    return "El catálogo R2.1.3 requiere vocabularios operativos organs[] y views[].";
+
+  for(const [name,arr] of [["organs",data.organs],["views",data.views]]){
+    if(arr.some(v=>!nonEmptyString(v))) return `${name}[] solo puede contener strings no vacíos.`;
+    if(arr.some(isPlaceholder)) return `${name}[] contiene placeholders no autorizados.`;
+    if(hasDuplicates(arr)) return `${name}[] contiene valores duplicados.`;
+  }
+
+  const ids=new Set();
+  const organSet=new Set(data.organs);
+  for(const c of data.characters){
+    if(!c || typeof c!=="object") return "Cada carácter debe ser un objeto.";
+    if(!nonEmptyString(c.id)) return "Cada carácter requiere id no vacío.";
+    if(isPlaceholder(c.id)) return `characterId placeholder no autorizado: ${c.id}`;
+    if(ids.has(c.id)) return `characterId duplicado: ${c.id}`;
+    ids.add(c.id);
+
+    if(c.label!=null && !nonEmptyString(c.label)) return `label vacío en ${c.id}`;
+    if(isPlaceholder(c.label)) return `label placeholder no autorizado en ${c.id}`;
+
+    if(c.states!=null){
+      if(!Array.isArray(c.states)) return `states debe ser array en ${c.id}`;
+      if(c.states.some(v=>!nonEmptyString(v))) return `states[] contiene un valor vacío en ${c.id}`;
+      if(c.states.some(isPlaceholder)) return `states[] contiene placeholders no autorizados en ${c.id}`;
+      if(hasDuplicates(c.states)) return `states[] contiene duplicados en ${c.id}`;
+    }
+
+    if(c.applies_to!=null){
+      if(!Array.isArray(c.applies_to)) return `applies_to debe ser array en ${c.id}`;
+      if(c.applies_to.some(v=>!nonEmptyString(v))) return `applies_to contiene un valor vacío en ${c.id}`;
+      if(c.applies_to.some(isPlaceholder)) return `applies_to contiene placeholders no autorizados en ${c.id}`;
+      if(hasDuplicates(c.applies_to)) return `applies_to contiene duplicados en ${c.id}`;
+      if(c.applies_to.some(v=>!organSet.has(v))) return `applies_to usa un órgano fuera de organs[] en ${c.id}`;
+    }
+  }
+  return null;
+}
+
+function validateWorkingSession(s){
+  if(!s || typeof s!=="object") return "La sesión debe ser un objeto JSON.";
+  if(s.experiment_id!=="H16-EXP-001") return "experiment_id incompatible.";
+  if(s.interface_version!=="R2.1.3-prototype") return "interface_version incompatible con R2.1.3.";
+  if(!Array.isArray(s.observations)) return "observations debe ser array.";
+  if(!Array.isArray(s.photos)) return "photos debe ser array.";
+  if(!Array.isArray(s.evidence)) return "evidence debe ser array.";
+  if(!s.ui || typeof s.ui!=="object" || Array.isArray(s.ui)) return "ui debe ser objeto.";
+  for(const k of ["activeGroupId","activePhotoId","activeCharacterId","mode"]){
+    if(!(k in s.ui)) return `ui.${k} ausente.`;
+  }
+  if(!["batch","character"].includes(s.ui.mode)) return "ui.mode inválido.";
+  if(s.catalog!=null){
+    const err=validateCatalog(s.catalog);
+    if(err) return "catálogo de sesión inválido: "+err;
+    if(!nonEmptyString(s.catalog_source_file_sha256)) return "catalog_source_file_sha256 ausente.";
+    if(!nonEmptyString(s.catalog_content_sha256)) return "catalog_content_sha256 ausente.";
+    if(!["VERIFIED","PRESERVED_UNVERIFIED"].includes(s.catalog_source_file_sha256_status))
+      return "catalog_source_file_sha256_status inválido.";
+    if(!nonEmptyString(s.authority_ref)) return "authority_ref de sesión ausente.";
+    if(!nonEmptyString(s.authority_git_blob_sha)) return "authority_git_blob_sha ausente.";
+    if(!nonEmptyString(s.authority_source_sha256)) return "authority_source_sha256 ausente.";
+    if(!nonEmptyString(s.authority_source_bytes_b64)) return "authority_source_bytes_b64 ausente.";
+  }
+  return null;
+}
+
+function commitEvidence(){
+  const c=currentCharacter(), g=currentGroup();
+  const warning=$("#evidenceWarning");warning.textContent="";
+  if(!c||!g){warning.textContent="Falta carácter o unidad de observación.";return}
+  if(!draftState){warning.textContent="Selecciona OBSERVED o NOT_OBSERVABLE.";return}
+  const source=[...document.querySelectorAll("#sourcePhotos input:checked")].map(x=>x.dataset.photo);
+  if(!source.length){warning.textContent="Selecciona al menos una fotografía fuente.";return}
+  if(source.some(pid=>photos.find(p=>p.photo_id===pid)?.observation_id!==g.observation_id)){
+    warning.textContent="Todas las fotos fuente deben pertenecer a la misma unidad de observación.";return
+  }
+  if(source.some(pid=>!isApplicable(c,photos.find(p=>p.photo_id===pid)))){
+    warning.textContent="Una foto seleccionada no es aplicable al carácter según el catálogo.";return
+  }
+
+  let observed_state=null, observed_value=null;
+  if(draftState==="OBSERVED"){
+    const el=$("#evidenceValue");
+    const raw=el?.value?.trim()||null;
+    if(!raw){warning.textContent="OBSERVED requiere un estado o valor observado.";return}
+    if(Array.isArray(c.states)&&c.states.length){
+      if(!c.states.includes(raw)){warning.textContent="El estado no pertenece al vocabulario permitido por el catálogo.";return}
+      observed_state=raw;
+    }else{
+      observed_value=raw;
+    }
+  }
+
+  evidence.push({
+    evidence_id:uid("ev"),
+    observation_id:g.observation_id,
+    character_id:c.id,
+    observability_status:draftState,
+    observed_state,
+    observed_value,
+    source_photo_ids:source,
+    note:$("#evidenceNote").value.trim()||null,
+    observer:{name:$("#observerName").value.trim()||null,method:"human-annotation"},
+    catalog_ref:{
+      catalog_id:catalog.catalog_id,
+      version:catalog.version,
+      authority_ref:catalog.authority_ref,
+      source_file_sha256:catalogHash,
+      source_file_sha256_status_at_annotation:catalogSourceFileHashStatus,
+      content_sha256:catalogContentHash,
+      authority_binding:currentAuthorityBinding()
+    },
+    annotated_at:new Date().toISOString()
+  });
+  draftState=null;$("#evidenceNote").value="";renderAll();
+}
+
+function workingSession(){
+  return {
+    experiment_id:"H16-EXP-001",
+    interface_version:"R2.1.3-prototype",
+    session_saved_at:new Date().toISOString(),
+    catalog,
+    catalog_source_file_sha256:catalogHash,
+    catalog_source_file_sha256_status:catalogSourceFileHashStatus,
+    catalog_content_sha256:catalogContentHash,
+    authority_ref:authorityRef,
+    authority_git_blob_sha:authorityGitBlobSha,
+    authority_source_sha256:authoritySourceSha256,
+    authority_source_bytes_b64:authoritySourceBytesB64,
+    authority_verification_status:authorityVerificationStatus,
+    observations:groups,
+    photos:photos.map(({object_url,...p})=>p),
+    evidence,
+    ui:{activeGroupId,activePhotoId,activeCharacterId,mode}
+  };
+}
+
+function exportPayload(){
+  return {
+    experiment_id:"H16-EXP-001",
+    export_schema_version:"R2.1.3-prototype",
+    exported_at:new Date().toISOString(),
+    catalog_ref:catalog?{
+      catalog_id:catalog.catalog_id,
+      version:catalog.version,
+      authority_ref:catalog.authority_ref,
+      source_file_sha256:catalogHash,
+      current_source_file_sha256_status:catalogSourceFileHashStatus,
+      content_sha256:catalogContentHash,
+      authority_binding:currentAuthorityBinding()
+    }:null,
+    open_decisions:[
+      "Repeated/contradictory evidence semantics for the same character_id remain OPEN.",
+      "Whether one photo may belong to multiple observation units remains OPEN.",
+      "View-specific character applicability remains OPEN until H16 defines it."
+    ],
+    observations:groups,
+    photos:photos.map(({object_url,selected,...p})=>p),
+    evidence
+  };
+}
+
+function validateExport(){
+  const issues=[];
+  if(!catalog)issues.push("No hay catálogo cargado.");
+  if(catalog && !catalogHash)issues.push("El catálogo no tiene SHA-256 del archivo fuente registrado.");
+  if(catalog && !["VERIFIED","PRESERVED_UNVERIFIED"].includes(catalogSourceFileHashStatus))
+    issues.push("Estado de verificación de source_file_sha256 inválido.");
+  if(catalog && !catalogContentHash)issues.push("El catálogo no tiene SHA-256 lógico de contenido registrado.");
+  if(catalog && !authoritySnapshot)issues.push("No hay autoridad botánica verificada cargada.");
+  if(catalog){
+    const catalogErr=validateCatalog(catalog);
+    if(catalogErr)issues.push("Catálogo inválido: "+catalogErr);
+    const authorityErr=validateCatalogAgainstAuthority(catalog);
+    if(authorityErr)issues.push("Authority binding inválido: "+authorityErr);
+  }
+
+  const groupIds=new Set(), photoIds=new Set(), evidenceIds=new Set();
+  for(const g of groups){
+    if(!g.observation_id)issues.push("Existe una observación sin observation_id.");
+    else if(groupIds.has(g.observation_id))issues.push(`observation_id duplicado: ${g.observation_id}`);
+    else groupIds.add(g.observation_id);
+  }
+  for(const p of photos){
+    if(!p.photo_id)issues.push("Existe una fotografía sin photo_id.");
+    else if(photoIds.has(p.photo_id))issues.push(`photo_id duplicado: ${p.photo_id}`);
+    else photoIds.add(p.photo_id);
+    if(!p.observation_id||!groupIds.has(p.observation_id))issues.push(`Foto ${p.photo_id} referencia una observación inexistente.`);
+    if(catalog && p.organ && !catalog.organs.includes(p.organ))issues.push(`Foto ${p.photo_id}: órgano fuera del vocabulario autorizado.`);
+    if(catalog && p.view && !catalog.views.includes(p.view))issues.push(`Foto ${p.photo_id}: vista fuera del vocabulario autorizado.`);
+  }
+
+  const charMap=new Map((catalog?.characters||[]).map(c=>[c.id,c]));
+  for(const e of evidence){
+    if(!e.evidence_id)issues.push("Existe evidencia sin evidence_id.");
+    else if(evidenceIds.has(e.evidence_id))issues.push(`evidence_id duplicado: ${e.evidence_id}`);
+    else evidenceIds.add(e.evidence_id);
+
+    if(!groupIds.has(e.observation_id))issues.push(`Evidencia ${e.evidence_id} referencia una observación inexistente.`);
+    const c=charMap.get(e.character_id);
+    if(!c)issues.push(`Evidencia ${e.evidence_id}: character_id inexistente en catálogo.`);
+    if(!["OBSERVED","NOT_OBSERVABLE"].includes(e.observability_status))
+      issues.push(`Evidencia ${e.evidence_id}: observability_status inválido.`);
+
+    if(!Array.isArray(e.source_photo_ids)||!e.source_photo_ids.length){
+      issues.push(`Evidencia ${e.evidence_id} sin fotos fuente.`);
+    }else{
+      for(const pid of e.source_photo_ids){
+        const p=photos.find(x=>x.photo_id===pid);
+        if(!p){issues.push(`Evidencia ${e.evidence_id}: foto fuente inexistente ${pid}.`);continue}
+        if(p.observation_id!==e.observation_id)
+          issues.push(`Evidencia ${e.evidence_id}: foto ${pid} pertenece a otra observación.`);
+        if(c && !isApplicable(c,p))
+          issues.push(`Evidencia ${e.evidence_id}: foto ${pid} no es aplicable al carácter según el catálogo.`);
+      }
+    }
+
+    if(e.observability_status==="OBSERVED"){
+      if(c?.states?.length){
+        if(!e.observed_state)issues.push(`Evidencia ${e.evidence_id}: OBSERVED requiere observed_state.`);
+        else if(!c.states.includes(e.observed_state))issues.push(`Evidencia ${e.evidence_id}: observed_state fuera del catálogo.`);
+        if(e.observed_value!=null)issues.push(`Evidencia ${e.evidence_id}: no debe mezclar observed_state y observed_value.`);
+      }else{
+        if(!e.observed_value)issues.push(`Evidencia ${e.evidence_id}: OBSERVED requiere observed_value.`);
+        if(e.observed_state!=null)issues.push(`Evidencia ${e.evidence_id}: observed_state no aplica a un carácter libre.`);
+      }
+    }
+    if(e.observability_status==="NOT_OBSERVABLE" && (e.observed_state!=null||e.observed_value!=null))
+      issues.push(`Evidencia ${e.evidence_id}: NOT_OBSERVABLE no debe contener estado/valor observado.`);
+
+    if(catalog && (
+      e.catalog_ref?.catalog_id!==catalog.catalog_id ||
+      e.catalog_ref?.version!==catalog.version ||
+      e.catalog_ref?.authority_ref!==catalog.authority_ref ||
+      e.catalog_ref?.source_file_sha256!==catalogHash ||
+      e.catalog_ref?.content_sha256!==catalogContentHash
+    )) issues.push(`Evidencia ${e.evidence_id}: provenance de catálogo no coincide con el catálogo activo.`);
+    if(e.catalog_ref && !["VERIFIED","PRESERVED_UNVERIFIED"].includes(e.catalog_ref.source_file_sha256_status_at_annotation))
+      issues.push(`Evidencia ${e.evidence_id}: source_file_sha256_status_at_annotation inválido.`);
+    const eb=e.catalog_ref?.authority_binding;
+    if(!eb ||
+       eb.authority_ref!==authorityRef ||
+       eb.authority_git_blob_sha!==authorityGitBlobSha ||
+       eb.authority_source_sha256!==authoritySourceSha256 ||
+       eb.derivation_contract!==AUTHORITY_REGISTRY[authorityRef]?.derivation_contract)
+      issues.push(`Evidencia ${e.evidence_id}: authority_binding no coincide con la autoridad verificada.`);
+  }
+
+  $("#validation").className="notice "+(issues.length?"warn":"good");
+  $("#validation").textContent=issues.length?issues.join(" "):"Estructura interna consistente, authority binding verificado contra characters.json y binding lógico del catálogo verificable. La evidencia repetida/contradictoria, la cardinalidad foto↔observación múltiple y la aplicabilidad por vista permanecen OPEN. Esto no equivale a validación científica ni a PASS de H16.";
+  return issues;
+}
+
+function renderAll(){
+  renderGroups();renderPhotos();renderViewer();renderBatchForm();renderCatalog();renderEvidenceEditor();validateExport();preview();
+  $("#statusTop").textContent=catalog?`${catalog.catalog_id}@${catalog.version} · auth ${authorityVerificationStatus||"NO"} · file ${catalogHash?.slice(0,8)||"?"}… [${catalogSourceFileHashStatus||"?"}] · content ${catalogContentHash?.slice(0,8)||"?"}… · ${groups.length} observaciones · ${photos.length} fotos · ${evidence.length} evidencias`:`catálogo no cargado · ${photos.length} fotos`;
+}
+
+function preview(){$("#jsonPreview").textContent=JSON.stringify(exportPayload(),null,2)}
+function download(name,text){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"application/json"}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function resetView(){zoom=1;rotation=0}function applyTransform(){const i=$("#mainImage");if(i)i.style.transform=`scale(${zoom}) rotate(${rotation}deg)`}
+function nav(delta){const arr=activeGroupId?groupPhotos(activeGroupId):photos;if(!arr.length)return;let i=arr.findIndex(p=>p.photo_id===activePhotoId);i=(i+delta+arr.length)%arr.length;activePhotoId=arr[i].photo_id;resetView();renderAll()}
+
+$("#tabBatch").onclick=()=>setMode("batch");$("#tabCharacter").onclick=()=>setMode("character");
+$("#newGroup").onclick=createGroup;
+$("#renameGroup").onclick=()=>{const g=currentGroup();if(!g)return;const n=prompt("Nombre de la unidad de observación",g.name);if(n){g.name=n;renderAll()}};
+$("#photoInput").onchange=e=>addPhotoFiles(e.target.files);
+["dragenter","dragover"].forEach(ev=>$("#drop").addEventListener(ev,e=>{e.preventDefault();$("#drop").style.background="#eef5ef"}));
+["dragleave","drop"].forEach(ev=>$("#drop").addEventListener(ev,e=>{e.preventDefault();$("#drop").style.background=""}));
+$("#drop").addEventListener("drop",e=>addPhotoFiles(e.dataTransfer.files));
+$("#prev").onclick=()=>nav(-1);$("#next").onclick=()=>nav(1);
+$("#zoomIn").onclick=()=>{zoom=Math.min(4,zoom+.2);applyTransform()};$("#zoomOut").onclick=()=>{zoom=Math.max(.2,zoom-.2);applyTransform()};$("#rotate").onclick=()=>{rotation=(rotation+90)%360;applyTransform()};
+
+["groupName","groupTaxon","groupTaxonSource","groupNotes"].forEach(id=>$("#"+id).addEventListener("input",()=>{
+  const g=currentGroup();if(!g)return;
+  if(id==="groupName")g.name=$("#"+id).value;
+  if(id==="groupTaxon")g.taxon=$("#"+id).value||null;
+  if(id==="groupTaxonSource")g.taxon_source=$("#"+id).value||null;
+  if(id==="groupNotes")g.notes=$("#"+id).value||null;
+  renderGroups();preview();
+}));
+["photoOrgan","photoView","photoNotes"].forEach(id=>$("#"+id).addEventListener("input",()=>{
+  const p=currentPhoto();if(!p)return;
+  if(id==="photoOrgan")p.organ=$("#"+id).value||null;
+  if(id==="photoView")p.view=$("#"+id).value||null;
+  if(id==="photoNotes")p.notes=$("#"+id).value||null;
+  renderPhotos();preview();
+}));
+$("#assignSelected").onclick=()=>{
+  const g=currentGroup();if(!g)return;
+  const selected=photos.filter(p=>p.selected);
+  selected.forEach(p=>{p.observation_id=g.observation_id;p.selected=false});
+  renderAll();
+};
+
+$("#authorityInput").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{
+    const bytes=new Uint8Array(await f.arrayBuffer());
+    await verifyAuthorityBytes("data/botanical/characters.json",bytes,"VERIFIED_DIRECT");
+    if(catalog){
+      const bindErr=validateCatalogAgainstAuthority(catalog);
+      if(bindErr){alert("Autoridad cargada, pero el catálogo activo no está ligado a ella: "+bindErr);}
+    }
+    renderAll();
+  }catch(err){
+    alert("Autoridad rechazada: "+err.message);
+  }
+};
+
+$("#catalogInput").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(!authoritySnapshot){alert("Importa primero la autoridad data/botanical/characters.json.");return}
+  const data=JSON.parse(await f.text());
+  const err=validateCatalog(data);
+  if(err){alert(err);return}
+  const bindErr=validateCatalogAgainstAuthority(data);
+  if(bindErr){alert("Catálogo rechazado por authority binding: "+bindErr);return}
+  catalog=data;
+  catalogHash=await sha256(f);
+  catalogContentHash=await catalogLogicalHash(data);
+  catalogSourceFileHashStatus="VERIFIED";
+  activeCharacterId=data.characters[0]?.id||null;
+  renderAll();
+};
+$("#evidenceGroup").onchange=e=>{activeGroupId=e.target.value;const p=groupPhotos(activeGroupId)[0];activePhotoId=p?.photo_id||null;renderAll()};
+$("#stateObserved").onclick=()=>{draftState="OBSERVED";renderValueArea()};
+$("#stateNotObservable").onclick=()=>{draftState="NOT_OBSERVABLE";renderValueArea()};
+$("#commitEvidence").onclick=commitEvidence;
+
+$("#saveSession").onclick=()=>download("H16-EXP-001_R2_1_3_session.json",JSON.stringify(workingSession(),null,2));
+$("#sessionInput").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  const s=JSON.parse(await f.text());
+  const sessionErr=validateWorkingSession(s);
+  if(sessionErr){alert("Sesión inválida: "+sessionErr);return}
+
+  catalog=s.catalog||null;
+  catalogHash=s.catalog_source_file_sha256||null;
+  catalogContentHash=s.catalog_content_sha256||null;
+  catalogSourceFileHashStatus=catalog ? "PRESERVED_UNVERIFIED" : null;
+
+  if(catalog){
+    try{
+      const authorityBytes=base64ToBytes(s.authority_source_bytes_b64);
+      await verifyAuthorityBytes(s.authority_ref,authorityBytes,"VERIFIED_SESSION_BYTES");
+      if(authorityGitBlobSha!==s.authority_git_blob_sha || authoritySourceSha256!==s.authority_source_sha256){
+        alert("Sesión inválida: metadata de autoridad no coincide con los bytes preservados.");
+        return;
+      }
+    }catch(err){
+      alert("Sesión inválida: authority binding no verificable. "+err.message);
+      return;
+    }
+
+    const recomputedContentHash=await catalogLogicalHash(catalog);
+    if(!catalogContentHash || recomputedContentHash!==catalogContentHash){
+      alert("Sesión inválida: el snapshot del catálogo no coincide con su fingerprint lógico.");
+      return;
+    }
+    const bindErr=validateCatalogAgainstAuthority(catalog);
+    if(bindErr){
+      alert("Sesión inválida: el catálogo no deriva de la autoridad preservada. "+bindErr);
+      return;
+    }
+  }
+  groups=s.observations||[];
+  photos=(s.photos||[]).map(p=>({...p,object_url:null,selected:false}));
+  evidence=s.evidence||[];
+  activeGroupId=s.ui?.activeGroupId||groups[0]?.observation_id||null;
+  activePhotoId=s.ui?.activePhotoId||photos[0]?.photo_id||null;
+  activeCharacterId=s.ui?.activeCharacterId||catalog?.characters?.[0]?.id||null;
+  setMode(s.ui?.mode||"batch");
+  alert("Sesión restaurada. Añade/rearrastra las fotografías para relink automático por SHA-256.");
+};
+$("#exportData").onclick=()=>{
+  const issues=validateExport();
+  if(!catalog){alert("No se exporta H16 sin un catálogo versionado cargado.");return}
+  if(issues.length){alert("Export bloqueado: corrige primero los problemas mostrados en Validación y salida.");return}
+  download("H16-EXP-001_R2_1_3_export.json",JSON.stringify(exportPayload(),null,2));
+};
+$("#previewJson").onclick=preview;$("#copyJson").onclick=async()=>{preview();await navigator.clipboard.writeText($("#jsonPreview").textContent)};
+
+document.addEventListener("keydown",e=>{
+  if(["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
+  if(e.key==="ArrowLeft")nav(-1);if(e.key==="ArrowRight")nav(1);
+});
+
+createGroup();
+setMode("batch");
+</script>
+</body>
+</html>
