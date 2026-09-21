@@ -1,0 +1,25 @@
+{
+  "_template_notice": "Plantilla H16. R2.1.3 exige importar primero el characters.json canónico fijado y rechazará REPLACE_WITH_*.",
+  "catalog_id": "REPLACE_WITH_AUTHORIZED_H16_CHARACTER_CATALOG_ID",
+  "version": "REPLACE_WITH_VERSION",
+  "authority_ref": "data/botanical/characters.json",
+  "organs": [
+    "REPLACE_WITH_H16_OPERATIONAL_ORGAN_VALUE"
+  ],
+  "views": [
+    "REPLACE_WITH_H16_OPERATIONAL_VIEW_VALUE"
+  ],
+  "characters": [
+    {
+      "id": "CH-001",
+      "label": "Tipo de hoja",
+      "states": [
+        "simple",
+        "compuesta"
+      ],
+      "applies_to": [
+        "REPLACE_WITH_VALUE_FROM_organs"
+      ]
+    }
+  ]
+}
