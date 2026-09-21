@@ -9,6 +9,7 @@ export const APC_PENDING_KINDS = Object.freeze(['UNRESOLVED_REQUIREMENT', 'REPRE
 export const APC_PENDING_STATUSES = Object.freeze(['OPEN', 'RESOLVED']);
 export const APC_REPRESENTATION_TARGETS = Object.freeze(['CHARACTER', 'STATE']);
 export const APC_CONTRADICTION_STATUSES = Object.freeze(['OPEN', 'RESOLVED']);
+export const APC_PASS_REASON_CODES = Object.freeze(['NOT_EXPORTABLE', 'ASSESSMENT_STALE', 'OBJECTIVE_NOT_SATISFIED', 'CRITICAL_PENDING_OPEN']);
 
 const EVIDENCE_IDENTITY_FIELDS = Object.freeze([
   'sessionId',
@@ -825,6 +826,264 @@ export function validateApcContradictionTransition(previousSession, nextSession,
   }
 
   return { valid: errors.length === 0, errors };
+}
+
+
+function validateObjectiveAssessmentBinding(session, errors, reasons = null) {
+  const revision = session?.semanticRevision;
+  const assessment = session?.objectiveAssessment;
+  if (!Number.isInteger(revision) || revision < 1) {
+    errors.push('semanticRevision must be an integer >= 1');
+    return;
+  }
+  if (!assessment || typeof assessment !== 'object') return;
+
+  if (assessment.status === 'OPEN') {
+    if (assessment.assessedRevision != null) errors.push('objectiveAssessment.assessedRevision must be null when status=OPEN');
+    if (assessment.assessedBy != null) errors.push('objectiveAssessment.assessedBy must be null when status=OPEN');
+    if (assessment.assessedAt != null) errors.push('objectiveAssessment.assessedAt must be null when status=OPEN');
+    return;
+  }
+
+  if (assessment.status === 'SATISFIED' || assessment.status === 'NOT_SATISFIED') {
+    if (!Number.isInteger(assessment.assessedRevision) || assessment.assessedRevision !== revision) {
+      errors.push(`objectiveAssessment.assessedRevision must equal semanticRevision ${revision} when assessment is final`);
+      if (Array.isArray(reasons) && !reasons.includes('ASSESSMENT_STALE')) reasons.push('ASSESSMENT_STALE');
+    }
+    if (!canonicalText(assessment.assessedBy)) errors.push('objectiveAssessment.assessedBy must be a canonical non-empty string when assessment is final');
+    if (!isIso8601(assessment.assessedAt)) errors.push('objectiveAssessment.assessedAt must be valid ISO-8601 when assessment is final');
+  }
+}
+
+function requirementCoverageErrors(session, indexes) {
+  const errors = [];
+  for (const requirement of session.requirements ?? []) {
+    const openMatches = (session.pending ?? []).filter(p =>
+      p?.kind === 'UNRESOLVED_REQUIREMENT' &&
+      p?.status === 'OPEN' &&
+      p?.originRequirementId === requirement.requirementId
+    );
+    const satisfied = isApcRequirementSatisfied(session, requirement, indexes);
+    if (satisfied && openMatches.length !== 0) {
+      errors.push(`requirement ${requirement.requirementId} is satisfied and must have zero OPEN UNRESOLVED_REQUIREMENT pending; found ${openMatches.length}`);
+    }
+    if (!satisfied && openMatches.length !== 1) {
+      errors.push(`requirement ${requirement.requirementId} is unsatisfied and must have exactly one OPEN UNRESOLVED_REQUIREMENT pending; found ${openMatches.length}`);
+    }
+  }
+  return errors;
+}
+
+function stableSorted(items, keyFn) {
+  return [...items].sort((a, b) => keyFn(a).localeCompare(keyFn(b)));
+}
+
+function assessmentSubstrateSnapshot(session, { isContradictionRelevant = () => false } = {}) {
+  const indexes = indexApcSession(session);
+
+  const evidence = stableSorted(
+    (session.evidence ?? [])
+      .filter(ev => ev?.current === true)
+      .map(ev => ({
+        evidenceId: ev.evidenceId,
+        revision: ev.revision,
+        photoId: ev.photoId,
+        individualId: ev.individualId,
+        characterId: ev.characterId,
+        lifecycleStatus: ev.lifecycleStatus,
+        evidenceStatus: ev.evidenceStatus,
+        observedState: ev.observedState ?? null,
+        reason: ev.reason ?? null,
+      })),
+    ev => `${ev.evidenceId}::${ev.revision}`,
+  );
+
+  const requirements = stableSorted(
+    (session.requirements ?? []).map(requirement => ({
+      requirementId: requirement.requirementId,
+      scopeLevel: requirement.scopeLevel,
+      scopeRef: requirement.scopeRef,
+      characterId: requirement.characterId,
+      required: requirement.required,
+      reason: requirement.reason,
+      createdBy: requirement.createdBy,
+      satisfied: isApcRequirementSatisfied(session, requirement, indexes),
+    })),
+    requirement => requirement.requirementId,
+  );
+
+  const pending = stableSorted(
+    (session.pending ?? [])
+      .filter(item => item?.status === 'OPEN')
+      .map(item => ({
+        pendingId: item.pendingId,
+        kind: item.kind,
+        status: item.status,
+        critical: item.critical,
+        originRequirementId: item.originRequirementId ?? null,
+        scopeLevel: item.scopeLevel ?? null,
+        scopeRef: item.scopeRef ?? null,
+        sourceLevel: item.sourceLevel ?? null,
+        sourceRef: item.sourceRef ?? null,
+        characterId: item.characterId,
+        representationTarget: item.representationTarget ?? null,
+        targetState: item.targetState ?? null,
+      })),
+    item => item.pendingId,
+  );
+
+  const contradictions = stableSorted(
+    (session.contradictions ?? [])
+      .filter(item => item?.status === 'OPEN' && isContradictionRelevant(item, session) === true)
+      .map(item => ({
+        contradictionId: item.contradictionId,
+        individualId: item.individualId,
+        characterId: item.characterId,
+        status: item.status,
+      })),
+    item => item.contradictionId,
+  );
+
+  return {
+    objective: session.objective,
+    evidence,
+    requirements,
+    pending,
+    contradictions,
+  };
+}
+
+export function validateApcSessionForExport(session, { areStatesIncompatible } = {}) {
+  const errors = [];
+  const reasons = [];
+
+  const base = validateApcSession(session);
+  if (!base.valid) errors.push(...base.errors.map(error => `snapshot: ${error}`));
+
+  if (Object.prototype.hasOwnProperty.call(session ?? {}, 'pass')) errors.push('session.pass must not be persisted');
+  if (Object.prototype.hasOwnProperty.call(session ?? {}, 'exportable')) errors.push('session.exportable must not be persisted');
+
+  validateObjectiveAssessmentBinding(session, errors, reasons);
+
+  if (base.valid) {
+    errors.push(...requirementCoverageErrors(session, base.indexes));
+
+    const contradictions = validateApcContradictions(session, { areStatesIncompatible });
+    if (!contradictions.valid) errors.push(...contradictions.errors.map(error => `I9 snapshot: ${error}`));
+  }
+
+  const uniqueReasons = [];
+  if (errors.length && !uniqueReasons.includes('NOT_EXPORTABLE')) uniqueReasons.push('NOT_EXPORTABLE');
+  if (reasons.includes('ASSESSMENT_STALE')) uniqueReasons.push('ASSESSMENT_STALE');
+
+  return {
+    exportable: errors.length === 0,
+    reasons: uniqueReasons,
+    errors,
+  };
+}
+
+export function assessApcSessionPass(session, options = {}) {
+  const exportResult = validateApcSessionForExport(session, options);
+  const reasonSet = new Set();
+
+  if (!exportResult.exportable) reasonSet.add('NOT_EXPORTABLE');
+  if (exportResult.reasons.includes('ASSESSMENT_STALE')) reasonSet.add('ASSESSMENT_STALE');
+  if (session?.objectiveAssessment?.status !== 'SATISFIED') reasonSet.add('OBJECTIVE_NOT_SATISFIED');
+  if ((session?.pending ?? []).some(item => item?.status === 'OPEN' && item?.critical === true)) {
+    reasonSet.add('CRITICAL_PENDING_OPEN');
+  }
+
+  const reasons = APC_PASS_REASON_CODES.filter(code => reasonSet.has(code));
+  return {
+    pass: exportResult.exportable &&
+      session?.objectiveAssessment?.status === 'SATISFIED' &&
+      !(session?.pending ?? []).some(item => item?.status === 'OPEN' && item?.critical === true),
+    reasons,
+  };
+}
+
+export function buildApcSessionExport(session, options = {}) {
+  const validation = validateApcSessionForExport(session, options);
+  if (!validation.exportable) {
+    return {
+      exportable: false,
+      filename: null,
+      json: null,
+      reasons: validation.reasons,
+      errors: validation.errors,
+    };
+  }
+
+  return {
+    exportable: true,
+    filename: `${session.sessionId}.apc.json`,
+    json: JSON.stringify(session, null, 2),
+    reasons: [],
+    errors: [],
+  };
+}
+
+export function validateApcSemanticTransition(
+  previousSession,
+  nextSession,
+  { isContradictionRelevant = () => false } = {},
+) {
+  const errors = [];
+  if (!previousSession || typeof previousSession !== 'object') {
+    return { valid: false, errors: ['previousSession is required'], semanticChanged: null };
+  }
+  if (!nextSession || typeof nextSession !== 'object') {
+    return { valid: false, errors: ['nextSession is required'], semanticChanged: null };
+  }
+
+  const previousBase = validateApcSession(previousSession);
+  const nextBase = validateApcSession(nextSession);
+  if (!previousBase.valid) errors.push(...previousBase.errors.map(error => `previous snapshot: ${error}`));
+  if (!nextBase.valid) errors.push(...nextBase.errors.map(error => `next snapshot: ${error}`));
+
+  if (previousSession.sessionId !== nextSession.sessionId) errors.push('semantic transition requires the same sessionId');
+
+  if (!Number.isInteger(previousSession.semanticRevision) || previousSession.semanticRevision < 1) {
+    errors.push('previous semanticRevision must be an integer >= 1');
+  }
+  if (!Number.isInteger(nextSession.semanticRevision) || nextSession.semanticRevision < 1) {
+    errors.push('next semanticRevision must be an integer >= 1');
+  }
+
+  let semanticChanged = null;
+  if (previousBase.valid && nextBase.valid) {
+    const previousSubstrate = assessmentSubstrateSnapshot(previousSession, { isContradictionRelevant });
+    const nextSubstrate = assessmentSubstrateSnapshot(nextSession, { isContradictionRelevant });
+    semanticChanged = JSON.stringify(previousSubstrate) !== JSON.stringify(nextSubstrate);
+
+    if (Number.isInteger(previousSession.semanticRevision) && Number.isInteger(nextSession.semanticRevision)) {
+      const expectedRevision = semanticChanged
+        ? previousSession.semanticRevision + 1
+        : previousSession.semanticRevision;
+      if (nextSession.semanticRevision !== expectedRevision) {
+        errors.push(`semanticRevision must change ${previousSession.semanticRevision}→${expectedRevision}; found ${nextSession.semanticRevision}`);
+      }
+    }
+
+    if (semanticChanged) {
+      const assessment = nextSession.objectiveAssessment;
+      if (assessment?.status !== 'OPEN' ||
+          assessment?.assessedRevision != null ||
+          assessment?.assessedBy != null ||
+          assessment?.assessedAt != null) {
+        errors.push('semantic mutation requires objectiveAssessment reset to OPEN with null assessedRevision/assessedBy/assessedAt');
+      }
+    }
+  }
+
+  validateObjectiveAssessmentBinding(nextSession, errors);
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    semanticChanged,
+  };
 }
 
 export function indexApcSession(session) {
