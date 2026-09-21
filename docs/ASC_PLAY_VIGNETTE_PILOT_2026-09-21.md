@@ -58,7 +58,24 @@ operativos)?
   `ASC_PROJECT_SEPARATION_AND_IMPLEMENTATION_PLAN_2026-09-17.md`.
 ```
 
-En consecuencia: los **hallazgos operativos de la sección 7** (redacción de `cameraFormat`, riesgo de sobre-extrapolación hidrológica) quedan confirmados como material de interés para el desarrollo de ASC. La **aprobación artística de la escena en sí** sigue sin resolverse y no debe inferirse de este comentario.
+En consecuencia: los **hallazgos operativos de la sección 7** (redacción de `cameraFormat`, riesgo de sobre-extrapolación hidrológica) quedan confirmados como material de interés para el desarrollo de ASC.
+
+### Aprobación artística de la dirección visual (2026-09-21)
+
+**Declarado por la persona operando esta sesión, identificándose como Álvaro (illestudio). No verificado técnicamente por este entorno** — no existe mecanismo en esta sesión para confirmar identidad de forma independiente; se registra con la misma convención aplicada a cualquier otra declaración no verificable en este documento (p. ej. el modelo generativo declarado en la sección 8).
+
+Contexto aportado: Álvaro y Alejandra son las dos personas de illestudio; el contrato formal no impide que cualquiera de los dos opere en nombre del proyecto Árboris.
+
+```text
+Aprobación: los TRES resultados generativos (ASC-PLAY-VIGNETTE-001, 002 y 003)
+Alcance: dirección de estilo/composición para escenas del fragmento acotado
+         del Estero El Arrayán (cauce encajonado, pared rocosa + vegetación
+         densa, hojarasca en primer plano, variación de energía hidráulica)
+Condiciones declaradas: ninguna
+Fecha: 2026-09-21
+```
+
+**Nota que se mantiene pese a la aprobación:** la advertencia de la sección 6 sobre la Imagen B de la iteración 003 (intensidad hidrológica visualmente mayor a la respaldada por `ENV-0037`) no fue mencionada como condición ni descartada explícitamente en esta aprobación. Se conserva como observación técnica independiente — la aprobación de estilo no convierte esa imagen en evidencia de caudal real del Estero El Arrayán; ambas cosas coexisten sin contradicción (una es dirección visual, la otra es evidencia territorial, y `ARBORIS_SCENE_COMPILER.md` §8 exige no mezclar clases de evidencia).
 
 ## 4. Contrato piloto — ASC-PLAY-VIGNETTE-001
 
