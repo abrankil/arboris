@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "candidateId": "candidate-001",
-  "status": "draft",
+  "status": "technical-validated",
   "reference": {
     "path": "assets/brand/canonical/arboris-logo-canonical-reference.jpg",
     "sha256Expected": "20957aeaf262defad7cd13e6274dcfd0cb6410c213f5dbbc05ffe7a420e761c8"
@@ -10,26 +10,26 @@
     "path": "assets/brand/master/candidate-001/arboris-logo-master.pxo",
     "producedIn": "Pixelorama",
     "layerCountDeclared": 7,
-    "verifiedAt": null
+    "verifiedAt": "2026-09-21"
   },
   "layers": [
-    { "id": "fondo", "order": 1, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
-    { "id": "wordmark", "order": 2, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
-    { "id": "hoja", "order": 3, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
-    { "id": "nervaduras", "order": 4, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
-    { "id": "tilde", "order": 5, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
-    { "id": "lema", "order": 6, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null },
-    { "id": "destello", "order": 7, "layerConvention": "PROPOSED", "path": null, "visible": true, "locked": false, "gridCompliant": null }
+    { "id": "fondo", "order": 1, "layerConvention": "PROPOSED", "path": "layers/01-fondo.png", "visible": true, "locked": false, "gridCompliant": true },
+    { "id": "wordmark", "order": 2, "layerConvention": "PROPOSED", "path": "layers/02-wordmark.png", "visible": true, "locked": false, "gridCompliant": true },
+    { "id": "hoja", "order": 3, "layerConvention": "PROPOSED", "path": "layers/03-hoja.png", "visible": true, "locked": false, "gridCompliant": true },
+    { "id": "nervaduras", "order": 4, "layerConvention": "PROPOSED", "path": "layers/04-nervaduras.png", "visible": true, "locked": false, "gridCompliant": true },
+    { "id": "tilde", "order": 5, "layerConvention": "PROPOSED", "path": "layers/05-tilde.png", "visible": true, "locked": false, "gridCompliant": true },
+    { "id": "lema", "order": 6, "layerConvention": "PROPOSED", "path": "layers/06-lema.png", "visible": true, "locked": false, "gridCompliant": true },
+    { "id": "destello", "order": 7, "layerConvention": "PROPOSED", "path": "layers/07-destello.png", "visible": true, "locked": false, "gridCompliant": true }
   ],
   "exports": {
-    "compositeNative": null,
-    "compositePresentation": null
+    "compositeNative": { "path": "exports/composite-native.png", "format": "png", "colorMode": "RGBA" },
+    "compositePresentation": { "path": "exports/composite-presentation.png", "format": "png", "scale": 2, "resampling": "nearest-neighbor" }
   },
   "approval": {
     "artisticApprovalBy": null,
     "artisticApprovalStatus": "OPEN"
   },
   "createdAt": "2026-09-20",
-  "updatedAt": "2026-09-20",
-  "notes": "Instancia inicial de candidate-001 en estado draft. No existen aún capas, .pxo ni exports físicos; assets/brand/master/candidate-001/ todavía no fue creado."
+  "updatedAt": "2026-09-21",
+  "notes": "candidate-001 en technical-validated: .pxo con 7 capas verificado byte a byte contra las exportaciones (sesión remota, independiente del reporte local), grilla 4x4 confirmada al 100% en las 7 capas, compuestos generados y verificados. Aprobación artística sigue OPEN, pendiente de Alejandra."
 }

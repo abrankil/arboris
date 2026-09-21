@@ -427,26 +427,44 @@ test("manifest.json y candidates-registry.json reales del repositorio validan si
   const registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
 
   assert.doesNotThrow(() => validateAll(manifest, registry, { repoRoot: REPO_ROOT }));
-  assert.equal(manifest.status, "draft");
+  assert.equal(manifest.status, "technical-validated");
   assert.equal(manifest.approval.artisticApprovalStatus, "OPEN");
+  assert.equal(manifest.approval.artisticApprovalBy, null);
   assert.equal(manifest.candidateId, "candidate-001");
 });
 
-test("la instancia real no exige capas, .pxo ni exports físicos en estado draft", () => {
+test("la instancia real de candidate-001 tiene las 7 capas, el .pxo y los exports físicos presentes en disco, con grilla validada", () => {
   const manifestPath = path.join(__dirname, "manifest.json");
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  const candidateRoot = path.resolve(REPO_ROOT, "assets/brand/master/candidate-001");
+
+  assert.equal(fs.existsSync(candidateRoot), true, "assets/brand/master/candidate-001/ debe existir");
+  assert.equal(
+    fs.existsSync(path.resolve(REPO_ROOT, manifest.sourcePxo.path)),
+    true,
+    "el .pxo referenciado debe existir en disco"
+  );
+  assert.notEqual(manifest.sourcePxo.verifiedAt, null);
 
   for (const layer of manifest.layers) {
-    assert.equal(layer.path, null);
+    assert.notEqual(layer.path, null, `layer ${layer.id} debe tener path`);
+    assert.equal(
+      fs.existsSync(path.resolve(candidateRoot, layer.path)),
+      true,
+      `${layer.path} debe existir en disco`
+    );
+    assert.equal(layer.gridCompliant, true, `layer ${layer.id} debe tener gridCompliant=true`);
   }
-  assert.equal(manifest.exports.compositeNative, null);
-  assert.equal(manifest.exports.compositePresentation, null);
-  assert.equal(manifest.sourcePxo.verifiedAt, null);
-  assert.equal(
-    fs.existsSync(path.resolve(REPO_ROOT, "assets/brand/master/candidate-001")),
-    false,
-    "assets/brand/master/candidate-001/ no debe existir todavía"
-  );
+
+  for (const key of ["compositeNative", "compositePresentation"]) {
+    const entry = manifest.exports[key];
+    assert.notEqual(entry, null, `exports.${key} debe estar presente`);
+    assert.equal(
+      fs.existsSync(path.resolve(candidateRoot, entry.path)),
+      true,
+      `exports.${key}.path debe existir en disco`
+    );
+  }
 });
 
 test("falla si el SHA-256 en disco de la referencia no coincide con sha256Expected", () => {
