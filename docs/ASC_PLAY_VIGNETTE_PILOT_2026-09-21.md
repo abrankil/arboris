@@ -40,6 +40,26 @@ ejecutor" que sigue abierto para MAP-001.
 
 **Importante para trazabilidad:** en esta sesión, el usuario declaró el brief "aprobado" en el chat. Esa declaración **no fue verificada de forma independiente como decisión artística de Álvaro** — no hay registro de que él haya revisado el brief. Este documento **no debe leerse como que el piloto tiene aprobación artística real**. La aprobación artística sigue, a todos los efectos prácticos, `OPEN` hasta que Álvaro la confirme directamente.
 
+### Retroalimentación posterior de Álvaro (relayada por el usuario, 2026-09-21)
+
+Álvaro revisó el material y señaló que **sirve como insumo para investigar el desarrollo del propio proyecto ASC**, no como aprobación de dirección artística para la escena.
+
+Esto se registra con la siguiente distinción, para no mezclar dos preguntas distintas:
+
+```text
+¿Este material aprueba la dirección artística de la viñeta?
+→ NO. Sigue OPEN. Álvaro no emitió esa aprobación.
+
+¿Este material es evidencia útil para el desarrollo de ASC como proyecto
+(comportamiento del compilador/ejecutor, redacción de contratos, hallazgos
+operativos)?
+→ SÍ, según lo señalado por Álvaro. Coherente con `ASC_PROJECT_BOUNDARY.md`
+  (ASC es su proyecto separado) y con la Fase 1 de diagnóstico prevista en
+  `ASC_PROJECT_SEPARATION_AND_IMPLEMENTATION_PLAN_2026-09-17.md`.
+```
+
+En consecuencia: los **hallazgos operativos de la sección 7** (redacción de `cameraFormat`, riesgo de sobre-extrapolación hidrológica) quedan confirmados como material de interés para el desarrollo de ASC. La **aprobación artística de la escena en sí** sigue sin resolverse y no debe inferirse de este comentario.
+
 ## 4. Contrato piloto — ASC-PLAY-VIGNETTE-001
 
 ```json
