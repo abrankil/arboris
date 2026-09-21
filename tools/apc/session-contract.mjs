@@ -8,6 +8,7 @@ export const APC_REQUIREMENT_REASONS = Object.freeze(['MANUAL', 'SESSION_OBJECTI
 export const APC_PENDING_KINDS = Object.freeze(['UNRESOLVED_REQUIREMENT', 'REPRESENTATION_GAP']);
 export const APC_PENDING_STATUSES = Object.freeze(['OPEN', 'RESOLVED']);
 export const APC_REPRESENTATION_TARGETS = Object.freeze(['CHARACTER', 'STATE']);
+export const APC_CONTRADICTION_STATUSES = Object.freeze(['OPEN', 'RESOLVED']);
 
 const EVIDENCE_IDENTITY_FIELDS = Object.freeze([
   'sessionId',
@@ -566,6 +567,273 @@ export function validateApcPendingTransition(previousSession, nextSession) {
   return { valid: errors.length === 0, errors };
 }
 
+
+function contradictionSeriesKey(contradiction) {
+  const individualId = canonicalText(contradiction?.individualId);
+  const characterId = canonicalText(contradiction?.characterId);
+  if (!individualId || !characterId) return null;
+  return `${individualId}::${characterId}`;
+}
+
+function currentOperationalEvidence(session, individualId, characterId) {
+  return (session.evidence ?? []).filter(ev =>
+    ev?.current === true &&
+    ev?.lifecycleStatus === 'CONFIRMED' &&
+    ev?.evidenceStatus === 'OBSERVED' &&
+    ev?.individualId === individualId &&
+    ev?.characterId === characterId
+  );
+}
+
+function hasIncompatiblePair(evidenceItems, areStatesIncompatible) {
+  if (typeof areStatesIncompatible !== 'function') return false;
+  for (let i = 0; i < evidenceItems.length; i += 1) {
+    for (let j = i + 1; j < evidenceItems.length; j += 1) {
+      const a = evidenceItems[i];
+      const b = evidenceItems[j];
+      if (areStatesIncompatible(a.observedState, b.observedState, {
+        characterId: a.characterId,
+        evidenceA: a,
+        evidenceB: b,
+      }) === true) return true;
+    }
+  }
+  return false;
+}
+
+function validateContradictionStructure(session, indexes, errors) {
+  const contradictionsById = new Map(session.contradictions.map(c => [c.contradictionId, c]));
+  const series = new Map();
+
+  for (const contradiction of session.contradictions) {
+    const id = canonicalText(contradiction?.contradictionId);
+    const individualId = canonicalText(contradiction?.individualId);
+    const characterId = canonicalText(contradiction?.characterId);
+
+    if (!id) errors.push('contradiction.contradictionId must be a non-empty canonical string without surrounding whitespace');
+    if (!individualId) errors.push(`contradiction ${id ?? '<missing>'} individualId must be canonical`);
+    else if (!indexes.individualsById.has(individualId)) errors.push(`contradiction ${id ?? '<missing>'} references unknown individualId ${individualId}`);
+    if (!characterId) errors.push(`contradiction ${id ?? '<missing>'} characterId must be canonical`);
+    if (!APC_CONTRADICTION_STATUSES.includes(contradiction?.status)) {
+      errors.push(`contradiction ${id ?? '<missing>'} status must be one of: ${APC_CONTRADICTION_STATUSES.join(', ')}`);
+    }
+
+    if (!Array.isArray(contradiction?.evidenceRefs) || contradiction.evidenceRefs.length < 2) {
+      errors.push(`contradiction ${id ?? '<missing>'} evidenceRefs must contain at least 2 versioned references`);
+    } else {
+      const versionKeys = new Set();
+      const logicalIds = new Set();
+      for (const ref of contradiction.evidenceRefs) {
+        const evidenceId = canonicalText(ref?.evidenceId);
+        const revision = ref?.revision;
+        if (!evidenceId || !Number.isInteger(revision) || revision < 1) {
+          errors.push(`contradiction ${id ?? '<missing>'} evidenceRefs entries require canonical evidenceId and revision >= 1`);
+          continue;
+        }
+        const key = `${evidenceId}::${revision}`;
+        if (versionKeys.has(key)) errors.push(`contradiction ${id ?? '<missing>'} contains duplicate evidence ref ${key}`);
+        versionKeys.add(key);
+        if (logicalIds.has(evidenceId)) errors.push(`contradiction ${id ?? '<missing>'} may reference at most one revision of evidenceId ${evidenceId}`);
+        logicalIds.add(evidenceId);
+
+        const ev = indexes.evidenceByLogicalVersion.get(key);
+        if (!ev) {
+          errors.push(`contradiction ${id ?? '<missing>'} references unknown evidence ${key}`);
+          continue;
+        }
+        if (ev.individualId !== individualId || ev.characterId !== characterId) {
+          errors.push(`contradiction ${id ?? '<missing>'} evidence ${key} must belong to the same individual/character series`);
+        }
+        if (ev.lifecycleStatus !== 'CONFIRMED' || ev.evidenceStatus !== 'OBSERVED') {
+          errors.push(`contradiction ${id ?? '<missing>'} evidence ${key} must be CONFIRMED and OBSERVED`);
+        }
+      }
+    }
+
+    if (contradiction?.previousContradictionId != null && !canonicalText(contradiction.previousContradictionId)) {
+      errors.push(`contradiction ${id ?? '<missing>'} previousContradictionId must be canonical when present`);
+    }
+
+    const key = contradictionSeriesKey(contradiction);
+    if (key) {
+      if (!series.has(key)) series.set(key, []);
+      series.get(key).push(contradiction);
+    }
+  }
+
+  for (const [key, episodes] of series) {
+    const openEpisodes = episodes.filter(c => c.status === 'OPEN');
+    if (openEpisodes.length > 1) errors.push(`contradiction series ${key} has more than one OPEN episode`);
+
+    const episodeIds = new Set(episodes.map(c => c.contradictionId));
+    const childCount = new Map();
+    let roots = 0;
+
+    for (const contradiction of episodes) {
+      const previousId = contradiction.previousContradictionId ?? null;
+      if (previousId == null) {
+        roots += 1;
+        continue;
+      }
+      const previous = contradictionsById.get(previousId);
+      if (!previous) {
+        errors.push(`contradiction ${contradiction.contradictionId} previousContradictionId ${previousId} does not resolve`);
+        continue;
+      }
+      if (!episodeIds.has(previousId) || contradictionSeriesKey(previous) !== key) {
+        errors.push(`contradiction ${contradiction.contradictionId} previousContradictionId must belong to the same semantic series`);
+      }
+      if (previous.status !== 'RESOLVED') {
+        errors.push(`contradiction ${contradiction.contradictionId} previous episode ${previousId} must be RESOLVED`);
+      }
+      childCount.set(previousId, (childCount.get(previousId) ?? 0) + 1);
+    }
+
+    if (episodes.length && roots !== 1) errors.push(`contradiction series ${key} must have exactly one root; found ${roots}`);
+    for (const [parentId, count] of childCount) {
+      if (count > 1) errors.push(`contradiction series ${key} forks at ${parentId}`);
+    }
+
+    for (const contradiction of episodes) {
+      const seen = new Set();
+      let cursor = contradiction;
+      while (cursor?.previousContradictionId != null) {
+        if (seen.has(cursor.contradictionId)) {
+          errors.push(`contradiction series ${key} contains a recurrence cycle`);
+          break;
+        }
+        seen.add(cursor.contradictionId);
+        cursor = contradictionsById.get(cursor.previousContradictionId);
+        if (!cursor || contradictionSeriesKey(cursor) !== key) break;
+      }
+    }
+
+    for (const open of openEpisodes) {
+      if ((childCount.get(open.contradictionId) ?? 0) > 0) {
+        errors.push(`contradiction OPEN episode ${open.contradictionId} must be the tail of its series`);
+      }
+    }
+  }
+}
+
+export function validateApcContradictions(session, { areStatesIncompatible } = {}) {
+  const errors = [];
+  if (typeof areStatesIncompatible !== 'function') {
+    return { valid: false, errors: ['areStatesIncompatible callback is required for semantic contradiction validation'] };
+  }
+
+  const base = validateApcSession(session);
+  if (!base.valid) return { valid: false, errors: base.errors.map(e => `snapshot: ${e}`) };
+
+  const openBySeries = new Map();
+  for (const contradiction of session.contradictions) {
+    const key = contradictionSeriesKey(contradiction);
+    if (key && contradiction.status === 'OPEN') openBySeries.set(key, contradiction);
+
+    const refs = (contradiction.evidenceRefs ?? [])
+      .map(ref => base.indexes.evidenceByLogicalVersion.get(`${ref.evidenceId}::${ref.revision}`))
+      .filter(Boolean);
+    if (!hasIncompatiblePair(refs, areStatesIncompatible)) {
+      errors.push(`contradiction ${contradiction.contradictionId} trigger evidenceRefs must contain at least one incompatible pair`);
+    }
+  }
+
+  const operationalSeries = new Map();
+  for (const ev of session.evidence) {
+    if (ev?.current !== true || ev?.lifecycleStatus !== 'CONFIRMED' || ev?.evidenceStatus !== 'OBSERVED') continue;
+    const key = `${ev.individualId}::${ev.characterId}`;
+    if (!operationalSeries.has(key)) operationalSeries.set(key, []);
+    operationalSeries.get(key).push(ev);
+  }
+
+  const allKeys = new Set([...operationalSeries.keys(), ...openBySeries.keys()]);
+  for (const key of allKeys) {
+    const current = operationalSeries.get(key) ?? [];
+    const incompatible = hasIncompatiblePair(current, areStatesIncompatible);
+    const hasOpen = openBySeries.has(key);
+    if (incompatible && !hasOpen) errors.push(`contradiction series ${key} has current incompatible evidence but no OPEN contradiction`);
+    if (!incompatible && hasOpen) errors.push(`contradiction series ${key} has OPEN contradiction but no current incompatible pair`);
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
+export function validateApcContradictionTransition(previousSession, nextSession, { areStatesIncompatible } = {}) {
+  const errors = [];
+  if (typeof areStatesIncompatible !== 'function') {
+    return { valid: false, errors: ['areStatesIncompatible callback is required for contradiction transition validation'] };
+  }
+
+  const nextSemantic = validateApcContradictions(nextSession, { areStatesIncompatible });
+  if (!nextSemantic.valid) errors.push(...nextSemantic.errors.map(e => `next snapshot: ${e}`));
+  if (!previousSession || typeof previousSession !== 'object') {
+    return { valid: false, errors: ['previousSession is required', ...errors] };
+  }
+  if (previousSession.sessionId !== nextSession?.sessionId) errors.push('contradiction transition requires the same sessionId');
+
+  const previousById = new Map((previousSession.contradictions ?? []).map(c => [c.contradictionId, c]));
+  const nextById = new Map((nextSession?.contradictions ?? []).map(c => [c.contradictionId, c]));
+  const nextIndexes = indexApcSession(nextSession);
+
+  for (const [id, before] of previousById) {
+    const after = nextById.get(id);
+    if (!after) {
+      errors.push(`contradiction episode ${id} cannot be deleted by transition`);
+      continue;
+    }
+
+    for (const field of ['individualId','characterId','previousContradictionId','evidenceRefs']) {
+      const beforeValue = field === 'evidenceRefs' ? JSON.stringify(before[field] ?? null) : (before[field] ?? null);
+      const afterValue = field === 'evidenceRefs' ? JSON.stringify(after[field] ?? null) : (after[field] ?? null);
+      if (beforeValue !== afterValue) errors.push(`contradiction ${id} immutable field ${field} changed during transition`);
+    }
+
+    if (before.status === 'RESOLVED' && after.status !== 'RESOLVED') {
+      errors.push(`contradiction ${id} RESOLVED status is terminal`);
+    }
+
+    if (before.status === 'OPEN' && after.status === 'RESOLVED') {
+      const current = currentOperationalEvidence(nextSession, after.individualId, after.characterId);
+      if (hasIncompatiblePair(current, areStatesIncompatible)) {
+        errors.push(`contradiction ${id} OPEN->RESOLVED requires no current incompatible pair`);
+      }
+    }
+  }
+
+  for (const [id, after] of nextById) {
+    if (previousById.has(id)) continue;
+
+    const triggerEvidence = (after.evidenceRefs ?? [])
+      .map(ref => nextIndexes.evidenceByLogicalVersion.get(`${ref?.evidenceId}::${ref?.revision}`))
+      .filter(Boolean);
+
+    for (const ev of triggerEvidence) {
+      if (ev.current !== true || ev.lifecycleStatus !== 'CONFIRMED' || ev.evidenceStatus !== 'OBSERVED') {
+        errors.push(`new contradiction ${id} trigger evidence must be current CONFIRMED OBSERVED at creation`);
+      }
+    }
+    if (!hasIncompatiblePair(triggerEvidence, areStatesIncompatible)) {
+      errors.push(`new contradiction ${id} trigger evidence must contain an incompatible pair`);
+    }
+
+    if (after.previousContradictionId != null) {
+      const previousEpisode = previousById.get(after.previousContradictionId);
+      if (!previousEpisode) {
+        errors.push(`new recurrent contradiction ${id} requires previousContradictionId to exist in previous snapshot`);
+      } else {
+        if (previousEpisode.status !== 'RESOLVED') {
+          errors.push(`new recurrent contradiction ${id} requires previous episode to already be RESOLVED`);
+        }
+        if (contradictionSeriesKey(previousEpisode) !== contradictionSeriesKey(after)) {
+          errors.push(`new recurrent contradiction ${id} must preserve semantic series`);
+        }
+      }
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 export function indexApcSession(session) {
   return {
     photosById: new Map((session.photos ?? []).map(x => [x.photoId, x])),
@@ -632,6 +900,7 @@ export function validateApcSession(session) {
 
   validateRequirements(session, indexes, errors);
   validatePending(session, indexes, errors);
+  validateContradictionStructure(session, indexes, errors);
 
   for (const ev of session.evidence) {
     const evidenceId = canonicalText(ev?.evidenceId) ?? '<missing>';
