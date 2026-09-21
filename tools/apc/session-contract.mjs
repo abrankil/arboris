@@ -26,8 +26,26 @@ function canonicalText(value) {
 
 function isIso8601(value) {
   if (typeof value !== 'string') return false;
-  const iso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
-  return iso.test(value) && !Number.isNaN(Date.parse(value));
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,3}))?(Z|([+-])(\d{2}):(\d{2}))$/.exec(value);
+  if (!match) return false;
+
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, , , , offsetHourText, offsetMinuteText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const offsetHour = offsetHourText == null ? 0 : Number(offsetHourText);
+  const offsetMinute = offsetMinuteText == null ? 0 : Number(offsetMinuteText);
+
+  if (month < 1 || month > 12) return false;
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  if (day < 1 || day > daysInMonth) return false;
+  if (hour > 23 || minute > 59 || second > 59) return false;
+  if (offsetHour > 23 || offsetMinute > 59) return false;
+
+  return !Number.isNaN(Date.parse(value));
 }
 
 function duplicateIds(items, field) {
