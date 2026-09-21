@@ -285,3 +285,10 @@ test('T-I6-26 rejects duplicate evidence version', () => {
   assert.equal(r.valid, false);
   assert.match(r.errors.join(' '), /duplicate evidence version/);
 });
+
+
+test('T-I6-27 rejects calendar-invalid ISO-shaped changedAt', () => {
+  const r = validateApcSession(twoRevisionSession({ event: { changedAt: '2026-02-31T18:05:00-03:00' } }));
+  assert.equal(r.valid, false);
+  assert.match(r.errors.join(' '), /changedAt must be valid ISO-8601/);
+});
