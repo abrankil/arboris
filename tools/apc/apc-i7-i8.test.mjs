@@ -323,3 +323,48 @@ test('T-I8-12 recurrent episode cannot fork from one predecessor', () => {
   assert.equal(r.valid, false);
   assert.match(r.errors.join(' '), /forks at PEND-001/);
 });
+
+
+test('T-I8-13 RESOLVED pending cannot mutate propagation or resolutionEvidenceRefs', () => {
+  const before = session({
+    evidenceItems: [evidence()],
+    pendingItems: [pending({
+      status: 'RESOLVED',
+      resolutionEvidenceRefs: [{ evidenceId: 'EV-001', revision: 1 }],
+    })],
+  });
+  const after = structuredClone(before);
+  after.pending[0].propagation = [];
+  after.pending[0].resolutionEvidenceRefs = [];
+  const r = validateApcPendingTransition(before, after);
+  assert.equal(r.valid, false);
+  assert.match(r.errors.join(' '), /immutable field propagation/);
+  assert.match(r.errors.join(' '), /RESOLVED resolutionEvidenceRefs are immutable/);
+});
+
+test('T-I8-14 OPEN unresolved requirement cannot resolve while requirement remains unsatisfied', () => {
+  const before = session();
+  const after = session({
+    pendingItems: [pending({
+      status: 'RESOLVED',
+      resolutionEvidenceRefs: [],
+    })],
+  });
+  const r = validateApcPendingTransition(before, after);
+  assert.equal(r.valid, false);
+  assert.match(r.errors.join(' '), /can resolve only while its origin requirement is satisfied/);
+});
+
+test('T-I8-15 OPEN pending cannot accumulate resolutionEvidenceRefs before resolving', () => {
+  const before = session();
+  const after = session({
+    evidenceItems: [evidence()],
+    pendingItems: [pending({
+      status: 'OPEN',
+      resolutionEvidenceRefs: [{ evidenceId: 'EV-001', revision: 1 }],
+    })],
+  });
+  const r = validateApcPendingTransition(before, after);
+  assert.equal(r.valid, false);
+  assert.match(r.errors.join(' '), /OPEN episode must not contain resolutionEvidenceRefs|may change only on OPEN->RESOLVED transition/);
+});
