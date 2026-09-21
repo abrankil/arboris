@@ -839,9 +839,11 @@ function validateObjectiveAssessmentBinding(session, errors, reasons = null) {
   if (!assessment || typeof assessment !== 'object') return;
 
   if (assessment.status === 'OPEN') {
-    if (assessment.assessedRevision != null) errors.push('objectiveAssessment.assessedRevision must be null when status=OPEN');
-    if (assessment.assessedBy != null) errors.push('objectiveAssessment.assessedBy must be null when status=OPEN');
-    if (assessment.assessedAt != null) errors.push('objectiveAssessment.assessedAt must be null when status=OPEN');
+    for (const field of ['assessedRevision', 'assessedBy', 'assessedAt']) {
+      if (!Object.prototype.hasOwnProperty.call(assessment, field) || assessment[field] !== null) {
+        errors.push(`objectiveAssessment.${field} must be explicitly null when status=OPEN`);
+      }
+    }
     return;
   }
 
@@ -953,7 +955,7 @@ function assessmentSubstrateSnapshot(session, { isContradictionRelevant = () => 
   };
 }
 
-export function validateApcSessionForExport(session, { areStatesIncompatible } = {}) {
+export function validateApcSessionForExport(session, { dataset, areStatesIncompatible } = {}) {
   const errors = [];
   const reasons = [];
 
@@ -968,8 +970,31 @@ export function validateApcSessionForExport(session, { areStatesIncompatible } =
   if (base.valid) {
     errors.push(...requirementCoverageErrors(session, base.indexes));
 
-    const contradictions = validateApcContradictions(session, { areStatesIncompatible });
-    if (!contradictions.valid) errors.push(...contradictions.errors.map(error => `I9 snapshot: ${error}`));
+    if ((session.requirements ?? []).length > 0) {
+      const requirementCharacters = validateApcRequirementCharacters(session, dataset);
+      if (!requirementCharacters.valid) {
+        errors.push(...requirementCharacters.errors.map(error => `I7 dataset: ${error}`));
+      }
+    }
+
+    const currentObservedCounts = new Map();
+    for (const ev of session.evidence ?? []) {
+      if (ev?.current !== true || ev?.lifecycleStatus !== 'CONFIRMED' || ev?.evidenceStatus !== 'OBSERVED') continue;
+      const key = `${ev.individualId}::${ev.characterId}`;
+      currentObservedCounts.set(key, (currentObservedCounts.get(key) ?? 0) + 1);
+    }
+    const needsI9SemanticValidation =
+      (session.contradictions ?? []).some(item => item?.status === 'OPEN') ||
+      [...currentObservedCounts.values()].some(count => count >= 2);
+
+    if (needsI9SemanticValidation) {
+      if (typeof areStatesIncompatible !== 'function') {
+        errors.push('areStatesIncompatible callback is required for export when I9 semantic contradiction validation is applicable');
+      } else {
+        const contradictions = validateApcContradictions(session, { areStatesIncompatible });
+        if (!contradictions.valid) errors.push(...contradictions.errors.map(error => `I9 snapshot: ${error}`));
+      }
+    }
   }
 
   const uniqueReasons = [];
@@ -1027,7 +1052,7 @@ export function buildApcSessionExport(session, options = {}) {
 export function validateApcSemanticTransition(
   previousSession,
   nextSession,
-  { isContradictionRelevant = () => false } = {},
+  { isContradictionRelevant } = {},
 ) {
   const errors = [];
   if (!previousSession || typeof previousSession !== 'object') {
@@ -1053,26 +1078,36 @@ export function validateApcSemanticTransition(
 
   let semanticChanged = null;
   if (previousBase.valid && nextBase.valid) {
-    const previousSubstrate = assessmentSubstrateSnapshot(previousSession, { isContradictionRelevant });
-    const nextSubstrate = assessmentSubstrateSnapshot(nextSession, { isContradictionRelevant });
-    semanticChanged = JSON.stringify(previousSubstrate) !== JSON.stringify(nextSubstrate);
+    const hasContradictions =
+      (previousSession.contradictions ?? []).length > 0 ||
+      (nextSession.contradictions ?? []).length > 0;
+    if (hasContradictions && typeof isContradictionRelevant !== 'function') {
+      errors.push('isContradictionRelevant callback is required for semantic transitions containing contradictions');
+    } else {
+      const contradictionClassifier = typeof isContradictionRelevant === 'function'
+        ? isContradictionRelevant
+        : () => false;
+      const previousSubstrate = assessmentSubstrateSnapshot(previousSession, { isContradictionRelevant: contradictionClassifier });
+      const nextSubstrate = assessmentSubstrateSnapshot(nextSession, { isContradictionRelevant: contradictionClassifier });
+      semanticChanged = JSON.stringify(previousSubstrate) !== JSON.stringify(nextSubstrate);
 
-    if (Number.isInteger(previousSession.semanticRevision) && Number.isInteger(nextSession.semanticRevision)) {
-      const expectedRevision = semanticChanged
-        ? previousSession.semanticRevision + 1
-        : previousSession.semanticRevision;
-      if (nextSession.semanticRevision !== expectedRevision) {
-        errors.push(`semanticRevision must change ${previousSession.semanticRevision}→${expectedRevision}; found ${nextSession.semanticRevision}`);
+      if (Number.isInteger(previousSession.semanticRevision) && Number.isInteger(nextSession.semanticRevision)) {
+        const expectedRevision = semanticChanged
+          ? previousSession.semanticRevision + 1
+          : previousSession.semanticRevision;
+        if (nextSession.semanticRevision !== expectedRevision) {
+          errors.push(`semanticRevision must change ${previousSession.semanticRevision}→${expectedRevision}; found ${nextSession.semanticRevision}`);
+        }
       }
-    }
 
-    if (semanticChanged) {
-      const assessment = nextSession.objectiveAssessment;
-      if (assessment?.status !== 'OPEN' ||
-          assessment?.assessedRevision != null ||
-          assessment?.assessedBy != null ||
-          assessment?.assessedAt != null) {
-        errors.push('semantic mutation requires objectiveAssessment reset to OPEN with null assessedRevision/assessedBy/assessedAt');
+      if (semanticChanged) {
+        const assessment = nextSession.objectiveAssessment;
+        if (assessment?.status !== 'OPEN' ||
+            assessment?.assessedRevision !== null ||
+            assessment?.assessedBy !== null ||
+            assessment?.assessedAt !== null) {
+          errors.push('semantic mutation requires objectiveAssessment reset to OPEN with explicit null assessedRevision/assessedBy/assessedAt');
+        }
       }
     }
   }
