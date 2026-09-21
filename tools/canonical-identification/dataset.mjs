@@ -130,10 +130,10 @@ function buildRelationIndex(relations) {
 function validateVariabilityEntries(
   variabilityEntries,
   speciesById,
-  charactersById,
+  allCharactersById,
   contextsById,
   sourcesById,
-  relationsBySpecies,
+  allRelationsBySpecies,
 ) {
   for (const entry of variabilityEntries) {
     const speciesId = entry.species_id;
@@ -148,14 +148,14 @@ function validateVariabilityEntries(
       );
     }
 
-    if (!characterId || !charactersById.has(characterId)) {
+    if (!characterId || !allCharactersById.has(characterId)) {
       throw new Error(
         `Variability references unknown or inactive caracter_id ${characterId}`,
       );
     }
 
     if (
-      !relationsBySpecies
+      !allRelationsBySpecies
         .get(speciesId)
         ?.has(characterId)
     ) {
@@ -170,7 +170,7 @@ function validateVariabilityEntries(
       );
     }
 
-    const character = charactersById.get(characterId);
+    const character = allCharactersById.get(characterId);
 
     if (
       character.allowedStates.length > 0
@@ -260,11 +260,7 @@ export async function loadCanonicalDataset(options = {}) {
   const computableStatus =
     metadata.computable_status ?? 'activo';
 
-  const activeCharacters = characters
-    .filter(
-      character =>
-        character.estado_piloto === computableStatus,
-    )
+  const allCharacters = characters
     .map(character => ({
       characterId: character.caracter_id,
       group: character.grupo ?? null,
@@ -286,6 +282,11 @@ export async function loadCanonicalDataset(options = {}) {
       raw: character,
     }));
 
+  const activeCharacters = allCharacters.filter(
+    character =>
+      character.pilotStatus === computableStatus,
+  );
+
   const normalizedSpecies = species.map(item => ({
     speciesId: item.species_id,
     scientificName: item.nombre_cientifico,
@@ -306,6 +307,12 @@ export async function loadCanonicalDataset(options = {}) {
     ),
   );
 
+  const allCharactersById = new Map(
+    allCharacters.map(
+      item => [item.characterId, item],
+    ),
+  );
+
   const charactersById = new Map(
     activeCharacters.map(
       item => [item.characterId, item],
@@ -318,8 +325,15 @@ export async function loadCanonicalDataset(options = {}) {
     ),
   );
 
+  // Preserve the complete canonical relation registry separately from
+  // the computable ACE view. H16/APC needs canonical existence checks,
+  // while ACE continues to consume only active/computable relations.
+  const allRelations = speciesCharacters;
+  const allRelationsBySpecies =
+    buildRelationIndex(allRelations);
+
   const activeRelations =
-    speciesCharacters.filter(
+    allRelations.filter(
       relation =>
         activeCharacterIds.has(
           relation.caracter_id,
@@ -338,10 +352,10 @@ export async function loadCanonicalDataset(options = {}) {
   validateVariabilityEntries(
     characterVariability,
     speciesById,
-    charactersById,
+    allCharactersById,
     contextsById,
     sourcesById,
-    relationsBySpecies,
+    allRelationsBySpecies,
   );
 
   const variabilityBySpecies =
@@ -351,21 +365,27 @@ export async function loadCanonicalDataset(options = {}) {
 
   return {
     metadata,
+    computableStatus,
     species: normalizedSpecies,
     characters: activeCharacters,
+    allCharacters,
     relations: activeRelations,
+    allRelations,
     contexts,
     sources,
     speciesById,
     charactersById,
+    allCharactersById,
     contextsById,
     sourcesById,
     relationsBySpecies,
+    allRelationsBySpecies,
     variabilityBySpecies,
     stats: {
       species: normalizedSpecies.length,
       activeCharacters: activeCharacters.length,
       activeRelations: activeRelations.length,
+      allRelations: allRelations.length,
       contexts: contextsById.size,
       sources: sourcesById.size,
       variabilityEntries: characterVariability.length,

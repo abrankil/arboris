@@ -115,40 +115,103 @@ export function compatible(
   };
 }
 
-export function normalizeEvidence(evidence = []) {
+function normalizeEvidenceItem(item) {
+  return {
+    ...item,
+    characterId:
+      item.characterId
+      ?? item.character_id,
+
+    observationStatus:
+      item.observationStatus
+      ?? item.observation_status
+      ?? null,
+
+    observedStates: [
+      ...toStateSet(
+        item.observedStates
+        ?? item.observed_states
+        ?? item.states
+        ?? item.state,
+      ),
+    ],
+
+    source:
+      item.source
+      ?? 'unknown',
+
+    context:
+      item.context
+      ?? null,
+
+    confidence:
+      item.confidence
+      ?? null,
+
+    model:
+      item.model
+      ?? null,
+
+    notes:
+      item.notes
+      ?? null,
+
+    provenance:
+      item.provenance
+      ?? null,
+
+    evidence:
+      Array.isArray(item.evidence)
+        ? item.evidence.map(evidenceItem => ({ ...evidenceItem }))
+        : [],
+
+    evidenceRef:
+      item.evidenceRef
+      ?? item.evidence_ref
+      ?? null,
+
+    regionOfInterest:
+      item.regionOfInterest
+      ?? item.region_of_interest
+      ?? null,
+  };
+}
+
+export function normalizeEvidence(
+  evidence = [],
+) {
   if (Array.isArray(evidence)) {
     return evidence
-      .map(item => ({
-        characterId:
-          item.characterId
-          ?? item.character_id,
-
-        observedStates: [
-          ...toStateSet(
-            item.observedStates
-            ?? item.observed_states
-            ?? item.states
-            ?? item.state,
-          ),
-        ],
-
-        source:
-          item.source
-          ?? 'unknown',
-
-        context:
-          item.context
-          ?? null,
-      }))
-      .filter(item => item.characterId);
+      .filter(
+        item =>
+          item
+          && typeof item === 'object',
+      )
+      .map(normalizeEvidenceItem)
+      .filter(
+        item => item.characterId,
+      );
   }
 
   return Object.entries(evidence)
-    .map(([characterId, states]) => ({
-      characterId,
-      observedStates: [...toStateSet(states)],
-      source: 'unknown',
-    }));
+    .map(
+      ([characterId, states]) => ({
+        characterId,
+        observationStatus: null,
+        observedStates: [
+          ...toStateSet(states),
+        ],
+        source: 'unknown',
+        context: null,
+        confidence: null,
+        model: null,
+        notes: null,
+        provenance: null,
+        evidence: [],
+        evidenceRef: null,
+        regionOfInterest: null,
+      }),
+    );
 }
 
 function isDocumentedVariability(
