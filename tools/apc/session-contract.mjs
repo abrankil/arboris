@@ -84,6 +84,24 @@ export function validateApcSession(session) {
 
   const indexes = indexApcSession(session);
 
+  for (const ev of session.evidence) {
+    const evidenceId = text(ev?.evidenceId) ?? '<missing>';
+    const photoId = text(ev?.photoId);
+    const individualId = text(ev?.individualId);
+
+    if (!photoId) errors.push(`evidence.photoId is required for ${evidenceId}`);
+    else if (!indexes.photosById.has(photoId)) errors.push(`Unknown evidence.photoId ${photoId} for ${evidenceId}`);
+
+    if (!individualId) errors.push(`evidence.individualId is required for ${evidenceId}`);
+    else if (!indexes.individualsById.has(individualId)) errors.push(`Unknown evidence.individualId ${individualId} for ${evidenceId}`);
+
+    if (photoId && individualId && indexes.photosById.has(photoId) && indexes.individualsById.has(individualId)) {
+      const photo = indexes.photosById.get(photoId);
+      const refs = Array.isArray(photo?.individualRefs) ? photo.individualRefs : [];
+      if (!refs.includes(individualId)) errors.push(`${individualId} is not referenced by PHOTO ${photoId} for evidence ${evidenceId}`);
+    }
+  }
+
   for (const photo of session.photos) {
     const photoId = text(photo?.photoId);
     if (!photoId) errors.push('photo.photoId is required');
