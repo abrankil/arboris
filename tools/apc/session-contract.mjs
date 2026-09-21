@@ -3,6 +3,11 @@ import { validatePhotoEvidence } from '../character-observers/common-evidence-co
 export const APC_SCHEMA_VERSION = 'apc-session-0.2';
 export const APC_SESSION_STATUSES = Object.freeze(['OPEN', 'CLOSED']);
 export const OBJECTIVE_ASSESSMENT_STATUSES = Object.freeze(['OPEN', 'SATISFIED', 'NOT_SATISFIED']);
+export const APC_REQUIREMENT_SCOPE_LEVELS = Object.freeze(['PHOTO', 'INDIVIDUAL', 'SESSION']);
+export const APC_REQUIREMENT_REASONS = Object.freeze(['MANUAL', 'SESSION_OBJECTIVE', 'H16_VERIFICATION']);
+export const APC_PENDING_KINDS = Object.freeze(['UNRESOLVED_REQUIREMENT', 'REPRESENTATION_GAP']);
+export const APC_PENDING_STATUSES = Object.freeze(['OPEN', 'RESOLVED']);
+export const APC_REPRESENTATION_TARGETS = Object.freeze(['CHARACTER', 'STATE']);
 
 const EVIDENCE_IDENTITY_FIELDS = Object.freeze([
   'sessionId',
@@ -179,6 +184,372 @@ function validateRevisionEvents(session, evidenceGroups, errors) {
   }
 }
 
+
+function scopeExists(session, indexes, level, ref) {
+  if (level === 'PHOTO') return indexes.photosById.has(ref);
+  if (level === 'INDIVIDUAL') return indexes.individualsById.has(ref);
+  if (level === 'SESSION') return ref === session.sessionId;
+  return false;
+}
+
+function evidenceMatchesScope(session, indexes, evidence, level, ref) {
+  if (level === 'PHOTO') {
+    const photo = indexes.photosById.get(ref);
+    return evidence.photoId === ref && Array.isArray(photo?.individualRefs) && photo.individualRefs.includes(evidence.individualId);
+  }
+  if (level === 'INDIVIDUAL') return evidence.individualId === ref;
+  if (level === 'SESSION') return ref === session.sessionId && evidence.sessionId === session.sessionId;
+  return false;
+}
+
+function isQualifyingObservedEvidence(session, indexes, evidence, characterId, level, ref, { requireCurrent = true } = {}) {
+  if (!evidence || typeof evidence !== 'object') return false;
+  if (requireCurrent && evidence.current !== true) return false;
+  if (evidence.lifecycleStatus !== 'CONFIRMED') return false;
+  if (evidence.evidenceStatus !== 'OBSERVED') return false;
+  if (evidence.characterId !== characterId) return false;
+  return evidenceMatchesScope(session, indexes, evidence, level, ref);
+}
+
+export function isApcRequirementSatisfied(session, requirement, indexes = indexApcSession(session)) {
+  if (!requirement || typeof requirement !== 'object') return false;
+  return (session.evidence ?? []).some(ev =>
+    isQualifyingObservedEvidence(
+      session,
+      indexes,
+      ev,
+      requirement.characterId,
+      requirement.scopeLevel,
+      requirement.scopeRef,
+      { requireCurrent: true },
+    )
+  );
+}
+
+function validateRequirements(session, indexes, errors) {
+  const semanticKeys = new Set();
+
+  for (const requirement of session.requirements) {
+    const id = canonicalText(requirement?.requirementId);
+    const scopeLevel = requirement?.scopeLevel;
+    const scopeRef = canonicalText(requirement?.scopeRef);
+    const characterId = canonicalText(requirement?.characterId);
+    const createdBy = canonicalText(requirement?.createdBy);
+
+    if (!id) errors.push('requirement.requirementId must be a non-empty canonical string without surrounding whitespace');
+    if (!APC_REQUIREMENT_SCOPE_LEVELS.includes(scopeLevel)) {
+      errors.push(`requirement ${id ?? '<missing>'} scopeLevel must be one of: ${APC_REQUIREMENT_SCOPE_LEVELS.join(', ')}`);
+    }
+    if (!scopeRef) errors.push(`requirement ${id ?? '<missing>'} scopeRef must be a non-empty canonical string`);
+    if (!characterId) errors.push(`requirement ${id ?? '<missing>'} characterId must be a non-empty canonical string`);
+    if (requirement?.required !== true) errors.push(`requirement ${id ?? '<missing>'} required must equal true`);
+    if (!APC_REQUIREMENT_REASONS.includes(requirement?.reason)) {
+      errors.push(`requirement ${id ?? '<missing>'} reason must be one of: ${APC_REQUIREMENT_REASONS.join(', ')}`);
+    }
+    if (!createdBy) errors.push(`requirement ${id ?? '<missing>'} createdBy must be a non-empty canonical string`);
+
+    if (scopeRef && APC_REQUIREMENT_SCOPE_LEVELS.includes(scopeLevel) && !scopeExists(session, indexes, scopeLevel, scopeRef)) {
+      errors.push(`requirement ${id ?? '<missing>'} scopeRef ${scopeRef} does not resolve at ${scopeLevel}`);
+    }
+
+    if (scopeRef && characterId && createdBy && APC_REQUIREMENT_SCOPE_LEVELS.includes(scopeLevel) && APC_REQUIREMENT_REASONS.includes(requirement?.reason)) {
+      const key = [scopeLevel, scopeRef, characterId, requirement.reason, createdBy].join('::');
+      if (semanticKeys.has(key)) errors.push(`duplicate requirement semantic key: ${key}`);
+      semanticKeys.add(key);
+    }
+  }
+}
+
+export function validateApcRequirementCharacters(session, dataset) {
+  const errors = [];
+  const characters = dataset?.allCharactersById;
+  if (!(characters instanceof Map)) {
+    return { valid: false, errors: ['dataset.allCharactersById must be a Map'] };
+  }
+  for (const requirement of session?.requirements ?? []) {
+    const id = canonicalText(requirement?.requirementId) ?? '<missing>';
+    const characterId = canonicalText(requirement?.characterId);
+    if (characterId && !characters.has(characterId)) {
+      errors.push(`requirement ${id} references unknown dataset characterId ${characterId}`);
+    }
+  }
+  return { valid: errors.length === 0, errors };
+}
+
+function pendingSource(pending, requirement = null) {
+  if (pending?.kind === 'UNRESOLVED_REQUIREMENT') {
+    return { level: pending?.scopeLevel, ref: pending?.scopeRef, characterId: pending?.characterId ?? requirement?.characterId ?? null };
+  }
+  return { level: pending?.sourceLevel, ref: pending?.sourceRef, characterId: pending?.characterId ?? null };
+}
+
+function pendingSeriesKey(pending) {
+  if (pending?.kind === 'UNRESOLVED_REQUIREMENT') {
+    const requirementId = canonicalText(pending?.originRequirementId);
+    return requirementId ? `UNRESOLVED_REQUIREMENT::${requirementId}` : null;
+  }
+  if (pending?.kind === 'REPRESENTATION_GAP') {
+    const level = pending?.sourceLevel;
+    const ref = canonicalText(pending?.sourceRef);
+    const characterId = canonicalText(pending?.characterId);
+    const target = pending?.representationTarget;
+    const targetState = target === 'STATE' ? canonicalText(pending?.targetState) : '';
+    if (!['INDIVIDUAL', 'SESSION'].includes(level) || !ref || !characterId || !APC_REPRESENTATION_TARGETS.includes(target)) return null;
+    if (target === 'STATE' && !targetState) return null;
+    return ['REPRESENTATION_GAP', level, ref, characterId, target, targetState].join('::');
+  }
+  return null;
+}
+
+function validateResolutionEvidenceRefs(session, indexes, pending, source, errors) {
+  const id = canonicalText(pending?.pendingId) ?? '<missing>';
+  if (!Array.isArray(pending?.resolutionEvidenceRefs)) {
+    errors.push(`pending ${id} resolutionEvidenceRefs must be an array`);
+    return;
+  }
+  const seen = new Set();
+  for (const ref of pending.resolutionEvidenceRefs) {
+    const evidenceId = canonicalText(ref?.evidenceId);
+    const revision = ref?.revision;
+    if (!evidenceId || !Number.isInteger(revision) || revision < 1) {
+      errors.push(`pending ${id} resolutionEvidenceRefs entries require canonical evidenceId and revision >= 1`);
+      continue;
+    }
+    const key = `${evidenceId}::${revision}`;
+    if (seen.has(key)) errors.push(`pending ${id} contains duplicate resolution evidence ref ${key}`);
+    seen.add(key);
+    const evidence = indexes.evidenceByLogicalVersion.get(key);
+    if (!evidence) {
+      errors.push(`pending ${id} references unknown resolution evidence ${key}`);
+      continue;
+    }
+    if (!isQualifyingObservedEvidence(session, indexes, evidence, source.characterId, source.level, source.ref, { requireCurrent: false })) {
+      errors.push(`pending ${id} resolution evidence ${key} is not CONFIRMED OBSERVED evidence compatible with its source scope`);
+    }
+  }
+  if (pending?.status === 'OPEN' && pending.resolutionEvidenceRefs.length) {
+    errors.push(`pending ${id} OPEN episode must not contain resolutionEvidenceRefs`);
+  }
+}
+
+function validatePropagation(session, indexes, pending, source, errors) {
+  const id = canonicalText(pending?.pendingId) ?? '<missing>';
+  if (!Array.isArray(pending?.propagation)) {
+    errors.push(`pending ${id} propagation must be an array`);
+    return;
+  }
+  const rank = { PHOTO: 0, INDIVIDUAL: 1, SESSION: 2 };
+  const seen = new Set();
+  for (const item of pending.propagation) {
+    const level = item?.level;
+    const ref = canonicalText(item?.ref);
+    if (!APC_REQUIREMENT_SCOPE_LEVELS.includes(level) || !ref) {
+      errors.push(`pending ${id} propagation entries require valid level and canonical ref`);
+      continue;
+    }
+    const key = `${level}::${ref}`;
+    if (seen.has(key)) errors.push(`pending ${id} contains duplicate propagation target ${key}`);
+    seen.add(key);
+    if (!scopeExists(session, indexes, level, ref)) errors.push(`pending ${id} propagation target ${key} does not resolve`);
+    if (!(rank[level] > rank[source.level])) errors.push(`pending ${id} propagation must be strictly upward from ${source.level}`);
+
+    if (source.level === 'PHOTO' && level === 'INDIVIDUAL') {
+      const photo = indexes.photosById.get(source.ref);
+      if (!Array.isArray(photo?.individualRefs) || !photo.individualRefs.includes(ref)) {
+        errors.push(`pending ${id} PHOTO propagation to INDIVIDUAL ${ref} must target an individual referenced by PHOTO ${source.ref}`);
+      }
+    }
+    if (level === 'SESSION' && ref !== session.sessionId) {
+      errors.push(`pending ${id} SESSION propagation must target sessionId ${session.sessionId}`);
+    }
+  }
+}
+
+function validatePending(session, indexes, errors) {
+  const requirementsById = new Map(session.requirements.map(r => [r.requirementId, r]));
+  const pendingById = new Map(session.pending.map(p => [p.pendingId, p]));
+  const series = new Map();
+
+  for (const pending of session.pending) {
+    const id = canonicalText(pending?.pendingId);
+    if (!id) errors.push('pending.pendingId must be a non-empty canonical string without surrounding whitespace');
+    if (!APC_PENDING_KINDS.includes(pending?.kind)) errors.push(`pending ${id ?? '<missing>'} kind must be one of: ${APC_PENDING_KINDS.join(', ')}`);
+    if (!APC_PENDING_STATUSES.includes(pending?.status)) errors.push(`pending ${id ?? '<missing>'} status must be one of: ${APC_PENDING_STATUSES.join(', ')}`);
+    if (typeof pending?.critical !== 'boolean') errors.push(`pending ${id ?? '<missing>'} critical must be boolean`);
+    if (!canonicalText(pending?.characterId)) errors.push(`pending ${id ?? '<missing>'} characterId must be a non-empty canonical string`);
+
+    let requirement = null;
+    if (pending?.kind === 'UNRESOLVED_REQUIREMENT') {
+      const originRequirementId = canonicalText(pending?.originRequirementId);
+      if (!originRequirementId) errors.push(`pending ${id ?? '<missing>'} originRequirementId is required for UNRESOLVED_REQUIREMENT`);
+      else {
+        requirement = requirementsById.get(originRequirementId);
+        if (!requirement) errors.push(`pending ${id ?? '<missing>'} references unknown originRequirementId ${originRequirementId}`);
+      }
+      if (!APC_REQUIREMENT_SCOPE_LEVELS.includes(pending?.scopeLevel)) errors.push(`pending ${id ?? '<missing>'} scopeLevel is invalid`);
+      if (!canonicalText(pending?.scopeRef)) errors.push(`pending ${id ?? '<missing>'} scopeRef must be canonical`);
+      if (requirement) {
+        if (pending.scopeLevel !== requirement.scopeLevel || pending.scopeRef !== requirement.scopeRef || pending.characterId !== requirement.characterId) {
+          errors.push(`pending ${id ?? '<missing>'} must match origin requirement scope and character`);
+        }
+        if (pending.status === 'OPEN' && isApcRequirementSatisfied(session, requirement, indexes)) {
+          errors.push(`pending ${id ?? '<missing>'} cannot be OPEN because origin requirement is currently satisfied`);
+        }
+      }
+      if (pending?.representationTarget != null || pending?.targetState != null) {
+        errors.push(`pending ${id ?? '<missing>'} UNRESOLVED_REQUIREMENT must not define representation target fields`);
+      }
+    }
+
+    if (pending?.kind === 'REPRESENTATION_GAP') {
+      if (!['INDIVIDUAL', 'SESSION'].includes(pending?.sourceLevel)) {
+        errors.push(`pending ${id ?? '<missing>'} REPRESENTATION_GAP sourceLevel must be INDIVIDUAL or SESSION`);
+      }
+      const sourceRef = canonicalText(pending?.sourceRef);
+      if (!sourceRef) errors.push(`pending ${id ?? '<missing>'} sourceRef must be canonical`);
+      else if (['INDIVIDUAL', 'SESSION'].includes(pending?.sourceLevel) && !scopeExists(session, indexes, pending.sourceLevel, sourceRef)) {
+        errors.push(`pending ${id ?? '<missing>'} sourceRef ${sourceRef} does not resolve at ${pending.sourceLevel}`);
+      }
+      if (!APC_REPRESENTATION_TARGETS.includes(pending?.representationTarget)) {
+        errors.push(`pending ${id ?? '<missing>'} representationTarget must be CHARACTER or STATE`);
+      } else if (pending.representationTarget === 'STATE') {
+        if (!canonicalText(pending?.targetState)) errors.push(`pending ${id ?? '<missing>'} targetState is required when representationTarget=STATE`);
+      } else if (pending?.targetState != null) {
+        errors.push(`pending ${id ?? '<missing>'} targetState must be absent when representationTarget=CHARACTER`);
+      }
+
+      if (pending?.originRequirementId != null) {
+        const originRequirementId = canonicalText(pending.originRequirementId);
+        requirement = requirementsById.get(originRequirementId);
+        if (!originRequirementId || !requirement) errors.push(`pending ${id ?? '<missing>'} optional originRequirementId must resolve when present`);
+        else if (requirement.characterId !== pending.characterId) errors.push(`pending ${id ?? '<missing>'} origin requirement character is incompatible with representation gap`);
+      }
+      if (pending?.scopeLevel != null || pending?.scopeRef != null) {
+        errors.push(`pending ${id ?? '<missing>'} REPRESENTATION_GAP must use sourceLevel/sourceRef, not scopeLevel/scopeRef`);
+      }
+    }
+
+    const source = pendingSource(pending, requirement);
+    if (APC_REQUIREMENT_SCOPE_LEVELS.includes(source.level) && canonicalText(source.ref) && canonicalText(source.characterId)) {
+      validateResolutionEvidenceRefs(session, indexes, pending, source, errors);
+      validatePropagation(session, indexes, pending, source, errors);
+    }
+
+    if (pending?.previousPendingId != null && !canonicalText(pending.previousPendingId)) {
+      errors.push(`pending ${id ?? '<missing>'} previousPendingId must be canonical when present`);
+    }
+
+    const key = pendingSeriesKey(pending);
+    if (key) {
+      if (!series.has(key)) series.set(key, []);
+      series.get(key).push(pending);
+    }
+  }
+
+  for (const [key, episodes] of series) {
+    const openEpisodes = episodes.filter(p => p.status === 'OPEN');
+    if (openEpisodes.length > 1) errors.push(`pending series ${key} has more than one OPEN episode`);
+
+    const episodeIds = new Set(episodes.map(p => p.pendingId));
+    const childCount = new Map();
+    let roots = 0;
+
+    for (const pending of episodes) {
+      const previousId = pending.previousPendingId ?? null;
+      if (previousId == null) {
+        roots += 1;
+        continue;
+      }
+      const previous = pendingById.get(previousId);
+      if (!previous) {
+        errors.push(`pending ${pending.pendingId} previousPendingId ${previousId} does not resolve`);
+        continue;
+      }
+      if (!episodeIds.has(previousId) || pendingSeriesKey(previous) !== key) {
+        errors.push(`pending ${pending.pendingId} previousPendingId must belong to the same semantic series`);
+      }
+      if (previous.status !== 'RESOLVED') errors.push(`pending ${pending.pendingId} previous episode ${previousId} must be RESOLVED`);
+      childCount.set(previousId, (childCount.get(previousId) ?? 0) + 1);
+    }
+
+    if (episodes.length && roots !== 1) errors.push(`pending series ${key} must have exactly one root; found ${roots}`);
+    for (const [parentId, count] of childCount) if (count > 1) errors.push(`pending series ${key} forks at ${parentId}`);
+
+    for (const pending of episodes) {
+      const seen = new Set();
+      let cursor = pending;
+      while (cursor?.previousPendingId != null) {
+        if (seen.has(cursor.pendingId)) {
+          errors.push(`pending series ${key} contains a recurrence cycle`);
+          break;
+        }
+        seen.add(cursor.pendingId);
+        cursor = pendingById.get(cursor.previousPendingId);
+        if (!cursor || pendingSeriesKey(cursor) !== key) break;
+      }
+    }
+
+    for (const open of openEpisodes) {
+      if ((childCount.get(open.pendingId) ?? 0) > 0) errors.push(`pending OPEN episode ${open.pendingId} must be the tail of its series`);
+    }
+  }
+}
+
+export function validateApcPendingTransition(previousSession, nextSession) {
+  const errors = [];
+  const nextResult = validateApcSession(nextSession);
+  if (!nextResult.valid) errors.push(...nextResult.errors.map(e => `next snapshot: ${e}`));
+  if (!previousSession || typeof previousSession !== 'object') return { valid: false, errors: ['previousSession is required', ...errors] };
+  if (previousSession.sessionId !== nextSession?.sessionId) errors.push('pending transition requires the same sessionId');
+
+  const previousById = new Map((previousSession.pending ?? []).map(p => [p.pendingId, p]));
+  const nextById = new Map((nextSession?.pending ?? []).map(p => [p.pendingId, p]));
+  const nextIndexes = nextResult.valid ? nextResult.indexes : indexApcSession(nextSession ?? { photos: [], photoEvidence: [], individuals: [], evidence: [] });
+
+  for (const [id, before] of previousById) {
+    const after = nextById.get(id);
+    if (!after) {
+      errors.push(`pending episode ${id} cannot be deleted by transition`);
+      continue;
+    }
+    const immutableFields = before.kind === 'UNRESOLVED_REQUIREMENT'
+      ? ['kind','originRequirementId','scopeLevel','scopeRef','characterId','critical','previousPendingId']
+      : ['kind','originRequirementId','sourceLevel','sourceRef','characterId','representationTarget','targetState','critical','previousPendingId'];
+    for (const field of immutableFields) {
+      if ((before[field] ?? null) !== (after[field] ?? null)) errors.push(`pending ${id} immutable field ${field} changed during transition`);
+    }
+    if (before.status === 'RESOLVED' && after.status !== 'RESOLVED') errors.push(`pending ${id} RESOLVED status is terminal`);
+    if (before.status === 'OPEN' && after.status === 'RESOLVED') {
+      const requirement = after.originRequirementId
+        ? (nextSession.requirements ?? []).find(r => r.requirementId === after.originRequirementId)
+        : null;
+      const source = pendingSource(after, requirement);
+      if (!Array.isArray(after.resolutionEvidenceRefs) || after.resolutionEvidenceRefs.length === 0) {
+        errors.push(`pending ${id} OPEN->RESOLVED transition requires at least one resolutionEvidenceRef`);
+      } else {
+        for (const ref of after.resolutionEvidenceRefs) {
+          const ev = nextIndexes.evidenceByLogicalVersion.get(`${ref?.evidenceId}::${ref?.revision}`);
+          if (!isQualifyingObservedEvidence(nextSession, nextIndexes, ev, source.characterId, source.level, source.ref, { requireCurrent: true })) {
+            errors.push(`pending ${id} resolution transition evidence must be current CONFIRMED OBSERVED and source-compatible`);
+          }
+        }
+      }
+    }
+  }
+
+  for (const [id, after] of nextById) {
+    if (previousById.has(id) || after.previousPendingId == null) continue;
+    const previousEpisode = previousById.get(after.previousPendingId);
+    if (!previousEpisode) errors.push(`new recurrent pending ${id} requires previousPendingId to exist in previous snapshot`);
+    else {
+      if (previousEpisode.status !== 'RESOLVED') errors.push(`new recurrent pending ${id} requires previous episode to already be RESOLVED`);
+      if (pendingSeriesKey(previousEpisode) !== pendingSeriesKey(after)) errors.push(`new recurrent pending ${id} must preserve semantic series`);
+    }
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 export function indexApcSession(session) {
   return {
     photosById: new Map((session.photos ?? []).map(x => [x.photoId, x])),
@@ -242,6 +613,9 @@ export function validateApcSession(session) {
   }
 
   const indexes = indexApcSession(session);
+
+  validateRequirements(session, indexes, errors);
+  validatePending(session, indexes, errors);
 
   for (const ev of session.evidence) {
     const evidenceId = canonicalText(ev?.evidenceId) ?? '<missing>';
