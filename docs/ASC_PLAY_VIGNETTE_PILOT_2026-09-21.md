@@ -174,13 +174,26 @@ Una sola imagen: cascada escalonada de varios saltos hasta un pozón, encuadre c
 3. **Riesgo de sobre-extrapolación hidrológica/visual**: un ejecutor puede intensificar visualmente un rasgo autorizado (p. ej. "rápido") más allá de lo que respalda la evidencia, sin violar literalmente el contrato. Este tipo de resultado requiere lectura crítica en la auditoría, no solo checklist de cumplimiento textual.
 4. **No se pudo verificar la fidelidad fotográfica exacta** contra `ENV-0016`/`ENV-0037` porque esta sesión no tuvo acceso directo a esas imágenes, solo a su descripción en `manifest.csv`. Auditoría hecha contra descripción textual, no contra pixel real.
 
-## 8. Gate de instrumentación del ejecutor — UNRESOLVED
+## 8. Gate de instrumentación del ejecutor — PARCIALMENTE ACTUALIZADO, SIGUE UNRESOLVED EN LO TÉCNICO
 
-Igual que en `MAP-001-ASC-GENERATIVE-BASELINE-001`, este piloto **no registró**: proveedor exacto, versión de modelo, parámetros de generación, seed, fecha/hora exacta, ID de respuesta. El usuario declaró que el ejecutor fue "GPT", sin más detalle verificable técnicamente en esta sesión.
+Igual que en `MAP-001-ASC-GENERATIVE-BASELINE-001`, este piloto **no registró de forma verificable**: proveedor exacto, versión de modelo, parámetros de generación, seed, fecha/hora exacta, ID de respuesta.
+
+**Declaración del usuario (2026-09-21, posterior a las tres iteraciones):** el ejecutor usado fue "GPT-5.6 Terra Medio".
+
+Esto se registra como **DECLARADO, no VERIFICADO**:
+
+- No corresponde a una nomenclatura de modelo que esta sesión pueda confirmar de forma independiente (no hay forma de contrastarlo contra un listado oficial de proveedor desde este entorno).
+- No se registró versión exacta, parámetros, seed, fecha/hora exacta ni ID de respuesta para ninguna de las tres corridas.
+- No se sabe si "GPT-5.6 Terra Medio" aplica a las tres iteraciones (001, 002, 003) por igual, o solo a alguna de ellas.
 
 ```text
-provenance: UNRESOLVED en las 3 iteraciones
+provenance: proveedor/modelo DECLARADO ("GPT-5.6 Terra Medio") por el usuario,
+            no verificado técnicamente.
+            Parámetros, seed, seed, fecha/hora exacta, ID de respuesta:
+            siguen UNRESOLVED en las 3 iteraciones.
 ```
+
+Este dato mejora parcialmente la trazabilidad (ya no es "GPT" sin más), pero **no cierra el gate de instrumentación** tal como lo exige un baseline reproducible — falta lo suficiente como para no poder repetir la corrida exacta ni confirmar el proveedor de forma independiente.
 
 ## 9. Auditoría de este documento
 
