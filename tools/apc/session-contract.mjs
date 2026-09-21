@@ -513,25 +513,41 @@ export function validateApcPendingTransition(previousSession, nextSession) {
       continue;
     }
     const immutableFields = before.kind === 'UNRESOLVED_REQUIREMENT'
-      ? ['kind','originRequirementId','scopeLevel','scopeRef','characterId','critical','previousPendingId']
-      : ['kind','originRequirementId','sourceLevel','sourceRef','characterId','representationTarget','targetState','critical','previousPendingId'];
+      ? ['kind','originRequirementId','scopeLevel','scopeRef','characterId','critical','previousPendingId','propagation']
+      : ['kind','originRequirementId','sourceLevel','sourceRef','characterId','representationTarget','targetState','critical','previousPendingId','propagation'];
     for (const field of immutableFields) {
-      if ((before[field] ?? null) !== (after[field] ?? null)) errors.push(`pending ${id} immutable field ${field} changed during transition`);
+      const beforeValue = field === 'propagation' ? JSON.stringify(before[field] ?? null) : (before[field] ?? null);
+      const afterValue = field === 'propagation' ? JSON.stringify(after[field] ?? null) : (after[field] ?? null);
+      if (beforeValue !== afterValue) errors.push(`pending ${id} immutable field ${field} changed during transition`);
     }
-    if (before.status === 'RESOLVED' && after.status !== 'RESOLVED') errors.push(`pending ${id} RESOLVED status is terminal`);
+
+    if (before.status === 'RESOLVED') {
+      if (after.status !== 'RESOLVED') errors.push(`pending ${id} RESOLVED status is terminal`);
+      if (JSON.stringify(before.resolutionEvidenceRefs ?? null) !== JSON.stringify(after.resolutionEvidenceRefs ?? null)) {
+        errors.push(`pending ${id} RESOLVED resolutionEvidenceRefs are immutable`);
+      }
+    }
+
+    if (before.status === 'OPEN' && after.status === 'OPEN' &&
+        JSON.stringify(before.resolutionEvidenceRefs ?? null) !== JSON.stringify(after.resolutionEvidenceRefs ?? null)) {
+      errors.push(`pending ${id} resolutionEvidenceRefs may change only on OPEN->RESOLVED transition`);
+    }
+
     if (before.status === 'OPEN' && after.status === 'RESOLVED') {
       const requirement = after.originRequirementId
         ? (nextSession.requirements ?? []).find(r => r.requirementId === after.originRequirementId)
         : null;
       const source = pendingSource(after, requirement);
-      if (!Array.isArray(after.resolutionEvidenceRefs) || after.resolutionEvidenceRefs.length === 0) {
-        errors.push(`pending ${id} OPEN->RESOLVED transition requires at least one resolutionEvidenceRef`);
-      } else {
-        for (const ref of after.resolutionEvidenceRefs) {
-          const ev = nextIndexes.evidenceByLogicalVersion.get(`${ref?.evidenceId}::${ref?.revision}`);
-          if (!isQualifyingObservedEvidence(nextSession, nextIndexes, ev, source.characterId, source.level, source.ref, { requireCurrent: true })) {
-            errors.push(`pending ${id} resolution transition evidence must be current CONFIRMED OBSERVED and source-compatible`);
-          }
+
+      if (after.kind === 'UNRESOLVED_REQUIREMENT' && requirement &&
+          !isApcRequirementSatisfied(nextSession, requirement, nextIndexes)) {
+        errors.push(`pending ${id} UNRESOLVED_REQUIREMENT can resolve only while its origin requirement is satisfied`);
+      }
+
+      for (const ref of after.resolutionEvidenceRefs ?? []) {
+        const ev = nextIndexes.evidenceByLogicalVersion.get(`${ref?.evidenceId}::${ref?.revision}`);
+        if (!isQualifyingObservedEvidence(nextSession, nextIndexes, ev, source.characterId, source.level, source.ref, { requireCurrent: true })) {
+          errors.push(`pending ${id} resolution transition evidence must be current CONFIRMED OBSERVED and source-compatible`);
         }
       }
     }
