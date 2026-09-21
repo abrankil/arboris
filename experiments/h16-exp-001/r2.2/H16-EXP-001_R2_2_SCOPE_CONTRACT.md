@@ -319,7 +319,9 @@ Ocultar metadata mediante CSS no satisface esta frontera.
 
 El perfil BLIND no debe mantener como parte de su estado activo normal photos.json completo, trusted binding, taxonomía, metadata trusted ni partition visible.
 
-La frontera es operacional, no una garantía de seguridad adversarial.
+Antes de entrar a BLIND debe eliminarse o aislarse de forma verificable cualquier estado TRUSTED persistido que pueda ser leído por el perfil BLIND. Esto incluye estado en memoria y, si se usan, localStorage, sessionStorage, IndexedDB u otro almacenamiento persistente equivalente. Una simple recarga de página no constituye limpieza suficiente por sí sola.
+
+La frontera es operacional y está orientada a evitar contaminación accidental del benchmark; no es una garantía de seguridad adversarial.
 
 ---
 
@@ -376,6 +378,16 @@ Para el benchmark primario, un cambio que afecte CH-003 o las definiciones de su
 
 Una anotación committed no debe corregirse mediante borrado o reemplazo destructivo.
 
+El registro usa:
+
+~~~text
+supersedes_annotation_ids[]
+~~~
+
+Una anotación inicial o independiente puede declarar una lista vacía. Una corrección o adjudicación declara una o más anotaciones anteriores que deja sin efecto, sin destruirlas.
+
+Ejemplo lineal:
+
 ~~~text
 ANN-001
 OBSERVED → serrado
@@ -384,20 +396,25 @@ OBSERVED → serrado
 
 ANN-002
 OBSERVED → dentado
-supersedes_annotation_id = ANN-001
+supersedes_annotation_ids = [ANN-001]
 ~~~
 
 ANN-001 permanece almacenada.
 
-Una arista supersedes solo es válida si:
+Cada referencia de supersession solo es válida si:
 
 ~~~text
 target exists
 same blind_image_id
 same character_id
 target != self
+no duplicate target ids
 graph is acyclic
 ~~~
+
+Una corrección lineal destinada a reemplazar la anotación efectiva debe superseder el active head vigente.
+
+Si existen varios active heads, una adjudicación que pretenda resolver el conflicto debe superseder todos los active heads vigentes en un único nuevo registro. Con una referencia singular no sería posible reducir determinísticamente una bifurcación a un único head sin perder historial.
 
 ---
 
@@ -422,9 +439,57 @@ No se permite desempatar mediante last-write-wins, timestamp-wins, confidence-wi
 
 Un conflicto entre anotadores no se convierte automáticamente en UNCERTAIN.
 
+Ejemplo de resolución append-only de una bifurcación:
+
+~~~text
+          ANN-002
+         /
+ANN-001
+         \
+          ANN-003
+
+ANN-004
+supersedes_annotation_ids = [ANN-002, ANN-003]
+        ↓
+único active head = ANN-004
+~~~
+
+Esta semántica pertenece al ledger de ground truth del benchmark R2.2 y no constituye por sí sola una resolución general de evidencia repetida o contradictoria fuera de ese ledger.
+
 ---
 
-## 16. Decisiones heredadas que permanecen OPEN
+## 16. Secuencia de cohortes del benchmark
+
+El benchmark primario debe separar operacionalmente development y holdout para evitar contaminación por conocimiento del holdout.
+
+La secuencia mínima es:
+
+~~~text
+trusted preparation
+→ development blind workset
+→ development human ground truth
+→ development coverage / tuning
+→ observer freeze
+→ frozen observer predictions on holdout
+→ seal predictions
+→ holdout blind workset
+→ holdout human ground truth blind to predictions
+→ primary comparison
+~~~
+
+Reglas:
+
+- development y holdout se materializan como worksets operacionalmente separados;
+- el perfil de decisión no debe mostrar la etiqueta de partición;
+- el workset holdout no debe cargarse ni exponerse al anotador durante la fase development;
+- las predicciones del observador sobre holdout deben quedar selladas antes de producir o revelar el ground truth humano de holdout;
+- las predicciones selladas no deben mostrarse durante la anotación humana;
+- reserve queda fuera del benchmark primario salvo un protocolo posterior explícito;
+- un rerun puramente reproductivo del observador congelado no autoriza tuning post-hoc sobre el holdout primario.
+
+---
+
+## 17. Decisiones heredadas que permanecen OPEN
 
 R2.2 preserva explícitamente:
 
@@ -442,7 +507,7 @@ La distinción entre elegibilidad y aplicabilidad no introduce reglas por view y
 
 ---
 
-## 17. Decisiones R2.2 diferidas
+## 18. Decisiones R2.2 diferidas
 
 Permanecen fuera del scope:
 
@@ -464,7 +529,7 @@ No deben cerrarse por inferencia durante la implementación del alcance aquí de
 
 ---
 
-## 18. No objetivos
+## 19. No objetivos
 
 R2.2 Scope Contract no:
 
@@ -481,7 +546,7 @@ R2.2 Scope Contract no:
 
 ---
 
-## 19. Criterios de validación del candidato
+## 20. Criterios de validación del candidato
 
 Antes de congelar este contrato debe comprobarse como mínimo:
 
@@ -500,7 +565,11 @@ METADATA MASKING CONTRACT
 BYTE-BASED IMAGE IDENTITY
 APPEND-ONLY CORRECTION HISTORY
 SUPERSESSION REFERENTIAL INTEGRITY
+MULTI-HEAD ADJUDICATION WITHOUT DELETION
 ACTIVE-HEAD DETERMINISM
+TRUSTED PERSISTENT-STATE ISOLATION
+DEVELOPMENT / HOLDOUT WORKSET SEPARATION
+HOLDOUT PREDICTION-SEAL GATE
 R2.1.3 OPEN PRESERVATION
 ASC UNCHANGED
 ACE UNCHANGED
@@ -513,7 +582,7 @@ La auditoría del candidato debe realizarse sobre sus bytes reales antes de crea
 
 ---
 
-## 20. Estado del candidato
+## 21. Estado del candidato
 
 ~~~text
 H16-EXP-001
