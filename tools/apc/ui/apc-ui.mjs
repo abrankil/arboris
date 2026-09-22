@@ -32,6 +32,7 @@ const state = {
   autosaveTimers: new Map(),
   autosaveInFlight: new Map(),
   runtimeTail: Promise.resolve(),
+  formCharacterId: null,
 };
 
 function message(text) {
@@ -74,7 +75,7 @@ function currentEvidence(session=currentSession()) {
   ) ?? null;
 }
 
-function bufferKey(photoId = state.activePhotoId, individualId = state.activeIndividualId, characterId = $('character').value) {
+function bufferKey(photoId = state.activePhotoId, individualId = state.activeIndividualId, characterId = (state.formCharacterId ?? $('character').value)) {
   if (!photoId || !individualId || !characterId) return null;
   return `${photoId}::${individualId}::${characterId}`;
 }
