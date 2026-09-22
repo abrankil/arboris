@@ -176,14 +176,27 @@ test('TD-I12-65 prefilled DRAFT requires traceable prior-observation basis', () 
   assert.match(r.errors.join(' '), /acquisition.basis/);
 });
 
-test('TD-I12-81 persisted DRAFT requires provenance producer and acquisition', () => {
-  const s = baseSession();
-  s.evidence[0].sourceId = null;
-  s.evidence[0].acquisition = null;
-  const r = validateApcWritableWorkingSnapshot(s, { dataset, areStatesIncompatible: incompatible });
+test('TD-I12-66 DRAFT sourceType/sourceId must be both absent or both present', () => {
+  const bothAbsent = baseSession();
+  delete bothAbsent.evidence[0].sourceType;
+  delete bothAbsent.evidence[0].sourceId;
+  assert.equal(
+    validateApcWritableWorkingSnapshot(bothAbsent, { dataset, areStatesIncompatible: incompatible }).valid,
+    true,
+  );
+
+  const oneSided = baseSession();
+  delete oneSided.evidence[0].sourceId;
+  const r = validateApcWritableWorkingSnapshot(oneSided, { dataset, areStatesIncompatible: incompatible });
   assert.equal(r.valid, false);
-  assert.match(r.errors.join(' '), /sourceId is required/);
-  assert.match(r.errors.join(' '), /acquisition.mode/);
+  assert.match(r.errors.join(' '), /both absent or both present/);
+});
+
+test('DRAFT may omit acquisition while still remaining non-handoff evidence', () => {
+  const s = baseSession();
+  delete s.evidence[0].acquisition;
+  const r = validateApcWritableWorkingSnapshot(s, { dataset, areStatesIncompatible: incompatible });
+  assert.equal(r.valid, true);
 });
 
 test('TD-I12 control-plane rejects persisted pass/exportable', () => {
