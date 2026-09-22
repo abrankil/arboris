@@ -1,6 +1,6 @@
 # Árboris — APC I12 Implementation Design
 
-**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.8`  
+**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.9`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12 implementation design.  
 **Contrato base:** `ARBORIS_APC_I12_UI_CONTRACT_R9`, VALIDATED WITH ASC y FROZEN en `h16/apc-i12-ui@4ba8f837f75eccf44054b7ef7c7b23b4c82efe40`.  
@@ -103,6 +103,8 @@ Producción puede usar `crypto.randomUUID()` y reloj real. Tests usan providers 
 
 `dataset` es una dependencia explícita del executor/transacción. No se obtiene desde un global implícito. Debe proporcionar, como mínimo, `allCharactersById` y las propiedades canónicas que consumen los validadores de caracteres/estados. Un runtime sin dataset válido no habilita write mode para operaciones botánicas.
 
+El conjunto `dataset + areStatesIncompatible + isContradictionRelevant` queda fijado para la vida de un contexto writer. Si cambia cualquiera de esas dependencias, la UI aplica el session-context barrier: detiene intake, espera el command activo, invalida queued commands/editBuffers, revalida el snapshot con las nuevas dependencias y sólo reabre write mode si vuelve a ser writer-ready. No se cambia semántica silenciosamente bajo commands ya construidos.
+
 `areStatesIncompatible` e `isContradictionRelevant` son providers semánticos inyectados, deterministas y estables durante una transacción. La UI no puede reemplazarlos ad hoc. `areStatesIncompatible` debe aplicar el contrato canónico del carácter; no puede usar desigualdad genérica salvo que dicho contrato establezca exclusión mutua. El mismo provider se usa para reconciliación y validación I9 de un candidate. `isContradictionRelevant` debe usar la misma política al construir y validar la transición I10. Si cambia cualquiera de estos providers durante la vida de un contexto writer, se requiere revalidar/reabrir el contexto antes de aceptar nuevos commands.
 
 ## 4. Commands
@@ -185,7 +187,9 @@ si cualquier item viola un guard
 
 Las operaciones de inbox modifican exclusivamente `inboxPhotoRefs[]`. No crean `classifiedPhotoRefs[]`, `classifiedPhotos[]` ni otra colección paralela.
 
-Las operaciones batch permitidas son reversibles mediante su command inverso mientras ese inverso siga siendo válido bajo los guards actuales. No confirman estados botánicos, no copian `observedState` y no crean evidencia positiva.
+Las operaciones batch permitidas son reversibles mediante su command inverso mientras ese inverso siga siendo válido bajo los guards actuales. La UI conserva el descriptor runtime necesario para ofrecer Undo mientras no exista una mutación dependiente posterior. Si posteriormente aparece evidencia histórica que hace ilegal una desasignación, el Undo deja de ofrecerse como ejecutable: la reversibilidad nunca autoriza violar I5/I6. Las operaciones de inbox permanecen reversibles mediante su inverso mientras la PHOTO exista. No confirman estados botánicos, no copian `observedState` y no crean evidencia positiva.
+
+Los targets repetidos dentro de un mismo batch se deduplican antes de construir el mutation plan. El orden del input no puede producir duplicados ni commits distintos para el mismo conjunto de targets.
 
 Al ingresar una PHOTO nueva:
 
@@ -202,6 +206,8 @@ Si el fingerprint ya existía:
 → no se altera por nombre/ruta de la carga duplicada
 → membership de inbox existente no se modifica implícitamente
 ```
+
+`inboxPhotoRefs[]` se trata con semántica de conjunto ordenado: cada `photoId` aparece como máximo una vez. `PHOTO.individualRefs[]` aplica la misma unicidad por `individualId`. Agregar una referencia ya presente es NO_OP.
 
 ### 4.2 ACTIVE_REVIEW_TARGET y commands de evidencia
 
@@ -748,13 +754,29 @@ evidenceId/revision/current e identidad I6 válidos
 lifecycleStatus ∈ DRAFT | CONFIRMED
 evidenceStatus ∈ OBSERVED | UNCERTAIN | NOT_OBSERVABLE
 PHOTO / PhotoEvidence / INDIVIDUAL referencialmente compatibles
-sourceType soportado cuando está presente como productor canónico
-sourceId canónico cuando corresponde
-acquisition.mode ∈ manual | prefilled | automatic cuando acquisition está materializada
+
+sourceType/sourceId:
+→ o ambos ausentes en un DRAFT todavía no atribuido a productor
+→ o ambos presentes y canónicos
+→ sourceType, si está presente, ∈ human | tool | model | imported
+
+acquisition, si está materializada:
+→ acquisition.mode ∈ manual | prefilled | automatic
+
+si acquisition.mode = prefilled, incluso en DRAFT:
+→ basis existe
+→ basis.type = prior_observations
+→ basis.photoEvidenceRefs contiene al menos una ref existente
+→ confirmedOnCurrentPhoto puede seguir false/ausente mientras sea DRAFT
+
 confidence null o número 0..1
 OBSERVED → observedState no vacío
 UNCERTAIN/NOT_OBSERVABLE → observedState vacío + reason no vacío
 evidence, si existe, es array
+
+si lifecycleStatus = DRAFT:
+→ confirmation ausente o null
+→ nunca se conserva/copía confirmation de una revisión CONFIRMED anterior
 ```
 
 Para la revisión `current=true`, `operationalDatasetCheck=true` añade:
@@ -1023,7 +1045,20 @@ Debe cubrir:
      session,
      { areStatesIncompatible }
    )
+
+8. invariantes I12 de colección/asset:
+   inboxPhotoRefs[]
+   → refs únicas
+
+   cada PHOTO.individualRefs[]
+   → refs únicas
+
+   PhotoEvidence.sourcePhoto.fingerprintSha256
+   → único dentro de la sesión
+   → dos fingerprints iguales no pueden pertenecer a PHOTO/PhotoEvidence distintos
 ```
+
+Las invariantes del punto 8 se implementan en un helper I12 reusable, conceptualmente `validateApcI12AssetAndCollectionInvariants()`. Un import que contenga dos PHOTO distintas con el mismo fingerprint no se auto-fusiona, porque eso podría reescribir IDs e historia; se rechaza para write mode y puede abrirse sólo READ_ONLY para diagnóstico.
 
 Las reglas del punto 2 deben exponerse/factorizarse desde la lógica canónica I10 actualmente usada por `validateObjectiveAssessmentBinding()` y `validateApcSessionForExport()`; no se copian dentro de UI.
 
@@ -1348,18 +1383,53 @@ derivePhotoReviewState(photoId)
 deriveSessionDiagnostics()
 → structurallyValid
 → serializableWorkingSnapshot
+→ writerReady
 → exportable
 → pass
 → closed
 ```
 
-Los nombres anteriores son valores runtime de presentación, no enums persistidos. Los diagnósticos se calculan desde validadores/estado canónico; no se guardan dentro de `APC_SESSION`.
+Los nombres anteriores son valores runtime de presentación, no enums persistidos. Los diagnósticos se calculan así:
+
+```text
+structurallyValid
+→ validateApcSession(currentSession).valid
+
+serializableWorkingSnapshot
+→ structurallyValid
+→ serialización JSON completa del APC_SESSION committed puede producirse y reparsearse sin pérdida de sus campos normativos
+
+writerReady
+→ validateApcWritableWorkingSnapshot(...).valid
+
+exportable
+→ validateApcSessionForExport(...).exportable
+
+pass
+→ assessApcSessionPass(...).pass
+
+closed
+→ currentSession.status === CLOSED
+```
+
+`writerReady` es sólo diagnóstico runtime adicional y no reemplaza ninguna categoría R9. En particular:
+
+```text
+STRUCTURALLY VALID
+≠ SERIALIZABLE WORKING SNAPSHOT
+≠ writerReady
+≠ EXPORTABLE
+≠ PASS
+≠ CLOSED
+```
+
+Ninguno se guarda dentro de `APC_SESSION`.
 
 Navegación, filtros, siguiente/anterior, zoom y selección no ejecutan commands normativos ni cambian `semanticRevision`.
 
 ### 23.1 Export e I11 como acciones explícitas
 
-`EXPORT_APC` ejecuta:
+`EXPORT_APC` opera exclusivamente sobre el último `currentSession` COMMITTED. Nunca incorpora `editBuffers` ni un candidate no persistido. Ejecuta:
 
 ```text
 buildApcSessionExport(
@@ -1376,7 +1446,7 @@ Debe existir al menos un fixture E2E I12 que produzca:
 buildApcSessionExport(...).exportable = true
 ```
 
-`RUN_I11_VERIFICATION` es una acción humana explícita de diagnóstico. Invoca el harness canónico I11 para un individuo seleccionado y nunca se ejecuta implícitamente por guardar/confirmar evidencia. Su resultado no modifica APC_SESSION, candidateIds ni evidencia.
+`RUN_I11_VERIFICATION` es una acción humana explícita de diagnóstico y opera sobre el último `currentSession` COMMITTED, nunca sobre editBuffers/candidates. Invoca el harness canónico I11 para un individuo seleccionado y nunca se ejecuta implícitamente por guardar/confirmar evidencia. Su resultado no modifica APC_SESSION, candidateIds ni evidencia. Si el harness canónico rechaza el snapshot/evidencia, la UI muestra el fallo y no intenta reparar u omitir silenciosamente la evidencia.
 
 ## 24. Resultados runtime del executor
 
@@ -1747,6 +1817,57 @@ TD-I12-63
 cambio normativo de evidence sólo en confirmation/acquisition/source/notes
 → NO es NO_OP
 → genera revisión I6 correspondiente
+
+TD-I12-64
+current DRAFT derivado de CONFIRMED anterior
+→ confirmation anterior ausente/null
+→ una confirmation heredada hace REJECT al working snapshot
+
+TD-I12-65
+DRAFT con acquisition.mode=prefilled
+→ basis prior_observations + photoEvidenceRefs válidas son obligatorias
+→ confirmedOnCurrentPhoto puede permanecer false/ausente hasta CONFIRMED
+
+TD-I12-66
+DRAFT con sourceType sin sourceId, o sourceId sin sourceType
+→ REJECT
+→ ambos ausentes o ambos canónicos
+
+TD-I12-67
+inboxPhotoRefs contiene el mismo photoId dos veces
+→ writer-ready REJECT
+
+TD-I12-68
+PHOTO.individualRefs contiene el mismo individualId dos veces
+→ writer-ready REJECT
+
+TD-I12-69
+dos PhotoEvidence distintas comparten fingerprintSha256
+→ writer-ready REJECT
+→ no auto-merge de IDs/historia
+
+TD-I12-70
+ADD_TO_INBOX de ref ya presente / ASSIGN_PHOTO de individuo ya presente
+→ NO_OP
+→ no duplicado
+→ no runtimeGeneration++
+
+TD-I12-71
+dataset o provider semántico cambia durante contexto writer
+→ barrier
+→ command activo termina
+→ queued commands quedan stale
+→ snapshot se revalida antes de reabrir write mode
+
+TD-I12-72
+deriveSessionDiagnostics
+→ STRUCTURALLY VALID / SERIALIZABLE / writerReady / EXPORTABLE / PASS / CLOSED se calculan separadamente
+→ ningún resultado se persiste
+
+TD-I12-73
+EXPORT_APC y RUN_I11_VERIFICATION con editBuffer sucio
+→ ambos consumen sólo currentSession COMMITTED
+→ editBuffer no contamina export ni handoff
 ```
 
 ## 26. Criterio de cierre del diseño
@@ -1780,20 +1901,25 @@ El diseño puede congelarse cuando:
 - dataset es dependencia explícita del executor;
 - revisiones históricas se preservan sin reinterpretación retroactiva contra allowedStates del dataset actual;
 - fallos de asset runtime post-commit no revierten APC;
-- TD-I12-01..63 están aceptadas como regresiones de implementación.
+- DRAFT nunca hereda confirmation y prefill DRAFT conserva basis trazable;
+- inboxPhotoRefs, PHOTO.individualRefs y fingerprints cumplen unicidad I12 para write mode;
+- dataset/providers quedan fijados por contexto writer y cualquier cambio fuerza barrier + revalidación;
+- diagnósticos STRUCTURALLY VALID/SERIALIZABLE/writerReady/EXPORTABLE/PASS/CLOSED permanecen separados;
+- export e I11 consumen únicamente snapshots committed;
+- TD-I12-01..73 están aceptadas como regresiones de implementación.
 
 ### AUDITORÍA
 
-V0.8 completa la auditoría de cobertura contra R9 sin modificar el contrato: explicita guards históricos de unassignment, batch/inbox reversible, captura segura de ACTIVE_REVIEW_TARGET, prefill y sugerencias no positivas, acciones explícitas de export/I11, binding estable de providers semánticos y comparación normativa exacta para NO_OP. Conserva las correcciones v0.7.
+V0.9 resuelve la revisión adversarial integral de v0.8 sin modificar R9. Cierra los vacíos restantes de persistencia DRAFT, prefill trazable, unicidad de colecciones/assets, estabilidad de dependencias semánticas, separación precisa de diagnósticos de sesión y aislamiento de editBuffers respecto de export/I11. Conserva todas las correcciones v0.8.
 
 ### INCONSISTENCIAS
 
-Se cierra la ausencia de semántica implementable para T-I12-12/T-I12-12A: toda desasignación inspecciona la historia completa y los batch son all-or-nothing; inbox usa sólo inboxPhotoRefs. Se cierra la dependencia accidental del target UI capturando photo/individual en el command y revalidando la asociación al ejecutar. Prefill y suggestions quedan separados de evidencia positiva. Toda nueva CONFIRMED sigue pasando explícitamente validateApcEvidenceForHandoff además de la validación fuerte. Export y I11 se ejecutan sólo como acciones derivadas explícitas. Los providers I9/I10 quedan estables dentro de la transacción y ligados al contrato canónico correspondiente.
+Se elimina la posibilidad de que un DRAFT conserve confirmation heredada de una revisión CONFIRMED. Un DRAFT prefilled debe preservar desde el inicio su basis de procedencia, aunque la confirmación sobre la foto actual sólo se exija para CONFIRMED. sourceType/sourceId pasan a ser un par consistente. Los arrays inboxPhotoRefs e individualRefs se tratan con unicidad explícita, y fingerprints duplicados entre PhotoEvidence distintas bloquean write mode sin auto-merge. Dataset y providers semánticos quedan ligados al contexto writer y no pueden cambiar bajo commands existentes. Los estados STRUCTURALLY VALID, SERIALIZABLE WORKING SNAPSHOT, writerReady, EXPORTABLE, PASS y CLOSED tienen derivaciones independientes. Export e I11 sólo leen el snapshot committed.
 
 ### VACÍOS / OMISIONES
 
-Siguen fuera de alcance layout visual final, accesibilidad de producto, backend remoto, blobs permanentes, eliminación de sesiones, hypothesis y H17 runtime. Las acciones de metadata operacional común por lote sólo podrán implementarse cuando el campo concreto esté cubierto por el schema vigente; v0.8 no inventa metadata normativa nueva. Representation gaps se muestran y preservan según I8; su creación no se infiere automáticamente desde NOT_OBSERVABLE.
+Siguen fuera de alcance layout final, accesibilidad de producto, backend remoto, blobs permanentes, eliminación de sesiones, hypothesis y H17 runtime. Un snapshot externo que viole invariantes I12 de fingerprint/colecciones puede inspeccionarse READ_ONLY, pero v0.9 no define reparación automática porque fusionar IDs o reescribir historia excedería I12. El versionado histórico del dataset continúa fuera de alcance; revisiones no-current se conservan por integridad intrínseca.
 
 ### REDUNDANCIAS
 
-No se crean colecciones classified, caches persistidos de estados derivados, resultados I11 persistidos ni copias de export. Batch assignment/inbox opera sobre arrays canónicos existentes. Los estados de foto y diagnósticos STRUCTURALLY VALID/SERIALIZABLE/EXPORTABLE/PASS/CLOSED son derivados de UI. Los providers semánticos son dependencias runtime y no se serializan en APC_SESSION.
+No se introducen nuevos campos persistidos para writerReady, undo, provider version, asset index, fingerprints indexados, diagnostics ni edit buffers. La unicidad se deriva de los arrays canónicos existentes. Export y handoff no mantienen copias paralelas: consumen currentSession committed y producen resultados derivados.
