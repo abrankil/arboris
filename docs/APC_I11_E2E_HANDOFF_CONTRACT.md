@@ -1,6 +1,6 @@
 # Árboris — APC I11 E2E Handoff Contract
 
-**ID:** `ARBORIS_APC_I11_E2E_HANDOFF_CONTRACT_R3`  
+**ID:** `ARBORIS_APC_I11_E2E_HANDOFF_CONTRACT_R3.1`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I11.  
 **Base canónica:** `main@805890c3c11f9de82922ac89e1369b7324a6e223`.  
@@ -163,8 +163,7 @@ scopeLevel = PHOTO
   { level: INDIVIDUAL, ref: target individualId }
 
 scopeLevel = SESSION
-→ incluir iff propagation[] contiene
-  { level: INDIVIDUAL, ref: target individualId }
+→ no incluir en context.pending individual
 
 REPRESENTATION_GAP
 
@@ -172,11 +171,12 @@ sourceLevel = INDIVIDUAL
 → incluir iff sourceRef = target individualId
 
 sourceLevel = SESSION
-→ incluir iff propagation[] contiene
-  { level: INDIVIDUAL, ref: target individualId }
+→ no incluir en context.pending individual
 ```
 
 No se infiere pertenencia individual a partir de que una PHOTO contenga varios `individualRefs`; la atribución debe estar expresada por scope o propagation.
+
+La propagación canónica I8 es estrictamente ascendente `PHOTO → INDIVIDUAL → SESSION`. Por ello un pending cuyo origen ya es `SESSION` nunca puede adquirir pertenencia individual mediante propagation y no se atribuye a `context.pending` de un individuo.
 
 Un pending crítico pertenece al gate APC/PASS; I11 no lo transforma en observación botánica.
 
@@ -263,7 +263,17 @@ characterId
 → revision
 ```
 
-No depende del orden accidental de `session.evidence[]`.
+El orden canónico del contexto es:
+
+```text
+context.contradictions
+→ contradictionId
+
+context.pending
+→ pendingId
+```
+
+Ninguno de estos arrays depende del orden accidental de sus arrays fuente en la sesión.
 
 I11 no reordena `candidateIds`: el array explícito se entrega a ACE sin sorting adicional, de modo que ACE pueda aplicar su contrato canónico de deduplicación conservando el orden de primera aparición.
 
@@ -350,11 +360,6 @@ SELECTED_EVIDENCE_CANDIDATE que falla validateApcEvidenceForHandoff()
 → no entra en selectedApcEvidence
 → no entra en excludedFromAce
 
-T-I11-14B
-APC_HANDOFF_ELIGIBLE + non_computable_character
-→ excludedFromAce
-→ no fallo global
-
 T-I11-15
 dos snapshots semánticamente equivalentes con distinto orden de session.evidence[]
 → mismo orden canónico de salida
@@ -365,6 +370,10 @@ APC_HANDOFF_ELIGIBLE pero carácter conocido no computable por ACE
 → excludedFromAce con razón explícita
 → no drop silencioso
 → no aborto global por sí solo
+
+T-I11-16B
+pending con scope/source SESSION
+→ no se atribuye a context.pending del individuo objetivo
 
 T-I11-17
 photoEvidenceRef
@@ -396,16 +405,16 @@ I11 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R3 mantiene la frontera epistemológica definida por H16/APC y H15/ACE: APC captura y confirma observaciones; el adaptador conserva el significado observacional; ACE evalúa compatibilidad e identificación. I11 funciona exclusivamente como verification harness E2E y no adelanta la integración runtime de H17. R3 además separa selección preliminar, handoff APC válido y elegibilidad ACE.
+R3.1 mantiene la frontera epistemológica definida por H16/APC y H15/ACE: APC captura y confirma observaciones; el adaptador conserva el significado observacional; ACE evalúa compatibilidad e identificación. I11 funciona exclusivamente como verification harness E2E y no adelanta la integración runtime de H17. R3 además separa selección preliminar, handoff APC válido y elegibilidad ACE.
 
 ### INCONSISTENCIAS
 
-R3 resuelve las ambigüedades detectadas en R2: define `selectedApcEvidence` sólo después de validar handoff, congela el predicate de pertenencia de `context.pending` y elimina interpretación ad hoc de hypotheses no normalizadas. Mantiene además las correcciones heredadas de R2 sobre H16/H17, PASS/EXPORTABLE, determinismo y provenance.
+R3.1 resuelve la inconsistencia detectada en R3 entre el predicate de `context.pending` y la propagación I8 estrictamente ascendente: los pending de origen SESSION no se atribuyen a individuos. También congela el orden determinista de `context.contradictions` y `context.pending`, y elimina la regresión redundante sobre `non_computable_character`. Mantiene las correcciones heredadas de R2/R3 sobre selección, handoff, ACE eligibility, H16/H17, PASS/EXPORTABLE, determinismo y provenance.
 
 ### VACÍOS / OMISIONES
 
-R3 no define persistencia de una identificación resultante, UI, política de cierre de Gate B, integración runtime de H17, contrato de hypotheses provisionales ni flujo multi-individuo agregado. Esos puntos quedan fuera de I11.
+R3.1 no define persistencia de una identificación resultante, UI, política de cierre de Gate B, integración runtime de H17, contrato de hypotheses provisionales ni flujo multi-individuo agregado. Esos puntos quedan fuera de I11.
 
 ### REDUNDANCIAS
 
-I11 no redefine validadores de APC, CharacterObservation ni ACE. Debe componer `validateApcSession()`, el adaptador APC existente y `assessIdentification()` en lugar de duplicarlos.
+I11 no redefine validadores de APC, CharacterObservation ni ACE. Debe componer `validateApcSession()`, el adaptador APC existente y `assessIdentification()` en lugar de duplicarlos. La regresión duplicada sobre `non_computable_character` fue eliminada en R3.1.
