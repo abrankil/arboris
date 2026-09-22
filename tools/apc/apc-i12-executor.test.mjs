@@ -666,3 +666,89 @@ test('T-I12-13 REPRESENTATION_GAP is visible as derived context without becoming
   assert.equal(executor.snapshot().semanticRevision, revisionBefore);
   await executor.close();
 });
+
+
+test('TD-I12-53 BATCH_UNASSIGN_PHOTOS rejects heterogeneous individuals atomically', async () => {
+  const { executor } = await setup();
+  let r = await executor.dispatch(executor.commandBase({
+    type: 'INGEST_PHOTOS',
+    photos: [
+      { fileRef: 'batch-a.jpg', fingerprintSha256: '8'.repeat(64) },
+      { fileRef: 'batch-b.jpg', fingerprintSha256: '9'.repeat(64) },
+    ],
+  }));
+  const [a, b] = r.session.photos;
+  r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  const ind1 = r.created.individualId;
+  r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  const ind2 = r.created.individualId;
+  await executor.dispatch(executor.commandBase({ type: 'ASSIGN_PHOTO', photoId: a.photoId, individualId: ind1 }));
+  await executor.dispatch(executor.commandBase({ type: 'ASSIGN_PHOTO', photoId: b.photoId, individualId: ind2 }));
+  const before = executor.snapshot();
+
+  r = await executor.dispatch(executor.commandBase({
+    type: 'BATCH_UNASSIGN_PHOTOS',
+    targets: [
+      { photoId: a.photoId, individualId: ind1 },
+      { photoId: b.photoId, individualId: ind2 },
+    ],
+  }));
+  assert.equal(r.status, 'REJECTED');
+  assert.match(r.errors.join(' '), /single individualId/);
+  assert.deepEqual(executor.snapshot(), before);
+  await executor.close();
+});
+
+test('TD-I12-53 homogeneous BATCH_UNASSIGN_PHOTOS remains reversible by one BATCH_ASSIGN_PHOTOS', async () => {
+  const { executor } = await setup();
+  let r = await executor.dispatch(executor.commandBase({
+    type: 'INGEST_PHOTOS',
+    photos: [
+      { fileRef: 'batch-c.jpg', fingerprintSha256: 'a8'.padEnd(64, '8') },
+      { fileRef: 'batch-d.jpg', fingerprintSha256: 'b9'.padEnd(64, '9') },
+    ],
+  }));
+  const [a, b] = r.session.photos;
+  r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  const individualId = r.created.individualId;
+  r = await executor.dispatch(executor.commandBase({
+    type: 'BATCH_ASSIGN_PHOTOS',
+    photoIds: [a.photoId, b.photoId],
+    individualId,
+  }));
+  assert.equal(r.status, 'COMMITTED');
+
+  r = await executor.dispatch(executor.commandBase({
+    type: 'BATCH_UNASSIGN_PHOTOS',
+    targets: [
+      { photoId: a.photoId, individualId },
+      { photoId: b.photoId, individualId },
+      { photoId: a.photoId, individualId },
+    ],
+  }));
+  assert.equal(r.status, 'COMMITTED');
+  assert.equal(r.session.photos.find(item => item.photoId === a.photoId).individualRefs.includes(individualId), false);
+  assert.equal(r.session.photos.find(item => item.photoId === b.photoId).individualRefs.includes(individualId), false);
+
+  r = await executor.dispatch(executor.commandBase({
+    type: 'BATCH_ASSIGN_PHOTOS',
+    photoIds: [a.photoId, b.photoId],
+    individualId,
+  }));
+  assert.equal(r.status, 'COMMITTED');
+  assert.equal(r.session.photos.find(item => item.photoId === a.photoId).individualRefs.includes(individualId), true);
+  assert.equal(r.session.photos.find(item => item.photoId === b.photoId).individualRefs.includes(individualId), true);
+  await executor.close();
+});
+
+test('T-I12-12 batch undo descriptor enforces exact delta and fails closed on heterogeneous inverse', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('export function deriveBatchUndoDescriptor');
+  const end = source.indexOf('\nexport function batchUndoIsValid', start);
+  assert.ok(start >= 0 && end > start);
+  const derivation = source.slice(start, end);
+  assert.match(derivation, /beforeSet\.has\(photoId\) !== afterSet\.has\(photoId\)/);
+  assert.match(derivation, /assigned\(before, target\) !== assigned\(after, target\)/);
+  assert.match(derivation, /new Set\(affectedTargets\.map\(item => item\.individualId\)\)\.size !== 1/);
+  assert.match(derivation, /targets: structuredClone\(affectedTargets\)/);
+});
