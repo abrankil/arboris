@@ -367,18 +367,82 @@ async function dispatch(command, { allowDecisionRetry = true } = {}) {
   return result;
 }
 
-function evidencePatch() {
-  const status = $('evidenceStatus').value;
+function patchFromBuffer(buffer) {
   return {
-    evidenceStatus: status,
-    observedState: status === 'OBSERVED' ? ($('observedState').value || null) : null,
+    evidenceStatus: buffer.evidenceStatus,
+    observedState: buffer.evidenceStatus === 'OBSERVED' ? (buffer.observedState ?? null) : null,
     sourceType: 'human',
     sourceId: actorId(),
     acquisition: { mode: 'manual', confirmedOnCurrentPhoto: null, basis: null },
     confidence: null,
-    reason: status === 'OBSERVED' ? null : ($('reason').value.trim() || null),
-    notes: $('notes').value.trim() || null,
+    reason: buffer.evidenceStatus === 'OBSERVED' ? null : (buffer.reason ?? null),
+    notes: buffer.notes ?? null,
   };
+}
+
+async function saveBufferKey(key) {
+  if (!key || !inWriteMode()) return null;
+  const buffer = state.editBuffers.get(key);
+  if (!buffer || !bufferIsPersistible(buffer)) return null;
+
+  const { photoId, individualId, characterId } = parseBufferKey(key);
+  const session = state.executor.snapshot();
+  const photo = session?.photos.find(item => item.photoId === photoId);
+  if (!photo || !photo.individualRefs.includes(individualId)) return null;
+
+  const ev = findCurrentEvidenceForTarget(session, photoId, individualId, characterId);
+  const type = ev?.lifecycleStatus === 'CONFIRMED' ? 'EDIT_CONFIRMED_AS_DRAFT' : 'SAVE_DRAFT';
+
+  const promise = dispatch(state.executor.commandBase({
+    type,
+    evidenceId: ev?.evidenceId ?? null,
+    baseRevision: ev?.revision ?? null,
+    targetPhotoId: photoId,
+    targetIndividualId: individualId,
+    characterId,
+    patch: patchFromBuffer(buffer),
+  }));
+
+  state.autosaveInFlight.set(key, promise);
+  const result = await promise;
+  state.autosaveInFlight.delete(key);
+
+  if (result?.status === 'COMMITTED' || result?.status === 'NO_OP') {
+    state.editBuffers.delete(key);
+  }
+  return result;
+}
+
+function scheduleAutosave(key = bufferKey()) {
+  if (!key || !inWriteMode()) return;
+  const existing = state.autosaveTimers.get(key);
+  if (existing) clearTimeout(existing);
+  const timer = setTimeout(() => {
+    state.autosaveTimers.delete(key);
+    saveBufferKey(key).catch(error => message(`autosave: ${error.message}`));
+  }, 800);
+  state.autosaveTimers.set(key, timer);
+}
+
+async function flushAutosave(key) {
+  const timer = state.autosaveTimers.get(key);
+  if (timer) {
+    clearTimeout(timer);
+    state.autosaveTimers.delete(key);
+  }
+  const inFlight = state.autosaveInFlight.get(key);
+  if (inFlight) await inFlight;
+}
+
+function captureAndScheduleAutosave() {
+  const key = bufferKey();
+  if (!key) return;
+  captureActiveEditBuffer();
+  scheduleAutosave(key);
+}
+
+function evidencePatch() {
+  return patchFromBuffer(readFormBuffer());
 }
 
 function evidenceCommand(type) {
