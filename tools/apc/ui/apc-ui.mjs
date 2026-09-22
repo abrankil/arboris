@@ -276,10 +276,7 @@ function render() {
     const inInbox = session.inboxPhotoRefs.includes(photo.photoId);
     div.textContent = `${photo.photoId.slice(0,18)} · ${photo.fileRef}${inInbox ? ' · inbox' : ''}`;
     div.onclick = () => {
-      state.activePhotoId = photo.photoId;
-      const refs = photo.individualRefs ?? [];
-      if (!refs.includes(state.activeIndividualId)) state.activeIndividualId = refs[0] ?? null;
-      render();
+      void changeReviewTarget({ photoId: photo.photoId });
     };
     $('photos').append(div);
   }
@@ -289,7 +286,9 @@ function render() {
     const div = document.createElement('div');
     div.className = 'item' + (individual.individualId===state.activeIndividualId ? ' active' : '');
     div.textContent = individual.individualId;
-    div.onclick = () => { state.activeIndividualId = individual.individualId; render(); };
+    div.onclick = () => {
+      void changeReviewTarget({ individualId: individual.individualId });
+    };
     $('individuals').append(div);
   }
 
@@ -424,14 +423,50 @@ function scheduleAutosave(key = bufferKey()) {
   state.autosaveTimers.set(key, timer);
 }
 
-async function flushAutosave(key) {
+async function flushAutosave(key, { persistPending = true } = {}) {
+  if (!key) return null;
   const timer = state.autosaveTimers.get(key);
   if (timer) {
     clearTimeout(timer);
     state.autosaveTimers.delete(key);
   }
+
+  let result = null;
   const inFlight = state.autosaveInFlight.get(key);
-  if (inFlight) await inFlight;
+  if (inFlight) result = await inFlight;
+
+  if (persistPending && state.editBuffers.has(key)) {
+    result = await saveBufferKey(key);
+  }
+  return result;
+}
+
+async function changeReviewTarget({ photoId = state.activePhotoId, individualId = state.activeIndividualId, characterId = state.formCharacterId } = {}) {
+  const oldKey = bufferKey();
+  captureActiveEditBuffer();
+  const flushResult = await flushAutosave(oldKey);
+
+  if (flushResult && flushResult.status !== 'COMMITTED' && flushResult.status !== 'NO_OP') {
+    message('Cambio de target bloqueado: el DRAFT anterior no pudo persistirse');
+    render();
+    return false;
+  }
+
+  const session = currentSession();
+  const nextPhoto = session?.photos?.find(item => item.photoId === photoId) ?? null;
+  let nextIndividualId = individualId;
+  if (nextPhoto) {
+    const refs = nextPhoto.individualRefs ?? [];
+    if (!refs.includes(nextIndividualId)) nextIndividualId = refs[0] ?? null;
+  }
+
+  state.activePhotoId = photoId ?? null;
+  state.activeIndividualId = nextIndividualId ?? null;
+  state.formCharacterId = characterId ?? $('character').value ?? null;
+  if (state.formCharacterId) $('character').value = state.formCharacterId;
+  renderCharacterHelp();
+  render();
+  return true;
 }
 
 function captureAndScheduleAutosave() {
@@ -460,22 +495,49 @@ function evidenceCommand(type) {
 
 async function saveDraft() {
   if (!activePhoto() || !activeIndividual()) return message('Falta ACTIVE_REVIEW_TARGET');
-  const ev = currentEvidence();
-  const type = ev?.lifecycleStatus === 'CONFIRMED' ? 'EDIT_CONFIRMED_AS_DRAFT' : 'SAVE_DRAFT';
-  await dispatch(evidenceCommand(type));
+  captureActiveEditBuffer();
+  const key = bufferKey();
+  const result = await flushAutosave(key);
+  if (!result && state.editBuffers.has(key)) message('DRAFT incompleto: permanece sólo en editBuffer');
 }
 
 async function confirmEvidence() {
   if (!activePhoto() || !activeIndividual()) return message('Falta ACTIVE_REVIEW_TARGET');
+
+  const key = bufferKey();
+  captureActiveEditBuffer();
+
+  // Confirm is a barrier: cancel the debounce, finish any autosave already
+  // running, persist the latest valid buffer as DRAFT, then rebuild CONFIRM
+  // from the committed revision. This prevents stale baseRevision races.
+  const draftResult = await flushAutosave(key);
+  if (draftResult && draftResult.status !== 'COMMITTED' && draftResult.status !== 'NO_OP') {
+    return message('Confirmación bloqueada: el DRAFT previo no pudo persistirse');
+  }
+
+  const buffer = state.editBuffers.get(key) ?? readFormBuffer();
+  if (!bufferIsPersistible(buffer)) {
+    return message('Confirmación bloqueada: evidencia incompleta');
+  }
+
   const ev = currentEvidence();
   const type = ev?.lifecycleStatus === 'CONFIRMED' ? 'EDIT_AND_RECONFIRM' : 'CONFIRM_EVIDENCE';
-  const command = evidenceCommand(type);
+  const command = commandBase({
+    type,
+    evidenceId: ev?.evidenceId ?? null,
+    baseRevision: ev?.revision ?? null,
+    targetPhotoId: state.activePhotoId,
+    targetIndividualId: state.activeIndividualId,
+    characterId: state.formCharacterId ?? $('character').value,
+    patch: patchFromBuffer(buffer),
+  });
   command.confirmation = {
     confirmedByType: 'human',
     confirmedById: actorId(),
     confirmedAt: new Date().toISOString(),
   };
-  await dispatch(command);
+  const result = await dispatch(command);
+  if (result.status === 'COMMITTED' || result.status === 'NO_OP') state.editBuffers.delete(key);
 }
 
 async function ingestFiles(files) {
@@ -540,8 +602,19 @@ $('importJson').onchange = async event => {
 };
 
 $('photoFiles').onchange = event => ingestFiles([...event.target.files ?? []]);
-$('character').onchange = renderCharacterHelp;
-$('evidenceStatus').onchange = syncEvidenceFormMode;
+$('character').onchange = event => {
+  const characterId = event.target.value;
+  event.target.value = state.formCharacterId ?? characterId;
+  void changeReviewTarget({ characterId });
+};
+$('evidenceStatus').onchange = () => {
+  syncEvidenceFormMode();
+  captureAndScheduleAutosave();
+};
+for (const id of ['observedState', 'reason', 'notes']) {
+  $(id).addEventListener('input', captureAndScheduleAutosave);
+  $(id).addEventListener('change', captureAndScheduleAutosave);
+}
 $('saveDraft').onclick = saveDraft;
 $('confirmEvidence').onclick = confirmEvidence;
 
