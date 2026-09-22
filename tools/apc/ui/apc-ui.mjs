@@ -199,6 +199,7 @@ function renderCharacters() {
     select.append(option);
   }
   if ([...select.options].some(o=>o.value===selected)) select.value = selected;
+  state.formCharacterId = select.value || null;
   renderCharacterHelp();
 }
 
@@ -226,21 +227,28 @@ function renderCharacterHelp() {
 
 function loadEvidenceIntoForm() {
   const ev = currentEvidence();
+  const key = bufferKey();
+  const buffer = key ? state.editBuffers.get(key) : null;
   $('evidenceLife').textContent = ev ? `${ev.lifecycleStatus} · rev ${ev.revision}` : 'sin evidencia';
-  if (!ev) {
+
+  if (buffer) {
+    writeFormBuffer(buffer);
+  } else if (!ev) {
     $('evidenceStatus').value = 'OBSERVED';
     $('observedState').value = '';
     $('reason').value = '';
     $('notes').value = '';
+    syncEvidenceFormMode();
   } else {
     $('evidenceStatus').value = ev.evidenceStatus;
     $('observedState').value = ev.observedState ?? '';
     $('reason').value = ev.reason ?? '';
     $('notes').value = ev.notes ?? '';
+    syncEvidenceFormMode();
   }
+
   $('history').textContent = JSON.stringify(evidenceHistory(), null, 2);
   $('currentEvidence').textContent = JSON.stringify(ev, null, 2);
-  syncEvidenceFormMode();
 }
 
 function syncEvidenceFormMode() {
