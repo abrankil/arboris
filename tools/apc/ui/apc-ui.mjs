@@ -266,6 +266,7 @@ function photoUiStatus(photo, session=currentSession()) {
   const hasDraft = evidence.some(item => item.lifecycleStatus === 'DRAFT');
   const hasConfirmed = evidence.some(item => item.lifecycleStatus === 'CONFIRMED');
   const hasPending = (session?.pending ?? []).some(item => item.status === 'OPEN' && (
+    item.photoId === photo?.photoId ||
     item.scopeRef === photo?.photoId ||
     (item.scopeLevel === 'INDIVIDUAL' && refs.includes(item.scopeRef))
   ));
