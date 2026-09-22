@@ -1,6 +1,6 @@
 # Árboris — APC I12 Implementation Design
 
-**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.9`  
+**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.10`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12 implementation design.  
 **Contrato base:** `ARBORIS_APC_I12_UI_CONTRACT_R9`, VALIDATED WITH ASC y FROZEN en `h16/apc-i12-ui@4ba8f837f75eccf44054b7ef7c7b23b4c82efe40`.  
@@ -500,22 +500,32 @@ Dentro del writer activo existe una única cola normativa.
 máximo un command normativo en vuelo
 ```
 
-Cada command obtiene `previousSession` sólo cuando comienza su turno después del commit/abort del command anterior.
+Un command normativo captura `targetSessionId`, `baseSessionEpoch` y `baseCommitGeneration` cuando se despacha/encola.
 
-No se permite:
+Al comenzar efectivamente su turno, el executor relee storage y verifica freshness antes de asignar `previousSession` a la transacción.
 
 ```text
+A despachado contra generation=N
+B despachado/encolado contra generation=N
+
 A previous=S1
-B previous=S1
-→ dos candidates independientes
+→ commit S2
+→ runtimeGeneration=N+1
+
+B comienza turno
+→ baseCommitGeneration=N != N+1
+→ STALE_COMMAND
+→ no previousSession transaccional
+→ no auto-rebase
+→ no commit
+
+usuario/UI reconstruye conscientemente B desde S2
+→ nuevo B baseCommitGeneration=N+1
+→ B previous=S2
+→ puede producir S3
 ```
 
-La secuencia válida es:
-
-```text
-A previous=S1 → commit S2
-B previous=S2 → commit S3
-```
+La cola serializa ejecución pero no convierte commands antiguos en intención automáticamente rebasable. La excepción explícita de §6 para `CONFIRM` después de autosave pendiente consiste en esperar/flush y construir un command CONFIRM nuevo contra el estado committed resultante.
 
 El coalescing es opcional y sólo puede aplicarse a `SAVE_DRAFT` aún no iniciado del mismo evidence target. Commands de confirmación, requirements, assignment o decisiones de pending no se coalescen automáticamente.
 
@@ -639,15 +649,17 @@ Para una mutación normativa:
 22. continuar cola manteniendo el writer lock
 ```
 
-Cualquier fallo antes de 17:
+Cualquier fallo antes de completar exitosamente el paso 18 —incluido un fallo de `saveAtomic()` o de la confirmación durable del adapter—:
 
 ```text
 → ABORT
 → currentSession permanece previousSession
 → snapshot persistido permanece exactamente previo
 → runtimeGeneration no cambia
-→ no se consume revisión ni semanticRevision
+→ no se consume revisión ni semanticRevision como historia committed
 ```
+
+El paso 19 es la primera promoción de autoridad en memoria. Después de esa promoción sólo pueden fallar efectos exclusivamente runtime del paso 21; esos fallos generan warning/degradación local y nunca revierten el commit APC.
 
 ## 11. I6 revision construction
 
@@ -1053,12 +1065,24 @@ Debe cubrir:
    cada PHOTO.individualRefs[]
    → refs únicas
 
+   cada PHOTO
+   → photoEvidenceId canónico obligatorio
+   → resuelve exactamente un PhotoEvidence
+   → PHOTO.photoEvidenceId = PhotoEvidence.photoEvidenceId
+   → PhotoEvidence.sourcePhoto.photoRef = PHOTO.photoId
+
+   conjunto PHOTO ↔ PhotoEvidence
+   → cardinalidad total 1:1
+
    PhotoEvidence.sourcePhoto.fingerprintSha256
    → único dentro de la sesión
+   → comparación hexadecimal case-insensitive
    → dos fingerprints iguales no pueden pertenecer a PHOTO/PhotoEvidence distintos
 ```
 
-Las invariantes del punto 8 se implementan en un helper I12 reusable, conceptualmente `validateApcI12AssetAndCollectionInvariants()`. Un import que contenga dos PHOTO distintas con el mismo fingerprint no se auto-fusiona, porque eso podría reescribir IDs e historia; se rechaza para write mode y puede abrirse sólo READ_ONLY para diagnóstico.
+Las invariantes del punto 8 se implementan en un helper I12 reusable, conceptualmente `validateApcI12AssetAndCollectionInvariants()`. Debe factorizar sólo las garantías que faltan sobre `validateApcSession()`: obligatoriedad de `PHOTO.photoEvidenceId`, cardinalidad total 1:1, unicidad de refs y unicidad de fingerprint. No duplica la validación bidireccional ya existente.
+
+Un import que contenga PHOTO sin PhotoEvidence correspondiente, dos PHOTO ligadas al mismo PhotoEvidence o dos PHOTO distintas con el mismo fingerprint no se auto-repara ni auto-fusiona; se rechaza para write mode y puede abrirse sólo READ_ONLY para diagnóstico.
 
 Las reglas del punto 2 deben exponerse/factorizarse desde la lógica canónica I10 actualmente usada por `validateObjectiveAssessmentBinding()` y `validateApcSessionForExport()`; no se copian dentro de UI.
 
@@ -1109,12 +1133,19 @@ validateApcSemanticTransition(
 
 Una nueva current CONFIRMED debe pasar además la validación de §12.2 con `requireCurrent=true` y `operationalDatasetCheck=true`.
 
-Export sigue usando I10:
+Export sigue usando I10, pero la superficie I12 exige primero sus propias invariantes writer-ready:
 
 ```text
+validateApcWritableWorkingSnapshot()
+→ PASS
+
 validateApcSessionForExport()
+→ exportable=true
+
 buildApcSessionExport()
 ```
+
+Esto no redefine EXPORTABLE/PASS de I10. Es un gate de la superficie I12 para impedir que un snapshot abierto sólo como READ_ONLY por violar R9 sea presentado por la UI como export APC normativo.
 
 ## 19. Durable persistence
 
@@ -1429,16 +1460,22 @@ Navegación, filtros, siguiente/anterior, zoom y selección no ejecutan commands
 
 ### 23.1 Export e I11 como acciones explícitas
 
-`EXPORT_APC` opera exclusivamente sobre el último `currentSession` COMMITTED. Nunca incorpora `editBuffers` ni un candidate no persistido. Ejecuta:
+`EXPORT_APC` opera exclusivamente sobre el último `currentSession` COMMITTED. Nunca incorpora `editBuffers` ni un candidate no persistido. Ejecuta primero el gate writer-ready I12 y sólo después I10:
 
 ```text
+validateApcWritableWorkingSnapshot(
+  currentSession,
+  { dataset, areStatesIncompatible }
+)
+→ debe pasar
+
 buildApcSessionExport(
   currentSession,
   { dataset, areStatesIncompatible }
 )
 ```
 
-Si `exportable=false`, no genera una exportación normativa exitosa y muestra razones. Si `exportable=true`, el JSON proviene directamente del builder I10; la UI no lo reescribe ni elimina historia.
+Si el gate I12 falla, la UI no presenta una exportación APC normativa aunque el snapshot sea inspeccionable en READ_ONLY. Si I12 pasa pero `exportable=false`, muestra las razones I10. Si `exportable=true`, el JSON proviene directamente del builder I10; la UI no lo reescribe ni elimina historia.
 
 Debe existir al menos un fixture E2E I12 que produzca:
 
@@ -1868,6 +1905,35 @@ TD-I12-73
 EXPORT_APC y RUN_I11_VERIFICATION con editBuffer sucio
 → ambos consumen sólo currentSession COMMITTED
 → editBuffer no contamina export ni handoff
+
+TD-I12-74
+PHOTO sin photoEvidenceId / sin PhotoEvidence 1:1 correspondiente
+→ writable working snapshot REJECT
+→ no autoridad writer
+
+TD-I12-75
+dos PHOTO comparten un mismo PhotoEvidence o la cardinalidad PHOTO↔PhotoEvidence no es 1:1
+→ writable working snapshot REJECT
+→ no auto-repair
+
+TD-I12-76
+A y B se despachan contra baseCommitGeneration=N
+→ A commit incrementa runtimeGeneration
+→ B comienza después y queda STALE_COMMAND
+→ B no se auto-rebasa contra S2
+→ sólo un B reconstruido conscientemente puede continuar
+
+TD-I12-77
+saveAtomic/confirmación durable falla antes de promoción de currentSession
+→ ABORT
+→ durable snapshot = previous
+→ currentSession = previous
+→ runtimeGeneration unchanged
+
+TD-I12-78
+snapshot READ_ONLY viola integridad PHOTO/PhotoEvidence o fingerprint
+→ EXPORT_APC rechazado por gate I12
+→ no se presenta como export APC normativo
 ```
 
 ## 26. Criterio de cierre del diseño
@@ -1880,6 +1946,7 @@ El diseño puede congelarse cuando:
 - B01/B02/B03/B04 y H01/H02 permanecen cerrados;
 - B05/B06/B07/B08 y H03/H04 permanecen cerrados;
 - B09/B10/B11/B12 y H05/H06 permanecen cerrados;
+- B13/B14/B15 y H07 permanecen cerrados;
 - guards de unassignment y batch/inbox satisfacen T-I12-12/T-I12-12A;
 - ACTIVE_REVIEW_TARGET queda desacoplado de commands mediante target IDs capturados;
 - prefill/suggestions respetan la frontera epistemológica de R9;
@@ -1890,13 +1957,14 @@ El diseño puede congelarse cuando:
 - commands stale son rechazados sin auto-rebase ni auto-retry;
 - persistence garantiza atomic replace all-or-nothing;
 - toda revisión CONFIRMED, current o histórica, usa la validación registrada fuerte factorada de APC→CharacterObservation;
-- writable working snapshots validan payload DRAFT/CONFIRMED, control-plane I10, dataset operacional actual, requirement coverage y contradiction semantics antes de adquirir autoridad;
+- writable working snapshots validan payload DRAFT/CONFIRMED, PHOTO↔PhotoEvidence total 1:1, unicidad de fingerprint, control-plane I10, dataset operacional actual, requirement coverage y contradiction semantics antes de adquirir autoridad;
 - imports conflictivos por sessionId no sobrescriben automáticamente;
 - ingest staging no produce efectos committed antes del durable commit;
 - comparadores históricos son ordinales y deterministas;
 - el validation stack reutiliza implementaciones canónicas;
 - CREATE_SESSION y CREATE_INDIVIDUAL quedan definidos;
 - session switch funciona como barrier y nunca libera el lock con un command activo;
+- commands encolados conservan la generación de dispatch y quedan stale si un commit previo la cambia; la cola no auto-rebasa intención;
 - NO_OP se detecta antes de materializar historia y no consume persistencia ni generaciones;
 - dataset es dependencia explícita del executor;
 - revisiones históricas se preservan sin reinterpretación retroactiva contra allowedStates del dataset actual;
@@ -1906,15 +1974,15 @@ El diseño puede congelarse cuando:
 - dataset/providers quedan fijados por contexto writer y cualquier cambio fuerza barrier + revalidación;
 - diagnósticos STRUCTURALLY VALID/SERIALIZABLE/writerReady/EXPORTABLE/PASS/CLOSED permanecen separados;
 - export e I11 consumen únicamente snapshots committed;
-- TD-I12-01..73 están aceptadas como regresiones de implementación.
+- TD-I12-01..78 están aceptadas como regresiones de implementación.
 
 ### AUDITORÍA
 
-V0.9 resuelve la revisión adversarial integral de v0.8 sin modificar R9. Cierra los vacíos restantes de persistencia DRAFT, prefill trazable, unicidad de colecciones/assets, estabilidad de dependencias semánticas, separación precisa de diagnósticos de sesión y aislamiento de editBuffers respecto de export/I11. Conserva todas las correcciones v0.8.
+V0.10 resuelve los hallazgos adversariales remanentes B13–B15 y H07 sin modificar R9, y conserva todas las correcciones v0.9. Endurece la totalidad/cardinalidad PHOTO↔PhotoEvidence, fija la semántica stale de commands encolados, corrige el boundary de fallo durable hasta antes de promover `currentSession` y aplica el gate writer-ready I12 antes de export normativo.
 
 ### INCONSISTENCIAS
 
-Se elimina la posibilidad de que un DRAFT conserve confirmation heredada de una revisión CONFIRMED. Un DRAFT prefilled debe preservar desde el inicio su basis de procedencia, aunque la confirmación sobre la foto actual sólo se exija para CONFIRMED. sourceType/sourceId pasan a ser un par consistente. Los arrays inboxPhotoRefs e individualRefs se tratan con unicidad explícita, y fingerprints duplicados entre PhotoEvidence distintas bloquean write mode sin auto-merge. Dataset y providers semánticos quedan ligados al contexto writer y no pueden cambiar bajo commands existentes. Los estados STRUCTURALLY VALID, SERIALIZABLE WORKING SNAPSHOT, writerReady, EXPORTABLE, PASS y CLOSED tienen derivaciones independientes. Export e I11 sólo leen el snapshot committed.
+B13 queda resuelto haciendo obligatorio `PHOTO.photoEvidenceId` en todo writable snapshot y exigiendo cardinalidad total 1:1 PHOTO↔PhotoEvidence sobre las verificaciones bidireccionales existentes. B14 permanece cerrado con unicidad case-insensitive de fingerprint. B15 queda resuelto incluyendo fallos de `saveAtomic()`/confirmación durable dentro de ABORT hasta antes de promover `currentSession`. H07 queda cerrado declarando que los commands capturan generación al dispatch: si un commit previo cambia la generación, el command queued queda STALE y debe reconstruirse conscientemente; la cola nunca auto-rebasa intención. La exportación I12 exige además el gate writer-ready antes de delegar a I10, evitando exportar normativamente snapshots READ_ONLY que violen R9.
 
 ### VACÍOS / OMISIONES
 
@@ -1922,4 +1990,4 @@ Siguen fuera de alcance layout final, accesibilidad de producto, backend remoto,
 
 ### REDUNDANCIAS
 
-No se introducen nuevos campos persistidos para writerReady, undo, provider version, asset index, fingerprints indexados, diagnostics ni edit buffers. La unicidad se deriva de los arrays canónicos existentes. Export y handoff no mantienen copias paralelas: consumen currentSession committed y producen resultados derivados.
+No se introducen nuevos campos persistidos para writerReady, undo, provider version, asset index, fingerprints indexados, diagnostics ni edit buffers. La unicidad se deriva de los arrays canónicos existentes. Export y handoff no mantienen copias paralelas: consumen currentSession committed y producen resultados derivados. `validateApcI12AssetAndCollectionInvariants()` añade sólo totalidad/cardinalidad/unicidad sobre relaciones ya canónicas; no crea una segunda fuente de verdad ni duplica la lógica bidireccional de `validateApcSession()`.
