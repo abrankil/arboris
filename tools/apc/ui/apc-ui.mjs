@@ -19,6 +19,7 @@ import {
 import { runApcIndividualThroughAce } from '../apc-i11-e2e.mjs';
 import { loadBrowserCanonicalDataset } from './apc-ui-dataset.mjs';
 import { derivePhotoUiStatus } from './apc-ui-status.mjs';
+import { derivePhotoNavigationTarget } from './apc-ui-navigation.mjs';
 
 const $ = id => document.getElementById(id);
 const state = {
@@ -800,11 +801,13 @@ async function relinkActivePhoto(file) {
 
 async function navigatePhoto(delta) {
   const session = currentSession();
-  const photos = visiblePhotos(session);
-  if (!photos.length) return;
-  const index = Math.max(0, photos.findIndex(item => item.photoId === state.activePhotoId));
-  const next = photos[(index + delta + photos.length) % photos.length];
-  await changeReviewTarget({ photoId: next.photoId });
+  const targetPhotoId = derivePhotoNavigationTarget({
+    visiblePhotoIds: visiblePhotos(session).map(item => item.photoId),
+    activePhotoId: state.activePhotoId,
+    delta,
+  });
+  if (targetPhotoId == null || targetPhotoId === state.activePhotoId) return;
+  await changeReviewTarget({ photoId: targetPhotoId });
 }
 
 async function batchInbox(type) {
