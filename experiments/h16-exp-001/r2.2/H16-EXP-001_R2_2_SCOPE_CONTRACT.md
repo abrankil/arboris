@@ -25,7 +25,7 @@ La separación es semántica y operacional. Compartir infraestructura técnica n
                           │
              ┌────────────┴────────────┐
              │                         │
-      TRUSTED / CORPUS          BLIND / BENCHMARK
+       TRUSTED / APC            BLIND / BENCHMARK
              │                         │
       curación masiva            ground truth H16
       metadata visible           metadata masked
@@ -86,7 +86,7 @@ Las decisiones locales de R2.2 no reescriben retroactivamente R2.1.3.
 
 ---
 
-## 4. Perfil A — TRUSTED / CORPUS
+## 4. Perfil A — TRUSTED / APC
 
 ### 4.1 Objetivo
 
@@ -735,7 +735,7 @@ R2.2 Scope Contract no:
 - redefine supported o resolved;
 - identifica especies;
 - convierte ground truth en evidencia ACE automáticamente;
-- convierte Corpus Evidence en ground truth automáticamente;
+- convierte APC_EVIDENCE en ground truth automáticamente;
 - ejecuta H17;
 - modifica los artefactos congelados de R2.1.3;
 - declara Hito 16 completo.
