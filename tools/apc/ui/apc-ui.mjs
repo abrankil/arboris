@@ -20,7 +20,11 @@ import { runApcIndividualThroughAce } from '../apc-i11-e2e.mjs';
 import { loadBrowserCanonicalDataset } from './apc-ui-dataset.mjs';
 import { derivePhotoUiStatus } from './apc-ui-status.mjs';
 import { derivePhotoNavigationTarget } from './apc-ui-navigation.mjs';
-import { createWriterContextGate } from './apc-ui-context.mjs';
+import {
+  createWriterContextGate,
+  createWriterIntentLeaseRegistry,
+  leaseAuthorizesExecutor,
+} from './apc-ui-context.mjs';
 
 const $ = id => document.getElementById(id);
 const state = {
@@ -41,6 +45,8 @@ const state = {
   selectedPhotoIds: new Set(),
   contextGate: createWriterContextGate('ERROR'),
   contextDependencies: null,
+  contextGeneration: 0,
+  writerIntentLeases: createWriterIntentLeaseRegistry(),
 };
 
 function message(text) {
@@ -486,17 +492,50 @@ export function batchUndoIsValid(descriptor, session, sessionEpoch) {
   });
 }
 
-function commandBase(extra={}) {
-  if (!canAcceptWriterIntent()) return { ...extra, __blockedWriterIntent: true };
-  return state.executor.commandBase(extra);
+function blockedWriterResult() {
+  return { status: 'READ_ONLY', session: currentSession(), errors: ['writer intent blocked by runtime context gate'], warnings: [], decisionsRequired: [] };
 }
 
-async function dispatch(command, { allowDecisionRetry = true } = {}) {
-  if (!canAcceptWriterIntent() || command?.__blockedWriterIntent) {
-    return { status: 'READ_ONLY', session: currentSession(), errors: ['writer intent blocked by runtime context gate'], warnings: [], decisionsRequired: [] };
-  }
-  let result = await state.executor.dispatch(command);
+function beginWriterIntent() {
+  const executorRef = state.executor;
+  return state.writerIntentLeases.begin({
+    executorRef,
+    sessionEpoch: executorRef?.sessionEpoch,
+    contextGeneration: state.contextGeneration,
+    canAccept: canAcceptWriterIntent(),
+  });
+}
 
+function leaseAuthorizesCurrentExecutor(lease) {
+  return leaseAuthorizesExecutor(lease, {
+    executorRef: state.executor,
+    sessionEpoch: state.executor?.sessionEpoch,
+    contextGeneration: state.contextGeneration,
+    isActive: state.writerIntentLeases.isActive(lease),
+  });
+}
+
+async function dispatchOnce(intent, lease) {
+  if (!leaseAuthorizesCurrentExecutor(lease)) return blockedWriterResult();
+  const command = state.executor.commandBase(intent);
+  return state.executor.dispatch(command);
+}
+
+async function runWriterIntent(intentFactory, { allowDecisionRetry = true } = {}) {
+  const lease = beginWriterIntent();
+  if (!lease) return blockedWriterResult();
+
+  let result;
+  try {
+    const intent = typeof intentFactory === 'function' ? await intentFactory(lease) : intentFactory;
+    if (!leaseAuthorizesCurrentExecutor(lease)) return blockedWriterResult();
+    result = await dispatchOnce(intent, lease);
+  } finally {
+    state.writerIntentLeases.release(lease);
+  }
+
+  // Human decision is deliberately outside the OLD lease. A retry is a new
+  // normative intent and therefore requires a fresh lease and command base.
   if (
     result.status === 'NEEDS_DECISION' &&
     allowDecisionRetry &&
@@ -508,20 +547,18 @@ async function dispatch(command, { allowDecisionRetry = true } = {}) {
         `Requirement ${decision.requirementId} quedó insatisfecho.\n\nOK = pending crítico\nCancelar = pending no crítico`,
       );
     }
-
-    const intent = structuredClone(command);
-    delete intent.targetSessionId;
-    delete intent.baseSessionEpoch;
-    delete intent.baseCommitGeneration;
-    intent.pendingCriticalByRequirement = {
-      ...(intent.pendingCriticalByRequirement ?? {}),
-      ...pendingCriticalByRequirement,
-    };
-
-    if (!canAcceptWriterIntent()) {
-      result = { status: 'READ_ONLY', session: currentSession(), errors: ['writer intent blocked by runtime context gate'], warnings: [], decisionsRequired: [] };
+    const retryIntent = structuredClone(typeof intentFactory === 'function' ? null : intentFactory);
+    if (!retryIntent) {
+      result = blockedWriterResult();
     } else {
-      result = await state.executor.dispatch(state.executor.commandBase(intent));
+      delete retryIntent.targetSessionId;
+      delete retryIntent.baseSessionEpoch;
+      delete retryIntent.baseCommitGeneration;
+      retryIntent.pendingCriticalByRequirement = {
+        ...(retryIntent.pendingCriticalByRequirement ?? {}),
+        ...pendingCriticalByRequirement,
+      };
+      result = await runWriterIntent(retryIntent, { allowDecisionRetry: false });
     }
   }
 
@@ -566,7 +603,7 @@ async function saveBufferKey(key) {
   const ev = findCurrentEvidenceForTarget(session, photoId, individualId, characterId);
   const type = ev?.lifecycleStatus === 'CONFIRMED' ? 'EDIT_CONFIRMED_AS_DRAFT' : 'SAVE_DRAFT';
 
-  const promise = dispatch(commandBase({
+  const promise = runWriterIntent({
     type,
     evidenceId: ev?.evidenceId ?? null,
     baseRevision: ev?.revision ?? null,
@@ -574,7 +611,7 @@ async function saveBufferKey(key) {
     targetIndividualId: individualId,
     characterId,
     patch: patchFromBuffer(buffer),
-  }));
+  });
 
   state.autosaveInFlight.set(key, promise);
   const result = await promise;
@@ -785,7 +822,7 @@ async function confirmEvidence() {
 
   const ev = currentEvidence();
   const type = ev?.lifecycleStatus === 'CONFIRMED' ? 'EDIT_AND_RECONFIRM' : 'CONFIRM_EVIDENCE';
-  const command = commandBase({
+  const result = await runWriterIntent({
     type,
     evidenceId: ev?.evidenceId ?? null,
     baseRevision: ev?.revision ?? null,
@@ -793,13 +830,12 @@ async function confirmEvidence() {
     targetIndividualId: state.activeIndividualId,
     characterId: state.formCharacterId ?? $('character').value,
     patch: patchFromBuffer(buffer, { confirming: true }),
+    confirmation: {
+      confirmedByType: 'human',
+      confirmedById: actorId(),
+      confirmedAt: new Date().toISOString(),
+    },
   });
-  command.confirmation = {
-    confirmedByType: 'human',
-    confirmedById: actorId(),
-    confirmedAt: new Date().toISOString(),
-  };
-  const result = await dispatch(command);
   if (result.status === 'COMMITTED' || result.status === 'NO_OP') state.editBuffers.delete(key);
 }
 
@@ -835,7 +871,7 @@ async function batchInbox(type) {
   const before = state.executor?.snapshot();
   const photoIds = selectedBatchPhotoIds(state.selectedPhotoIds, before);
   if (!photoIds.length) return message('Selecciona al menos una foto para el batch');
-  const result = await dispatch(commandBase({ type, photoIds }));
+  const result = await runWriterIntent({ type, photoIds });
   if (result.status === 'COMMITTED') {
     state.batchUndo = deriveBatchUndoDescriptor({
       before,
@@ -857,7 +893,7 @@ async function undoLastBatch() {
     return message('Undo batch ya no es válido');
   }
   const intent = structuredClone(descriptor.inverseCommand);
-  const result = await dispatch(commandBase(intent));
+  const result = await runWriterIntent(intent);
   if (result.status === 'COMMITTED' || result.status === 'NO_OP') {
     state.batchUndo = null;
   } else {
@@ -876,7 +912,7 @@ async function setSessionStatus(status) {
   if (flushed && flushed.status !== 'COMMITTED' && flushed.status !== 'NO_OP') {
     return message('Cambio de estado bloqueado: DRAFT previo no persistido');
   }
-  await dispatch(commandBase({ type:'SET_SESSION_STATUS', status }));
+  await runWriterIntent({ type:'SET_SESSION_STATUS', status });
 }
 
 export async function replaceWriterContext(newDependencies) {
@@ -892,8 +928,7 @@ export async function replaceWriterContext(newDependencies) {
     for (const timer of state.autosaveTimers.values()) clearTimeout(timer);
     state.autosaveTimers.clear();
 
-    const inFlight = [...state.autosaveInFlight.values()];
-    if (inFlight.length) await Promise.allSettled(inFlight);
+    await state.writerIntentLeases.waitForDrain();
 
     if (state.executor) await state.executor.close();
 
@@ -906,6 +941,7 @@ export async function replaceWriterContext(newDependencies) {
     state.activeIndividualId = null;
     state.formCharacterId = $('character').value || null;
 
+    state.contextGeneration += 1;
     state.dataset = newDependencies.dataset;
     state.contextDependencies = {
       dataset: newDependencies.dataset,
@@ -969,13 +1005,13 @@ async function ingestFiles(files) {
   for (const file of files) {
     staged.push(await stageApcPhotoFile(file));
   }
-  const result = await dispatch(commandBase({
+  const result = await runWriterIntent({
     type:'INGEST_PHOTOS',
     photos: staged.map(item => ({
       fileRef:item.fileRef,
       fingerprintSha256:item.fingerprintSha256,
     })),
-  }));
+  });
   if (result.status !== 'COMMITTED' && result.status !== 'NO_OP') return;
 
   const session = state.executor.snapshot();
@@ -1053,27 +1089,27 @@ $('saveDraft').onclick = saveDraft;
 $('confirmEvidence').onclick = confirmEvidence;
 
 $('createIndividual').onclick = async () => {
-  const r = await dispatch(commandBase({ type:'CREATE_INDIVIDUAL' }));
+  const r = await runWriterIntent({ type:'CREATE_INDIVIDUAL' });
   if (r.created?.individualId) state.activeIndividualId = r.created.individualId;
   render();
 };
 
 $('assignPhoto').onclick = async () => {
   if (!state.activePhotoId || !state.activeIndividualId) return message('Selecciona foto e individuo');
-  await dispatch(commandBase({
+  await runWriterIntent({
     type:'ASSIGN_PHOTO',
     photoId:state.activePhotoId,
     individualId:state.activeIndividualId,
-  }));
+  });
 };
 
 $('unassignPhoto').onclick = async () => {
   if (!state.activePhotoId || !state.activeIndividualId) return message('Selecciona foto e individuo');
-  await dispatch(commandBase({
+  await runWriterIntent({
     type:'UNASSIGN_PHOTO',
     photoId:state.activePhotoId,
     individualId:state.activeIndividualId,
-  }));
+  });
 };
 
 $('addRequirement').onclick = async () => {
@@ -1086,7 +1122,7 @@ $('addRequirement').onclick = async () => {
     session.sessionId;
   if (!scopeRef) return message('No existe scopeRef activo');
   const requirementId = newId('requirement');
-  await dispatch(commandBase({
+  await runWriterIntent({
     type:'ADD_REQUIREMENT',
     requirement:{
       requirementId,
@@ -1099,7 +1135,7 @@ $('addRequirement').onclick = async () => {
     pendingCriticalByRequirement:{
       [requirementId]:$('requirementCritical').checked,
     },
-  }));
+  });
 };
 
 $('exportJson').onclick = () => {
