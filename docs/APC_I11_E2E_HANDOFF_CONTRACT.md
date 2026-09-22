@@ -1,7 +1,7 @@
 # Árboris — APC I11 E2E Handoff Contract
 
 **ID:** `ARBORIS_APC_I11_E2E_HANDOFF_CONTRACT_R3.1`  
-**Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
+**Estado:** VALIDATED WITH ASC, FROZEN para implementación técnica.  
 **Ámbito:** Hito 16 / APC I11.  
 **Base canónica:** `main@805890c3c11f9de82922ac89e1369b7324a6e223`.  
 **No autoriza:** merge a `main`, I12, Gate B ni cierre del Hito 16.
@@ -184,7 +184,7 @@ Un pending crítico pertenece al gate APC/PASS; I11 no lo transforma en observac
 
 I11 no introduce ni interpreta un contrato provisional de identificación porque el schema APC canónico actual no define una ubicación o forma normativa para `speciesHypothesis`, `workingSpeciesId` o equivalentes.
 
-Por tanto, en R3.1.1:
+Por tanto, en R3.1:
 
 ```text
 context.provisionalHypothesis = null
@@ -417,4 +417,4 @@ R3.1 no define persistencia de una identificación resultante, UI, política de 
 
 ### REDUNDANCIAS
 
-I11 no redefine validadores de APC, CharacterObservation ni ACE. Debe componer `validateApcSession()`, el adaptador APC existente y `assessIdentification()` en lugar de duplicarlos. La regresión duplicada sobre `non_computable_character` fue eliminada en R3.1.1.
+I11 no redefine validadores de APC, CharacterObservation ni ACE. Debe componer `validateApcSession()`, el adaptador APC existente y `assessIdentification()` en lugar de duplicarlos. La regresión duplicada sobre `non_computable_character` fue eliminada en R3.1.
