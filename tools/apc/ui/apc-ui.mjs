@@ -34,6 +34,7 @@ const state = {
   autosaveInFlight: new Map(),
   runtimeTail: Promise.resolve(),
   formCharacterId: null,
+  batchUndo: null,
 };
 
 function message(text) {
@@ -326,6 +327,9 @@ function render() {
   $('sessionLabel').textContent = session?.sessionId ?? '';
   disableWrites(!inWriteMode());
   $('actorId').disabled = Boolean(session);
+  const undoValid = batchUndoIsValid(state.batchUndo, session, state.executor?.sessionEpoch);
+  if (state.batchUndo && !undoValid) state.batchUndo = null;
+  $('undoBatch').disabled = !undoValid;
 
   $('photos').replaceChildren();
   for (const photo of visiblePhotos(session)) {
@@ -387,6 +391,72 @@ function render() {
   }
 
   loadEvidenceIntoForm();
+}
+
+export function deriveBatchUndoDescriptor({ before, after, type, photoIds = [], targets = [], individualId = null, sessionEpoch }) {
+  if (!before || !after || before.sessionId !== after.sessionId) return null;
+  let affectedTargets = [];
+  let inverseCommand = null;
+  let expectedState = null;
+
+  if (type === 'BATCH_ADD_TO_INBOX' || type === 'BATCH_REMOVE_FROM_INBOX') {
+    const beforeSet = new Set(before.inboxPhotoRefs ?? []);
+    const afterSet = new Set(after.inboxPhotoRefs ?? []);
+    affectedTargets = [...new Set(photoIds)].filter(photoId => beforeSet.has(photoId) !== afterSet.has(photoId));
+    if (!affectedTargets.length) return null;
+    expectedState = type === 'BATCH_ADD_TO_INBOX' ? 'INBOX' : 'OUT_OF_INBOX';
+    inverseCommand = {
+      type: type === 'BATCH_ADD_TO_INBOX' ? 'BATCH_REMOVE_FROM_INBOX' : 'BATCH_ADD_TO_INBOX',
+      photoIds: [...affectedTargets],
+    };
+  } else if (type === 'BATCH_ASSIGN_PHOTOS' || type === 'BATCH_UNASSIGN_PHOTOS') {
+    const requested = type === 'BATCH_ASSIGN_PHOTOS'
+      ? [...new Set(photoIds)].map(photoId => ({ photoId, individualId }))
+      : [...new Map(targets.map(item => [`${item.photoId}::${item.individualId}`, item])).values()];
+    const assigned = (session, target) => Boolean(session.photos?.find(item => item.photoId === target.photoId)?.individualRefs?.includes(target.individualId));
+    affectedTargets = requested.filter(target => assigned(before, target) !== assigned(after, target));
+    if (!affectedTargets.length) return null;
+    expectedState = type === 'BATCH_ASSIGN_PHOTOS' ? 'ASSIGNED' : 'UNASSIGNED';
+    inverseCommand = type === 'BATCH_ASSIGN_PHOTOS'
+      ? { type: 'BATCH_UNASSIGN_PHOTOS', targets: structuredClone(affectedTargets) }
+      : {
+          type: 'BATCH_ASSIGN_PHOTOS',
+          photoIds: affectedTargets.map(item => item.photoId),
+          individualId: affectedTargets[0].individualId,
+        };
+  } else {
+    return null;
+  }
+
+  return {
+    sessionId: after.sessionId,
+    sessionEpoch,
+    inverseCommand,
+    affectedTargets: structuredClone(affectedTargets),
+    expectedState,
+  };
+}
+
+export function batchUndoIsValid(descriptor, session, sessionEpoch) {
+  if (!descriptor || !session) return false;
+  if (descriptor.sessionId !== session.sessionId || descriptor.sessionEpoch !== sessionEpoch) return false;
+  if (descriptor.expectedState === 'INBOX' || descriptor.expectedState === 'OUT_OF_INBOX') {
+    const inbox = new Set(session.inboxPhotoRefs ?? []);
+    const expected = descriptor.expectedState === 'INBOX';
+    return descriptor.affectedTargets.every(photoId =>
+      session.photos?.some(item => item.photoId === photoId) && inbox.has(photoId) === expected
+    );
+  }
+  const expected = descriptor.expectedState === 'ASSIGNED';
+  return descriptor.affectedTargets.every(target => {
+    const photo = session.photos?.find(item => item.photoId === target.photoId);
+    if (!photo || !session.individuals?.some(item => item.individualId === target.individualId)) return false;
+    const assigned = photo.individualRefs?.includes(target.individualId) ?? false;
+    if (assigned !== expected) return false;
+    if (descriptor.inverseCommand.type === 'BATCH_UNASSIGN_PHOTOS' &&
+        (session.evidence ?? []).some(item => item.photoId === target.photoId && item.individualId === target.individualId)) return false;
+    return true;
+  });
 }
 
 function commandBase(extra={}) {
@@ -724,10 +794,36 @@ async function navigatePhoto(delta) {
 }
 
 async function batchInbox(type) {
-  const session = currentSession();
-  const photoIds = visiblePhotos(session).map(item => item.photoId);
+  const before = state.executor?.snapshot();
+  const photoIds = visiblePhotos(before).map(item => item.photoId);
   if (!photoIds.length) return message('No hay fotos en el filtro actual');
-  await dispatch(commandBase({ type, photoIds }));
+  const result = await dispatch(commandBase({ type, photoIds }));
+  if (result.status === 'COMMITTED') {
+    state.batchUndo = deriveBatchUndoDescriptor({
+      before,
+      after: state.executor.snapshot(),
+      type,
+      photoIds,
+      sessionEpoch: state.executor.sessionEpoch,
+    });
+  }
+  render();
+}
+
+async function undoLastBatch() {
+  const session = state.executor?.snapshot();
+  const descriptor = state.batchUndo;
+  if (!batchUndoIsValid(descriptor, session, state.executor?.sessionEpoch)) {
+    state.batchUndo = null;
+    render();
+    return message('Undo batch ya no es válido');
+  }
+  const intent = structuredClone(descriptor.inverseCommand);
+  const result = await dispatch(commandBase(intent));
+  if (result.status === 'COMMITTED' || result.status === 'NO_OP' || result.status === 'REJECTED' || result.status === 'STALE_COMMAND') {
+    state.batchUndo = null;
+  }
+  render();
 }
 
 async function setSessionStatus(status) {
@@ -751,6 +847,7 @@ async function sessionSwitchBarrier(action) {
   if (state.executor) await state.executor.close();
 
   clearEditBuffers();
+  state.batchUndo = null;
   state.inspectionSession = null;
   state.assets.clear();
   state.activePhotoId = null;
@@ -829,6 +926,7 @@ $('prevPhoto').onclick = () => navigatePhoto(-1);
 $('nextPhoto').onclick = () => navigatePhoto(1);
 $('batchAddInbox').onclick = () => batchInbox('BATCH_ADD_TO_INBOX');
 $('batchRemoveInbox').onclick = () => batchInbox('BATCH_REMOVE_FROM_INBOX');
+$('undoBatch').onclick = undoLastBatch;
 $('closeSession').onclick = () => setSessionStatus('CLOSED');
 $('reopenSession').onclick = () => setSessionStatus('OPEN');
 $('character').onchange = event => {
