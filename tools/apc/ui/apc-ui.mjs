@@ -269,21 +269,31 @@ function syncEvidenceFormMode() {
   else $('observedState').value = '';
 }
 
-function photoUiStatus(photo, session=currentSession()) {
-  const refs = photo?.individualRefs ?? [];
-  const evidence = (session?.evidence ?? []).filter(item => item.current === true && item.photoId === photo?.photoId);
+export function derivePhotoUiStatus(photo, session) {
+  const photoId = photo?.photoId ?? null;
+  if (!photoId) return 'sin revisar';
+
+  const evidence = (session?.evidence ?? []).filter(item =>
+    item.current === true && item.photoId === photoId
+  );
   const hasDraft = evidence.some(item => item.lifecycleStatus === 'DRAFT');
   const hasConfirmed = evidence.some(item => item.lifecycleStatus === 'CONFIRMED');
-  const hasPending = (session?.pending ?? []).some(item => item.status === 'OPEN' && (
-    item.photoId === photo?.photoId ||
-    item.scopeRef === photo?.photoId ||
-    (item.scopeLevel === 'INDIVIDUAL' && refs.includes(item.scopeRef))
-  ));
-  if (hasPending) return 'required pendiente';
+  const hasPhotoRequiredPending = (session?.pending ?? []).some(item =>
+    item.kind === 'UNRESOLVED_REQUIREMENT' &&
+    item.status === 'OPEN' &&
+    item.scopeLevel === 'PHOTO' &&
+    item.scopeRef === photoId
+  );
+
+  if (hasPhotoRequiredPending) return 'required pendiente';
   if (hasDraft && hasConfirmed) return 'revisada parcialmente';
   if (hasDraft) return 'DRAFT';
   if (hasConfirmed) return 'CONFIRMED';
   return 'sin revisar';
+}
+
+function photoUiStatus(photo, session=currentSession()) {
+  return derivePhotoUiStatus(photo, session);
 }
 
 function visiblePhotos(session=currentSession()) {
