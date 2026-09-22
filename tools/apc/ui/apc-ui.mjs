@@ -296,6 +296,27 @@ function visiblePhotos(session=currentSession()) {
   });
 }
 
+export function deriveRepresentationGaps({ session, activeIndividualId = null }) {
+  if (!session) return [];
+  return (session.pending ?? [])
+    .filter(item => item.kind === 'REPRESENTATION_GAP')
+    .filter(item =>
+      item.sourceLevel === 'SESSION' && item.sourceRef === session.sessionId ||
+      item.sourceLevel === 'INDIVIDUAL' && item.sourceRef === activeIndividualId
+    )
+    .map(item => ({
+      pendingId: item.pendingId,
+      status: item.status,
+      critical: item.critical,
+      sourceLevel: item.sourceLevel,
+      sourceRef: item.sourceRef,
+      characterId: item.characterId,
+      representationTarget: item.representationTarget,
+      ...(item.representationTarget === 'STATE' ? { targetState: item.targetState } : {}),
+      ...(item.originRequirementId != null ? { originRequirementId: item.originRequirementId } : {}),
+    }));
+}
+
 function render() {
   const session = currentSession();
   chooseFallbackTargets(session);
@@ -353,10 +374,15 @@ function render() {
       closed: d.closed,
     }).map(([k,v]) => `<div class="${v?'ok':'warn'}">${k}: ${v}</div>`).join('');
     $('pending').textContent = JSON.stringify(session.pending ?? [], null, 2);
+    $('representationGaps').textContent = JSON.stringify(deriveRepresentationGaps({
+      session,
+      activeIndividualId: state.activeIndividualId,
+    }), null, 2);
     $('contradictions').textContent = JSON.stringify(session.contradictions ?? [], null, 2);
   } else {
     $('diagnostics').textContent = '';
     $('pending').textContent = '';
+    $('representationGaps').textContent = '';
     $('contradictions').textContent = '';
   }
 
