@@ -1,6 +1,6 @@
 # Árboris — APC I12 Implementation Design
 
-**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.5`  
+**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.6`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12 implementation design.  
 **Contrato base:** `ARBORIS_APC_I12_UI_CONTRACT_R9`, VALIDATED WITH ASC y FROZEN en `h16/apc-i12-ui@4ba8f837f75eccf44054b7ef7c7b23b4c82efe40`.  
@@ -112,6 +112,9 @@ INGEST_PHOTOS
 ASSIGN_PHOTO
 UNASSIGN_PHOTO
 
+INDIVIDUAL
+CREATE_INDIVIDUAL
+
 EVIDENCE
 SAVE_DRAFT
 CONFIRM_EVIDENCE
@@ -138,7 +141,44 @@ RELINK_ASSET con fingerprint coincidente
 
 ## 5. Freshness preconditions
 
-Todo command normativo se construye contra una generación runtime del último commit conocido:
+Todo contexto de sesión cargado mantiene una identidad runtime no persistida:
+
+```text
+sessionEpoch
+```
+
+Cada command normativo debe declarar:
+
+```text
+targetSessionId
+baseSessionEpoch
+baseCommitGeneration
+```
+
+Guard de sesión:
+
+```text
+command.targetSessionId != currentSession.sessionId
+OR
+command.baseSessionEpoch != sessionEpoch
+→ STALE_COMMAND
+→ no mutación
+→ no persistencia
+```
+
+Al abrir, importar o reemplazar la sesión activa:
+
+```text
+→ invalidar la cola anterior
+→ invalidar/marcar stale los editBuffers anteriores
+→ limpiar assetRuntime cuando corresponda al cambio de sesión
+→ sessionEpoch += 1
+→ runtimeGeneration = 0
+```
+
+Los commands pendientes de un epoch anterior no pueden adquirir vigencia sólo porque el nuevo contexto vuelva a usar el mismo valor de `runtimeGeneration`.
+
+Todo command normativo se construye además contra una generación runtime del último commit conocido:
 
 ```text
 baseCommitGeneration
@@ -326,6 +366,70 @@ B previous=S2 → commit S3
 
 El coalescing es opcional y sólo puede aplicarse a `SAVE_DRAFT` aún no iniciado del mismo evidence target. Commands de confirmación, requirements, assignment o decisiones de pending no se coalescen automáticamente.
 
+## 8.1 Session lifecycle, epoch y bootstrap
+
+Cambiar la sesión activa es una operación de lifecycle del executor, no una mutación dentro del `APC_SESSION` anterior.
+
+Al reemplazar/cargar/importar una sesión:
+
+```text
+→ bloquear nuevos commands del contexto anterior
+→ invalidar commands pendientes mediante sessionEpoch
+→ invalidar o marcar STALE los editBuffers anteriores
+→ limpiar assetRuntime del contexto saliente
+→ liberar su writer lock
+→ sessionEpoch += 1
+→ runtimeGeneration = 0
+```
+
+La creación inicial de una sesión usa una ruta bootstrap explícita `CREATE_SESSION`. No existe `previousSession`, por lo que no se ejecuta `validateApcSemanticTransition()` contra una sesión inexistente.
+
+Snapshot inicial mínimo:
+
+```text
+schemaVersion = APC_SCHEMA_VERSION
+sessionId = newId()
+semanticRevision = 1
+status = OPEN
+objective = valor humano explícito
+objectiveAssessment.status = OPEN
+objectiveAssessment.assessedRevision = null
+objectiveAssessment.assessedBy = null
+objectiveAssessment.assessedAt = null
+createdAt = now()
+createdBy = actorId
+inboxPhotoRefs = []
+photos = []
+photoEvidence = []
+individuals = []
+evidence = []
+requirements = []
+pending = []
+contradictions = []
+revisions = []
+```
+
+Bootstrap:
+
+```text
+generar sessionId
+→ adquirir writer lock de ese sessionId
+→ comprobar que no existe snapshot durable con ese sessionId
+→ construir snapshot inicial
+→ validateApcSession()
+→ validateApcWorkingSnapshot() cuando el helper de §18 esté disponible
+→ saveAtomic()
+→ SUCCESS:
+     currentSession = snapshot inicial
+     sessionEpoch += 1
+     runtimeGeneration = 0
+→ FAIL:
+     no currentSession nueva
+     liberar lock
+```
+
+Un `sessionId` ya existente no se sobrescribe durante bootstrap.
+
 ## 9. Transaction engine
 
 Forma conceptual:
@@ -360,7 +464,7 @@ Para una mutación normativa:
 ```text
 1. verificar que write mode y writer lock siguen vigentes
 2. releer snapshot persistido
-3. verificar baseCommitGeneration y demás freshness/preconditions
+3. verificar targetSessionId + baseSessionEpoch + baseCommitGeneration y demás freshness/preconditions
 4. clonar previousSession
 5. aplicar mutación primaria
 6. construir revisiones I6 y revisionEvents
@@ -459,7 +563,66 @@ edit + confirm explícito
 → nueva confirmation
 ```
 
-Toda nueva current CONFIRMED debe pasar `validateApcEvidenceForHandoff()` antes de persistirse como confirmada.
+Toda nueva current CONFIRMED debe pasar la validación registrada fuerte definida abajo antes de persistirse como confirmada.
+
+### 12.1 Validación fuerte de CONFIRMED
+
+`validateApcEvidenceForHandoff()` por sí solo no cubre todas las reglas que la ruta APC→CharacterObservation aplica actualmente. I12 no duplica esas reglas.
+
+Durante implementación se debe factorizar una validación reusable, conceptualmente:
+
+```js
+validateRegisteredApcConfirmedEvidence(
+  dataset,
+  session,
+  evidenceId,
+  revision,
+  { requireCurrent }
+)
+```
+
+La implementación debe reutilizar/factorizar la lógica canónica hoy distribuida entre:
+
+```text
+validateApcEvidenceForHandoff()
+mapObserver()/sourceType mapping
+validateCharacterObservation()
+referential checks del adapter APC→CharacterObservation
+```
+
+y debe cubrir, como mínimo:
+
+```text
+lifecycleStatus = CONFIRMED
+confirmation humana válida
+sourceType soportado: human | tool | model | imported
+sourceId válido
+importMetadata requerido cuando sourceType=imported
+acquisition válida
+prefilled → confirmedOnCurrentPhoto=true
+prefilled → basis prior_observations válida y refs existentes
+characterId conocido en dataset
+OBSERVED → observedState permitido por el carácter
+UNCERTAIN/NOT_OBSERVABLE → reason y ausencia de observedState
+confidence válida
+PHOTO / PhotoEvidence / INDIVIDUAL referencialmente compatibles
+```
+
+Para una nueva/current CONFIRMED:
+
+```text
+requireCurrent = true
+```
+
+Para revisar historia importada o persisted history:
+
+```text
+requireCurrent = false
+```
+
+Todas las revisiones con `lifecycleStatus=CONFIRMED`, incluidas `current=false`, deben pasar esta validación de payload/contexto. La opción `requireCurrent=false` elimina sólo la exigencia de `current=true`; no relaja confirmation, provenance, acquisition, dataset ni integridad referencial.
+
+`adaptRegisteredApcEvidenceToCharacterObservation()` debe reutilizar este helper o una factorización equivalente, no mantener una segunda definición divergente de reglas.
 
 ## 13. I8 pending reconciliation
 
@@ -594,24 +757,80 @@ Una transacción que modifica varias entidades incrementa `semanticRevision` só
 
 Si no cambia el substrate, la revisión semántica permanece igual.
 
-## 18. Validation stack
+## 18. Validation stack y working snapshot integrity
 
-Antes de persistir un candidate:
+I12 requiere una composición reusable de integridad operacional de working snapshot, conceptualmente:
 
-```text
-validateApcSession(nextSession)
+```js
+validateApcWorkingSnapshot(
+  session,
+  { dataset, areStatesIncompatible }
+)
 ```
 
-Cuando I8 aplica:
+No constituye un nuevo contrato epistemológico. Debe componer reglas canónicas existentes y factorizar las privadas cuando sea necesario.
+
+Debe cubrir:
+
+```text
+1. validateApcSession(session)
+
+2. validateApcRequirementCharacters(session, dataset)
+
+3. todas las revisions lifecycleStatus=CONFIRMED
+   → validateRegisteredApcConfirmedEvidence(
+        dataset,
+        session,
+        evidenceId,
+        revision,
+        { requireCurrent: false }
+      )
+
+4. requirement coverage snapshot:
+   satisfied requirement
+   → 0 OPEN UNRESOLVED_REQUIREMENT
+
+   unsatisfied requirement
+   → exactamente 1 OPEN UNRESOLVED_REQUIREMENT
+
+5. validateApcContradictions(
+     session,
+     { areStatesIncompatible }
+   )
+```
+
+La regla de coverage del punto 4 debe reutilizar la misma definición actualmente usada por I10. Durante implementación se debe exponer/factorizar un helper canónico, conceptualmente `validateApcRequirementCoverage()`, desde la lógica existente de `requirementCoverageErrors()`; no se copia esa lógica dentro de UI.
+
+`validateApcWorkingSnapshot()` no exige por sí mismo que el snapshot sea EXPORTABLE ni que `objectiveAssessment` esté vigente para export. Por tanto:
+
+```text
+WORKING SNAPSHOT VALID
+≠ EXPORTABLE
+```
+
+pero sí:
+
+```text
+WORKING SNAPSHOT VALID
+→ integridad I6/I7/I8/I9 operacional coherente
+→ toda historia CONFIRMED semánticamente validable
+```
+
+Antes de persistir cualquier candidate normativo:
+
+```text
+validateApcWorkingSnapshot(nextSession, ...)
+```
+
+Cuando I8 cambia entre snapshots:
 
 ```text
 validateApcPendingTransition(previousSession, nextSession)
 ```
 
-Cuando I9 aplica:
+Cuando I9 cambia:
 
 ```text
-validateApcContradictions(nextSession, { areStatesIncompatible })
 validateApcContradictionTransition(
   previousSession,
   nextSession,
@@ -619,7 +838,7 @@ validateApcContradictionTransition(
 )
 ```
 
-Siempre para una transición normativa:
+Siempre para una transición normativa con `previousSession`:
 
 ```text
 validateApcSemanticTransition(
@@ -629,13 +848,19 @@ validateApcSemanticTransition(
 )
 ```
 
-Cuando se crea una nueva current CONFIRMED:
+Cuando se crea una nueva current CONFIRMED, además debe pasar:
 
 ```text
-validateApcEvidenceForHandoff(newConfirmedEvidence)
+validateRegisteredApcConfirmedEvidence(
+  dataset,
+  nextSession,
+  evidenceId,
+  revision,
+  { requireCurrent: true }
+)
 ```
 
-Export usa exclusivamente I10:
+Export sigue usando I10:
 
 ```text
 validateApcSessionForExport()
@@ -703,16 +928,19 @@ Ruta de validación:
 raw
 → JSON.parse
 → candidate object
-→ validateApcSession(candidate)
-→ para cada evidence current con lifecycleStatus=CONFIRMED:
-     validateApcEvidenceForHandoff(evidence)
-→ si cualquiera falla:
+→ validateApcWorkingSnapshot(
+     candidate,
+     { dataset, areStatesIncompatible }
+   )
+→ si falla:
      REJECT
      no auto-fix
      no autoridad
 ```
 
-Esto impide que una current CONFIRMED estructuralmente presente pero inválida en provenance, confirmation, acquisition o payload lifecycle influya requirements/contradictions como si hubiera sido creada válidamente por I12.
+La validación incluye toda revisión `CONFIRMED`, current o histórica, mediante la validación registrada fuerte de §12.1. También exige coverage requirement↔pending y coherencia semántica actual de contradictions.
+
+Esto impide que un snapshot estructuralmente presente pero operacionalmente imposible bajo I12 adquiera autoridad writer.
 
 No se:
 
@@ -756,6 +984,41 @@ Un import nunca salta el durable commit para convertirse directamente en `curren
 
 Si el usuario trata el archivo específicamente como export APC normativa, se evalúa adicionalmente I10.
 
+## 20.1 CREATE_INDIVIDUAL
+
+R9 exige poder crear individuos dentro de la sesión. `CREATE_INDIVIDUAL` es un command normativo y atraviesa writer guard, freshness, cola, working-snapshot validation y atomic commit.
+
+Input mínimo:
+
+```text
+type = CREATE_INDIVIDUAL
+targetSessionId
+baseSessionEpoch
+baseCommitGeneration
+```
+
+La transacción genera:
+
+```text
+individualId = newId()
+```
+
+y crea la estructura mínima admitida por el contrato APC/I5 vigente. No deriva ni exige `speciesId`, `speciesHypothesis` ni identificación taxonómica.
+
+Flujo:
+
+```text
+PHOTO puede existir con individualRefs=[]
+→ CREATE_INDIVIDUAL
+→ commit
+→ ASSIGN_PHOTO(individualId)
+→ commit
+→ ACTIVE_REVIEW_TARGET puede seleccionar photo + individual
+→ recién entonces se permite APC_EVIDENCE para ese target
+```
+
+La creación del individuo no modifica por sí sola conocimiento botánico ni asigna especie.
+
 ## 21. Ingestión de fotografías
 
 ### 21.1 Preparación
@@ -793,14 +1056,27 @@ Los `objectURL` definitivos se adjuntan sólo después del commit APC exitoso.
 
 ```text
 commit SUCCESS
-→ assetRuntime.attach(photoId,file)
+→ APC_SESSION ya es autoridad committed
+→ intentar assetRuntime.attach(photoId,file)
 
-commit FAIL
+asset attach SUCCESS
+→ visual disponible
+
+asset attach FAIL
+→ APC_SESSION permanece COMMITTED
+→ asset se marca unavailable
+→ warning runtime recuperable
+→ NO rollback normativo
+```
+
+Si el commit APC falla antes:
+
+```text
 → descartar staged runtime
 → revoke objectURL temporal si existía
 ```
 
-No puede quedar una fotografía visible como asset committed si su PHOTO no fue persistida.
+No puede quedar una fotografía visible como asset committed si su PHOTO no fue persistida. Un fallo visual posterior al durable commit nunca revierte historia APC.
 
 ## 22. Asset runtime lifecycle
 
@@ -856,14 +1132,39 @@ Forma operativa recomendada:
     "NEEDS_DECISION" |
     "STALE_COMMAND" |
     "IMPORT_CONFLICT" |
+    "NO_OP" |
     "READ_ONLY",
   session: null | committedSession,
   errors: [],
+  warnings: [],
   decisionsRequired: []
 }
 ```
 
 Estos estados son runtime; no forman parte de APC.
+
+### 24.1 NO_OP
+
+Después de construir/comparar la mutación normativa:
+
+```text
+candidate normativamente equivalente a previousSession
+→ NO_OP
+→ no saveAtomic()
+→ no runtimeGeneration++
+→ no semanticRevision++
+→ no revisionEvent
+```
+
+Ejemplos posibles:
+
+```text
+SAVE_DRAFT sin cambio normativo
+assignment ya presente
+duplicate ingest que no modifica APC_SESSION
+```
+
+Un `NO_OP` puede producir un efecto estrictamente runtime si éste está autorizado independientemente, por ejemplo restaurar disponibilidad local de un asset cuyos bytes tienen fingerprint coincidente. Ese efecto no convierte el NO_OP en commit APC ni incrementa generaciones.
 
 ## 25. Regresiones mínimas del diseño
 
@@ -1011,6 +1312,65 @@ TD-I12-29
 adapter mínimo I12
 → no expone clear()
 → eliminación de sesión permanece fuera de alcance
+
+TD-I12-30
+CONFIRMED con sourceType no soportado
+→ working snapshot REJECT
+
+TD-I12-31
+CONFIRMED prefilled con confirmedOnCurrentPhoto=false o basis inválida
+→ working snapshot REJECT
+
+TD-I12-32
+CONFIRMED OBSERVED con state no permitido por dataset
+→ working snapshot REJECT
+
+TD-I12-33
+CONFIRMED imported sin importMetadata.observerType válido
+→ working snapshot REJECT
+
+TD-I12-34
+revisión histórica CONFIRMED current=false inválida
+→ working snapshot REJECT
+→ validación histórica no exige current=true pero conserva el resto de reglas
+
+TD-I12-35
+SESSION A tiene command/buffer pendiente
+→ se reemplaza por SESSION B
+→ sessionEpoch cambia
+→ command A queda STALE aunque runtimeGeneration de B coincida numéricamente
+
+TD-I12-36
+CREATE_SESSION
+→ snapshot inicial semanticRevision=1 y OA OPEN/null
+→ validateApcSession + working snapshot PASS
+→ saveAtomic antes de currentSession
+
+TD-I12-37
+requirement insatisfecho sin exactamente un OPEN pending
+→ working snapshot REJECT aunque validateApcSession aislado pase
+
+TD-I12-38
+evidencias actuales incompatibles sin contradiction OPEN coherente
+→ working snapshot REJECT
+
+TD-I12-39
+CREATE_INDIVIDUAL sobre PHOTO inicialmente sin individuo
+→ individuo canónico creado sin speciesId obligatorio
+→ ASSIGN_PHOTO posterior permite ACTIVE_REVIEW_TARGET válido
+
+TD-I12-40
+command produce candidate normativamente igual a previous
+→ NO_OP
+→ sin saveAtomic
+→ runtimeGeneration unchanged
+
+TD-I12-41
+APC commit SUCCESS seguido por assetRuntime.attach FAIL
+→ status APC sigue COMMITTED
+→ warning runtime
+→ asset unavailable
+→ no rollback normativo
 ```
 
 ## 26. Criterio de cierre del diseño
@@ -1021,30 +1381,35 @@ El diseño puede congelarse cuando:
 - este documento pasa auditoría adversarial sin blockers;
 - G1/G2/D6/D7/H4/H5 permanecen cerrados;
 - B01/B02/B03/B04 y H01/H02 permanecen cerrados;
+- B05/B06/B07/B08 y H03/H04 permanecen cerrados;
 - no introduce campos normativos nuevos en APC_SESSION;
 - el single-writer guard es de vida de sesión writer y queda exigido para write mode;
-- todos los commands normativos usan baseCommitGeneration runtime, más baseRevision cuando aplica;
+- todos los commands normativos usan targetSessionId + baseSessionEpoch + baseCommitGeneration runtime, más baseRevision cuando aplica;
 - commands stale son rechazados sin auto-rebase ni auto-retry;
 - persistence garantiza atomic replace all-or-nothing;
-- import valida toda current CONFIRMED mediante validateApcEvidenceForHandoff() antes de adquirir autoridad;
+- toda revisión CONFIRMED, current o histórica, usa la validación registrada fuerte factorada de APC→CharacterObservation;
+- working snapshots validan dataset, requirement coverage y contradiction semantics antes de adquirir autoridad;
 - imports conflictivos por sessionId no sobrescriben automáticamente;
 - ingest staging no produce efectos committed antes del durable commit;
 - comparadores históricos son ordinales y deterministas;
 - el validation stack reutiliza implementaciones canónicas;
-- TD-I12-01..29 están aceptadas como regresiones de implementación.
+- CREATE_SESSION y CREATE_INDIVIDUAL quedan definidos;
+- NO_OP no consume persistencia ni generaciones;
+- fallos de asset runtime post-commit no revierten APC;
+- TD-I12-01..41 están aceptadas como regresiones de implementación.
 
 ### AUDITORÍA
 
-V0.5 incorpora los hallazgos adversariales del diseño v0.4 sin modificar R9: writer lock de vida de sesión, freshness runtime global, persistencia atomic-replace, trust boundary reforzado para current CONFIRMED, import conflict-safe y recuperación explícita de STALE_COMMAND. Mantiene binding a R9 congelado, transaction boundary, I6 versionado, I8 critical explícito, I9 snapshots históricos e I10 semanticRevision.
+V0.6 incorpora exclusivamente los hallazgos adversariales B05–B08 y H03–H04 sin modificar R9. Añade validación registrada fuerte de toda historia CONFIRMED, working-snapshot operational integrity, sessionEpoch y bootstrap explícito, CREATE_INDIVIDUAL, semántica NO_OP y separación entre commit APC y fallos runtime post-commit. Conserva todas las correcciones v0.5.
 
 ### INCONSISTENCIAS
 
-B01 queda resuelto congelando el writer lock durante toda la vida del contexto writer y no por command. B02 queda resuelto con `baseCommitGeneration/runtimeGeneration` para toda mutación normativa, manteniendo `baseRevision` como precondición adicional de evidence. B03 queda resuelto haciendo `saveAtomic()` all-or-nothing una obligación del adapter. B04 queda resuelto validando cada current CONFIRMED con `validateApcEvidenceForHandoff()` antes de instalar/importar y evitando overwrite automático cuando el mismo sessionId ya posee un snapshot distinto. H01 se cierra eliminando `clear()` del adapter mínimo. H02 se cierra prohibiendo auto-rebase/auto-retry y definiendo recuperación UI explícita ante stale state.
+B05 queda resuelto exigiendo una validación factorada común con la ruta APC→CharacterObservation para toda revisión CONFIRMED, sin usar `validateApcEvidenceForHandoff()` como garantía suficiente aislada. B06 queda resuelto con `sessionEpoch`, invalidación de commands/buffers al reemplazar sesión y bootstrap CREATE_SESSION explícito. B07 queda resuelto mediante `validateApcWorkingSnapshot()`, que compone validación estructural, caracteres de requirements, coverage I8, contradictions I9 y payload/contexto CONFIRMED sin exigir exportabilidad. B08 queda resuelto incorporando CREATE_INDIVIDUAL como command normativo. H03 se cierra con NO_OP sin persistencia ni increments. H04 se cierra declarando que un fallo de assetRuntime posterior al durable commit genera warning y disponibilidad local degradada, nunca rollback APC.
 
 ### VACÍOS / OMISIONES
 
-Quedan fuera de alcance detalles visuales finales, accesibilidad de producto, packaging H17, backend remoto, persistencia permanente de blobs, eliminación de sesiones y hypothesis. La tecnología concreta del adapter de storage puede variar sólo si preserva exclusión de writer y atomic replace. Si el runtime no ofrece una primitiva de exclusión fiable o storage atómico compatible, write mode no se habilita.
+Quedan fuera de alcance detalles visuales finales, accesibilidad de producto, packaging H17, backend remoto, persistencia permanente de blobs, eliminación de sesiones y hypothesis. La implementación deberá factorizar/exponer helpers canónicos de validation sin duplicar la lógica privada existente: validación completa de CONFIRMED y coverage requirement↔pending. Esa factorización es implementación I12 y no modifica R9.
 
 ### REDUNDANCIAS
 
-No se persisten locks, writer IDs, runtimeGeneration, command states, edit buffers, asset runtime, transaction IDs ni caches paralelos dentro de APC_SESSION. `baseCommitGeneration`, `baseRevision` y `expectedSemanticRevision` pertenecen al command runtime; sólo los dos primeros gobiernan freshness general/específica. Pending/contradictions/revisions continúan usando exclusivamente sus arrays canónicos.
+No se persisten `sessionEpoch`, `runtimeGeneration`, `baseCommitGeneration`, locks, writer IDs, command states, edit buffers, asset runtime ni transaction IDs dentro de APC_SESSION. `validateApcWorkingSnapshot()` es composición de validadores canónicos, no una segunda definición contractual. La validación fuerte de CONFIRMED debe ser compartida por import, commit y adapter APC→CharacterObservation, evitando tres lógicas paralelas.
