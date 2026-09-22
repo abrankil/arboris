@@ -3,7 +3,7 @@
 **Estado:** DRAFT / CANDIDATE FOR VALIDATION  
 **Versión:** R2.2  
 **Ámbito:** Batch Annotation Workbench de H16-EXP-001  
-**Base verificada:** main @ d38cdadb5e00aa30e275a9cada3e58bdedcf958d  
+**Base verificada:** main @ 54824efea9ec5806eef720fc07b6bdd44339d609  
 **Predecesor:** R2.1.3 — VALIDATED / FROZEN EXPERIMENTAL DESIGN  
 **No modifica:** ASC, ACE, contratos de Hito 15 ni canon botánico  
 **No cierra:** Hito 16 completo  
@@ -35,9 +35,11 @@ La separación es semántica y operacional. Compartir infraestructura técnica n
 
 ---
 
-## 2. Fuentes semánticas
+## 2. Fuentes y autoridades
 
-R2.2 consume conocimiento botánico únicamente desde:
+R2.2 separa autoridad botánica de autoridad operacional.
+
+La autoridad botánica se consume únicamente desde:
 
 ~~~text
 data/botanical/characters.json
@@ -47,6 +49,10 @@ data/botanical/glossary.json
 Las definiciones de caracteres y estados no deben hardcodearse como una segunda fuente botánica dentro del HTML.
 
 La selección de CH-003 — Dentición del margen foliar como benchmark primario es una decisión experimental de H16-EXP-001, no una nueva afirmación botánica.
+
+Para el dominio TRUSTED, APC es la autoridad operacional vigente. R2.2 no crea un segundo modelo normativo de persistencia de evidencia. El contrato APC I12/R9 de la rama `h16/apc-i12-ui` puede informar decisiones de implementación —incluidos UI TRUSTED, SHA-256, dedup, relink, revisiones y export— pero, mientras no esté integrado en main, no constituye autoridad normativa del freeze R2.2.
+
+Para el dominio BLIND, este Scope Contract es la autoridad local del protocolo experimental y del Benchmark Annotation Ledger. Estas autoridades no son intercambiables.
 
 ---
 
@@ -87,12 +93,15 @@ Las decisiones locales de R2.2 no reescriben retroactivamente R2.1.3.
 Permitir una sola sesión de trabajo por lote sobre muchas fotografías para registrar la mayor cantidad posible de información reutilizable sin repetir el flujo completo carácter por carácter y fotografía por fotografía.
 
 ~~~text
-Observation
-    ↓
-Photos[]
-    ↓
-Corpus Evidence[]
+TRUSTED / APC
+→ APC_SESSION
+   ├── PHOTO[]
+   ├── PhotoEvidence[]
+   ├── INDIVIDUAL[]
+   └── APC_EVIDENCE[]
 ~~~
+
+La interacción batch puede existir como UI de trabajo, pero no constituye una segunda persistencia normativa.
 
 ### 4.2 Metadata permitida
 
@@ -138,32 +147,50 @@ Workbench
 → data/botanical/*.json
 ~~~
 
-### 4.4 Corrección de Corpus Evidence committed
+### 4.4 Corrección de evidencia APC committed
 
-La corrección de un registro de Corpus Evidence ya committed no debe borrar ni reemplazar físicamente el registro previo.
+TRUSTED no define `Corpus Evidence` ni un lineage local paralelo. La persistencia committed se rige por APC, incluida su semántica I6 de revisión no destructiva.
 
 ~~~text
-committed Corpus Evidence
+APC_EVIDENCE revision N
         ↓ corrección explícita
-nuevo Corpus Evidence record
-+ lineage al registro corregido
+same evidenceId
+revision N+1
+current = true
++ revision event
+
+revision N
+current = false
+→ permanece en historial
 ~~~
 
-El registro anterior permanece disponible para provenance e historial de revisión.
+La corrección debe conservar el historial y provenance exigidos por APC. R2.2 no redefine esos invariantes ni introduce un identificador alternativo de lineage.
 
-La implementación exacta del identificador de lineage se fija en la especificación ejecutable, pero debe cumplir como mínimo:
+El borrado físico puede existir únicamente para estado de UI todavía no committed y sólo cuando el contrato APC aplicable lo permita. No puede utilizarse para reescribir evidencia APC committed.
+
+Esta regla no decide cuál de múltiples evidencias independientes debe prevalecer, fusionarse o considerarse contradictoria. Esa interpretación continúa bajo OPEN-01.
+
+### 4.5 Relación TRUSTED → ACE y TRUSTED → BLIND
+
+R2.2 no introduce automatic ACE promotion.
 
 ~~~text
-target evidence exists
-same observation_id
-same character_id
-no self-reference
-no cycle in correction lineage
+TRUSTED / APC
+≠ automatic promotion ≠
+ACE
 ~~~
 
-El borrado físico puede existir únicamente para estado de UI todavía no committed. No puede utilizarse como mecanismo de corrección de evidencia ya registrada.
+Cualquier handoff TRUSTED → ACE debe utilizar el contrato APC/H16 vigente. R2.2 no crea un adaptador, shortcut ni equivalencia adicional.
 
-Esta regla de conservación histórica no decide cuál de múltiples evidencias independientes debe prevalecer, fusionarse o considerarse contradictoria. Esa interpretación continúa bajo OPEN-01. Tampoco promueve Corpus Evidence a benchmark ground truth ni a evidencia ACE.
+Asimismo:
+
+~~~text
+TRUSTED / APC
+≠
+BLIND / Benchmark Annotation Ledger
+~~~
+
+No existe conversión implícita, automatic copying ni automatic promotion entre ambos dominios. La materialización de un blind workset es una operación experimental explícita sometida a las fronteras y seals de este contrato.
 
 ---
 
@@ -205,7 +232,7 @@ CONDITIONAL_UNRESOLVED
 → aplica_si != null
 ~~~
 
-Solo DIRECT_PHOTO_ELIGIBLE puede producir un commit de Corpus Evidence derivado de fotografía en el alcance base de R2.2.
+Solo DIRECT_PHOTO_ELIGIBLE puede producir un commit de APC_EVIDENCE derivado de fotografía en el alcance base de R2.2, sujeto al contrato APC vigente.
 
 NON_PHOTOGRAPHIC, INACTIVE_FOR_PILOT y CONDITIONAL_UNRESOLVED pueden conservarse como referencia de catálogo cuando corresponda, pero no pueden utilizarse para registrar evidencia fotográfica committed hasta que un contrato posterior autorice explícitamente ese caso.
 
@@ -277,9 +304,18 @@ No equivale a desacuerdo entre anotadores, ausencia botánica ni estado permitid
 
 ## 8. Perfil B — BLIND / BENCHMARK
 
-### 8.1 Objetivo
+### 8.1 Objetivo y claim de blindness
 
-Producir ground truth experimental con metadata enmascarada para comparar posteriormente un observador visual restringido por carácter.
+Producir ground truth experimental con metadata operacional enmascarada para comparar posteriormente un observador visual restringido por carácter.
+
+El claim permitido para este protocolo es:
+
+~~~text
+blindness_level = OPERATIONAL_METADATA_BLIND
+annotator_naivety = NOT_ESTABLISHED
+~~~
+
+salvo que evidencia procedimental específica permita establecer otra cosa. R2.2 no afirma que el anotador humano sea genéricamente “blind” en sentido total.
 
 ~~~text
 blind_image_id
@@ -352,6 +388,35 @@ Los identificadores visibles en BLIND deben ser opacos y no codificar taxón, in
 
 Un payload que contenga claves prohibidas, un schema TRUSTED o referencias que permitan recuperar automáticamente metadata TRUSTED desde el perfil BLIND debe rechazarse fail-closed.
 
+### 8.5 B1 — frontera de input del observador automático
+
+El observador automático del benchmark debe ejecutarse detrás de una frontera BLIND explícita. Su input se limita a:
+
+~~~text
+exact sealed image bytes
+opaque blind_image_id
+character_id
+authorized guide, cuando corresponda
+~~~
+
+Debe excluir metadata TRUSTED, incluida como mínimo:
+
+~~~text
+species_id
+individual_id
+photo_id
+filename / archivo
+notes / notas
+organ
+view
+capture date
+partition
+expected state
+human annotation
+~~~
+
+y cualquier otro campo que permita recuperar automáticamente esa metadata. El observador no puede consumir el payload TRUSTED y simplemente ignorar campos: debe consumir el input BLIND materializado por allowlist.
+
 ---
 
 ## 9. Annotation guide
@@ -417,7 +482,7 @@ La frontera es operacional y está orientada a evitar contaminación accidental 
 Invariante:
 
 ~~~text
-Corpus Evidence
+APC_EVIDENCE
 ≠
 Benchmark Annotation
 ~~~
@@ -577,32 +642,46 @@ Esta semántica pertenece al ledger de ground truth del benchmark R2.2 y no cons
 
 ## 16. Secuencia de cohortes del benchmark
 
-El benchmark primario debe separar operacionalmente development y holdout para evitar contaminación por conocimiento del holdout.
+El benchmark primario debe separar operacionalmente development y holdout y precomprometer el primary holdout antes del tuning.
 
 La secuencia mínima es:
 
 ~~~text
-trusted preparation
-→ development blind workset
-→ development human ground truth
-→ development coverage / tuning
-→ observer freeze
-→ frozen observer predictions on holdout
-→ seal predictions
-→ holdout blind workset
-→ holdout human ground truth blind to predictions
-→ primary comparison
+TRUSTED / APC preparation
+→ capture inventory snapshot
+→ capture partition-definition snapshot
+→ materialize development workset
+→ materialize exact primary holdout workset
+→ SEAL HOLDOUT
+→ development / tuning
+→ FREEZE OBSERVER
+→ run observer through BLIND INPUT boundary
+→ SEAL PREDICTIONS
+→ human OPERATIONAL_METADATA_BLIND annotation
+→ adjudicate valid ledger conflicts
+→ validate ledger
+→ SEAL HUMAN GT
+→ unblind predictions
+→ PRIMARY COMPARISON
 ~~~
 
 Reglas:
 
-- development y holdout se materializan como worksets operacionalmente separados;
-- el perfil de decisión no debe mostrar la etiqueta de partición;
-- el workset holdout no debe cargarse ni exponerse al anotador durante la fase development;
-- las predicciones del observador sobre holdout deben quedar selladas antes de producir o revelar el ground truth humano de holdout;
+- development y primary holdout se materializan como worksets operacionalmente separados;
+- partition membership y sealed primary benchmark workset membership son conceptos distintos;
+- una fotografía futura puede heredar una partición por individuo, pero no puede incorporarse retroactivamente al primary benchmark workset ya sellado;
+- SEAL HOLDOUT impide seleccionar o sustituir imágenes del primary holdout después de conocer rendimiento;
+- el perfil de decisión humano no debe mostrar la etiqueta de partición;
+- el primary holdout no debe cargarse ni exponerse durante development/tuning;
+- FREEZE OBSERVER debe registrar una identidad inmutable y reproducible suficiente para distinguir exactamente la versión evaluada; este Scope exige el fingerprint pero no fija todavía su mecanismo físico exacto;
+- el observador congelado sólo recibe el input autorizado por §8.5;
+- SEAL PREDICTIONS ocurre antes de producir o revelar el human ground truth y evita modificar respuestas del observador después de conocerlo;
 - las predicciones selladas no deben mostrarse durante la anotación humana;
+- los conflictos estructuralmente válidos del ledger se adjudican append-only antes de validar el ground truth;
+- SEAL HUMAN GT ocurre después de validar el ledger y antes de unblinding, e impide cambiar el ground truth después de conocer las predicciones;
+- sólo después de los tres seals corresponde el unblinding y PRIMARY COMPARISON;
 - reserve queda fuera del benchmark primario salvo un protocolo posterior explícito;
-- un rerun puramente reproductivo del observador congelado no autoriza tuning post-hoc sobre el holdout primario.
+- un rerun puramente reproductivo del observador congelado no autoriza tuning post-hoc sobre el primary holdout.
 
 ---
 
@@ -670,8 +749,9 @@ Antes de congelar este contrato debe comprobarse como mínimo:
 ~~~text
 SCOPE PRESERVATION
 TWO-PROFILE SEPARATION
-CORPUS / BENCHMARK DATA-MODEL SEPARATION
-CORPUS EVIDENCE NON-DESTRUCTIVE CORRECTION HISTORY
+APC / BENCHMARK DATA-MODEL SEPARATION
+APC I6 NON-DESTRUCTIVE REVISION HISTORY
+NO SECOND TRUSTED CORPUS-EVIDENCE PERSISTENCE
 CHARACTER ELIGIBILITY RULE
 PHOTO-EVIDENCE COMMIT ELIGIBILITY
 ELIGIBILITY / APPLICABILITY / OBSERVABILITY DISTINCTION
@@ -681,8 +761,11 @@ UNCERTAIN SEMANTICS
 CH-003 PRIMARY BENCHMARK RESTRICTION
 CHARACTERS + GLOSSARY GUIDE BINDING
 EXACT-ONE GLOSSARY STATE DEFINITION
+OPERATIONAL_METADATA_BLIND CLAIM
+ANNOTATOR_NAIVETY NOT ASSUMED
 METADATA MASKING CONTRACT
 BLIND WORKSET ALLOWLIST / FORBIDDEN-KEY REJECTION
+OBSERVER BLIND-INPUT BOUNDARY
 BYTE-BASED IMAGE IDENTITY
 ANNOTATION MINIMUM IDENTITY / PROVENANCE
 APPEND-ONLY CORRECTION HISTORY
@@ -691,8 +774,15 @@ MULTI-HEAD ADJUDICATION WITHOUT DELETION
 ACTIVE-HEAD DETERMINISM
 LEDGER_INVALID / MISSING SEPARATION
 TRUSTED PERSISTENT-STATE ISOLATION
+PARTITION / SEALED-WORKSET MEMBERSHIP SEPARATION
+PRIMARY HOLDOUT PRECOMMITMENT
+SEAL HOLDOUT BEFORE TUNING
 DEVELOPMENT / HOLDOUT WORKSET SEPARATION
+IMMUTABLE / REPRODUCIBLE OBSERVER IDENTITY
 HOLDOUT PREDICTION-SEAL GATE
+HUMAN GT SEAL BEFORE UNBLINDING
+TRUSTED → ACE USES APC/H16 CONTRACT
+NO TRUSTED → BLIND IMPLICIT CONVERSION
 R2.1.3 OPEN PRESERVATION
 ASC UNCHANGED
 ACE UNCHANGED
@@ -720,9 +810,15 @@ NO
 REPOSITORY AUTHORITY
 NO
 
-DESIGN BLOCKERS KNOWN AT MATERIALIZATION
-0
+AUDIT-002 BLOCKERS
+ADDRESSED IN CANDIDATE
+
+VALIDATION
+PENDING EXACT-BLOB REAUDIT
 
 NEXT GATE
-AUDIT REAL BYTES
+ADVERSARIAL EXACT-BLOB REAUDIT
+
+FREEZE GATE
+ONLY AFTER PASS + ASC VALIDATED
 ~~~
