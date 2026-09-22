@@ -301,3 +301,159 @@ test('conflicting import leaves the current writer active and unchanged', async 
   assert.equal(r.status, 'COMMITTED');
   await executor.close();
 });
+
+
+async function setupReviewTarget(executor) {
+  let r = await executor.dispatch(executor.commandBase({
+    type: 'INGEST_PHOTOS',
+    photos: [{ fileRef: 'direct-confirm.jpg', fingerprintSha256: 'd'.repeat(64) }],
+  }));
+  const photoId = r.session.photos[0].photoId;
+  r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  const individualId = r.created.individualId;
+  r = await executor.dispatch(executor.commandBase({ type: 'ASSIGN_PHOTO', photoId, individualId }));
+  assert.equal(r.status, 'COMMITTED');
+  return { photoId, individualId };
+}
+
+function manualObservedPatch(state = 'entero') {
+  return {
+    evidenceStatus: 'OBSERVED',
+    observedState: state,
+    sourceType: 'human',
+    sourceId: 'Alejandra',
+    acquisition: { mode: 'manual', confirmedOnCurrentPhoto: null, basis: null },
+    confidence: null,
+    reason: null,
+    notes: null,
+  };
+}
+
+test('T-I12-05A ephemeral data can commit directly as revision 1 CONFIRMED', async () => {
+  const { executor } = await setup();
+  const { photoId, individualId } = await setupReviewTarget(executor);
+
+  const r = await executor.dispatch(executor.commandBase({
+    type: 'CONFIRM_EVIDENCE',
+    evidenceId: null,
+    baseRevision: null,
+    targetPhotoId: photoId,
+    targetIndividualId: individualId,
+    characterId: 'CH-003',
+    patch: manualObservedPatch(),
+    confirmation: {
+      confirmedByType: 'human',
+      confirmedById: 'Alejandra',
+      confirmedAt: '2026-09-22T03:00:00-03:00',
+    },
+  }));
+
+  assert.equal(r.status, 'COMMITTED');
+  assert.equal(r.session.evidence.length, 1);
+  assert.equal(r.session.evidence[0].revision, 1);
+  assert.equal(r.session.evidence[0].lifecycleStatus, 'CONFIRMED');
+  assert.equal(r.session.evidence[0].current, true);
+  assert.equal(r.session.revisions.length, 0);
+  await executor.close();
+});
+
+test('TD-I12-11 SAVE_DRAFT then rebuilt CONFIRM uses committed draft revision', async () => {
+  const { executor } = await setup();
+  const { photoId, individualId } = await setupReviewTarget(executor);
+
+  const saved = await executor.dispatch(executor.commandBase({
+    type: 'SAVE_DRAFT',
+    evidenceId: null,
+    baseRevision: null,
+    targetPhotoId: photoId,
+    targetIndividualId: individualId,
+    characterId: 'CH-003',
+    patch: manualObservedPatch(),
+  }));
+  assert.equal(saved.status, 'COMMITTED');
+  const draft = saved.session.evidence.find(item => item.current);
+
+  const confirmed = await executor.dispatch(executor.commandBase({
+    type: 'CONFIRM_EVIDENCE',
+    evidenceId: draft.evidenceId,
+    baseRevision: draft.revision,
+    targetPhotoId: photoId,
+    targetIndividualId: individualId,
+    characterId: 'CH-003',
+    patch: {},
+    confirmation: {
+      confirmedByType: 'human',
+      confirmedById: 'Alejandra',
+      confirmedAt: '2026-09-22T03:01:00-03:00',
+    },
+  }));
+
+  assert.equal(confirmed.status, 'COMMITTED');
+  const versions = confirmed.session.evidence.filter(item => item.evidenceId === draft.evidenceId);
+  assert.deepEqual(versions.map(item => [item.revision, item.lifecycleStatus, item.current]), [
+    [1, 'DRAFT', false],
+    [2, 'CONFIRMED', true],
+  ]);
+  await executor.close();
+});
+
+test('TD-I12-35 session replacement invalidates a command captured in prior epoch', async () => {
+  const { executor } = await setup();
+  const stale = executor.commandBase({ type: 'CREATE_INDIVIDUAL' });
+  const oldSessionId = executor.snapshot().sessionId;
+
+  await executor.close();
+  const replacement = await executor.bootstrap({ objective: 'replacement session' });
+  assert.equal(replacement.status, 'COMMITTED');
+  assert.notEqual(replacement.session.sessionId, oldSessionId);
+
+  const result = await executor.dispatch(stale);
+  assert.equal(result.status, 'STALE_COMMAND');
+  assert.equal(executor.snapshot().sessionId, replacement.session.sessionId);
+  await executor.close();
+});
+
+test('TD-I12-48 close barrier waits active command and invalidates queued command before release', async () => {
+  const basePersistence = createMemoryApcPersistence();
+  let blockNextSave = false;
+  let releaseSave;
+  let saveStarted;
+  const saveStartedPromise = new Promise(resolve => { saveStarted = resolve; });
+  const persistence = {
+    load: id => basePersistence.load(id),
+    async saveAtomic(id, raw) {
+      if (blockNextSave) {
+        blockNextSave = false;
+        saveStarted();
+        await new Promise(resolve => { releaseSave = resolve; });
+      }
+      return basePersistence.saveAtomic(id, raw);
+    },
+  };
+  const locks = createMemoryWriterLockProvider();
+  const executor = new ApcI12CommandExecutor({ persistence, lockProvider: locks, context: testContext() });
+  const created = await executor.bootstrap({ objective: 'switch barrier' });
+  assert.equal(created.status, 'COMMITTED');
+
+  blockNextSave = true;
+  const base = executor.commandBase();
+  const active = executor.dispatch({ ...base, type: 'CREATE_INDIVIDUAL' });
+  const queued = executor.dispatch({ ...base, type: 'CREATE_INDIVIDUAL' });
+  await saveStartedPromise;
+
+  let closeResolved = false;
+  const closing = executor.close().then(() => { closeResolved = true; });
+  await Promise.resolve();
+  assert.equal(closeResolved, false);
+  assert.equal(locks._held.has(created.session.sessionId), true);
+
+  releaseSave();
+  const activeResult = await active;
+  const queuedResult = await queued;
+  await closing;
+
+  assert.equal(activeResult.status, 'COMMITTED');
+  assert.equal(queuedResult.status, 'STALE_COMMAND');
+  assert.equal(locks._held.has(created.session.sessionId), false);
+  assert.equal(executor.snapshot(), null);
+});
