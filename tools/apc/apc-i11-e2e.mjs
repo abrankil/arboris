@@ -13,11 +13,21 @@ function compareText(a, b) {
   return String(a ?? '').localeCompare(String(b ?? ''));
 }
 
+function evidenceIdentity(item) {
+  return {
+    characterId: item?.characterId ?? null,
+    evidenceId: item?.evidenceId ?? item?.provenance?.apc?.evidenceId ?? null,
+    revision: item?.revision ?? item?.provenance?.apc?.revision ?? 0,
+  };
+}
+
 function compareEvidence(a, b) {
+  const left = evidenceIdentity(a);
+  const right = evidenceIdentity(b);
   return (
-    compareText(a?.characterId, b?.characterId)
-    || compareText(a?.evidenceId, b?.evidenceId)
-    || ((a?.revision ?? 0) - (b?.revision ?? 0))
+    compareText(left.characterId, right.characterId)
+    || compareText(left.evidenceId, right.evidenceId)
+    || (left.revision - right.revision)
   );
 }
 
