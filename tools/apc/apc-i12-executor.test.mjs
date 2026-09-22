@@ -1330,3 +1330,114 @@ test('T-CTX-51 OLD composite lease cannot migrate to NEW context after async sus
   }), false);
   leases.release(lease);
 });
+
+
+test('T-CTX-52 session switch closes gate and executor intake before first await', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function sessionSwitchBarrier');
+  const end = source.indexOf('\nasync function ingestFiles', start);
+  const body = source.slice(start, end);
+  const gateAt = body.indexOf('state.contextGate.beginReplacement()');
+  const stopAt = body.indexOf('state.executor?.stopAcceptingWrites()');
+  const firstAwaitAt = body.indexOf('await ');
+  assert.ok(gateAt >= 0);
+  assert.ok(stopAt > gateAt);
+  assert.ok(firstAwaitAt > stopAt);
+});
+
+test('T-CTX-53 session switch drains admitted leases before closing OLD executor', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function sessionSwitchBarrier');
+  const end = source.indexOf('\nasync function ingestFiles', start);
+  const body = source.slice(start, end);
+  const drainAt = body.indexOf('await state.writerIntentLeases.waitForDrain()');
+  const closeAt = body.indexOf('await state.executor.close()');
+  const resetAt = body.indexOf('resetExecutor()');
+  const actionAt = body.indexOf('result = await action()');
+  assert.ok(drainAt >= 0);
+  assert.ok(closeAt > drainAt);
+  assert.ok(resetAt > closeAt);
+  assert.ok(actionAt > resetAt);
+});
+
+test('T-CTX-54 context replacement also stops executor intake before lease drain', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('export async function replaceWriterContext');
+  const end = source.indexOf('\nasync function sessionSwitchBarrier', start);
+  const body = source.slice(start, end);
+  const gateAt = body.indexOf('state.contextGate.beginReplacement()');
+  const stopAt = body.indexOf('state.executor?.stopAcceptingWrites()');
+  const drainAt = body.indexOf('await state.writerIntentLeases.waitForDrain()');
+  assert.ok(gateAt >= 0);
+  assert.ok(stopAt > gateAt);
+  assert.ok(drainAt > stopAt);
+});
+
+test('T-CTX-55 stopAcceptingWrites preserves active commit, stales queued command, and rejects new dispatch', async () => {
+  const basePersistence = createMemoryApcPersistence();
+  let blockNextSave = false;
+  let releaseSave;
+  let saveStarted;
+  const saveStartedPromise = new Promise(resolve => { saveStarted = resolve; });
+  const persistence = {
+    load: id => basePersistence.load(id),
+    async saveAtomic(id, raw) {
+      if (blockNextSave) {
+        blockNextSave = false;
+        saveStarted();
+        await new Promise(resolve => { releaseSave = resolve; });
+      }
+      return basePersistence.saveAtomic(id, raw);
+    },
+  };
+  const locks = createMemoryWriterLockProvider();
+  const executor = new ApcI12CommandExecutor({ persistence, lockProvider: locks, context: testContext() });
+  const created = await executor.bootstrap({ objective: 'intake stop regression' });
+  assert.equal(created.status, 'COMMITTED');
+
+  blockNextSave = true;
+  const base = executor.commandBase();
+  const active = executor.dispatch({ ...base, type: 'CREATE_INDIVIDUAL' });
+  const queued = executor.dispatch({ ...base, type: 'CREATE_INDIVIDUAL' });
+  await saveStartedPromise;
+
+  executor.stopAcceptingWrites();
+  const rejected = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  assert.equal(rejected.status, 'READ_ONLY');
+
+  releaseSave();
+  const activeResult = await active;
+  const queuedResult = await queued;
+  assert.equal(activeResult.status, 'COMMITTED');
+  assert.equal(queuedResult.status, 'STALE_COMMAND');
+
+  await executor.close();
+  assert.equal(locks._held.has(created.session.sessionId), false);
+});
+
+test('T-CTX-56 session switch derives gate state from completed replacement result', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function sessionSwitchBarrier');
+  const end = source.indexOf('\nasync function ingestFiles', start);
+  const body = source.slice(start, end);
+  const actionAt = body.indexOf('result = await action()');
+  const readyAt = body.indexOf("state.contextGate.finish('READY')");
+  const readOnlyAt = body.indexOf("state.contextGate.finish('READ_ONLY')");
+  const errorAt = body.lastIndexOf("state.contextGate.finish('ERROR')");
+  assert.ok(actionAt >= 0);
+  assert.ok(readyAt > actionAt);
+  assert.ok(readOnlyAt > actionAt);
+  assert.ok(errorAt > actionAt);
+});
+
+test('T-CTX-57 new/open/import callbacks return their result to the session switch barrier', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  for (const marker of ["$('newSession').onclick", "$('openSession').onclick", "$('importJson').onchange"]) {
+    const start = source.indexOf(marker);
+    assert.ok(start >= 0);
+    const nextHandler = source.indexOf("\n$('", start + marker.length);
+    const end = nextHandler >= 0 ? nextHandler : Math.min(source.length, start + 2200);
+    const body = source.slice(start, end);
+    assert.match(body, /return result;/);
+  }
+});

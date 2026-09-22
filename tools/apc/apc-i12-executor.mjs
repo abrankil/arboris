@@ -124,6 +124,10 @@ export class ApcI12CommandExecutor {
     return this.currentSession ? structuredClone(this.currentSession) : null;
   }
 
+  stopAcceptingWrites() {
+    this.accepting = false;
+  }
+
   commandBase(extra = {}) {
     if (!this.currentSession) throw new Error('No active APC session');
     return {

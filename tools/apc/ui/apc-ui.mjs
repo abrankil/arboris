@@ -921,6 +921,9 @@ export async function replaceWriterContext(newDependencies) {
 
   // The gate closes synchronously before the first await. Work already
   // admitted under READY may finish; no new OLD intent may be admitted.
+  // The executor intake closes at the same boundary so already-queued
+  // commands that have not begun become STALE instead of draining as writes.
+  state.executor?.stopAcceptingWrites();
   const sessionId = state.executor?.snapshot()?.sessionId ?? null;
 
   try {
@@ -976,10 +979,23 @@ export async function replaceWriterContext(newDependencies) {
 }
 
 async function sessionSwitchBarrier(action) {
-  // Stop accepting UI autosaves immediately, cancel debounce work, then wait
-  // for every already-started save and the executor queue before replacement.
+  if (!state.contextGate.beginReplacement()) {
+    return { status: 'REPLACEMENT_IN_PROGRESS' };
+  }
+
+  // Close admission and executor intake synchronously before the first await.
+  // Already-active work may finish. Commands queued but not yet started become
+  // STALE_COMMAND because executor.accepting is already false.
+  state.executor?.stopAcceptingWrites();
+
   for (const timer of state.autosaveTimers.values()) clearTimeout(timer);
   state.autosaveTimers.clear();
+
+  // Composite writer intents may be doing async pre-dispatch work (for example
+  // hashing/staging a photo). Keep the OLD executor/session alive until every
+  // admitted lease has terminated, but do not admit any new writer intent.
+  await state.writerIntentLeases.waitForDrain();
+
   const inFlight = [...state.autosaveInFlight.values()];
   if (inFlight.length) await Promise.allSettled(inFlight);
 
@@ -995,7 +1011,26 @@ async function sessionSwitchBarrier(action) {
   state.formCharacterId = $('character').value || null;
 
   resetExecutor();
-  return action();
+
+  let result;
+  try {
+    result = await action();
+  } catch (error) {
+    state.contextGate.finish('ERROR');
+    disableWrites(true);
+    render();
+    return { status: 'ERROR', error };
+  }
+
+  if (result?.status === 'COMMITTED' || result?.status === 'NO_OP') {
+    state.contextGate.finish('READY');
+  } else if (result?.status === 'READ_ONLY') {
+    state.contextGate.finish('READ_ONLY');
+  } else {
+    state.contextGate.finish('ERROR');
+  }
+  render();
+  return result;
 }
 
 async function ingestFiles(files) {
@@ -1034,6 +1069,7 @@ $('newSession').onclick = async () => {
     const result = await state.executor.bootstrap({ objective:$('objective').value.trim() || 'Revisión APC I12' });
     message(`bootstrap: ${result.status}`);
     render();
+    return result;
   });
 };
 
@@ -1045,6 +1081,7 @@ $('openSession').onclick = async () => {
     if (result.status === 'READ_ONLY' && result.session) state.inspectionSession = result.session;
     message(`open: ${result.status} ${(result.errors??[]).join('; ')}`);
     render();
+    return result;
   });
 };
 
@@ -1057,6 +1094,7 @@ $('importJson').onchange = async event => {
     state.inspectionSession = result.status === 'READ_ONLY' ? result.session : null;
     message(`import: ${result.status} ${(result.errors??[]).join('; ')}`);
     render();
+    return result;
   });
 };
 
