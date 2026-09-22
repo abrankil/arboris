@@ -66,7 +66,7 @@ function activeIndividual(session=currentSession()) {
 
 function currentEvidence(session=currentSession()) {
   if (!session || !state.activePhotoId || !state.activeIndividualId) return null;
-  const characterId = $('character').value;
+  const characterId = state.formCharacterId ?? $('character').value;
   return session.evidence.find(item =>
     item.current === true &&
     item.photoId === state.activePhotoId &&
