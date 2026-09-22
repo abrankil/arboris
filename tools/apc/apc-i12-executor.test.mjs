@@ -795,8 +795,10 @@ test('TD-I12-53 runtime batch Undo restores exact inbox delta after unrelated co
   const [a, b] = r.session.photos;
   const before = executor.snapshot();
 
+  // Newly ingested photos start in inbox, so exercise REMOVE -> unrelated
+  // commit -> inverse ADD rather than manufacturing a NO_OP ADD.
   r = await executor.dispatch(executor.commandBase({
-    type: 'BATCH_ADD_TO_INBOX',
+    type: 'BATCH_REMOVE_FROM_INBOX',
     photoIds: [a.photoId, b.photoId],
   }));
   assert.equal(r.status, 'COMMITTED');
@@ -811,10 +813,10 @@ test('TD-I12-53 runtime batch Undo restores exact inbox delta after unrelated co
   r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
   assert.equal(r.status, 'COMMITTED');
   const afterUnrelated = executor.snapshot();
-  for (const photoId of affected) assert.equal(afterUnrelated.inboxPhotoRefs.includes(photoId), true);
+  for (const photoId of affected) assert.equal(afterUnrelated.inboxPhotoRefs.includes(photoId), false);
 
   r = await executor.dispatch(executor.commandBase({
-    type: 'BATCH_REMOVE_FROM_INBOX',
+    type: 'BATCH_ADD_TO_INBOX',
     photoIds: affected,
   }));
   assert.equal(r.status, 'COMMITTED');
