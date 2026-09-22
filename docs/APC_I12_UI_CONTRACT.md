@@ -1,6 +1,6 @@
 # Árboris — APC I12 Single-Screen UI Contract
 
-**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R2`  
+**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R3`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12.  
 **Base canónica:** `main@54824efea9ec5806eef720fc07b6bdd44339d609`.  
@@ -78,7 +78,30 @@ Una misma fotografía puede vincularse posteriormente a uno o más individuos. L
 
 Las fotografías no esenciales pueden permanecer explícitamente sin clasificar al cierre de una sesión, conforme al contrato APC vigente.
 
-## 5. Identidad e individuos
+
+
+## 5. PhotoEvidence y vínculo con PHOTO
+
+Por cada PHOTO registrada que participa del snapshot APC debe existir exactamente un registro `PhotoEvidence` correspondiente conforme al contrato I2 vigente.
+
+Invariantes mínimas:
+
+```text
+PHOTO.photoEvidenceId
+= PhotoEvidence.photoEvidenceId
+
+PhotoEvidence.sourcePhoto.photoRef
+= PHOTO.photoId
+
+PhotoEvidence.sourcePhoto.fingerprintSha256
+→ identifica establemente el asset registrado
+```
+
+La UI debe preservar la relación bidireccional PHOTO ↔ PhotoEvidence y no puede reutilizar un mismo `PhotoEvidence` para dos PHOTO distintas salvo que un contrato canónico posterior lo autorice explícitamente.
+
+El fingerprint no es una inferencia botánica. Es metadata técnica de identidad/traceabilidad del asset y debe generarse o importarse de forma determinista conforme al tooling APC vigente.
+
+## 6. Identidad e individuos
 
 La UI debe permitir:
 
@@ -90,7 +113,7 @@ La UI debe permitir:
 
 I12 no inventa un contrato de `speciesHypothesis` ni `workingSpeciesId`. Mientras no exista contrato APC canónico para hypothesis, estos campos no forman parte del flujo normativo I12.
 
-## 6. Revisión por fotografía
+## 7. Revisión por fotografía
 
 Para una fotografía activa, la UI debe permitir registrar cero o más caracteres observacionales.
 
@@ -110,7 +133,7 @@ Reglas:
 - un carácter no evaluado no se convierte automáticamente en `NOT_OBSERVABLE`;
 - una fotografía puede confirmarse con revisión parcial cuando no queda un carácter requerido pendiente para esa fotografía.
 
-## 7. Sugerencias y ayuda
+## 8. Sugerencias y ayuda
 
 La UI puede sugerir **qué estructura o carácter inspeccionar** utilizando el dataset canónico y, cuando exista un conjunto explícito de candidatos, ese contexto.
 
@@ -126,7 +149,7 @@ La UI **no puede sugerir ni preseleccionar un estado botánico concreto** como r
 
 Un modelo, herramienta o heurística puede señalar estructuras o caracteres potencialmente relevantes, pero la confirmación de evidencia sigue siendo humana.
 
-## 8. DRAFT y CONFIRMED
+## 9. DRAFT y CONFIRMED
 
 Toda captura editable comienza o permanece en estado `DRAFT` hasta confirmación humana explícita.
 
@@ -147,7 +170,7 @@ Toda captura editable comienza o permanece en estado `DRAFT` hasta confirmación
 
 La UI debe mostrar claramente si el dato visible es DRAFT o CONFIRMED.
 
-## 9. Prefill
+## 10. Prefill
 
 La UI puede prellenar una observación desde observaciones previas únicamente conforme al contrato de adquisición `prefilled`.
 
@@ -160,22 +183,24 @@ Un prefill:
 
 I12 no introduce una nueva semántica de prefill.
 
-## 10. Acciones por lote
+## 11. Acciones por lote
 
 La UI puede ofrecer acciones por lote para reducir repetición, siempre que sean reversibles y trazables.
 
 Las acciones por lote permitidas en I12 se limitan a operaciones que no afirmen automáticamente un estado botánico positivo, por ejemplo:
 
 - asignar/desasignar fotografías a un individuo;
-- mover fotografías entre inbox y conjunto clasificado;
+- quitar/agregar referencias en `inboxPhotoRefs[]`;
 - aplicar metadata operacional común;
 - seleccionar fotografías para una acción posterior.
+
+La UI no persiste `classifiedPhotoRefs[]`, `classifiedPhotos[]` ni un conjunto canónico paralelo. Una PHOTO se considera fuera de inbox cuando existe en `photos[]` y su `photoId` no está presente en `inboxPhotoRefs[]`.
 
 I12 no permite confirmar por lote estados botánicos concretos inferidos o copiados sin revisión por fotografía.
 
 Toda acción por lote que modifique el estado de sesión debe poder revertirse antes de exportar y conservar historial suficiente para explicar el cambio cuando el contrato APC lo requiera.
 
-## 11. Requirements y pending
+## 12. Requirements y pending
 
 La UI debe distinguir:
 
@@ -198,7 +223,7 @@ Si una fotografía requerida produce `NOT_OBSERVABLE`:
 - el requirement no queda satisfecho por esa evidencia;
 - el pending debe seguir visible hasta resolverse por otra evidencia o por el mecanismo canónico de representation gap.
 
-## 12. Representation gaps
+## 13. Representation gaps
 
 `REPRESENTATION_GAP` es contexto de cobertura, no evidencia observacional.
 
@@ -210,7 +235,7 @@ La UI debe mostrarlo separado de:
 
 I12 no crea representation gaps automáticamente a partir de una sola fotografía no observable salvo que una acción/contrato APC vigente lo autorice explícitamente.
 
-## 13. Contradicciones
+## 14. Contradicciones
 
 Cuando existen contradicciones APC para el individuo activo, la UI debe hacerlas visibles sin:
 
@@ -221,7 +246,7 @@ Cuando existen contradicciones APC para el individuo activo, la UI debe hacerlas
 
 La UI presenta contradicciones como contexto diagnóstico y conserva todas las evidencias confirmadas involucradas.
 
-## 14. Estado de fotografía
+## 15. Estado de fotografía
 
 La UI debe distinguir al menos:
 
@@ -237,7 +262,7 @@ Estos son estados de interfaz derivados y no nuevos estados canónicos de APC.
 
 Una fotografía no necesita contener evidencia para todos los caracteres del dataset.
 
-## 15. Navegación de sesión
+## 16. Navegación de sesión
 
 Debe ser posible recorrer rápidamente las fotografías mediante:
 
@@ -248,7 +273,7 @@ Debe ser posible recorrer rápidamente las fotografías mediante:
 
 La navegación no debe alterar evidencia por sí sola.
 
-## 16. Contexto visible
+## 17. Contexto visible
 
 Para la fotografía/individuo activo, la UI puede mostrar contexto APC relevante:
 
@@ -263,7 +288,7 @@ Para la fotografía/individuo activo, la UI puede mostrar contexto APC relevante
 
 La UI no transforma estos elementos de contexto en evidencia positiva.
 
-## 17. Persistencia, serialización y exportación
+## 18. Persistencia, serialización y exportación
 
 I12 debe poder persistir localmente un snapshot de trabajo y, de forma separada, producir una exportación APC conforme al contrato canónico.
 
@@ -281,13 +306,15 @@ y no presentarlos como sinónimos.
 
 Un snapshot local puede persistirse para continuar el trabajo aunque todavía no sea `EXPORTABLE`, siempre que no se presente como exportación APC normativa.
 
+`SERIALIZABLE WORKING SNAPSHOT` es una etiqueta derivada de I12 para describir persistencia de trabajo. No es un campo persistido, no es un enum APC y no sustituye `validateApcSession()` ni los resultados I10.
+
 La exportación APC normativa debe reutilizar los contratos I10 vigentes, incluyendo `validateApcSessionForExport()` y/o `buildApcSessionExport()` según corresponda. Una sesión estructuralmente válida puede seguir siendo `NOT_EXPORTABLE` por razones de binding semántico, coverage requirement/pending, assessment stale u otras validaciones I10 aplicables.
 
 `PASS` sigue siendo el resultado derivado definido por I10 y no una decisión visual de I12.
 
 I12 no modifica los criterios de Gate B.
 
-## 18. Mutaciones semánticas y autoridad del autosave
+## 19. Mutaciones semánticas y autoridad del autosave
 
 La persistencia local de I12 debe conservar una única representación normativa del estado APC.
 
@@ -324,7 +351,7 @@ Las operaciones puramente visuales o de navegación no modifican `semanticRevisi
 
 I12 no permite editar manualmente `semanticRevision` ni los campos de binding de `objectiveAssessment` como controles independientes de UI.
 
-## 19. Integración con I11
+## 20. Integración con I11
 
 I12 no ejecuta identificación como efecto implícito de confirmar un dato.
 
@@ -339,7 +366,7 @@ APC evidence
 
 El resultado ACE no reescribe automáticamente la evidencia APC.
 
-## 20. Seguridad epistemológica
+## 21. Seguridad epistemológica
 
 La UI no puede:
 
@@ -352,7 +379,7 @@ La UI no puede:
 - resolver contradicciones por mayoría;
 - ocultar revisiones históricas necesarias para trazabilidad.
 
-## 21. Regresiones mínimas I12
+## 22. Regresiones mínimas I12
 
 La implementación debe demostrar como mínimo:
 
@@ -369,6 +396,13 @@ T-I12-03
 una PHOTO se asocia a dos individuos
 → no se duplica el asset
 → individualRefs conserva ambos
+
+T-I12-03A
+cada PHOTO registrada
+→ resuelve exactamente un PhotoEvidence
+→ PHOTO.photoEvidenceId = PhotoEvidence.photoEvidenceId
+→ PhotoEvidence.sourcePhoto.photoRef = PHOTO.photoId
+→ fingerprintSha256 presente y estable
 
 T-I12-04
 cambio de fotografía con DRAFT
@@ -408,9 +442,10 @@ prefill
 → requiere confirmación sobre foto actual
 
 T-I12-12
-batch assignment de individuo
+batch assignment de individuo / inbox
 → reversible
 → no crea estado botánico positivo
+→ no persiste classifiedPhotoRefs[] ni colección paralela
 
 T-I12-13
 REPRESENTATION_GAP
@@ -453,6 +488,7 @@ navegación / filtro / zoom
 T-I12-21
 export APC normativo
 → validateApcSessionForExport() / buildApcSessionExport() conforme a I10
+→ al menos un fixture de cierre produce buildApcSessionExport(...).exportable = true
 
 T-I12-22
 STRUCTURALLY VALID / SERIALIZABLE / EXPORTABLE / PASS / CLOSED
@@ -463,7 +499,7 @@ reimportar sesión exportada
 → conserva IDs, evidence revisions, pending, contradictions, provenance y semanticRevision
 ```
 
-## 22. Criterio de cierre I12
+## 23. Criterio de cierre I12
 
 I12 puede considerarse implementado cuando:
 
@@ -476,9 +512,10 @@ I12 puede considerarse implementado cuando:
 - suggestions no proponen estados botánicos concretos;
 - requirements/pending/gaps/contradictions se visualizan sin reinterpretarlos;
 - acciones por lote permitidas son reversibles y no confirman estados botánicos;
-- exporta una sesión APC estructuralmente válida;
+- puede persistir working snapshots estructuralmente válidos sin presentarlos como export APC;
+- produce al menos una exportación APC normativa con `buildApcSessionExport(...).exportable = true`;
 - puede reimportar la sesión sin pérdida de trazabilidad;
-- T-I12-01..23 pasan;
+- T-I12-01..23 + T-I12-03A pasan;
 - I1–I11 permanecen verdes;
 - `npm test` pasa;
 - la auditoría del diff no encuentra blockers;
@@ -486,16 +523,16 @@ I12 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R2 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Corrige la frontera entre estado de trabajo de UI y snapshot APC normativo, e incorpora explícitamente el binding semántico I10 para mutaciones de sesión.
+R3 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R2 y añade el vínculo PHOTO ↔ PhotoEvidence, endurece el criterio de cierre de exportación y elimina ambigüedades de estado de fotografía e inbox.
 
 ### INCONSISTENCIAS
 
-R2 resuelve las inconsistencias detectadas en R1: elimina PHOTO.sessionId y el alias persistido origin; separa snapshot serializable de exportación normativa; y hace obligatorio semanticRevision/objectiveAssessment en mutaciones semánticas conforme a I10.
+R3 resuelve los hallazgos adversariales de R2: el criterio de cierre exige una exportación I10 realmente exportable; toda PHOTO queda vinculada a un PhotoEvidence canónico con fingerprint estable; "fotografía confirmada" se reemplaza por estado derivado de UI; y el inbox se modela sólo mediante inboxPhotoRefs[] sin colección clasificada paralela.
 
 ### VACÍOS / OMISIONES
 
-R2 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. La autoridad del autosave queda resuelta: APC_SESSION es la única representación normativa; el estado puramente visual permanece fuera de APC_SESSION.
+R3 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. La autoridad del autosave y la del inbox quedan resueltas sin introducir colecciones persistidas paralelas.
 
 ### REDUNDANCIAS
 
-Los estados de revisión de fotografía definidos en §14 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. El working snapshot local tampoco constituye una segunda fuente de verdad: es persistencia del mismo APC_SESSION, no un modelo paralelo.
+Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. El working snapshot local tampoco constituye una segunda fuente de verdad: es persistencia del mismo APC_SESSION, no un modelo paralelo. `SERIALIZABLE WORKING SNAPSHOT` tampoco se persiste como estado APC.
