@@ -175,9 +175,11 @@ export function validateApcWritableWorkingSnapshot(
         errors.push(...contradictions.errors.map(error => `I9 snapshot: ${error}`));
       }
     }
+  }
 
-    const assets = validateApcI12AssetAndCollectionInvariants(session);
-    if (!assets.valid) errors.push(...assets.errors.map(error => `I12 asset: ${error}`));
+  const assets = validateApcI12AssetAndCollectionInvariants(session);
+  if (!assets.valid) {
+    errors.push(...assets.errors.map(error => `I12 asset: ${error}`));
   }
 
   return { valid: errors.length === 0, errors };
