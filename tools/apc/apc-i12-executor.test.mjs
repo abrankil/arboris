@@ -633,3 +633,36 @@ test('TD-I12-58 SUGGEST_INSPECTION_TARGETS is runtime-only and cannot mutate APC
   assert.doesNotMatch(executableSource, /semanticRevision\s*=/);
   assert.doesNotMatch(operationSource, /writeFormBuffer\s*\(/);
 });
+
+
+test('T-I12-13 REPRESENTATION_GAP is visible as derived context without becoming evidence', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('export function deriveRepresentationGaps');
+  const end = source.indexOf('\nfunction render()', start);
+  assert.ok(start >= 0 && end > start, 'representation-gap derivation must remain explicit');
+  const derivationSource = source.slice(start, end);
+
+  assert.match(derivationSource, /session\.pending/);
+  assert.match(derivationSource, /item\.kind === 'REPRESENTATION_GAP'/);
+  assert.match(derivationSource, /sourceLevel === 'SESSION'/);
+  assert.match(derivationSource, /sourceLevel === 'INDIVIDUAL'/);
+  assert.doesNotMatch(derivationSource, /dispatch\s*\(/);
+  assert.doesNotMatch(derivationSource, /commandBase\s*\(/);
+  assert.doesNotMatch(derivationSource, /session\.evidence\s*=/);
+  assert.doesNotMatch(derivationSource, /semanticRevision\s*=/);
+
+  const html = await fs.readFile(new URL('./ui/apc-ui.html', import.meta.url), 'utf8');
+  assert.match(html, /Representation gaps · contexto read-only/);
+  assert.match(html, /id="representationGaps"/);
+
+  const { executor } = await setup();
+  const before = executor.snapshot();
+  const evidenceBefore = JSON.stringify(before.evidence);
+  const revisionBefore = before.semanticRevision;
+
+  // Reading/deriving representation-gap context is deliberately outside the
+  // executor command path. The committed APC snapshot therefore remains exact.
+  assert.equal(JSON.stringify(executor.snapshot().evidence), evidenceBefore);
+  assert.equal(executor.snapshot().semanticRevision, revisionBefore);
+  await executor.close();
+});
