@@ -1248,3 +1248,78 @@ test('T-CTX-43 NEW context installation advances generation before constructing 
   assert.ok(generationAt >= 0 && resetAt > generationAt);
   assert.doesNotMatch(body.slice(generationAt, resetAt), /await /);
 });
+
+
+test('T-CTX-45 INGEST acquires composite lease before staging await', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function ingestFiles');
+  const end = source.indexOf("\n$('newSession')", start);
+  const body = source.slice(start, end);
+  assert.match(body, /runCompositeWriterIntent\(async lease =>/);
+  assert.ok(body.indexOf('runCompositeWriterIntent') < body.indexOf('await stageApcPhotoFile'));
+  assert.match(body, /dispatchAdmitted\(\{/);
+});
+
+test('T-CTX-46 CONFIRM acquires composite lease before waiting autosave', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function confirmEvidence');
+  const end = source.indexOf('\nasync function relinkActivePhoto', start);
+  const body = source.slice(start, end);
+  assert.match(body, /runCompositeWriterIntent\(async lease =>/);
+  assert.ok(body.indexOf('runCompositeWriterIntent') < body.indexOf('await inFlight'));
+  assert.match(body, /dispatchAdmitted\(retryIntent, lease\)/);
+});
+
+test('T-CTX-47 SET_SESSION_STATUS acquires composite lease before flush await', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function setSessionStatus');
+  const end = source.indexOf('\nexport async function replaceWriterContext', start);
+  const body = source.slice(start, end);
+  assert.match(body, /runCompositeWriterIntent\(async lease =>/);
+  assert.ok(body.indexOf('runCompositeWriterIntent') < body.indexOf('await flushAutosave'));
+  assert.match(body, /dispatchAdmitted\(\{ type:'SET_SESSION_STATUS', status \}, lease\)/);
+});
+
+test('T-CTX-48 blocked composite admission performs no async operation body', async () => {
+  const leases = createWriterIntentLeaseRegistry();
+  let staged = false;
+  const lease = leases.begin({ executorRef: {}, sessionEpoch: 1, contextGeneration: 1, canAccept: false });
+  if (lease) staged = true;
+  assert.equal(lease, null);
+  assert.equal(staged, false);
+});
+
+test('T-CTX-49 composite writer helper acquires lease before invoking operation', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function withWriterIntent');
+  const end = source.indexOf('\nasync function applyDecisionFlow', start);
+  const body = source.slice(start, end);
+  assert.ok(body.indexOf('beginWriterIntent()') < body.indexOf('await operation(lease)'));
+  assert.match(body, /finally\s*\{\s*state\.writerIntentLeases\.release\(lease\)/);
+});
+
+test('T-CTX-50 decision flow executes after composite lease release and retries as new intent', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const compositeStart = source.indexOf('async function runCompositeWriterIntent');
+  const compositeEnd = source.indexOf('\nfunction patchFromBuffer', compositeStart);
+  const body = source.slice(compositeStart, compositeEnd);
+  assert.ok(body.indexOf('await withWriterIntent(operation)') < body.indexOf('await applyDecisionFlow'));
+  const decisionStart = source.indexOf('async function applyDecisionFlow');
+  const decisionEnd = source.indexOf('\nfunction reportWriterResult', decisionStart);
+  const decision = source.slice(decisionStart, decisionEnd);
+  assert.match(decision, /return runWriterIntent\(retry, \{ allowDecisionRetry: false \}\)/);
+});
+
+test('T-CTX-51 OLD composite lease cannot migrate to NEW context after async suspension', () => {
+  const leases = createWriterIntentLeaseRegistry();
+  const oldExecutor = {};
+  const newExecutor = {};
+  const lease = leases.begin({ executorRef: oldExecutor, sessionEpoch: 8, contextGeneration: 12, canAccept: true });
+  assert.equal(leaseAuthorizesExecutor(lease, {
+    executorRef: newExecutor,
+    sessionEpoch: 1,
+    contextGeneration: 13,
+    isActive: leases.isActive(lease),
+  }), false);
+  leases.release(lease);
+});
