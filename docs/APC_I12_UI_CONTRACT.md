@@ -1,6 +1,6 @@
 # Árboris — APC I12 Single-Screen UI Contract
 
-**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R5`  
+**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R6`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12.  
 **Base canónica:** `main@54824efea9ec5806eef720fc07b6bdd44339d609`.  
@@ -108,6 +108,8 @@ Para una sesión reimportada sin acceso a los bytes originales, se conserva exac
 
 Dos cargas de exactamente los mismos bytes originales deben producir el mismo fingerprint.
 
+Si una carga posterior dentro de la misma sesión produce un fingerprint ya existente, se conserva el `fileRef` canónico de la PHOTO previamente registrada. El nombre, ruta o referencia local de la carga duplicada no sustituye automáticamente ese `fileRef` ni se persiste como alias en I12.
+
 Dentro de una misma sesión, `fingerprintSha256` también funciona como detector de duplicación de asset durante el ingreso:
 
 ```text
@@ -207,7 +209,8 @@ Toda captura editable comienza o permanece en estado `DRAFT` hasta confirmación
 - puede editarse;
 - no entra al handoff I11;
 - no satisface requirements;
-- no se presenta como evidencia confirmada.
+- no se presenta como evidencia confirmada;
+- si ya existe como `APC_EVIDENCE` persistida, cualquier cambio de contenido se materializa como una nueva revisión conforme a I6 y no sobrescribe la revisión vigente in-place.
 
 `CONFIRMED`:
 
@@ -415,6 +418,8 @@ si no coincide
 
 El relink es estado/runtime local de UI y no crea una segunda PHOTO ni un nuevo PhotoEvidence cuando el fingerprint coincide.
 
+Un relink exitoso con fingerprint coincidente no modifica `APC_SESSION`, no cambia `semanticRevision` y no resetea `objectiveAssessment`. Es exclusivamente una recuperación de disponibilidad local del asset.
+
 ## 20. Mutaciones semánticas y autoridad del autosave
 
 La persistencia local de I12 debe conservar una única representación normativa del estado APC.
@@ -431,6 +436,10 @@ UI-only state
 DRAFT evidence
 → si se persiste, se representa mediante la estructura APC vigente
 → no existe una segunda copia paralela del mismo dato como fuente alternativa de verdad
+→ editar contenido de un DRAFT ya persistido crea nueva revisión I6
+→ revisión previa permanece trazable current=false
+→ nueva revisión current=true
+→ revision event adyacente obligatorio
 ```
 
 Toda mutación que altere el substrate semántico definido por I10 debe aplicar el contrato de transición semántica vigente:
@@ -511,6 +520,8 @@ mismos bytes originales cargados dos veces en la misma sesión
 → una sola PHOTO
 → un solo PhotoEvidence
 → no se crean segundo photoId ni segundo photoEvidenceId
+→ fileRef canónico previo se conserva
+→ nombre/ruta de la carga duplicada no reemplaza fileRef
 → decode/resize/recompression no participan del cálculo
 
 T-I12-03C
@@ -528,6 +539,14 @@ T-I12-04
 cambio de fotografía con DRAFT
 → DRAFT se conserva
 → no se vuelve CONFIRMED
+
+T-I12-04A
+DRAFT revision 1 persistida
+→ editar contenido
+→ revision 1 retained current=false
+→ revision 2 DRAFT current=true
+→ revision event 1→2
+→ no overwrite destructivo
 
 T-I12-05
 CONFIRMED requiere acción humana explícita
@@ -631,6 +650,9 @@ reimportar sesión sin bytes locales del asset
 → registro PHOTO/PhotoEvidence sigue disponible
 → UI distingue asset record de asset bytes
 → relink con archivo cuyo fingerprint coincide restaura visualización sin crear nueva PHOTO
+→ APC_SESSION permanece byte-for-byte semánticamente equivalente
+→ semanticRevision no cambia
+→ objectiveAssessment no se resetea
 → relink con fingerprint distinto es rechazado sin modificar el asset registrado
 ```
 
@@ -647,6 +669,7 @@ I12 puede considerarse implementado cuando:
 - permite revisar evidencia por fotografía/individuo con estados APC canónicos;
 - calcula fingerprintSha256 sobre bytes originales exactos y lo conserva sin recálculo espurio al reimportar;
 - DRAFT y CONFIRMED están claramente separados;
+- cualquier edición de contenido de un DRAFT ya persistido usa una nueva revisión I6;
 - correcciones confirmadas usan revisiones;
 - suggestions no proponen estados botánicos concretos;
 - requirements/pending/gaps/contradictions se visualizan sin reinterpretarlos;
@@ -655,7 +678,7 @@ I12 puede considerarse implementado cuando:
 - produce al menos una exportación APC normativa con `buildApcSessionExport(...).exportable = true`;
 - puede reimportar la sesión sin pérdida de trazabilidad;
 - distingue registro de asset de disponibilidad de bytes y permite relink sólo mediante fingerprint coincidente;
-- T-I12-01..24 + T-I12-03A..03D + T-I12-12A pasan;
+- T-I12-01..24 + T-I12-03A..03D + T-I12-04A + T-I12-12A pasan;
 - I1–I11 permanecen verdes;
 - `npm test` pasa;
 - la auditoría del diff no encuentra blockers;
@@ -663,16 +686,16 @@ I12 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R5 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R4 y añade deduplicación por fingerprint dentro de la sesión, protección de integridad al desasignar individuos y relink explícito cuando los bytes del asset no están disponibles tras reimportar.
+R6 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R5 y alinea el autosave DRAFT con I6, fija la conservación de fileRef ante duplicados y declara el relink coincidente como operación puramente local no semántica.
 
 ### INCONSISTENCIAS
 
-R5 resuelve los hallazgos adversariales de R4: fingerprints idénticos ya no pueden materializar assets duplicados dentro de la misma sesión; la desasignación PHOTO↔INDIVIDUAL queda bloqueada cuando existe historia de evidence dependiente; y la reimportación distingue registro de asset de disponibilidad de bytes con relink verificado por fingerprint. Conserva ACTIVE_REVIEW_TARGET, bytes canónicos del fingerprint y las correcciones previas.
+R6 resuelve los hallazgos adversariales de R5: editar un DRAFT persistido crea una nueva revisión I6 en vez de sobrescribir; un duplicate fingerprint conserva el fileRef canónico ya registrado; y el relink con fingerprint coincidente no muta APC_SESSION, semanticRevision ni objectiveAssessment. Conserva deduplicación, desasignación segura, ACTIVE_REVIEW_TARGET y las correcciones previas.
 
 ### VACÍOS / OMISIONES
 
-R5 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. La disponibilidad local de bytes y el relink son estado/runtime de UI y no introducen campos canónicos nuevos en APC_SESSION.
+R6 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. La disponibilidad local de bytes y el relink siguen siendo estado/runtime de UI; no introducen campos canónicos nuevos ni mutaciones semánticas en APC_SESSION.
 
 ### REDUNDANCIAS
 
-Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional.
+Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional. El autosave DRAFT tampoco introduce un buffer normativo paralelo: una vez persistido, evoluciona únicamente mediante la cadena de revisiones I6.
