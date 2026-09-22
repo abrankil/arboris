@@ -1,6 +1,6 @@
 # Árboris — APC I12 Implementation Design
 
-**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.4`  
+**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.5`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12 implementation design.  
 **Contrato base:** `ARBORIS_APC_I12_UI_CONTRACT_R9`, VALIDATED WITH ASC y FROZEN en `h16/apc-i12-ui@4ba8f837f75eccf44054b7ef7c7b23b4c82efe40`.  
@@ -138,7 +138,42 @@ RELINK_ASSET con fingerprint coincidente
 
 ## 5. Freshness preconditions
 
-Todo command que modifica una evidencia existente debe declarar:
+Todo command normativo se construye contra una generación runtime del último commit conocido:
+
+```text
+baseCommitGeneration
+```
+
+El executor mantiene:
+
+```text
+runtimeGeneration
+```
+
+como contador exclusivamente runtime, no persistido dentro de `APC_SESSION`.
+
+Regla global:
+
+```text
+al dispatch
+→ command.baseCommitGeneration = runtimeGeneration actual
+
+después de cada COMMITTED normativo
+→ runtimeGeneration += 1
+
+al comenzar efectivamente el turno
+command.baseCommitGeneration == runtimeGeneration
+→ puede continuar
+
+command.baseCommitGeneration != runtimeGeneration
+→ STALE_COMMAND
+→ no mutación
+→ no persistencia
+```
+
+Esta precondición se aplica incluso a cambios normativos que no alteran el assessment substrate de I10, por ejemplo assignment de PHOTO/INDIVIDUAL o metadata normativa no semántica.
+
+Todo command que modifica una evidencia existente debe declarar además:
 
 ```text
 evidenceId
@@ -152,7 +187,7 @@ evidenceId = null o nuevo id reservado por la transacción
 baseRevision = null
 ```
 
-Al comenzar efectivamente el turno del command:
+Al comenzar efectivamente el turno:
 
 ```text
 current revision == baseRevision
@@ -166,17 +201,11 @@ current revision != baseRevision
 
 No existe auto-rebase silencioso de edición botánica.
 
-Para commands sobre entidades distintas de evidence, el diseño aplica la misma idea mediante una precondición de base de sesión:
+`expectedSemanticRevision` puede utilizarse como precondición adicional cuando una operación dependa específicamente del substrate I10, pero no sustituye `baseCommitGeneration` como freshness global.
 
-```text
-expectedSemanticRevision
-```
+Un command rechazado por stale state debe reconstruirse desde `currentSession`; no se modifica silenciosamente su base para reintentarlo.
 
-cuando la operación dependa del substrate semántico vigente.
-
-Un command rechazado por stale state debe reconstruirse desde `currentSession`.
-
-## 6. Autosave y confirmación
+## 6. Autosave, confirmación y recuperación de stale state
 
 Si existe un autosave pendiente del mismo target y el usuario confirma:
 
@@ -184,12 +213,25 @@ Si existe un autosave pendiente del mismo target y el usuario confirma:
 CONFIRM
 → espera/flush del SAVE_DRAFT pendiente del mismo target
 → lee la revisión current resultante
-→ construye CONFIRM contra esa baseRevision
+→ construye CONFIRM contra esa baseRevision y baseCommitGeneration vigentes
 ```
 
 Nunca se confirma contra una revisión anterior mientras un autosave normativo del mismo target está en vuelo.
 
 Si un command devuelve `NEEDS_DECISION`, la decisión posterior no reusa ciegamente el command anterior: se reconstruye contra la sesión vigente y vuelve a validar sus precondiciones.
+
+Si un command devuelve `STALE_COMMAND`:
+
+```text
+→ no auto-rebase
+→ no auto-retry
+→ currentSession committed permanece autoridad
+→ UI vuelve a renderizar el estado committed vigente
+→ el editBuffer viejo puede conservarse sólo como buffer efímero marcado STALE para comparación humana
+→ el usuario debe descartarlo o re-aplicar conscientemente su intención sobre un buffer fresco
+```
+
+La UI no puede limitarse a cambiar `baseRevision` o `baseCommitGeneration` del command rechazado y reenviarlo automáticamente.
 
 ## 7. Single-writer guard entre browser contexts
 
@@ -203,13 +245,40 @@ por sessionId
 entre todos los browser contexts
 ```
 
-La implementación de referencia usa un `WriterLockProvider` cuya operación de escritura requiere un lock exclusivo por clave:
+El lock es de vida de sesión writer, no de vida de command.
+
+Entrada a write mode:
 
 ```text
-arboris-apc:<sessionId>
+OPEN SESSION AS WRITER
+→ solicitar lock exclusivo arboris-apc:<sessionId>
+→ si se obtiene, mantenerlo durante toda la vida del contexto writer
+→ sólo entonces habilitar commands normativos
 ```
 
-La implementación primaria debe usar Web Locks (`navigator.locks`) o una primitiva equivalente con exclusión real.
+Mientras el contexto mantenga write mode:
+
+```text
+→ todos los commands pasan por la cola interna
+→ el lock NO se libera entre commands
+```
+
+Salida:
+
+```text
+EXIT WRITE MODE / session replacement / unload / pérdida del contexto
+→ liberar lock
+```
+
+La implementación primaria debe usar Web Locks (`navigator.locks`) o una primitiva equivalente con exclusión real y lifetime controlable.
+
+Si otro contexto intenta abrir el mismo `sessionId` mientras el writer lock está retenido:
+
+```text
+→ read-only
+o
+→ apertura writer rechazada
+```
 
 Si el runtime no dispone de una primitiva capaz de garantizar exclusión:
 
@@ -220,11 +289,11 @@ Si el runtime no dispone de una primitiva capaz de garantizar exclusión:
 
 No se permite degradar silenciosamente a last-write-wins.
 
-Antes de construir cada transacción normativa bajo el lock:
+Antes de construir cada transacción normativa mientras se mantiene el lock:
 
 ```text
 → releer snapshot persistido
-→ validar que corresponde a la base esperada
+→ validar freshness global y precondiciones específicas
 → recién entonces ejecutar el command
 ```
 
@@ -284,12 +353,14 @@ Resultado lógico:
 
 ## 10. Secuencia transaccional
 
+Precondición: el contexto ya mantiene el writer lock exclusivo de vida de sesión definido en §7.
+
 Para una mutación normativa:
 
 ```text
-1. adquirir writer lock
+1. verificar que write mode y writer lock siguen vigentes
 2. releer snapshot persistido
-3. verificar freshness/preconditions
+3. verificar baseCommitGeneration y demás freshness/preconditions
 4. clonar previousSession
 5. aplicar mutación primaria
 6. construir revisiones I6 y revisionEvents
@@ -301,11 +372,12 @@ Para una mutación normativa:
 12. resetear objectiveAssessment si corresponde
 13. ejecutar validation stack
 14. serializar candidate
-15. persistir candidate
-16. confirmar persistencia exitosa
+15. persistir candidate mediante atomic replace
+16. confirmar commit durable exitoso
 17. promover currentSession
-18. aplicar efectos runtime post-commit
-19. liberar lock / continuar cola
+18. incrementar runtimeGeneration exactamente una vez
+19. aplicar efectos runtime post-commit
+20. continuar cola manteniendo el writer lock
 ```
 
 Cualquier fallo antes de 17:
@@ -313,7 +385,8 @@ Cualquier fallo antes de 17:
 ```text
 → ABORT
 → currentSession permanece previousSession
-→ snapshot persistido permanece previo
+→ snapshot persistido permanece exactamente previo
+→ runtimeGeneration no cambia
 → no se consume revisión ni semanticRevision
 ```
 
@@ -571,40 +644,75 @@ buildApcSessionExport()
 
 ## 19. Durable persistence
 
-El adapter conceptual:
+El adapter mínimo conceptual:
 
 ```js
 persistence = {
   load(sessionId),
-  save(sessionId, serializedSession),
-  clear(sessionId)
+  saveAtomic(sessionId, serializedSession)
 }
 ```
 
-`save()` debe completar antes de promover `currentSession`.
+La eliminación de sesiones queda fuera de alcance de I12 v0.5; el adapter mínimo no expone `clear()`.
+
+`saveAtomic()` debe ofrecer semántica all-or-nothing:
+
+```text
+SUCCESS
+→ el snapshot durable es exactamente candidate
+
+FAIL
+→ el snapshot durable permanece exactamente previous
+```
+
+No es suficiente iniciar una escritura o resolver una Promise antes de que el commit del adapter haya concluido según su propia semántica.
+
+Un adapter sólo es compatible con write mode si puede garantizar atomic replace. Ejemplos de mecanismos aceptables:
+
+```text
+localStorage
+→ una única sustitución del string completo bajo la clave de sesión
+
+IndexedDB
+→ una transacción atómica equivalente
+```
+
+La verificación read-after-write puede añadirse como hardening, pero no sustituye la garantía de atomicidad del primitive de storage.
+
+`saveAtomic()` debe completar exitosamente antes de promover `currentSession`.
 
 Si persistence falla:
 
 ```text
 → candidate descartado
 → currentSession no cambia
+→ runtimeGeneration no cambia
+→ durable snapshot permanece previous
 → ningún cambio se presenta como committed
 ```
 
-El diseño no exige localStorage específicamente. El adapter elegido debe ser compatible con el single-writer guard y con la política de commit.
+El diseño no exige una tecnología específica. El adapter elegido debe ser compatible con el single-writer guard, atomic replace y la política de commit.
 
 ## 20. Trust boundary de load/import
 
-Ruta única:
+Ningún JSON externo o snapshot recuperado adquiere autoridad sólo por poder parsearse.
+
+Ruta de validación:
 
 ```text
 raw
 → JSON.parse
 → candidate object
 → validateApcSession(candidate)
-→ VALID: puede instalarse como working snapshot
-→ INVALID: reject / no auto-fix / no autoridad
+→ para cada evidence current con lifecycleStatus=CONFIRMED:
+     validateApcEvidenceForHandoff(evidence)
+→ si cualquiera falla:
+     REJECT
+     no auto-fix
+     no autoridad
 ```
+
+Esto impide que una current CONFIRMED estructuralmente presente pero inválida en provenance, confirmation, acquisition o payload lifecycle influya requirements/contradictions como si hubiera sido creada válidamente por I12.
 
 No se:
 
@@ -613,11 +721,40 @@ completan IDs
 renumeran revisions
 eliminan records inválidos
 normalizan silenciosamente identificadores
+reparan confirmation/provenance
 ```
 
-Un working snapshot estructuralmente válido puede cargarse aunque sea NOT_EXPORTABLE.
+Un working snapshot que pasa este trust boundary puede seguir siendo NOT_EXPORTABLE; exportabilidad continúa siendo una evaluación separada I10.
 
-Si el usuario lo trata específicamente como export APC normativa, se evalúa adicionalmente I10.
+Instalación de un import válido:
+
+```text
+adquirir/poseer writer lock
+→ comprobar storage existente para sessionId
+```
+
+Si no existe snapshot durable conflictivo:
+
+```text
+→ saveAtomic(candidate)
+→ sólo tras SUCCESS:
+     currentSession = candidate
+     runtimeGeneration se inicializa/reinicia para el nuevo contexto committed
+```
+
+Si existe un snapshot durable diferente con el mismo `sessionId`:
+
+```text
+→ IMPORT_CONFLICT
+→ no overwrite automático
+→ no currentSession nuevo
+```
+
+Si el import es byte-for-byte equivalente al snapshot durable ya presente, puede tratarse como no-op de carga.
+
+Un import nunca salta el durable commit para convertirse directamente en `currentSession`.
+
+Si el usuario trata el archivo específicamente como export APC normativa, se evalúa adicionalmente I10.
 
 ## 21. Ingestión de fotografías
 
@@ -718,6 +855,7 @@ Forma operativa recomendada:
     "REJECTED" |
     "NEEDS_DECISION" |
     "STALE_COMMAND" |
+    "IMPORT_CONFLICT" |
     "READ_ONLY",
   session: null | committedSession,
   errors: [],
@@ -834,6 +972,45 @@ ingest candidate válido pero persistence falla
 TD-I12-22
 commit de mutación semántica múltiple
 → semanticRevision incrementa una sola vez
+
+TD-I12-23
+writer A obtiene lock de sessionId
+→ ejecuta y termina varios commands
+→ lock permanece retenido entre commands
+→ writer B no obtiene write mode hasta que A cierra/libera
+
+TD-I12-24
+ASSIGN_PHOTO command fue construido con baseCommitGeneration=N
+→ otro command normativo committeó sin cambiar semanticRevision
+→ runtimeGeneration=N+1
+→ ASSIGN_PHOTO stale se rechaza
+
+TD-I12-25
+saveAtomic falla durante commit
+→ durable snapshot permanece byte-for-byte igual a previous
+→ currentSession y runtimeGeneration permanecen sin cambios
+
+TD-I12-26
+import contiene current CONFIRMED que pasa validateApcSession()
+pero falla validateApcEvidenceForHandoff()
+→ import rechazado
+→ no autoridad operacional
+
+TD-I12-27
+import válido usa sessionId ya persistido con snapshot diferente
+→ IMPORT_CONFLICT
+→ no overwrite automático
+
+TD-I12-28
+STALE_COMMAND
+→ no auto-rebase ni auto-retry
+→ UI vuelve a currentSession committed
+→ buffer viejo queda sólo como estado efímero STALE hasta descarte o reaplicación consciente
+
+TD-I12-29
+adapter mínimo I12
+→ no expone clear()
+→ eliminación de sesión permanece fuera de alcance
 ```
 
 ## 26. Criterio de cierre del diseño
@@ -843,26 +1020,31 @@ El diseño puede congelarse cuando:
 - R9 permanece VALIDATED WITH ASC y FROZEN;
 - este documento pasa auditoría adversarial sin blockers;
 - G1/G2/D6/D7/H4/H5 permanecen cerrados;
+- B01/B02/B03/B04 y H01/H02 permanecen cerrados;
 - no introduce campos normativos nuevos en APC_SESSION;
-- el single-writer guard queda exigido para write mode;
-- commands stale son rechazados;
+- el single-writer guard es de vida de sesión writer y queda exigido para write mode;
+- todos los commands normativos usan baseCommitGeneration runtime, más baseRevision cuando aplica;
+- commands stale son rechazados sin auto-rebase ni auto-retry;
+- persistence garantiza atomic replace all-or-nothing;
+- import valida toda current CONFIRMED mediante validateApcEvidenceForHandoff() antes de adquirir autoridad;
+- imports conflictivos por sessionId no sobrescriben automáticamente;
 - ingest staging no produce efectos committed antes del durable commit;
 - comparadores históricos son ordinales y deterministas;
 - el validation stack reutiliza implementaciones canónicas;
-- TD-I12-01..22 están aceptadas como regresiones de implementación.
+- TD-I12-01..29 están aceptadas como regresiones de implementación.
 
 ### AUDITORÍA
 
-V0.4 incorpora los hallazgos adversariales del diseño v0.3: binding a R9 congelado, artefacto versionado, freshness de commands, single-writer entre contexts, staging de ingest y comparadores ordinales deterministas. Mantiene transaction boundary, persistencia atómica, I6 versionado, I8 critical explícito, I9 snapshots históricos y I10 semanticRevision.
+V0.5 incorpora los hallazgos adversariales del diseño v0.4 sin modificar R9: writer lock de vida de sesión, freshness runtime global, persistencia atomic-replace, trust boundary reforzado para current CONFIRMED, import conflict-safe y recuperación explícita de STALE_COMMAND. Mantiene binding a R9 congelado, transaction boundary, I6 versionado, I8 critical explícito, I9 snapshots históricos e I10 semanticRevision.
 
 ### INCONSISTENCIAS
 
-G1 queda resuelto porque R9 fue auditado adversarialmente, marcado PASS y congelado antes de versionar este diseño. G2 queda resuelto mediante este artefacto versionado. D6 se resuelve con `baseRevision`/precondiciones y rechazo `STALE_COMMAND`; D7 con single-writer guard obligatorio para write mode. H4 separa staging de ingest de efectos runtime post-commit. H5 congela orden ordinal sin `localeCompare()`.
+B01 queda resuelto congelando el writer lock durante toda la vida del contexto writer y no por command. B02 queda resuelto con `baseCommitGeneration/runtimeGeneration` para toda mutación normativa, manteniendo `baseRevision` como precondición adicional de evidence. B03 queda resuelto haciendo `saveAtomic()` all-or-nothing una obligación del adapter. B04 queda resuelto validando cada current CONFIRMED con `validateApcEvidenceForHandoff()` antes de instalar/importar y evitando overwrite automático cuando el mismo sessionId ya posee un snapshot distinto. H01 se cierra eliminando `clear()` del adapter mínimo. H02 se cierra prohibiendo auto-rebase/auto-retry y definiendo recuperación UI explícita ante stale state.
 
 ### VACÍOS / OMISIONES
 
-Quedan fuera de alcance detalles visuales finales, accesibilidad de producto, packaging H17, backend remoto, persistencia permanente de blobs y hypothesis. La tecnología concreta del adapter de storage puede variar siempre que preserve exclusión de writer y commit durable. Si el runtime no ofrece una primitiva de exclusión fiable, write mode no se habilita.
+Quedan fuera de alcance detalles visuales finales, accesibilidad de producto, packaging H17, backend remoto, persistencia permanente de blobs, eliminación de sesiones y hypothesis. La tecnología concreta del adapter de storage puede variar sólo si preserva exclusión de writer y atomic replace. Si el runtime no ofrece una primitiva de exclusión fiable o storage atómico compatible, write mode no se habilita.
 
 ### REDUNDANCIAS
 
-No se persisten locks, writer IDs, command states, edit buffers, asset runtime, transaction IDs ni caches paralelos dentro de APC_SESSION. `baseRevision` y `expectedSemanticRevision` pertenecen al command runtime. Pending/contradictions/revisions continúan usando exclusivamente sus arrays canónicos.
+No se persisten locks, writer IDs, runtimeGeneration, command states, edit buffers, asset runtime, transaction IDs ni caches paralelos dentro de APC_SESSION. `baseCommitGeneration`, `baseRevision` y `expectedSemanticRevision` pertenecen al command runtime; sólo los dos primeros gobiernan freshness general/específica. Pending/contradictions/revisions continúan usando exclusivamente sus arrays canónicos.
