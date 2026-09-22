@@ -416,6 +416,8 @@ export function deriveBatchUndoDescriptor({ before, after, type, photoIds = [], 
     const assigned = (session, target) => Boolean(session.photos?.find(item => item.photoId === target.photoId)?.individualRefs?.includes(target.individualId));
     affectedTargets = requested.filter(target => assigned(before, target) !== assigned(after, target));
     if (!affectedTargets.length) return null;
+    if (type === 'BATCH_UNASSIGN_PHOTOS' &&
+        new Set(affectedTargets.map(item => item.individualId)).size !== 1) return null;
     expectedState = type === 'BATCH_ASSIGN_PHOTOS' ? 'ASSIGNED' : 'UNASSIGNED';
     inverseCommand = type === 'BATCH_ASSIGN_PHOTOS'
       ? { type: 'BATCH_UNASSIGN_PHOTOS', targets: structuredClone(affectedTargets) }
