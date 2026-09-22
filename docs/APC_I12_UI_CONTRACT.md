@@ -1,6 +1,6 @@
 # Árboris — APC I12 Single-Screen UI Contract
 
-**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R6`  
+**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R7`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12.  
 **Base canónica:** `main@54824efea9ec5806eef720fc07b6bdd44339d609`.  
@@ -442,26 +442,93 @@ DRAFT evidence
 → revision event adyacente obligatorio
 ```
 
-Toda mutación que altere el substrate semántico definido por I10 debe aplicar el contrato de transición semántica vigente:
+Toda mutación que altere el substrate semántico definido por I10 debe materializarse como una única transacción APC coherente antes de persistirse.
 
 ```text
-semantic mutation
+APC semantic transaction
+→ aplica cambio de evidence / requirement / pending / contradiction que corresponda
+→ reconcilia satisfaction de requirements
+→ reconcilia pending conforme a I8
+→ reconcilia contradictions conforme a I9 cuando aplique
 → semanticRevision incrementa exactamente una vez por transacción
 → objectiveAssessment.status = OPEN
 → objectiveAssessment.assessedRevision = null
 → objectiveAssessment.assessedBy = null
 → objectiveAssessment.assessedAt = null
+→ sólo entonces persiste nextSession
 ```
 
-La UI debe reutilizar `validateApcSemanticTransition()` o una composición técnicamente equivalente que respete exactamente el mismo contrato.
+Una revisión de evidence no puede persistirse dejando temporalmente `pending[]` o `contradictions[]` incoherentes con el nuevo conjunto operacional.
 
-Una única acción de UI que modifique varias entidades dentro de una misma transacción semántica produce un solo incremento de `semanticRevision`.
+Cuando una mutación afecta satisfaction de requirements, la UI debe construir el `nextSession` de forma que:
 
-Las operaciones puramente visuales o de navegación no modifican `semanticRevision`.
+```text
+requirement satisfecho
+→ cero OPEN UNRESOLVED_REQUIREMENT para ese requirement
+
+requirement no satisfecho
+→ exactamente un OPEN UNRESOLVED_REQUIREMENT para ese requirement
+```
+
+y aplicar las reglas de transición/recurrencia I8 vigentes.
+
+Cuando una mutación altera el conjunto operacional de contradicción `current + CONFIRMED + OBSERVED`, la UI debe reconciliar `contradictions[]` conforme a I9:
+
+```text
+aparece incompatibilidad actual
+→ existe episodio OPEN válido
+
+desaparece incompatibilidad actual
+→ OPEN → RESOLVED sólo conforme a transición I9
+
+reaparece posteriormente
+→ nuevo contradictionId
+→ previousContradictionId conforme a recurrencia I9
+```
+
+I12 no define una segunda lógica de pending ni contradicciones. Debe reutilizar los contratos y validadores canónicos existentes, incluyendo según corresponda:
+
+```text
+isApcRequirementSatisfied()
+validateApcPendingTransition()
+validateApcContradictions()
+validateApcContradictionTransition()
+validateApcSemanticTransition()
+```
+
+Una única acción de UI que modifique varias entidades dentro de la misma transacción semántica produce un solo incremento de `semanticRevision`.
+
+Las operaciones puramente visuales, navegación y relink local con fingerprint coincidente no modifican `semanticRevision`.
 
 I12 no permite editar manualmente `semanticRevision` ni los campos de binding de `objectiveAssessment` como controles independientes de UI.
 
-## 21. Integración con I11
+
+
+## 21. Unidad de edición y commit de autosave
+
+I12 distingue entre cambios efímeros de formulario y estado APC persistido.
+
+```text
+UI EDIT TRANSACTION
+→ cambios locales aún no committed
+→ estado efímero de formulario
+→ no APC_EVIDENCE
+→ no fuente normativa
+
+AUTOSAVE COMMIT
+→ compara contra la revisión current persistida
+→ si no cambió contenido normativo: no crea revisión
+→ si cambió contenido normativo: crea exactamente una nueva revisión I6 por evidenceId afectado
+→ materializa además cualquier reconciliación I8/I9 necesaria dentro de la misma transacción APC
+```
+
+El estado efímero de formulario puede existir sólo para agrupar la interacción previa al commit. No se presenta como evidencia, no participa en requirements, pending, contradictions, handoff, export ni PASS, y no constituye una segunda persistencia normativa.
+
+Una única interacción de autosave produce como máximo una nueva revisión por `evidenceId` afectado. Pulsaciones de tecla, movimientos de cursor o cambios intermedios de controles no generan revisiones por sí solos.
+
+Si el usuario cancela una edición antes del commit, el estado APC persistido permanece intacto.
+
+## 22. Integración con I11
 
 I12 no ejecuta identificación como efecto implícito de confirmar un dato.
 
@@ -476,7 +543,7 @@ APC evidence
 
 El resultado ACE no reescribe automáticamente la evidencia APC.
 
-## 22. Seguridad epistemológica
+## 23. Seguridad epistemológica
 
 La UI no puede:
 
@@ -489,7 +556,7 @@ La UI no puede:
 - resolver contradicciones por mayoría;
 - ocultar revisiones históricas necesarias para trazabilidad.
 
-## 23. Regresiones mínimas I12
+## 24. Regresiones mínimas I12
 
 La implementación debe demostrar como mínimo:
 
@@ -548,6 +615,12 @@ DRAFT revision 1 persistida
 → revision event 1→2
 → no overwrite destructivo
 
+T-I12-04B
+múltiples cambios intermedios antes de un autosave commit
+→ no generan revisión por cada keystroke/control change
+→ un commit crea como máximo una nueva revisión por evidenceId
+→ cancelar antes del commit deja APC_SESSION intacto
+
 T-I12-05
 CONFIRMED requiere acción humana explícita
 → entra a evidence canónica
@@ -604,9 +677,30 @@ contradiction
 → ambas evidencias visibles
 → UI no elige ganadora
 
+T-I12-14A
+mutación de evidence elimina incompatibilidad actual
+→ misma transacción aplica OPEN→RESOLVED conforme I9
+→ no deja contradiction OPEN stale
+
+T-I12-14B
+incompatibilidad aparece o reaparece
+→ misma transacción crea episodio OPEN válido conforme I9
+→ recurrence conserva previousContradictionId cuando corresponda
+
 T-I12-15
 required no satisfecho
 → pending visible
+
+T-I12-15A
+evidence current+CONFIRMED+OBSERVED satisfacía requirement
+→ nueva revisión deja de satisfacerlo
+→ misma transacción crea/recurre el OPEN UNRESOLVED_REQUIREMENT conforme I8
+→ no persiste snapshot intermedio incoherente
+
+T-I12-15B
+evidence nueva satisface requirement previamente pendiente
+→ misma transacción resuelve el pending conforme I8
+→ no persiste snapshot intermedio incoherente
 
 T-I12-16
 foto parcialmente revisada sin required pendiente para esa foto
@@ -625,6 +719,10 @@ working snapshot local
 
 T-I12-19
 mutación semántica
+→ nextSession reconcilia evidence + requirement satisfaction + pending + contradictions aplicables
+→ validateApcPendingTransition() pasa cuando I8 aplica
+→ validateApcContradictionTransition() pasa cuando I9 aplica
+→ validateApcSemanticTransition() pasa
 → semanticRevision incrementa exactamente una vez por transacción
 → objectiveAssessment se resetea a OPEN con bindings null
 
@@ -656,7 +754,7 @@ reimportar sesión sin bytes locales del asset
 → relink con fingerprint distinto es rechazado sin modificar el asset registrado
 ```
 
-## 24. Criterio de cierre I12
+## 25. Criterio de cierre I12
 
 I12 puede considerarse implementado cuando:
 
@@ -670,7 +768,9 @@ I12 puede considerarse implementado cuando:
 - calcula fingerprintSha256 sobre bytes originales exactos y lo conserva sin recálculo espurio al reimportar;
 - DRAFT y CONFIRMED están claramente separados;
 - cualquier edición de contenido de un DRAFT ya persistido usa una nueva revisión I6;
+- el autosave agrupa cambios efímeros y crea como máximo una revisión nueva por evidenceId y commit;
 - correcciones confirmadas usan revisiones;
+- toda mutación de evidence reconcilia requirements/pending/contradictions aplicables antes de persistir nextSession;
 - suggestions no proponen estados botánicos concretos;
 - requirements/pending/gaps/contradictions se visualizan sin reinterpretarlos;
 - acciones por lote permitidas son reversibles y no confirman estados botánicos;
@@ -678,7 +778,7 @@ I12 puede considerarse implementado cuando:
 - produce al menos una exportación APC normativa con `buildApcSessionExport(...).exportable = true`;
 - puede reimportar la sesión sin pérdida de trazabilidad;
 - distingue registro de asset de disponibilidad de bytes y permite relink sólo mediante fingerprint coincidente;
-- T-I12-01..24 + T-I12-03A..03D + T-I12-04A + T-I12-12A pasan;
+- T-I12-01..24 + T-I12-03A..03D + T-I12-04A..04B + T-I12-12A + T-I12-14A..14B + T-I12-15A..15B pasan;
 - I1–I11 permanecen verdes;
 - `npm test` pasa;
 - la auditoría del diff no encuentra blockers;
@@ -686,16 +786,16 @@ I12 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R6 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R5 y alinea el autosave DRAFT con I6, fija la conservación de fileRef ante duplicados y declara el relink coincidente como operación puramente local no semántica.
+R7 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R6 y hace atómica la reconciliación evidence→requirements/pending/contradictions, además de congelar la unidad de edición/commit del autosave.
 
 ### INCONSISTENCIAS
 
-R6 resuelve los hallazgos adversariales de R5: editar un DRAFT persistido crea una nueva revisión I6 en vez de sobrescribir; un duplicate fingerprint conserva el fileRef canónico ya registrado; y el relink con fingerprint coincidente no muta APC_SESSION, semanticRevision ni objectiveAssessment. Conserva deduplicación, desasignación segura, ACTIVE_REVIEW_TARGET y las correcciones previas.
+R7 resuelve los hallazgos adversariales de R6: una mutación de evidence no puede persistirse sin reconciliar I8/I9 en la misma transacción APC; y el autosave se define como commit explícito de cambios efímeros, evitando revisiones por keystroke o por cambio intermedio de control. Conserva versionado I6, deduplicación, desasignación segura, relink no semántico y las correcciones previas.
 
 ### VACÍOS / OMISIONES
 
-R6 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. La disponibilidad local de bytes y el relink siguen siendo estado/runtime de UI; no introducen campos canónicos nuevos ni mutaciones semánticas en APC_SESSION.
+R7 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. El estado efímero de formulario existe sólo antes del autosave commit y no es evidencia ni persistencia normativa.
 
 ### REDUNDANCIAS
 
-Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional. El autosave DRAFT tampoco introduce un buffer normativo paralelo: una vez persistido, evoluciona únicamente mediante la cadena de revisiones I6.
+Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot, estado efímero de formulario y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional. Pending y contradictions se actualizan en sus arrays canónicos, sin caches UI persistidos paralelos.
