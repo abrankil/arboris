@@ -1,7 +1,7 @@
 # Árboris — APC I12 Single-Screen UI Contract
 
 **ID:** `ARBORIS_APC_I12_UI_CONTRACT_R9`  
-**Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
+**Estado:** VALIDATED WITH ASC, FROZEN para implementación técnica.  
 **Ámbito:** Hito 16 / APC I12.  
 **Base canónica:** `main@54824efea9ec5806eef720fc07b6bdd44339d609`.  
 **Prerequisito:** I1–I11 integrados en `main`.  
@@ -857,6 +857,8 @@ I12 puede considerarse implementado cuando:
 ### AUDITORÍA
 
 R9 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R8 y congela las rutas de primera confirmación y reconfirmación de contenido corregido, evitando historia DRAFT ficticia y confirmation heredada.
+
+Auditoría adversarial final con ASC: PASS. No se detectan blockers contractuales abiertos en R9. Queda FROZEN como contrato base de la implementación I12; cualquier cambio posterior requiere nueva revisión contractual y regresión del diseño dependiente.
 
 ### INCONSISTENCIAS
 
