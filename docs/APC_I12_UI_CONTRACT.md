@@ -1,6 +1,6 @@
 # Árboris — APC I12 Single-Screen UI Contract
 
-**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R7`  
+**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R8`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12.  
 **Base canónica:** `main@54824efea9ec5806eef720fc07b6bdd44339d609`.  
@@ -216,6 +216,9 @@ Toda captura editable comienza o permanece en estado `DRAFT` hasta confirmación
 
 - requiere confirmación humana conforme al contrato APC;
 - entra a la capa de evidencia;
+- si el DRAFT previo ya estaba persistido como `APC_EVIDENCE`, la transición `DRAFT → CONFIRMED` se materializa como una nueva revisión I6 y nunca sobrescribe la revisión DRAFT existente;
+- la revisión CONFIRMED debe incorporar la metadata de confirmación humana exigida por el contrato APC;
+- la transición a CONFIRMED participa en la misma transacción APC atómica que la reconciliación I8/I9, `semanticRevision` y el reset de `objectiveAssessment`;
 - si posteriormente se corrige, debe producir una nueva revisión;
 - no destruye la revisión anterior.
 
@@ -520,9 +523,19 @@ AUTOSAVE COMMIT
 → si no cambió contenido normativo: no crea revisión
 → si cambió contenido normativo: crea exactamente una nueva revisión I6 por evidenceId afectado
 → materializa además cualquier reconciliación I8/I9 necesaria dentro de la misma transacción APC
+
+CONFIRM COMMIT
+→ si el DRAFT ya está persistido: crea exactamente una nueva revisión I6 CONFIRMED
+→ conserva la revisión DRAFT anterior current=false
+→ nueva revisión current=true
+→ incorpora confirmation humana válida
+→ crea revision event adyacente
+→ reconcilia I8/I9 y semanticRevision en la misma transacción
 ```
 
 El estado efímero de formulario puede existir sólo para agrupar la interacción previa al commit. No se presenta como evidencia, no participa en requirements, pending, contradictions, handoff, export ni PASS, y no constituye una segunda persistencia normativa.
+
+Para decidir si un autosave crea nueva revisión, "contenido normativo" significa el payload APC_EVIDENCE persistido excluyendo únicamente bookkeeping de versionado `revision` y `current`. Los campos de identidad I6 (`sessionId`, `photoId`, `photoEvidenceRef`, `individualId`, `characterId`) no son editables dentro del mismo `evidenceId`; si cualquiera cambia, corresponde un nuevo `evidenceId`. Los eventos de `revisions[]` son consecuencia del cambio y no se usan como entrada para decidir si existió cambio de contenido.
 
 Una única interacción de autosave produce como máximo una nueva revisión por `evidenceId` afectado. Pulsaciones de tecla, movimientos de cursor o cambios intermedios de controles no generan revisiones por sí solos.
 
@@ -618,12 +631,23 @@ DRAFT revision 1 persistida
 T-I12-04B
 múltiples cambios intermedios antes de un autosave commit
 → no generan revisión por cada keystroke/control change
+→ comparación de cambio excluye sólo revision/current
+→ identidad I6 no cambia dentro del mismo evidenceId
 → un commit crea como máximo una nueva revisión por evidenceId
 → cancelar antes del commit deja APC_SESSION intacto
 
 T-I12-05
-CONFIRMED requiere acción humana explícita
-→ entra a evidence canónica
+DRAFT ya persistido
+→ acción humana explícita Confirmar
+→ revisión DRAFT anterior retenida current=false
+→ nueva revisión CONFIRMED current=true
+→ confirmation.confirmedByType = human
+→ confirmation.confirmedById presente
+→ confirmation.confirmedAt presente
+→ revision event adyacente
+→ reconciliación I8/I9 en la misma transacción
+→ semanticRevision/objectiveAssessment conforme I10
+→ no overwrite destructivo
 
 T-I12-06
 corrección de CONFIRMED
@@ -768,7 +792,9 @@ I12 puede considerarse implementado cuando:
 - calcula fingerprintSha256 sobre bytes originales exactos y lo conserva sin recálculo espurio al reimportar;
 - DRAFT y CONFIRMED están claramente separados;
 - cualquier edición de contenido de un DRAFT ya persistido usa una nueva revisión I6;
+- confirmar un DRAFT ya persistido crea una nueva revisión CONFIRMED con confirmation humana y revision event;
 - el autosave agrupa cambios efímeros y crea como máximo una revisión nueva por evidenceId y commit;
+- la comparación de cambio normativo excluye sólo revision/current y respeta la identidad inmutable I6;
 - correcciones confirmadas usan revisiones;
 - toda mutación de evidence reconcilia requirements/pending/contradictions aplicables antes de persistir nextSession;
 - suggestions no proponen estados botánicos concretos;
@@ -786,16 +812,16 @@ I12 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R7 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R6 y hace atómica la reconciliación evidence→requirements/pending/contradictions, además de congelar la unidad de edición/commit del autosave.
+R8 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R7 y congela la transición DRAFT persistido → CONFIRMED como nueva revisión I6, además de precisar qué significa cambio de contenido normativo en autosave.
 
 ### INCONSISTENCIAS
 
-R7 resuelve los hallazgos adversariales de R6: una mutación de evidence no puede persistirse sin reconciliar I8/I9 en la misma transacción APC; y el autosave se define como commit explícito de cambios efímeros, evitando revisiones por keystroke o por cambio intermedio de control. Conserva versionado I6, deduplicación, desasignación segura, relink no semántico y las correcciones previas.
+R8 resuelve los hallazgos adversariales de R7: confirmar un DRAFT ya persistido crea una nueva revisión CONFIRMED con metadata humana y reconciliación atómica I8/I9/I10; y la detección de cambio normativo compara el payload APC_EVIDENCE excluyendo sólo revision/current, sin usar eventos de revisión como señal de cambio. Conserva atomicidad, versionado I6, deduplicación, desasignación segura, relink no semántico y las correcciones previas.
 
 ### VACÍOS / OMISIONES
 
-R7 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. El estado efímero de formulario existe sólo antes del autosave commit y no es evidencia ni persistencia normativa.
+R8 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. El estado efímero de formulario existe sólo antes del autosave/confirm commit y no es evidencia ni persistencia normativa.
 
 ### REDUNDANCIAS
 
-Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot, estado efímero de formulario y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional. Pending y contradictions se actualizan en sus arrays canónicos, sin caches UI persistidos paralelos.
+Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot, estado efímero de formulario y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional. Pending y contradictions se actualizan en sus arrays canónicos, sin caches UI persistidos paralelos. La confirmación no introduce estados intermedios como CONFIRMING/PENDING_CONFIRMATION; DRAFT y CONFIRMED siguen siendo los únicos lifecycle canónicos y su transición persistida se expresa mediante I6.
