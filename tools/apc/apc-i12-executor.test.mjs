@@ -1,4 +1,5 @@
 import test from 'node:test';
+import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {
   ApcI12CommandExecutor,
@@ -598,5 +599,70 @@ test('TD-I12-65 prefilled DRAFT rejects missing or unknown prior-observation ref
   assert.equal(unknown.status, 'REJECTED');
   assert.match(unknown.errors.join(' '), /Unknown acquisition.basis.photoEvidenceRef/);
   assert.equal(executor.snapshot().evidence.length, 0);
+  await executor.close();
+});
+
+
+test('T-I12-10 suggestion derivation permits inspection guidance but never botanical state', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const match = source.match(/export function deriveInspectionTargetSuggestions\([^]*?\n}\n\nfunction suggestInspectionTargets/);
+  assert.ok(match, 'pure suggestion derivation must remain exported for regression');
+  const body = match[0];
+  assert.doesNotMatch(body, /observedState/);
+
+  const dataset = {
+    allCharacters: [
+      { characterId: 'CH-003', name: 'Margen', description: 'Inspeccionar margen' },
+      { characterId: 'CH-004', name: 'Ápice', description: 'Inspeccionar ápice' },
+    ],
+  };
+  const session = {
+    requirements: [{
+      requirementId: 'REQ-SUGGEST',
+      required: true,
+      scopeLevel: 'INDIVIDUAL',
+      scopeRef: 'IND-001',
+      characterId: 'CH-003',
+    }],
+  };
+
+  const derive = Function('session','dataset','activePhotoId','activeIndividualId',
+    body
+      .replace(/^export function deriveInspectionTargetSuggestions\([^)]*\) \{/, '')
+      .replace(/\n}\n\nfunction suggestInspectionTargets$/, '')
+  );
+  const suggestions = derive(session, dataset, null, 'IND-001');
+  assert.deepEqual(suggestions, [{
+    characterId: 'CH-003',
+    structure: 'Margen',
+    help: 'Inspeccionar margen',
+  }]);
+  assert.equal(Object.hasOwn(suggestions[0], 'observedState'), false);
+});
+
+test('TD-I12-58 SUGGEST_INSPECTION_TARGETS is runtime-only and cannot mutate APC_SESSION', async () => {
+  const { executor } = await setup();
+  const before = executor.snapshot();
+  const beforeRaw = JSON.stringify(before);
+  const beforeRevision = before.semanticRevision;
+
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const match = source.match(/export function deriveInspectionTargetSuggestions\([^]*?\n}\n\nfunction suggestInspectionTargets/);
+  assert.ok(match);
+  const body = match[0];
+  const derive = Function('session','dataset','activePhotoId','activeIndividualId',
+    body
+      .replace(/^export function deriveInspectionTargetSuggestions\([^)]*\) \{/, '')
+      .replace(/\n}\n\nfunction suggestInspectionTargets$/, '')
+  );
+  const dataset = {
+    allCharacters: [{ characterId: 'CH-003', name: 'Margen', description: 'Inspeccionar margen' }],
+  };
+  const suggestions = derive(executor.snapshot(), dataset, null, null);
+
+  assert.equal(suggestions.length, 1);
+  assert.equal(Object.hasOwn(suggestions[0], 'observedState'), false);
+  assert.equal(JSON.stringify(executor.snapshot()), beforeRaw);
+  assert.equal(executor.snapshot().semanticRevision, beforeRevision);
   await executor.close();
 });
