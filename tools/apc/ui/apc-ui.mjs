@@ -353,6 +353,7 @@ function render() {
     const selector = document.createElement('input');
     selector.type = 'checkbox';
     selector.checked = state.selectedPhotoIds.has(photo.photoId);
+    selector.disabled = !inWriteMode();
     selector.setAttribute('aria-label', `Seleccionar ${photo.photoId} para batch`);
     selector.onclick = event => event.stopPropagation();
     selector.onchange = () => togglePhotoSelection(photo.photoId);
