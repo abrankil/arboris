@@ -1215,14 +1215,21 @@ test('T-CTX-38 drain waits for every OLD lease and unadmitted work never enters 
 
 test('T-CTX-34 NEEDS_DECISION flow releases OLD lease before human decision and retry uses runWriterIntent', async () => {
   const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
-  const start = source.indexOf('async function runWriterIntent');
-  const end = source.indexOf('\nfunction patchFromBuffer', start);
-  const body = source.slice(start, end);
-  assert.match(body, /finally\s*\{\s*state\.writerIntentLeases\.release\(lease\)/);
-  const finallyAt = body.indexOf('finally');
-  const decisionAt = body.indexOf("result.status === 'NEEDS_DECISION'");
-  assert.ok(finallyAt >= 0 && decisionAt > finallyAt);
-  assert.match(body, /result = await runWriterIntent\(retryIntent, \{ allowDecisionRetry: false \}\)/);
+
+  const leaseStart = source.indexOf('async function withWriterIntent');
+  const leaseEnd = source.indexOf('\nasync function applyDecisionFlow', leaseStart);
+  const leaseBody = source.slice(leaseStart, leaseEnd);
+  assert.match(leaseBody, /finally\s*\{\s*state\.writerIntentLeases\.release\(lease\)/);
+
+  const runStart = source.indexOf('async function runWriterIntent');
+  const runEnd = source.indexOf('\nasync function runCompositeWriterIntent', runStart);
+  const runBody = source.slice(runStart, runEnd);
+  assert.ok(runBody.indexOf('await withWriterIntent') < runBody.indexOf('await applyDecisionFlow'));
+
+  const decisionStart = source.indexOf('async function applyDecisionFlow');
+  const decisionEnd = source.indexOf('\nfunction reportWriterResult', decisionStart);
+  const decisionBody = source.slice(decisionStart, decisionEnd);
+  assert.match(decisionBody, /return runWriterIntent\(retry, \{ allowDecisionRetry: false \}\)/);
 });
 
 test('T-CTX-40 autosave and replacement use lease authority rather than autosaveInFlight as close barrier', async () => {
