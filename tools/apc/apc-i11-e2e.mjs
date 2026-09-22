@@ -10,7 +10,11 @@ import {
 import { validateApcSession } from './session-contract.mjs';
 
 function compareText(a, b) {
-  return String(a ?? '').localeCompare(String(b ?? ''));
+  const left = String(a ?? '');
+  const right = String(b ?? '');
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return 0;
 }
 
 function evidenceIdentity(item) {
