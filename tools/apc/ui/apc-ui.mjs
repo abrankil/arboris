@@ -176,7 +176,8 @@ function resetExecutor() {
 function disableWrites(disabled) {
   for (const id of [
     'photoFiles','createIndividual','assignPhoto','unassignPhoto',
-    'saveDraft','confirmEvidence','addRequirement'
+    'saveDraft','confirmEvidence','addRequirement',
+    'batchAddInbox','batchRemoveInbox','undoBatch'
   ]) $(id).disabled = disabled;
 }
 
@@ -327,7 +328,8 @@ function render() {
   $('sessionLabel').textContent = session?.sessionId ?? '';
   disableWrites(!inWriteMode());
   $('actorId').disabled = Boolean(session);
-  const undoValid = batchUndoIsValid(state.batchUndo, session, state.executor?.sessionEpoch);
+  const undoValid = inWriteMode() &&
+    batchUndoIsValid(state.batchUndo, session, state.executor?.sessionEpoch);
   if (state.batchUndo && !undoValid) state.batchUndo = null;
   $('undoBatch').disabled = !undoValid;
 
@@ -822,8 +824,13 @@ async function undoLastBatch() {
   }
   const intent = structuredClone(descriptor.inverseCommand);
   const result = await dispatch(commandBase(intent));
-  if (result.status === 'COMMITTED' || result.status === 'NO_OP' || result.status === 'REJECTED' || result.status === 'STALE_COMMAND') {
+  if (result.status === 'COMMITTED' || result.status === 'NO_OP') {
     state.batchUndo = null;
+  } else {
+    const current = state.executor?.snapshot();
+    if (!batchUndoIsValid(state.batchUndo, current, state.executor?.sessionEpoch)) {
+      state.batchUndo = null;
+    }
   }
   render();
 }
