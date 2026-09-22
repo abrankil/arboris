@@ -950,7 +950,7 @@ test('T-I12-12 filter, active target changes, and selection remain separate UI-o
 
 
 test('PHOTO_UI_STATUS_V0.2 derives only PHOTO-scoped unresolved requirements and current evidence', async () => {
-  const { derivePhotoUiStatus } = await import('./ui/apc-ui.mjs');
+  const { derivePhotoUiStatus } = await import('./ui/apc-ui-status.mjs');
   const photo = { photoId: 'PHOTO-1', individualRefs: ['IND-1'] };
   const base = { evidence: [], pending: [] };
   const status = (evidence = [], pending = []) =>
@@ -994,7 +994,7 @@ test('PHOTO_UI_STATUS_V0.2 derives only PHOTO-scoped unresolved requirements and
 });
 
 test('PHOTO_UI_STATUS_V0.2 derivation is pure and does not mutate APC session', async () => {
-  const { derivePhotoUiStatus } = await import('./ui/apc-ui.mjs');
+  const { derivePhotoUiStatus } = await import('./ui/apc-ui-status.mjs');
   const photo = { photoId: 'PHOTO-1', individualRefs: ['IND-1'] };
   const session = {
     semanticRevision: 7,
