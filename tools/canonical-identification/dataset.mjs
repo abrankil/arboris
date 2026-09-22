@@ -223,39 +223,15 @@ function buildVariabilityIndex(variabilityEntries) {
   return bySpecies;
 }
 
-export async function loadCanonicalDataset(options = {}) {
-  // Node-only filesystem loading is resolved lazily so the pure dataset
-  // accessors in this module remain importable by the local I12 browser harness.
-  const [{ readFile }, pathModule, urlModule] = await Promise.all([
-    import('node:fs/promises'),
-    import('node:path'),
-    import('node:url'),
-  ]);
-  const { dirname, join, resolve } = pathModule;
-  const { fileURLToPath } = urlModule;
-  const here = dirname(fileURLToPath(import.meta.url));
-  const repoRoot = resolve(here, '..', '..');
-  const botanicalDir = options.botanicalDir ?? join(repoRoot, 'data', 'botanical');
-  const readJson = async path => JSON.parse(await readFile(path, 'utf8'));
-
-  const [
-    metadata,
-    species,
-    characters,
-    speciesCharacters,
-    characterVariability,
-    contexts,
-    sources,
-  ] = await Promise.all([
-    readJson(join(botanicalDir, 'metadata.json')),
-    readJson(join(botanicalDir, 'species.json')),
-    readJson(join(botanicalDir, 'characters.json')),
-    readJson(join(botanicalDir, 'species_characters.json')),
-    readJson(join(botanicalDir, 'character_variability.json')),
-    readJson(join(botanicalDir, 'contexts.json')),
-    readJson(join(botanicalDir, 'sources.json')),
-  ]);
-
+export function buildCanonicalDatasetFromRaw({
+  metadata,
+  species,
+  characters,
+  speciesCharacters,
+  characterVariability,
+  contexts,
+  sources,
+}) {
   const computableStatus =
     metadata.computable_status ?? 'activo';
 
@@ -393,6 +369,51 @@ export async function loadCanonicalDataset(options = {}) {
       sourceFile: metadata.source_file ?? null,
     },
   };
+
+}
+
+export async function loadCanonicalDataset(options = {}) {
+  // Node-only filesystem loading is resolved lazily so the pure dataset
+  // accessors in this module remain importable by the local I12 browser harness.
+  const [{ readFile }, pathModule, urlModule] = await Promise.all([
+    import('node:fs/promises'),
+    import('node:path'),
+    import('node:url'),
+  ]);
+  const { dirname, join, resolve } = pathModule;
+  const { fileURLToPath } = urlModule;
+  const here = dirname(fileURLToPath(import.meta.url));
+  const repoRoot = resolve(here, '..', '..');
+  const botanicalDir = options.botanicalDir ?? join(repoRoot, 'data', 'botanical');
+  const readJson = async path => JSON.parse(await readFile(path, 'utf8'));
+
+  const [
+    metadata,
+    species,
+    characters,
+    speciesCharacters,
+    characterVariability,
+    contexts,
+    sources,
+  ] = await Promise.all([
+    readJson(join(botanicalDir, 'metadata.json')),
+    readJson(join(botanicalDir, 'species.json')),
+    readJson(join(botanicalDir, 'characters.json')),
+    readJson(join(botanicalDir, 'species_characters.json')),
+    readJson(join(botanicalDir, 'character_variability.json')),
+    readJson(join(botanicalDir, 'contexts.json')),
+    readJson(join(botanicalDir, 'sources.json')),
+  ]);
+
+  return buildCanonicalDatasetFromRaw({
+    metadata,
+    species,
+    characters,
+    speciesCharacters,
+    characterVariability,
+    contexts,
+    sources,
+  });
 }
 
 export function getRelation(
