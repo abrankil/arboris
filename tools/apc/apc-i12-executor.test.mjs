@@ -270,3 +270,34 @@ test('import conflict never overwrites different durable snapshot', async () => 
   const durable = JSON.parse(await persistence.load(session.sessionId));
   assert.equal(durable.objective, session.objective);
 });
+
+
+test('invalid import leaves the current writer active and unchanged', async () => {
+  const { executor } = await setup();
+  const before = executor.snapshot();
+  const invalid = structuredClone(before);
+  invalid.photos = 'not-an-array';
+
+  const imported = await executor.importSession(invalid);
+  assert.equal(imported.status, 'READ_ONLY');
+  assert.deepEqual(executor.snapshot(), before);
+
+  const r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  assert.equal(r.status, 'COMMITTED');
+  await executor.close();
+});
+
+test('conflicting import leaves the current writer active and unchanged', async () => {
+  const { executor } = await setup();
+  const before = executor.snapshot();
+  const conflict = structuredClone(before);
+  conflict.objective = 'conflict';
+
+  const imported = await executor.importSession(conflict);
+  assert.equal(imported.status, 'IMPORT_CONFLICT');
+  assert.deepEqual(executor.snapshot(), before);
+
+  const r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  assert.equal(r.status, 'COMMITTED');
+  await executor.close();
+});
