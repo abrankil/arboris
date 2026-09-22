@@ -535,26 +535,36 @@ function priorObservationCandidates(session=currentSession()) {
   );
 }
 
-function suggestInspectionTargets() {
-  const session = currentSession();
-  if (!session || !state.dataset) return message('Sugerencias requieren sesión y dataset');
+export function deriveInspectionTargetSuggestions({ session, dataset, activePhotoId = null, activeIndividualId = null }) {
+  if (!session || !dataset) return [];
 
   const requiredIds = new Set((session.requirements ?? [])
     .filter(item => item.required === true)
     .filter(item =>
       item.scopeLevel === 'SESSION' ||
-      (item.scopeLevel === 'INDIVIDUAL' && item.scopeRef === state.activeIndividualId) ||
-      (item.scopeLevel === 'PHOTO' && item.scopeRef === state.activePhotoId)
+      (item.scopeLevel === 'INDIVIDUAL' && item.scopeRef === activeIndividualId) ||
+      (item.scopeLevel === 'PHOTO' && item.scopeRef === activePhotoId)
     )
     .map(item => item.characterId));
 
-  const candidates = (state.dataset.allCharacters ?? [])
+  return (dataset.allCharacters ?? [])
     .filter(character => requiredIds.size === 0 || requiredIds.has(character.characterId))
     .map(character => ({
       characterId: character.characterId,
       structure: character.structure ?? character.organ ?? character.name ?? null,
       help: character.description ?? character.observationInstruction ?? null,
     }));
+}
+
+function suggestInspectionTargets() {
+  const session = currentSession();
+  if (!session || !state.dataset) return message('Sugerencias requieren sesión y dataset');
+  const candidates = deriveInspectionTargetSuggestions({
+    session,
+    dataset: state.dataset,
+    activePhotoId: state.activePhotoId,
+    activeIndividualId: state.activeIndividualId,
+  });
 
   // Runtime-only descriptor. Deliberately no observedState field and no form
   // mutation: automatic suggestions may guide inspection, never infer state.
