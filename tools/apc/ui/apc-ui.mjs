@@ -515,53 +515,48 @@ function leaseAuthorizesCurrentExecutor(lease) {
   });
 }
 
-async function dispatchOnce(intent, lease) {
+async function dispatchAdmitted(intent, lease) {
   if (!leaseAuthorizesCurrentExecutor(lease)) return blockedWriterResult();
   const command = state.executor.commandBase(intent);
   return state.executor.dispatch(command);
 }
 
-async function runWriterIntent(intentFactory, { allowDecisionRetry = true } = {}) {
+async function withWriterIntent(operation) {
   const lease = beginWriterIntent();
   if (!lease) return blockedWriterResult();
-
-  let result;
   try {
-    const intent = typeof intentFactory === 'function' ? await intentFactory(lease) : intentFactory;
-    if (!leaseAuthorizesCurrentExecutor(lease)) return blockedWriterResult();
-    result = await dispatchOnce(intent, lease);
+    return await operation(lease);
   } finally {
     state.writerIntentLeases.release(lease);
   }
+}
 
-  // Human decision is deliberately outside the OLD lease. A retry is a new
-  // normative intent and therefore requires a fresh lease and command base.
+async function applyDecisionFlow(result, retryIntent, { allowDecisionRetry = true } = {}) {
   if (
-    result.status === 'NEEDS_DECISION' &&
-    allowDecisionRetry &&
-    (result.decisionsRequired ?? []).every(item => item.type === 'PENDING_CRITICAL')
-  ) {
-    const pendingCriticalByRequirement = {};
-    for (const decision of result.decisionsRequired) {
-      pendingCriticalByRequirement[decision.requirementId] = window.confirm(
-        `Requirement ${decision.requirementId} quedó insatisfecho.\n\nOK = pending crítico\nCancelar = pending no crítico`,
-      );
-    }
-    const retryIntent = structuredClone(typeof intentFactory === 'function' ? null : intentFactory);
-    if (!retryIntent) {
-      result = blockedWriterResult();
-    } else {
-      delete retryIntent.targetSessionId;
-      delete retryIntent.baseSessionEpoch;
-      delete retryIntent.baseCommitGeneration;
-      retryIntent.pendingCriticalByRequirement = {
-        ...(retryIntent.pendingCriticalByRequirement ?? {}),
-        ...pendingCriticalByRequirement,
-      };
-      result = await runWriterIntent(retryIntent, { allowDecisionRetry: false });
-    }
-  }
+    result.status !== 'NEEDS_DECISION' ||
+    !allowDecisionRetry ||
+    !(result.decisionsRequired ?? []).every(item => item.type === 'PENDING_CRITICAL')
+  ) return result;
 
+  // Human interaction is outside the prior lease. Retry is a new writer intent.
+  const pendingCriticalByRequirement = {};
+  for (const decision of result.decisionsRequired) {
+    pendingCriticalByRequirement[decision.requirementId] = window.confirm(
+      `Requirement ${decision.requirementId} quedó insatisfecho.\n\nOK = pending crítico\nCancelar = pending no crítico`,
+    );
+  }
+  const retry = structuredClone(retryIntent);
+  delete retry.targetSessionId;
+  delete retry.baseSessionEpoch;
+  delete retry.baseCommitGeneration;
+  retry.pendingCriticalByRequirement = {
+    ...(retry.pendingCriticalByRequirement ?? {}),
+    ...pendingCriticalByRequirement,
+  };
+  return runWriterIntent(retry, { allowDecisionRetry: false });
+}
+
+function reportWriterResult(result) {
   if (result.status !== 'COMMITTED' && result.status !== 'NO_OP') {
     message(`${result.status}: ${(result.errors ?? []).join('; ') || JSON.stringify(result.decisionsRequired ?? [])}`);
   } else {
@@ -569,6 +564,19 @@ async function runWriterIntent(intentFactory, { allowDecisionRetry = true } = {}
   }
   render();
   return result;
+}
+
+async function runWriterIntent(intent, { allowDecisionRetry = true } = {}) {
+  let result = await withWriterIntent(lease => dispatchAdmitted(intent, lease));
+  result = await applyDecisionFlow(result, intent, { allowDecisionRetry });
+  return reportWriterResult(result);
+}
+
+async function runCompositeWriterIntent(operation, retryIntentFactory = null) {
+  let result = await withWriterIntent(operation);
+  const retryIntent = retryIntentFactory ? retryIntentFactory(result) : null;
+  if (retryIntent) result = await applyDecisionFlow(result, retryIntent);
+  return reportWriterResult(result);
 }
 
 function patchFromBuffer(buffer, { confirming = false } = {}) {
@@ -782,47 +790,49 @@ async function saveDraft() {
 async function confirmEvidence() {
   if (!activePhoto() || !activeIndividual()) return message('Falta ACTIVE_REVIEW_TARGET');
 
-  const key = bufferKey();
-  captureActiveEditBuffer();
+  let retryIntent = null;
+  const result = await runCompositeWriterIntent(async lease => {
+    const key = bufferKey();
+    captureActiveEditBuffer();
 
-  // Confirm is a barrier, but an editBuffer that has never started autosave
-  // must remain ephemeral: T-I12-05A requires direct revision 1 CONFIRMED.
-  // Only an autosave already in flight is awaited; a pending debounce is
-  // cancelled and is not materialized merely because the user confirmed.
-  const timer = state.autosaveTimers.get(key);
-  if (timer) {
-    clearTimeout(timer);
-    state.autosaveTimers.delete(key);
-  }
-  const inFlight = state.autosaveInFlight.get(key);
-  if (inFlight) {
-    const draftResult = await inFlight;
-    if (draftResult && draftResult.status !== 'COMMITTED' && draftResult.status !== 'NO_OP') {
-      return message('Confirmación bloqueada: el DRAFT previo no pudo persistirse');
+    const timer = state.autosaveTimers.get(key);
+    if (timer) {
+      clearTimeout(timer);
+      state.autosaveTimers.delete(key);
     }
-  }
+    const inFlight = state.autosaveInFlight.get(key);
+    if (inFlight) {
+      const draftResult = await inFlight;
+      if (draftResult && draftResult.status !== 'COMMITTED' && draftResult.status !== 'NO_OP') {
+        return { status: 'READ_ONLY', session: currentSession(), errors: ['DRAFT previo no pudo persistirse'], warnings: [], decisionsRequired: [] };
+      }
+    }
 
-  const buffer = state.editBuffers.get(key) ?? readFormBuffer();
-  if (!bufferIsPersistible(buffer)) {
-    return message('Confirmación bloqueada: evidencia incompleta');
-  }
+    const buffer = state.editBuffers.get(key) ?? readFormBuffer();
+    if (!bufferIsPersistible(buffer)) {
+      return { status: 'READ_ONLY', session: currentSession(), errors: ['evidencia incompleta'], warnings: [], decisionsRequired: [] };
+    }
 
-  const ev = currentEvidence();
-  const type = ev?.lifecycleStatus === 'CONFIRMED' ? 'EDIT_AND_RECONFIRM' : 'CONFIRM_EVIDENCE';
-  const result = await runWriterIntent({
-    type,
-    evidenceId: ev?.evidenceId ?? null,
-    baseRevision: ev?.revision ?? null,
-    targetPhotoId: state.activePhotoId,
-    targetIndividualId: state.activeIndividualId,
-    characterId: state.formCharacterId ?? $('character').value,
-    patch: patchFromBuffer(buffer, { confirming: true }),
-    confirmation: {
-      confirmedByType: 'human',
-      confirmedById: actorId(),
-      confirmedAt: new Date().toISOString(),
-    },
-  });
+    const ev = currentEvidence();
+    const type = ev?.lifecycleStatus === 'CONFIRMED' ? 'EDIT_AND_RECONFIRM' : 'CONFIRM_EVIDENCE';
+    retryIntent = {
+      type,
+      evidenceId: ev?.evidenceId ?? null,
+      baseRevision: ev?.revision ?? null,
+      targetPhotoId: state.activePhotoId,
+      targetIndividualId: state.activeIndividualId,
+      characterId: state.formCharacterId ?? $('character').value,
+      patch: patchFromBuffer(buffer, { confirming: true }),
+      confirmation: {
+        confirmedByType: 'human',
+        confirmedById: actorId(),
+        confirmedAt: new Date().toISOString(),
+      },
+    };
+    return dispatchAdmitted(retryIntent, lease);
+  }, result => result.status === 'NEEDS_DECISION' ? retryIntent : null);
+
+  const key = bufferKey();
   if (result.status === 'COMMITTED' || result.status === 'NO_OP') state.editBuffers.delete(key);
 }
 
@@ -893,13 +903,15 @@ async function undoLastBatch() {
 }
 
 async function setSessionStatus(status) {
-  const key = bufferKey();
-  captureActiveEditBuffer();
-  const flushed = await flushAutosave(key);
-  if (flushed && flushed.status !== 'COMMITTED' && flushed.status !== 'NO_OP') {
-    return message('Cambio de estado bloqueado: DRAFT previo no persistido');
-  }
-  await runWriterIntent({ type:'SET_SESSION_STATUS', status });
+  await runCompositeWriterIntent(async lease => {
+    const key = bufferKey();
+    captureActiveEditBuffer();
+    const flushed = await flushAutosave(key);
+    if (flushed && flushed.status !== 'COMMITTED' && flushed.status !== 'NO_OP') {
+      return { status: 'READ_ONLY', session: currentSession(), errors: ['DRAFT previo no persistido'], warnings: [], decisionsRequired: [] };
+    }
+    return dispatchAdmitted({ type:'SET_SESSION_STATUS', status }, lease);
+  });
 }
 
 export async function replaceWriterContext(newDependencies) {
@@ -987,17 +999,18 @@ async function sessionSwitchBarrier(action) {
 }
 
 async function ingestFiles(files) {
-  if (!inWriteMode()) return;
   const staged = [];
-  for (const file of files) {
-    staged.push(await stageApcPhotoFile(file));
-  }
-  const result = await runWriterIntent({
-    type:'INGEST_PHOTOS',
-    photos: staged.map(item => ({
-      fileRef:item.fileRef,
-      fingerprintSha256:item.fingerprintSha256,
-    })),
+  const result = await runCompositeWriterIntent(async lease => {
+    for (const file of files) {
+      staged.push(await stageApcPhotoFile(file));
+    }
+    return dispatchAdmitted({
+      type:'INGEST_PHOTOS',
+      photos: staged.map(item => ({
+        fileRef:item.fileRef,
+        fingerprintSha256:item.fingerprintSha256,
+      })),
+    }, lease);
   });
   if (result.status !== 'COMMITTED' && result.status !== 'NO_OP') return;
 
