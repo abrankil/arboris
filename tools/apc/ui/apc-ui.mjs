@@ -1035,35 +1035,37 @@ async function sessionSwitchBarrier(action) {
 
 async function ingestFiles(files) {
   const staged = [];
-  const result = await runCompositeWriterIntent(async lease => {
+  await runCompositeWriterIntent(async lease => {
     for (const file of files) {
       staged.push(await stageApcPhotoFile(file));
     }
-    return dispatchAdmitted({
+
+    const result = await dispatchAdmitted({
       type:'INGEST_PHOTOS',
       photos: staged.map(item => ({
         fileRef:item.fileRef,
         fingerprintSha256:item.fingerprintSha256,
       })),
     }, lease);
-  });
-  if (result.status !== 'COMMITTED' && result.status !== 'NO_OP') return;
 
-  const session = state.executor.snapshot();
-  for (const item of staged) {
-    const pe = session.photoEvidence.find(x =>
-      x.sourcePhoto.fingerprintSha256.toLowerCase() === item.fingerprintSha256.toLowerCase()
-    );
-    if (!pe) continue;
-    try {
-      state.assets.attach(pe.sourcePhoto.photoRef, item.file);
-    } catch (error) {
-      message(`asset runtime: ${error.message}`);
+    if (result.status !== 'COMMITTED' && result.status !== 'NO_OP') return result;
+
+    const session = state.executor.snapshot();
+    for (const item of staged) {
+      const pe = session.photoEvidence.find(x =>
+        x.sourcePhoto.fingerprintSha256.toLowerCase() === item.fingerprintSha256.toLowerCase()
+      );
+      if (!pe) continue;
+      try {
+        state.assets.attach(pe.sourcePhoto.photoRef, item.file);
+      } catch (error) {
+        message(`asset runtime: ${error.message}`);
+      }
     }
-  }
-  render();
+    render();
+    return result;
+  });
 }
-
 $('newSession').onclick = async () => {
   await sessionSwitchBarrier(async () => {
     const result = await state.executor.bootstrap({ objective:$('objective').value.trim() || 'Revisión APC I12' });

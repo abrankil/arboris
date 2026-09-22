@@ -1441,3 +1441,83 @@ test('T-CTX-57 new/open/import callbacks return their result to the session swit
     assert.match(body, /return result;/);
   }
 });
+
+test('T-CTX-58 INGEST runtime post-commit effects remain inside composite lease lifecycle', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function ingestFiles');
+  const end = source.indexOf("\n$('newSession')", start);
+  const body = source.slice(start, end);
+
+  const compositeAt = body.indexOf('await runCompositeWriterIntent(async lease =>');
+  const stagingAt = body.indexOf('await stageApcPhotoFile');
+  const dispatchAt = body.indexOf('const result = await dispatchAdmitted');
+  const snapshotAt = body.indexOf('state.executor.snapshot()');
+  const attachAt = body.indexOf('state.assets.attach');
+  const renderAt = body.indexOf('render();');
+  const returnAt = body.indexOf('return result;', renderAt);
+
+  assert.ok(compositeAt >= 0);
+  assert.ok(stagingAt > compositeAt);
+  assert.ok(dispatchAt > stagingAt);
+  assert.ok(snapshotAt > dispatchAt);
+  assert.ok(attachAt > snapshotAt);
+  assert.ok(renderAt > attachAt);
+  assert.ok(returnAt > renderAt);
+});
+
+test('T-CTX-59 INGEST asset runtime failure is contained after APC commit', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function ingestFiles');
+  const end = source.indexOf("\n$('newSession')", start);
+  const body = source.slice(start, end);
+
+  const guardAt = body.indexOf(
+    "if (result.status !== 'COMMITTED' && result.status !== 'NO_OP') return result;"
+  );
+  const tryAt = body.indexOf('try {', guardAt);
+  const attachAt = body.indexOf('state.assets.attach', tryAt);
+  const catchAt = body.indexOf('} catch (error) {', attachAt);
+  const warningAt = body.indexOf('message(`asset runtime: ${error.message}`);', catchAt);
+  const returnAt = body.indexOf('return result;', warningAt);
+
+  assert.ok(guardAt >= 0);
+  assert.ok(tryAt > guardAt);
+  assert.ok(attachAt > tryAt);
+  assert.ok(catchAt > attachAt);
+  assert.ok(warningAt > catchAt);
+  assert.ok(returnAt > warningAt);
+});
+
+test('T-CTX-60 composite NEEDS_DECISION releases prior lease before human wait and retry', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+
+  const writerStart = source.indexOf('async function withWriterIntent');
+  const writerEnd = source.indexOf('\nasync function applyDecisionFlow', writerStart);
+  const writerBody = source.slice(writerStart, writerEnd);
+
+  assert.match(
+    writerBody,
+    /finally\s*\{\s*state\.writerIntentLeases\.release\(lease\)/
+  );
+
+  const compositeStart = source.indexOf('async function runCompositeWriterIntent');
+  const compositeEnd = source.indexOf('\nfunction patchFromBuffer', compositeStart);
+  const compositeBody = source.slice(compositeStart, compositeEnd);
+
+  assert.ok(
+    compositeBody.indexOf('await withWriterIntent(operation)') <
+    compositeBody.indexOf('await applyDecisionFlow')
+  );
+
+  const decisionStart = source.indexOf('async function applyDecisionFlow');
+  const decisionEnd = source.indexOf('\nfunction reportWriterResult', decisionStart);
+  const decisionBody = source.slice(decisionStart, decisionEnd);
+
+  const confirmAt = decisionBody.indexOf('window.confirm(');
+  const retryAt = decisionBody.indexOf(
+    'return runWriterIntent(retry, { allowDecisionRetry: false })'
+  );
+
+  assert.ok(confirmAt >= 0);
+  assert.ok(retryAt > confirmAt);
+});
