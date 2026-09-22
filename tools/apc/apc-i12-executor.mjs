@@ -289,6 +289,7 @@ export class ApcI12CommandExecutor {
   }
 
   async importSession(raw) {
+    const previousAccepting = this.accepting;
     this.accepting = false;
     await this.tail;
 
@@ -296,39 +297,57 @@ export class ApcI12CommandExecutor {
     try {
       candidate = typeof raw === 'string' ? JSON.parse(raw) : structuredClone(raw);
     } catch (error) {
+      this.accepting = previousAccepting;
       return { status: 'REJECTED', session: this.snapshot(), errors: [error.message], warnings: [], decisionsRequired: [] };
     }
 
     const validation = validateApcWritableWorkingSnapshot(candidate, this.context);
     if (!validation.valid) {
+      this.accepting = previousAccepting;
       return { status: 'READ_ONLY', session: structuredClone(candidate), errors: validation.errors, warnings: [], decisionsRequired: [] };
     }
 
-    await this.#releaseWriter();
-    this.currentSession = null;
-    this.sessionEpoch += 1;
-    this.runtimeGeneration = 0;
+    const targetIsCurrent =
+      this.currentSession?.sessionId === candidate.sessionId &&
+      this.writerLock != null;
 
-    const lock = await this.lockProvider.acquire(candidate.sessionId);
-    if (!lock) return { status: 'READ_ONLY', session: structuredClone(candidate), errors: ['writer lock unavailable'], warnings: [], decisionsRequired: [] };
+    let targetLock = targetIsCurrent ? this.writerLock : await this.lockProvider.acquire(candidate.sessionId);
+    if (!targetLock) {
+      this.accepting = previousAccepting;
+      return { status: 'READ_ONLY', session: structuredClone(candidate), errors: ['writer lock unavailable'], warnings: [], decisionsRequired: [] };
+    }
 
-    const existingRaw = await this.persistence.load(candidate.sessionId);
+    let existingRaw;
+    try {
+      existingRaw = await this.persistence.load(candidate.sessionId);
+    } catch (error) {
+      if (!targetIsCurrent) targetLock.release();
+      this.accepting = previousAccepting;
+      return { status: 'REJECTED', session: this.snapshot(), errors: [error.message], warnings: [], decisionsRequired: [] };
+    }
+
     if (existingRaw != null) {
       const existing = parseStored(existingRaw);
       if (!sameJson(existing, candidate)) {
-        lock.release();
-        return { status: 'IMPORT_CONFLICT', session: null, errors: ['different durable snapshot already exists for sessionId'], warnings: [], decisionsRequired: [] };
+        if (!targetIsCurrent) targetLock.release();
+        this.accepting = previousAccepting;
+        return { status: 'IMPORT_CONFLICT', session: this.snapshot(), errors: ['different durable snapshot already exists for sessionId'], warnings: [], decisionsRequired: [] };
       }
     } else {
       try {
         await this.persistence.saveAtomic(candidate.sessionId, JSON.stringify(candidate));
       } catch (error) {
-        lock.release();
-        return { status: 'REJECTED', session: null, errors: [error.message], warnings: [], decisionsRequired: [] };
+        if (!targetIsCurrent) targetLock.release();
+        this.accepting = previousAccepting;
+        return { status: 'REJECTED', session: this.snapshot(), errors: [error.message], warnings: [], decisionsRequired: [] };
       }
     }
 
-    this.writerLock = lock;
+    if (!targetIsCurrent) {
+      await this.#releaseWriter();
+      this.writerLock = targetLock;
+    }
+
     this.currentSession = structuredClone(candidate);
     this.sessionEpoch += 1;
     this.runtimeGeneration = 0;
