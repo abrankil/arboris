@@ -41,6 +41,8 @@
   <button id="openSession">Abrir</button>
   <label>Importar JSON <input id="importJson" type="file" accept=".json,application/json"></label>
   <button id="exportJson">Exportar APC</button>
+  <button id="closeSession">Cerrar sesión</button>
+  <button id="reopenSession">Reabrir sesión</button>
 </header>
 <main>
   <aside>
@@ -49,6 +51,21 @@
       <label>Actor <input id="actorId" value="local-human"></label>
       <label>Objetivo <input id="objective" value="Revisión APC I12"></label>
       <label>Agregar fotos <input id="photoFiles" type="file" accept="image/*" multiple></label>
+      <div class="row">
+        <button id="prevPhoto">← Anterior</button>
+        <button id="nextPhoto">Siguiente →</button>
+        <select id="photoFilter" aria-label="Filtro de fotografías">
+          <option value="ALL">Todas</option>
+          <option value="INBOX">Inbox</option>
+          <option value="DRAFT">Con DRAFT</option>
+          <option value="PENDING">Con pending</option>
+          <option value="CONFIRMED">Con CONFIRMED</option>
+        </select>
+      </div>
+      <div class="row">
+        <button id="batchAddInbox">Agregar visibles a inbox</button>
+        <button id="batchRemoveInbox">Quitar visibles de inbox</button>
+      </div>
       <div id="photos" class="photos"></div>
       <h3>Individuos</h3>
       <div class="row">
@@ -66,6 +83,7 @@
       <div id="targetLabel" class="muted">Sin target</div>
       <img id="photoPreview" alt="Fotografía activa">
       <div id="assetStatus" class="muted"></div>
+      <label>Relink asset <input id="relinkPhoto" type="file" accept="image/*"></label>
 
       <fieldset>
         <legend>Evidencia</legend>
