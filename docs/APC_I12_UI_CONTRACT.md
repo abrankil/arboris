@@ -1,6 +1,6 @@
 # Árboris — APC I12 Single-Screen UI Contract
 
-**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R3`  
+**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R4`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12.  
 **Base canónica:** `main@54824efea9ec5806eef720fc07b6bdd44339d609`.  
@@ -94,12 +94,19 @@ PhotoEvidence.sourcePhoto.photoRef
 = PHOTO.photoId
 
 PhotoEvidence.sourcePhoto.fingerprintSha256
-→ identifica establemente el asset registrado
+→ SHA-256 de los bytes originales exactos del archivo ingresado,
+  antes de decode, resize, recompression o cualquier transformación
 ```
 
 La UI debe preservar la relación bidireccional PHOTO ↔ PhotoEvidence y no puede reutilizar un mismo `PhotoEvidence` para dos PHOTO distintas salvo que un contrato canónico posterior lo autorice explícitamente.
 
-El fingerprint no es una inferencia botánica. Es metadata técnica de identidad/traceabilidad del asset y debe generarse o importarse de forma determinista conforme al tooling APC vigente.
+El fingerprint no es una inferencia botánica. Es metadata técnica de identidad/traceabilidad del asset.
+
+Para una carga nueva, `fingerprintSha256` debe calcularse sobre los bytes originales exactos del archivo ingresado, antes de decode, resize, recompression o cualquier transformación. No se calcula desde `fileRef`, desde una representación base64 ni desde píxeles decodificados.
+
+Para una sesión reimportada sin acceso a los bytes originales, se conserva exactamente el `fingerprintSha256` ya persistido y no se recalcula desde `fileRef`.
+
+Dos cargas de exactamente los mismos bytes originales deben producir el mismo fingerprint.
 
 ## 6. Identidad e individuos
 
@@ -112,6 +119,31 @@ La UI debe permitir:
 - mantener separadas identidad observacional e identificación taxonómica.
 
 I12 no inventa un contrato de `speciesHypothesis` ni `workingSpeciesId`. Mientras no exista contrato APC canónico para hypothesis, estos campos no forman parte del flujo normativo I12.
+
+La unidad editable de revisión botánica es un target de UI compuesto:
+
+```text
+ACTIVE_REVIEW_TARGET
+= activePhotoId
++ activeIndividualId
+```
+
+Ambos campos son estado exclusivo de UI y no se persisten dentro de `APC_SESSION`.
+
+Antes de crear o editar cualquier DRAFT/CONFIRMED botánico:
+
+```text
+activePhotoId
+→ debe resolver a una PHOTO existente
+
+activeIndividualId
+→ debe resolver a un INDIVIDUAL existente
+→ debe estar incluido en active PHOTO.individualRefs[]
+```
+
+Una PHOTO sin individuo asociado puede visualizarse y permanecer en inbox, pero no puede originar `APC_EVIDENCE` persistible hasta que exista un `activeIndividualId` válido.
+
+Si una PHOTO referencia múltiples individuos, cambiar `activeIndividualId` cambia el target de edición. La evidencia existente de otro individuo no se reutiliza, reasigna ni sobrescribe silenciosamente.
 
 ## 7. Revisión por fotografía
 
@@ -131,7 +163,7 @@ Reglas:
 - `UNCERTAIN` no aporta un estado botánico positivo;
 - `NOT_OBSERVABLE` no equivale a ausencia;
 - un carácter no evaluado no se convierte automáticamente en `NOT_OBSERVABLE`;
-- una fotografía puede confirmarse con revisión parcial cuando no queda un carácter requerido pendiente para esa fotografía.
+- una fotografía puede considerarse revisada, como estado derivado de UI, cuando no queda un carácter requerido pendiente para esa fotografía; esto no introduce un estado canónico CONFIRMED para PHOTO.
 
 ## 8. Sugerencias y ayuda
 
@@ -219,7 +251,8 @@ Cuando un requirement no está satisfecho, la UI debe reflejar el pending corres
 
 Si una fotografía requerida produce `NOT_OBSERVABLE`:
 
-- la fotografía puede confirmarse;
+- la evidencia `NOT_OBSERVABLE` puede confirmarse conforme al contrato APC;
+- la fotografía conserva únicamente su estado derivado de UI;
 - el requirement no queda satisfecho por esa evidencia;
 - el pending debe seguir visible hasta resolverse por otra evidencia o por el mecanismo canónico de representation gap.
 
@@ -402,7 +435,23 @@ cada PHOTO registrada
 → resuelve exactamente un PhotoEvidence
 → PHOTO.photoEvidenceId = PhotoEvidence.photoEvidenceId
 → PhotoEvidence.sourcePhoto.photoRef = PHOTO.photoId
-→ fingerprintSha256 presente y estable
+→ fingerprintSha256 = SHA-256 de los bytes originales exactos del archivo
+
+T-I12-03B
+mismos bytes originales cargados dos veces
+→ mismo fingerprintSha256
+→ decode/resize/recompression no participan del cálculo
+
+T-I12-03C
+reimport sin bytes originales
+→ conserva fingerprintSha256 persistido
+→ no recalcula desde fileRef
+
+T-I12-03D
+PHOTO con IND-A + IND-B
+→ seleccionar IND-A permite crear evidencia con individualId=IND-A
+→ cambiar target a IND-B no reutiliza ni reatribuye evidencia de IND-A
+→ sin activeIndividualId válido no se crea APC_EVIDENCE persistible
 
 T-I12-04
 cambio de fotografía con DRAFT
@@ -506,7 +555,9 @@ I12 puede considerarse implementado cuando:
 - existe una interfaz HTML/JavaScript local funcional de una sola vista principal;
 - puede ingresar múltiples fotografías en una sesión;
 - permite atribuir fotografías a individuos sin duplicarlas;
-- permite revisar evidencia por fotografía con estados APC canónicos;
+- exige un ACTIVE_REVIEW_TARGET válido (photo + individual) antes de crear evidencia botánica;
+- permite revisar evidencia por fotografía/individuo con estados APC canónicos;
+- calcula fingerprintSha256 sobre bytes originales exactos y lo conserva sin recálculo espurio al reimportar;
 - DRAFT y CONFIRMED están claramente separados;
 - correcciones confirmadas usan revisiones;
 - suggestions no proponen estados botánicos concretos;
@@ -515,7 +566,7 @@ I12 puede considerarse implementado cuando:
 - puede persistir working snapshots estructuralmente válidos sin presentarlos como export APC;
 - produce al menos una exportación APC normativa con `buildApcSessionExport(...).exportable = true`;
 - puede reimportar la sesión sin pérdida de trazabilidad;
-- T-I12-01..23 + T-I12-03A pasan;
+- T-I12-01..23 + T-I12-03A..03D pasan;
 - I1–I11 permanecen verdes;
 - `npm test` pasa;
 - la auditoría del diff no encuentra blockers;
@@ -523,16 +574,16 @@ I12 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R3 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R2 y añade el vínculo PHOTO ↔ PhotoEvidence, endurece el criterio de cierre de exportación y elimina ambigüedades de estado de fotografía e inbox.
+R4 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R3 y añade un target explícito photo+individual para edición multi-individuo, congela los bytes canónicos del fingerprint y elimina las últimas referencias ambiguas a "fotografía confirmada".
 
 ### INCONSISTENCIAS
 
-R3 resuelve los hallazgos adversariales de R2: el criterio de cierre exige una exportación I10 realmente exportable; toda PHOTO queda vinculada a un PhotoEvidence canónico con fingerprint estable; "fotografía confirmada" se reemplaza por estado derivado de UI; y el inbox se modela sólo mediante inboxPhotoRefs[] sin colección clasificada paralela.
+R4 resuelve los hallazgos adversariales de R3: ACTIVE_REVIEW_TARGET evita atribución ambigua en PHOTO multi-individuo; fingerprintSha256 queda definido como SHA-256 de bytes originales exactos; y CONFIRMED queda reservado a APC_EVIDENCE, no a PHOTO. Conserva las correcciones previas sobre exportación I10, PhotoEvidence e inbox.
 
 ### VACÍOS / OMISIONES
 
-R3 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. La autoridad del autosave y la del inbox quedan resueltas sin introducir colecciones persistidas paralelas.
+R4 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. ACTIVE_REVIEW_TARGET es estado exclusivo de UI y no introduce campos nuevos en APC_SESSION.
 
 ### REDUNDANCIAS
 
-Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. El working snapshot local tampoco constituye una segunda fuente de verdad: es persistencia del mismo APC_SESSION, no un modelo paralelo. `SERIALIZABLE WORKING SNAPSHOT` tampoco se persiste como estado APC.
+Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, el working snapshot local y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos.
