@@ -752,3 +752,32 @@ test('T-I12-12 batch undo descriptor enforces exact delta and fails closed on he
   assert.match(derivation, /new Set\(affectedTargets\.map\(item => item\.individualId\)\)\.size !== 1/);
   assert.match(derivation, /targets: structuredClone\(affectedTargets\)/);
 });
+
+
+test('T-I12-12 batch mutation and Undo controls are write-gated', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('function disableWrites');
+  const end = source.indexOf('\nfunction chooseFallbackTargets', start);
+  assert.ok(start >= 0 && end > start);
+  const gate = source.slice(start, end);
+  assert.match(gate, /'batchAddInbox'/);
+  assert.match(gate, /'batchRemoveInbox'/);
+  assert.match(gate, /'undoBatch'/);
+
+  const renderStart = source.indexOf('function render()');
+  const renderEnd = source.indexOf('\nexport function deriveBatchUndoDescriptor', renderStart);
+  const renderSource = source.slice(renderStart, renderEnd);
+  assert.match(renderSource, /const undoValid = inWriteMode\(\) &&/);
+});
+
+test('TD-I12-53 stale or rejected Undo attempt preserves descriptor while inverse remains valid', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function undoLastBatch');
+  const end = source.indexOf('\nasync function setSessionStatus', start);
+  assert.ok(start >= 0 && end > start);
+  const undoSource = source.slice(start, end);
+  assert.match(undoSource, /result\.status === 'COMMITTED' \|\| result\.status === 'NO_OP'/);
+  assert.doesNotMatch(undoSource, /result\.status === 'STALE_COMMAND'[^\n]*state\.batchUndo = null/);
+  assert.doesNotMatch(undoSource, /result\.status === 'REJECTED'[^\n]*state\.batchUndo = null/);
+  assert.match(undoSource, /batchUndoIsValid\(state\.batchUndo, current, state\.executor\?\.sessionEpoch\)/);
+});
