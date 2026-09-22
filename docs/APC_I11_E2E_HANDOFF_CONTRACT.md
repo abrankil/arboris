@@ -184,7 +184,7 @@ Un pending crítico pertenece al gate APC/PASS; I11 no lo transforma en observac
 
 I11 no introduce ni interpreta un contrato provisional de identificación porque el schema APC canónico actual no define una ubicación o forma normativa para `speciesHypothesis`, `workingSpeciesId` o equivalentes.
 
-Por tanto, en R3:
+Por tanto, en R3.1.1:
 
 ```text
 context.provisionalHypothesis = null
@@ -238,7 +238,7 @@ donde:
 - `aceAssessment` es el resultado directo de `assessIdentification()`;
 - `context.contradictions` contiene sólo episodios APC cuyo `individualId` coincide con el objetivo;
 - `context.pending` se construye exclusivamente con el predicate de §7;
-- `context.provisionalHypothesis` es siempre `null` en R3.
+- `context.provisionalHypothesis` es siempre `null` en R3.1.
 
 No se persiste una identificación nueva dentro de APC como efecto lateral de I11.
 
@@ -371,11 +371,11 @@ APC_HANDOFF_ELIGIBLE pero carácter conocido no computable por ACE
 → no drop silencioso
 → no aborto global por sí solo
 
-T-I11-16B
+T-I11-17
 pending con scope/source SESSION
 → no se atribuye a context.pending del individuo objetivo
 
-T-I11-17
+T-I11-18
 photoEvidenceRef
 → preservado exactamente en provenance.apc.photoEvidenceRef hasta ACE
 ```
@@ -397,7 +397,7 @@ I11 puede considerarse implementado cuando:
 - `context.provisionalHypothesis` permanece `null` hasta existir contrato APC canónico;
 - `candidateIds` sólo se restringe explícitamente;
 - la salida ACE es resultado directo del motor canónico;
-- T-I11-01..17 pasan;
+- T-I11-01..18 pasan;
 - I1–I10 permanecen verdes;
 - `npm test` pasa;
 - la auditoría del diff no encuentra blockers;
@@ -405,7 +405,7 @@ I11 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R3.1 mantiene la frontera epistemológica definida por H16/APC y H15/ACE: APC captura y confirma observaciones; el adaptador conserva el significado observacional; ACE evalúa compatibilidad e identificación. I11 funciona exclusivamente como verification harness E2E y no adelanta la integración runtime de H17. R3 además separa selección preliminar, handoff APC válido y elegibilidad ACE.
+R3.1 mantiene la frontera epistemológica definida por H16/APC y H15/ACE: APC captura y confirma observaciones; el adaptador conserva el significado observacional; ACE evalúa compatibilidad e identificación. I11 funciona exclusivamente como verification harness E2E y no adelanta la integración runtime de H17. R3.1 además separa selección preliminar, handoff APC válido y elegibilidad ACE.
 
 ### INCONSISTENCIAS
 
@@ -417,4 +417,4 @@ R3.1 no define persistencia de una identificación resultante, UI, política de 
 
 ### REDUNDANCIAS
 
-I11 no redefine validadores de APC, CharacterObservation ni ACE. Debe componer `validateApcSession()`, el adaptador APC existente y `assessIdentification()` en lugar de duplicarlos. La regresión duplicada sobre `non_computable_character` fue eliminada en R3.1.
+I11 no redefine validadores de APC, CharacterObservation ni ACE. Debe componer `validateApcSession()`, el adaptador APC existente y `assessIdentification()` en lugar de duplicarlos. La regresión duplicada sobre `non_computable_character` fue eliminada en R3.1.1.
