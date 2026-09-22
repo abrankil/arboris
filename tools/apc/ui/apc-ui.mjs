@@ -28,6 +28,10 @@ const state = {
   activeIndividualId: null,
   inspectionSession: null,
   messages: [],
+  editBuffers: new Map(),
+  autosaveTimers: new Map(),
+  autosaveInFlight: new Map(),
+  runtimeTail: Promise.resolve(),
 };
 
 function message(text) {
