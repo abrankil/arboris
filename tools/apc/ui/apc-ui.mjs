@@ -18,6 +18,7 @@ import {
 } from '../apc-i12-semantics.mjs';
 import { runApcIndividualThroughAce } from '../apc-i11-e2e.mjs';
 import { loadBrowserCanonicalDataset } from './apc-ui-dataset.mjs';
+import { derivePhotoUiStatus } from './apc-ui-status.mjs';
 
 const $ = id => document.getElementById(id);
 const state = {
@@ -267,29 +268,6 @@ function syncEvidenceFormMode() {
   $('reason').disabled = observed;
   if (observed) $('reason').value = '';
   else $('observedState').value = '';
-}
-
-export function derivePhotoUiStatus(photo, session) {
-  const photoId = photo?.photoId ?? null;
-  if (!photoId) return 'sin revisar';
-
-  const evidence = (session?.evidence ?? []).filter(item =>
-    item.current === true && item.photoId === photoId
-  );
-  const hasDraft = evidence.some(item => item.lifecycleStatus === 'DRAFT');
-  const hasConfirmed = evidence.some(item => item.lifecycleStatus === 'CONFIRMED');
-  const hasPhotoRequiredPending = (session?.pending ?? []).some(item =>
-    item.kind === 'UNRESOLVED_REQUIREMENT' &&
-    item.status === 'OPEN' &&
-    item.scopeLevel === 'PHOTO' &&
-    item.scopeRef === photoId
-  );
-
-  if (hasPhotoRequiredPending) return 'required pendiente';
-  if (hasDraft && hasConfirmed) return 'revisada parcialmente';
-  if (hasDraft) return 'DRAFT';
-  if (hasConfirmed) return 'CONFIRMED';
-  return 'sin revisar';
 }
 
 function photoUiStatus(photo, session=currentSession()) {
