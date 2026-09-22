@@ -69,6 +69,7 @@ export function adaptRegisteredApcEvidenceToCharacterObservation(dataset, sessio
         evidenceId: evidence.evidenceId,
         individualId: evidence.individualId,
         revision: evidence.revision,
+        photoEvidenceRef: evidence.photoEvidenceRef,
         sourceType: evidence.sourceType,
         sourceId: evidence.sourceId,
         confirmation: {
