@@ -68,7 +68,7 @@ test('T02 registered CONFIRMED evidence reaches ACE', () => { const s=session();
 // T03/T12
 test('T03/T12 status normalization is reversible', () => { for(const [a,h] of [['OBSERVED','observed'],['UNCERTAIN','uncertain'],['NOT_OBSERVABLE','not_observable']]) { assert.equal(normalizeApcEvidenceStatus(a),h); assert.equal(denormalizeH16Status(h),a); } });
 // T04 + audit correction
-test('T04 provenance preserves full APC identity and confirmation', () => { const o=adaptRegisteredApcEvidenceToCharacterObservation(dataset,session(),'EV-001',1); assert.deepEqual(o.provenance.apc,{sessionId:'APC-S-001',evidenceId:'EV-001',individualId:'IND-001',revision:1,sourceType:'human',sourceId:'Alejandra',confirmation:{confirmedByType:'human',confirmedById:'Alejandra',confirmedAt:'2026-09-21T16:00:00-03:00'}}); });
+test('T04 provenance preserves full APC identity and confirmation', () => { const o=adaptRegisteredApcEvidenceToCharacterObservation(dataset,session(),'EV-001',1); assert.deepEqual(o.provenance.apc,{sessionId:'APC-S-001',evidenceId:'EV-001',individualId:'IND-001',revision:1,photoEvidenceRef:'PE-001',sourceType:'human',sourceId:'Alejandra',confirmation:{confirmedByType:'human',confirmedById:'Alejandra',confirmedAt:'2026-09-21T16:00:00-03:00'}}); });
 // Audit correction: object not registered cannot handoff
 test('adapter rejects evidence not registered in session.evidence[]', () => { assert.throws(()=>adaptRegisteredApcEvidenceToCharacterObservation(dataset,session([]),'EV-001',1), /Expected exactly one registered APC evidence/); });
 // Audit correction: mandatory identity
