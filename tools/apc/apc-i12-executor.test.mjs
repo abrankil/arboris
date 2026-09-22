@@ -923,7 +923,7 @@ test('NV-SEL-01 explicit batch selection is disabled outside writer mode', async
   const renderEnd = source.indexOf('\nexport function deriveBatchUndoDescriptor', renderStart);
   assert.ok(renderStart >= 0 && renderEnd > renderStart);
   const renderSource = source.slice(renderStart, renderEnd);
-  assert.match(renderSource, /selector\.disabled = !inWriteMode\(\)/);
+  assert.match(renderSource, /selector\.disabled = !canAcceptWriterIntent\(\)/);
 });
 
 test('T-I12-12 filter, active target changes, and selection remain separate UI-only concerns', async () => {
@@ -1098,6 +1098,36 @@ test('TD-I12-71 reopening same session under a new context revalidates before wr
   const created = await oldExecutor.bootstrap({ objective: 'context barrier regression' });
   assert.equal(created.status, 'COMMITTED');
   const sessionId = oldExecutor.snapshot().sessionId;
+  const photo = oldExecutor.snapshot().photos[0];
+  const individualId = oldExecutor.snapshot().individuals[0]?.individualId;
+  // Make the durable snapshot actually depend on CH-003 so replacing the
+  // dataset with one that lacks CH-003 must fail writer revalidation.
+  const createdIndividual = individualId ?? (await oldExecutor.dispatch(oldExecutor.commandBase({
+    type: 'CREATE_INDIVIDUAL',
+  }))).session.individuals[0].individualId;
+  if (!(oldExecutor.snapshot().photos[0]?.individualRefs ?? []).includes(createdIndividual)) {
+    await oldExecutor.dispatch(oldExecutor.commandBase({
+      type: 'ASSIGN_PHOTO',
+      photoId: photo.photoId,
+      individualId: createdIndividual,
+    }));
+  }
+  await oldExecutor.dispatch(oldExecutor.commandBase({
+    type: 'SAVE_DRAFT',
+    targetPhotoId: photo.photoId,
+    targetIndividualId: createdIndividual,
+    characterId: 'CH-003',
+    patch: {
+      evidenceStatus: 'OBSERVED',
+      observedState: 'entero',
+      sourceType: 'human',
+      sourceId: 'Alejandra',
+      acquisition: { mode: 'manual', confirmedOnCurrentPhoto: null, basis: null },
+      confidence: null,
+      reason: null,
+      notes: null,
+    },
+  }));
   await oldExecutor.close();
 
   const incompatible = testContext();
