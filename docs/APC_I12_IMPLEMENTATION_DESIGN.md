@@ -1,6 +1,6 @@
 # Árboris — APC I12 Implementation Design
 
-**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.7`  
+**ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.8`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12 implementation design.  
 **Contrato base:** `ARBORIS_APC_I12_UI_CONTRACT_R9`, VALIDATED WITH ASC y FROZEN en `h16/apc-i12-ui@4ba8f837f75eccf44054b7ef7c7b23b4c82efe40`.  
@@ -103,6 +103,8 @@ Producción puede usar `crypto.randomUUID()` y reloj real. Tests usan providers 
 
 `dataset` es una dependencia explícita del executor/transacción. No se obtiene desde un global implícito. Debe proporcionar, como mínimo, `allCharactersById` y las propiedades canónicas que consumen los validadores de caracteres/estados. Un runtime sin dataset válido no habilita write mode para operaciones botánicas.
 
+`areStatesIncompatible` e `isContradictionRelevant` son providers semánticos inyectados, deterministas y estables durante una transacción. La UI no puede reemplazarlos ad hoc. `areStatesIncompatible` debe aplicar el contrato canónico del carácter; no puede usar desigualdad genérica salvo que dicho contrato establezca exclusión mutua. El mismo provider se usa para reconciliación y validación I9 de un candidate. `isContradictionRelevant` debe usar la misma política al construir y validar la transición I10. Si cambia cualquiera de estos providers durante la vida de un contexto writer, se requiere revalidar/reabrir el contexto antes de aceptar nuevos commands.
+
 ## 4. Commands
 
 Toda mutación normativa entra por commands explícitos.
@@ -114,6 +116,12 @@ PHOTO / ASSET-NORMATIVE
 INGEST_PHOTOS
 ASSIGN_PHOTO
 UNASSIGN_PHOTO
+BATCH_ASSIGN_PHOTOS
+BATCH_UNASSIGN_PHOTOS
+ADD_TO_INBOX
+REMOVE_FROM_INBOX
+BATCH_ADD_TO_INBOX
+BATCH_REMOVE_FROM_INBOX
 
 INDIVIDUAL
 CREATE_INDIVIDUAL
@@ -129,7 +137,8 @@ ADD_REQUIREMENT
 otros commands explícitos permitidos por contratos vigentes
 
 SESSION
-mutaciones normativas de sesión permitidas
+SET_SESSION_STATUS cuando el contrato vigente lo permita
+otras mutaciones normativas de sesión explícitamente cubiertas por contrato
 ```
 
 Operaciones puramente runtime/UI no entran a la cola APC:
@@ -137,10 +146,120 @@ Operaciones puramente runtime/UI no entran a la cola APC:
 ```text
 SELECT_PHOTO
 SELECT_INDIVIDUAL
+NEXT_PHOTO
+PREVIOUS_PHOTO
 FILTER
 ZOOM
 RELINK_ASSET con fingerprint coincidente
+PREFILL_TO_EDIT_BUFFER
+SUGGEST_INSPECTION_TARGETS
+EXPORT_APC
+RUN_I11_VERIFICATION
 ```
+
+`EXPORT_APC` y `RUN_I11_VERIFICATION` son operaciones de lectura/derivación; no modifican `APC_SESSION`.
+
+### 4.1 Asignación, desasignación e inbox
+
+`ASSIGN_PHOTO` y `BATCH_ASSIGN_PHOTOS` sólo agregan `individualId` a `PHOTO.individualRefs[]`; nunca duplican PHOTO, PhotoEvidence ni evidencia botánica.
+
+`UNASSIGN_PHOTO` y `BATCH_UNASSIGN_PHOTOS` aplican antes de toda mutación el guard R9 sobre TODA la historia:
+
+```text
+exists session.evidence revision
+where evidence.photoId = targetPhotoId
+AND evidence.individualId = targetIndividualId
+→ UNASSIGN_BLOCKED
+→ snapshot sin cambios
+```
+
+El guard incluye `current=true` y `current=false`, DRAFT y CONFIRMED. No se permite reatribuir ni borrar evidencia para hacer posible la desasignación.
+
+Los commands batch son all-or-nothing para APC:
+
+```text
+si cualquier item viola un guard
+→ REJECT batch completo
+→ no commit parcial
+```
+
+Las operaciones de inbox modifican exclusivamente `inboxPhotoRefs[]`. No crean `classifiedPhotoRefs[]`, `classifiedPhotos[]` ni otra colección paralela.
+
+Las operaciones batch permitidas son reversibles mediante su command inverso mientras ese inverso siga siendo válido bajo los guards actuales. No confirman estados botánicos, no copian `observedState` y no crean evidencia positiva.
+
+Al ingresar una PHOTO nueva:
+
+```text
+→ se agrega una sola vez a photos[]
+→ se agrega una sola vez a inboxPhotoRefs[]
+```
+
+Si el fingerprint ya existía:
+
+```text
+→ se reutilizan PHOTO + PhotoEvidence existentes
+→ se conserva fileRef canónico previo
+→ no se altera por nombre/ruta de la carga duplicada
+→ membership de inbox existente no se modifica implícitamente
+```
+
+### 4.2 ACTIVE_REVIEW_TARGET y commands de evidencia
+
+`ACTIVE_REVIEW_TARGET` permanece UI-only:
+
+```text
+activePhotoId
+activeIndividualId
+```
+
+Al crear un command de evidencia, la UI captura explícitamente:
+
+```text
+targetPhotoId
+targetIndividualId
+characterId
+```
+
+El executor no confía en la selección UI mutable al momento posterior de ejecución. Antes de crear/revisar evidencia valida:
+
+```text
+targetPhotoId existe
+targetIndividualId existe
+targetIndividualId ∈ target PHOTO.individualRefs[]
+```
+
+Si falla:
+
+```text
+→ REJECT / STALE_COMMAND según corresponda
+→ no APC_EVIDENCE
+```
+
+Cambiar de IND-A a IND-B nunca reutiliza el `evidenceId` de IND-A. Como `individualId` es identidad I6 inmutable, un target biológico distinto requiere otra evidencia lógica.
+
+### 4.3 Prefill y sugerencias
+
+`PREFILL_TO_EDIT_BUFFER` sólo prepara estado efímero. No constituye APC_EVIDENCE ni confirmation.
+
+Cuando el buffer usa adquisición `prefilled`:
+
+```text
+acquisition.mode = prefilled
+basis.type = prior_observations
+basis.photoEvidenceRefs = referencias explícitas
+```
+
+Puede permanecer DRAFT sin ser handoff-eligible. Para CONFIRMED debe existir nueva acción humana sobre la foto actual y la adquisición final debe cumplir el contrato vigente, incluido `confirmedOnCurrentPhoto=true`.
+
+`SUGGEST_INSPECTION_TARGETS` puede producir únicamente:
+
+```text
+characterId
+estructura
+definición/ayuda/instrucción observacional
+```
+
+Puede usar dataset y un conjunto explícito de candidatos cuando exista. Nunca devuelve, preselecciona ni persiste un `observedState` botánico como inferencia automática.
 
 ## 5. Freshness preconditions
 
@@ -593,7 +712,15 @@ edit + confirm explícito
 → nueva confirmation
 ```
 
-Toda nueva current CONFIRMED debe pasar la validación registrada fuerte definida abajo antes de persistirse como confirmada.
+Toda nueva current CONFIRMED debe cumplir simultáneamente:
+
+```text
+validateApcEvidenceForHandoff(newConfirmedEvidence).valid = true
++
+validación registrada fuerte definida abajo
+```
+
+antes de persistirse como confirmada. La validación fuerte es adicional; no reemplaza el requisito explícito R9 de `validateApcEvidenceForHandoff()`.
 
 ### 12.1 Validación común de APC_EVIDENCE persistida
 
@@ -1200,12 +1327,56 @@ active individual
 character editor
 DRAFT/CONFIRMED
 requirements/pending
+representation gaps
 contradictions
 provenance
 export/PASS diagnostics
 ```
 
 Los estados de fotografía son derivados de UI y nunca se persisten como nuevos enums APC.
+
+Selectores derivados mínimos:
+
+```text
+derivePhotoReviewState(photoId)
+→ unreviewed
+→ has_draft
+→ partially_reviewed
+→ has_confirmed
+→ required_pending
+
+deriveSessionDiagnostics()
+→ structurallyValid
+→ serializableWorkingSnapshot
+→ exportable
+→ pass
+→ closed
+```
+
+Los nombres anteriores son valores runtime de presentación, no enums persistidos. Los diagnósticos se calculan desde validadores/estado canónico; no se guardan dentro de `APC_SESSION`.
+
+Navegación, filtros, siguiente/anterior, zoom y selección no ejecutan commands normativos ni cambian `semanticRevision`.
+
+### 23.1 Export e I11 como acciones explícitas
+
+`EXPORT_APC` ejecuta:
+
+```text
+buildApcSessionExport(
+  currentSession,
+  { dataset, areStatesIncompatible }
+)
+```
+
+Si `exportable=false`, no genera una exportación normativa exitosa y muestra razones. Si `exportable=true`, el JSON proviene directamente del builder I10; la UI no lo reescribe ni elimina historia.
+
+Debe existir al menos un fixture E2E I12 que produzca:
+
+```text
+buildApcSessionExport(...).exportable = true
+```
+
+`RUN_I11_VERIFICATION` es una acción humana explícita de diagnóstico. Invoca el harness canónico I11 para un individuo seleccionado y nunca se ejecuta implícitamente por guardar/confirmar evidencia. Su resultado no modifica APC_SESSION, candidateIds ni evidencia.
 
 ## 24. Resultados runtime del executor
 
@@ -1246,7 +1417,9 @@ intent normativo equivalente a previousSession
 → no runtimeGeneration++
 ```
 
-La comparación se realiza sobre el payload normativo que el command pretende modificar, aplicando la regla R9 de cambio normativo; `revision`, `current` y eventos que sólo existirían como consecuencia de una modificación real no pueden usarse para fabricar artificialmente una diferencia.
+La comparación de una evidencia se realiza sobre el payload APC_EVIDENCE persistido completo excluyendo únicamente `revision` y `current`, exactamente como exige R9. Esto incluye lifecycle, evidenceStatus, observedState, source/provenance, confirmation, acquisition, confidence, reason, notes y cualquier otro campo normativo vigente. Los eventos de `revisions[]` son consecuencia y no participan de la detección.
+
+Los campos de identidad I6 (`sessionId`, `photoId`, `photoEvidenceRef`, `individualId`, `characterId`) tampoco se ignoran: si el intent pretende cambiarlos, no corresponde una revisión del mismo evidenceId sino una nueva identidad lógica según I6.
 
 Ejemplos:
 
@@ -1506,6 +1679,74 @@ TD-I12-50
 runtime/transacción sin dataset válido
 → operaciones botánicas writer rechazadas/configuración inválida
 → no fallback global implícito
+
+TD-I12-51
+UNASSIGN_PHOTO encuentra una revisión histórica current=false para PHOTO/IND
+→ UNASSIGN_BLOCKED
+→ snapshot byte-for-byte normativamente igual
+
+TD-I12-52
+BATCH_UNASSIGN_PHOTOS contiene un item bloqueado
+→ batch completo REJECT
+→ no commit parcial
+
+TD-I12-53
+BATCH_ASSIGN_PHOTOS + BATCH_REMOVE_FROM_INBOX
+→ operaciones reversibles por commands inversos
+→ no estado botánico positivo
+→ no classifiedPhotoRefs paralelo
+
+TD-I12-54
+INGEST_PHOTOS carga asset nuevo
+→ PHOTO y PhotoEvidence únicos
+→ photoId aparece una sola vez en inboxPhotoRefs
+
+TD-I12-55
+INGEST_PHOTOS carga bytes ya existentes con filename distinto
+→ reutiliza IDs
+→ conserva fileRef canónico previo
+→ no modifica membership inbox implícitamente
+
+TD-I12-56
+command de evidencia captura targetPhotoId/targetIndividualId
+→ si la asociación ya no es válida al ejecutar
+→ REJECT/STALE
+→ no evidencia reasignada
+
+TD-I12-57
+PREFILL_TO_EDIT_BUFFER
+→ no crea APC_EVIDENCE
+→ confirm sólo pasa con acción humana + acquisition prefilled válida y confirmedOnCurrentPhoto=true
+
+TD-I12-58
+SUGGEST_INSPECTION_TARGETS
+→ puede devolver carácter/estructura/ayuda
+→ nunca devuelve ni preselecciona observedState
+
+TD-I12-59
+EXPORT_APC sobre fixture válido
+→ buildApcSessionExport(...).exportable=true
+→ export conserva historia completa
+
+TD-I12-60
+RUN_I11_VERIFICATION
+→ acción explícita
+→ salida canónica I11
+→ APC_SESSION permanece sin cambios
+
+TD-I12-61
+nueva CONFIRMED
+→ validateApcEvidenceForHandoff(...).valid=true
+→ también pasa validación fuerte registrada
+
+TD-I12-62
+dos providers de incompatibilidad distintos no pueden mezclarse dentro de una misma transacción
+→ reconciliación y validación usan la misma dependencia inyectada
+
+TD-I12-63
+cambio normativo de evidence sólo en confirmation/acquisition/source/notes
+→ NO es NO_OP
+→ genera revisión I6 correspondiente
 ```
 
 ## 26. Criterio de cierre del diseño
@@ -1518,6 +1759,10 @@ El diseño puede congelarse cuando:
 - B01/B02/B03/B04 y H01/H02 permanecen cerrados;
 - B05/B06/B07/B08 y H03/H04 permanecen cerrados;
 - B09/B10/B11/B12 y H05/H06 permanecen cerrados;
+- guards de unassignment y batch/inbox satisfacen T-I12-12/T-I12-12A;
+- ACTIVE_REVIEW_TARGET queda desacoplado de commands mediante target IDs capturados;
+- prefill/suggestions respetan la frontera epistemológica de R9;
+- export I10 e I11 verification son acciones explícitas y no mutantes;
 - no introduce campos normativos nuevos en APC_SESSION;
 - el single-writer guard es de vida de sesión writer y queda exigido para write mode;
 - todos los commands normativos usan targetSessionId + baseSessionEpoch + baseCommitGeneration runtime, más baseRevision cuando aplica;
@@ -1535,20 +1780,20 @@ El diseño puede congelarse cuando:
 - dataset es dependencia explícita del executor;
 - revisiones históricas se preservan sin reinterpretación retroactiva contra allowedStates del dataset actual;
 - fallos de asset runtime post-commit no revierten APC;
-- TD-I12-01..50 están aceptadas como regresiones de implementación.
+- TD-I12-01..63 están aceptadas como regresiones de implementación.
 
 ### AUDITORÍA
 
-V0.7 incorpora exclusivamente B09–B12 y H05–H06 sin modificar R9. Añade validación común de toda APC_EVIDENCE persistida, control-plane writer-ready I10, session-switch barrier, detección NO_OP previa a I6, dataset como dependencia explícita y separación entre validez histórica e interpretación contra el dataset operacional actual. Conserva todas las correcciones v0.6.
+V0.8 completa la auditoría de cobertura contra R9 sin modificar el contrato: explicita guards históricos de unassignment, batch/inbox reversible, captura segura de ACTIVE_REVIEW_TARGET, prefill y sugerencias no positivas, acciones explícitas de export/I11, binding estable de providers semánticos y comparación normativa exacta para NO_OP. Conserva las correcciones v0.7.
 
 ### INCONSISTENCIAS
 
-B09 queda resuelto separando estado efímero de formulario de APC_EVIDENCE DRAFT persistible y validando lifecycle/evidenceStatus/payload de todas las revisiones; el dataset actual se aplica a revisiones current. B10 queda resuelto mediante `validateApcWritableWorkingSnapshot()`, que incorpora semanticRevision, binding de objectiveAssessment y prohibición de `pass/exportable` persistidos sin exigir EXPORTABLE. B11 queda resuelto con un barrier que espera el command activo antes de liberar lock/cambiar epoch. B12 queda resuelto moviendo NO_OP antes de generar revisiones, events, IDs o timestamps. H05 queda cerrado haciendo `dataset` dependencia explícita del executor. H06 queda cerrado preservando historia current=false mediante validación intrínseca y evitando revalidar retroactivamente allowedStates contra el dataset actual.
+Se cierra la ausencia de semántica implementable para T-I12-12/T-I12-12A: toda desasignación inspecciona la historia completa y los batch son all-or-nothing; inbox usa sólo inboxPhotoRefs. Se cierra la dependencia accidental del target UI capturando photo/individual en el command y revalidando la asociación al ejecutar. Prefill y suggestions quedan separados de evidencia positiva. Toda nueva CONFIRMED sigue pasando explícitamente validateApcEvidenceForHandoff además de la validación fuerte. Export y I11 se ejecutan sólo como acciones derivadas explícitas. Los providers I9/I10 quedan estables dentro de la transacción y ligados al contrato canónico correspondiente.
 
 ### VACÍOS / OMISIONES
 
-Quedan fuera de alcance detalles visuales finales, accesibilidad de producto, packaging H17, backend remoto, persistencia permanente de blobs, eliminación de sesiones y hypothesis. La implementación deberá factorizar/exponer helpers canónicos sin duplicar lógica privada: payload común APC_EVIDENCE, validación CONFIRMED compartida con APC→CharacterObservation, requirement coverage y control-plane I10. No se introduce todavía un binding/versionado histórico del dataset; por eso la historia no current se valida intrínsecamente y el dataset actual sólo gobierna el conjunto operacional current.
+Siguen fuera de alcance layout visual final, accesibilidad de producto, backend remoto, blobs permanentes, eliminación de sesiones, hypothesis y H17 runtime. Las acciones de metadata operacional común por lote sólo podrán implementarse cuando el campo concreto esté cubierto por el schema vigente; v0.8 no inventa metadata normativa nueva. Representation gaps se muestran y preservan según I8; su creación no se infiere automáticamente desde NOT_OBSERVABLE.
 
 ### REDUNDANCIAS
 
-No se persisten `sessionEpoch`, `runtimeGeneration`, `baseCommitGeneration`, locks, barriers, NO_OP, writer IDs, command states, edit buffers, asset runtime ni transaction IDs dentro de APC_SESSION. `validateApcWritableWorkingSnapshot()` compone validadores canónicos y helpers factorados; no crea una segunda semántica de PASS/EXPORTABLE. DRAFT y CONFIRMED siguen siendo los únicos lifecycle canónicos, y la historia I6 no se reescribe para adaptarse a cambios posteriores del dataset.
+No se crean colecciones classified, caches persistidos de estados derivados, resultados I11 persistidos ni copias de export. Batch assignment/inbox opera sobre arrays canónicos existentes. Los estados de foto y diagnósticos STRUCTURALLY VALID/SERIALIZABLE/EXPORTABLE/PASS/CLOSED son derivados de UI. Los providers semánticos son dependencias runtime y no se serializan en APC_SESSION.
