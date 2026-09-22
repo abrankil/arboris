@@ -781,3 +781,94 @@ test('TD-I12-53 stale or rejected Undo attempt preserves descriptor while invers
   assert.doesNotMatch(undoSource, /result\.status === 'REJECTED'[^\n]*state\.batchUndo = null/);
   assert.match(undoSource, /batchUndoIsValid\(state\.batchUndo, current, state\.executor\?\.sessionEpoch\)/);
 });
+
+
+test('TD-I12-53 runtime batch Undo restores exact inbox delta after unrelated committed mutation', async () => {
+  const { executor } = await setup();
+  let r = await executor.dispatch(executor.commandBase({
+    type: 'INGEST_PHOTOS',
+    photos: [
+      { fileRef: 'undo-a.jpg', fingerprintSha256: 'c'.repeat(64) },
+      { fileRef: 'undo-b.jpg', fingerprintSha256: 'd'.repeat(64) },
+    ],
+  }));
+  const [a, b] = r.session.photos;
+  const before = executor.snapshot();
+
+  r = await executor.dispatch(executor.commandBase({
+    type: 'BATCH_ADD_TO_INBOX',
+    photoIds: [a.photoId, b.photoId],
+  }));
+  assert.equal(r.status, 'COMMITTED');
+  const afterBatch = executor.snapshot();
+
+  const beforeSet = new Set(before.inboxPhotoRefs ?? []);
+  const affected = [a.photoId, b.photoId].filter(photoId =>
+    beforeSet.has(photoId) !== new Set(afterBatch.inboxPhotoRefs ?? []).has(photoId)
+  );
+  assert.deepEqual(new Set(affected), new Set([a.photoId, b.photoId]));
+
+  r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  assert.equal(r.status, 'COMMITTED');
+  const afterUnrelated = executor.snapshot();
+  for (const photoId of affected) assert.equal(afterUnrelated.inboxPhotoRefs.includes(photoId), true);
+
+  r = await executor.dispatch(executor.commandBase({
+    type: 'BATCH_REMOVE_FROM_INBOX',
+    photoIds: affected,
+  }));
+  assert.equal(r.status, 'COMMITTED');
+  const restored = executor.snapshot();
+  for (const photoId of affected) {
+    assert.equal(restored.inboxPhotoRefs.includes(photoId), before.inboxPhotoRefs.includes(photoId));
+  }
+  assert.equal(restored.individuals.length, afterUnrelated.individuals.length);
+  await executor.close();
+});
+
+test('TD-I12-53 runtime assignment Undo becomes non-executable after evidence history creates UNASSIGN_BLOCKED', async () => {
+  const { executor } = await setup();
+  let r = await executor.dispatch(executor.commandBase({
+    type: 'INGEST_PHOTOS',
+    photos: [{ fileRef: 'undo-guard.jpg', fingerprintSha256: 'e'.repeat(64) }],
+  }));
+  const photo = r.session.photos[0];
+  r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  const individualId = r.created.individualId;
+
+  r = await executor.dispatch(executor.commandBase({
+    type: 'BATCH_ASSIGN_PHOTOS',
+    photoIds: [photo.photoId],
+    individualId,
+  }));
+  assert.equal(r.status, 'COMMITTED');
+
+  r = await executor.dispatch(executor.commandBase({
+    type: 'SAVE_DRAFT',
+    targetPhotoId: photo.photoId,
+    targetIndividualId: individualId,
+    characterId: 'CH-003',
+    patch: {
+      evidenceStatus: 'OBSERVED',
+      observedState: 'entero',
+      sourceType: 'human',
+      sourceId: 'Alejandra',
+      acquisition: { mode: 'manual', confirmedOnCurrentPhoto: null, basis: null },
+      confidence: null,
+      reason: null,
+      notes: null,
+    },
+  }));
+  assert.equal(r.status, 'COMMITTED');
+
+  const beforeUndoAttempt = executor.snapshot();
+  r = await executor.dispatch(executor.commandBase({
+    type: 'BATCH_UNASSIGN_PHOTOS',
+    targets: [{ photoId: photo.photoId, individualId }],
+  }));
+  assert.equal(r.status, 'REJECTED');
+  assert.match(r.errors.join(' '), /UNASSIGN_BLOCKED/);
+  assert.deepEqual(executor.snapshot(), beforeUndoAttempt);
+  assert.equal(executor.snapshot().photos[0].individualRefs.includes(individualId), true);
+  await executor.close();
+});
