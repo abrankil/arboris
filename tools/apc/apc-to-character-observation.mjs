@@ -114,16 +114,24 @@ export function validateRegisteredApcEvidencePayload(
     }
   }
 
-  if (!['human','tool','model','imported'].includes(evidence.sourceType)) {
-    errors.push('sourceType must be human, tool, model or imported');
+  const hasSourceType = evidence.sourceType != null;
+  const hasSourceId = evidence.sourceId != null;
+  if (hasSourceType !== hasSourceId) {
+    errors.push('sourceType and sourceId must be both absent or both present');
+  } else if (hasSourceType) {
+    if (!['human','tool','model','imported'].includes(evidence.sourceType)) {
+      errors.push('sourceType must be human, tool, model or imported');
+    }
+    if (!canonicalText(evidence.sourceId)) errors.push('sourceId must be a canonical non-empty string');
   }
-  if (!canonicalText(evidence.sourceId)) errors.push('sourceId is required');
 
   const acquisition = evidence.acquisition;
-  if (!acquisition || !['manual','prefilled','automatic'].includes(acquisition.mode)) {
-    errors.push('acquisition.mode must be manual, prefilled or automatic');
-  } else {
-    validatePrefillBasis(acquisition, indexes.photoEvidenceById, errors);
+  if (acquisition != null) {
+    if (!['manual','prefilled','automatic'].includes(acquisition.mode)) {
+      errors.push('acquisition.mode must be manual, prefilled or automatic');
+    } else {
+      validatePrefillBasis(acquisition, indexes.photoEvidenceById, errors);
+    }
   }
 
   const confidence = evidence.confidence ?? null;
