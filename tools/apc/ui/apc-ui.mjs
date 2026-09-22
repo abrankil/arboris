@@ -538,12 +538,21 @@ async function confirmEvidence() {
   const key = bufferKey();
   captureActiveEditBuffer();
 
-  // Confirm is a barrier: cancel the debounce, finish any autosave already
-  // running, persist the latest valid buffer as DRAFT, then rebuild CONFIRM
-  // from the committed revision. This prevents stale baseRevision races.
-  const draftResult = await flushAutosave(key);
-  if (draftResult && draftResult.status !== 'COMMITTED' && draftResult.status !== 'NO_OP') {
-    return message('Confirmación bloqueada: el DRAFT previo no pudo persistirse');
+  // Confirm is a barrier, but an editBuffer that has never started autosave
+  // must remain ephemeral: T-I12-05A requires direct revision 1 CONFIRMED.
+  // Only an autosave already in flight is awaited; a pending debounce is
+  // cancelled and is not materialized merely because the user confirmed.
+  const timer = state.autosaveTimers.get(key);
+  if (timer) {
+    clearTimeout(timer);
+    state.autosaveTimers.delete(key);
+  }
+  const inFlight = state.autosaveInFlight.get(key);
+  if (inFlight) {
+    const draftResult = await inFlight;
+    if (draftResult && draftResult.status !== 'COMMITTED' && draftResult.status !== 'NO_OP') {
+      return message('Confirmación bloqueada: el DRAFT previo no pudo persistirse');
+    }
   }
 
   const buffer = state.editBuffers.get(key) ?? readFormBuffer();
@@ -614,6 +623,27 @@ async function setSessionStatus(status) {
   await dispatch(commandBase({ type:'SET_SESSION_STATUS', status }));
 }
 
+async function sessionSwitchBarrier(action) {
+  // Stop accepting UI autosaves immediately, cancel debounce work, then wait
+  // for every already-started save and the executor queue before replacement.
+  for (const timer of state.autosaveTimers.values()) clearTimeout(timer);
+  state.autosaveTimers.clear();
+  const inFlight = [...state.autosaveInFlight.values()];
+  if (inFlight.length) await Promise.allSettled(inFlight);
+
+  if (state.executor) await state.executor.close();
+
+  clearEditBuffers();
+  state.inspectionSession = null;
+  state.assets.clear();
+  state.activePhotoId = null;
+  state.activeIndividualId = null;
+  state.formCharacterId = $('character').value || null;
+
+  resetExecutor();
+  return action();
+}
+
 async function ingestFiles(files) {
   if (!inWriteMode()) return;
   const staged = [];
@@ -645,34 +675,34 @@ async function ingestFiles(files) {
 }
 
 $('newSession').onclick = async () => {
-  if (state.executor) await state.executor.close();
-  resetExecutor();
-  state.inspectionSession = null;
-  state.assets.clear();
-  const result = await state.executor.bootstrap({ objective:$('objective').value.trim() || 'Revisión APC I12' });
-  message(`bootstrap: ${result.status}`);
-  render();
+  await sessionSwitchBarrier(async () => {
+    const result = await state.executor.bootstrap({ objective:$('objective').value.trim() || 'Revisión APC I12' });
+    message(`bootstrap: ${result.status}`);
+    render();
+  });
 };
 
 $('openSession').onclick = async () => {
-  if (!state.executor) resetExecutor();
-  state.inspectionSession = null;
-  state.assets.clear();
-  const result = await state.executor.openAsWriter($('openSessionId').value.trim());
-  if (result.status === 'READ_ONLY' && result.session) state.inspectionSession = result.session;
-  message(`open: ${result.status} ${(result.errors??[]).join('; ')}`);
-  render();
+  const sessionId = $('openSessionId').value.trim();
+  if (!sessionId) return message('sessionId requerido');
+  await sessionSwitchBarrier(async () => {
+    const result = await state.executor.openAsWriter(sessionId);
+    if (result.status === 'READ_ONLY' && result.session) state.inspectionSession = result.session;
+    message(`open: ${result.status} ${(result.errors??[]).join('; ')}`);
+    render();
+  });
 };
 
 $('importJson').onchange = async event => {
   const file = event.target.files?.[0];
   if (!file) return;
-  if (!state.executor) resetExecutor();
   const raw = await file.text();
-  const result = await state.executor.importSession(raw);
-  state.inspectionSession = result.status === 'READ_ONLY' ? result.session : null;
-  message(`import: ${result.status} ${(result.errors??[]).join('; ')}`);
-  render();
+  await sessionSwitchBarrier(async () => {
+    const result = await state.executor.importSession(raw);
+    state.inspectionSession = result.status === 'READ_ONLY' ? result.session : null;
+    message(`import: ${result.status} ${(result.errors??[]).join('; ')}`);
+    render();
+  });
 };
 
 $('photoFiles').onchange = event => ingestFiles([...event.target.files ?? []]);
