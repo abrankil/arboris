@@ -336,6 +336,12 @@ function applyPrimaryMutation(candidate, command, context) {
         ? [{ photoId: command.photoId, individualId: command.individualId }]
         : command.targets ?? [];
       const unique = new Map(targets.map(item => [`${item.photoId}::${item.individualId}`, item]));
+      if (command.type === 'BATCH_UNASSIGN_PHOTOS') {
+        const individualIds = new Set([...unique.values()].map(item => item.individualId));
+        if (individualIds.size > 1) {
+          return { ok: false, errors: ['BATCH_UNASSIGN_PHOTOS requires a single individualId'] };
+        }
+      }
       for (const target of unique.values()) {
         const photo = candidate.photos.find(item => item.photoId === target.photoId);
         if (!photo) return { ok: false, errors: [`Unknown photoId: ${target.photoId}`] };
