@@ -82,11 +82,14 @@ function bufferKey(photoId = state.activePhotoId, individualId = state.activeInd
 }
 
 function readFormBuffer() {
+  const key = bufferKey();
+  const runtime = key ? state.editBuffers.get(key) : null;
   return {
     evidenceStatus: $('evidenceStatus').value,
     observedState: $('evidenceStatus').value === 'OBSERVED' ? ($('observedState').value || null) : null,
     reason: $('evidenceStatus').value === 'OBSERVED' ? null : ($('reason').value.trim() || null),
     notes: $('notes').value.trim() || null,
+    acquisition: runtime?.acquisition ? structuredClone(runtime.acquisition) : null,
   };
 }
 
@@ -102,7 +105,10 @@ function writeFormBuffer(buffer) {
 function captureActiveEditBuffer() {
   const key = bufferKey();
   if (!key) return;
-  state.editBuffers.set(key, readFormBuffer());
+  const previous = state.editBuffers.get(key);
+  const next = readFormBuffer();
+  if (previous?.acquisition) next.acquisition = structuredClone(previous.acquisition);
+  state.editBuffers.set(key, next);
 }
 
 function clearEditBuffers() {
@@ -397,13 +403,19 @@ async function dispatch(command, { allowDecisionRetry = true } = {}) {
   return result;
 }
 
-function patchFromBuffer(buffer) {
+function patchFromBuffer(buffer, { confirming = false } = {}) {
+  const acquisition = buffer.acquisition?.mode === 'prefilled'
+    ? {
+        ...structuredClone(buffer.acquisition),
+        confirmedOnCurrentPhoto: confirming ? true : (buffer.acquisition.confirmedOnCurrentPhoto ?? false),
+      }
+    : { mode: 'manual', confirmedOnCurrentPhoto: null, basis: null };
   return {
     evidenceStatus: buffer.evidenceStatus,
     observedState: buffer.evidenceStatus === 'OBSERVED' ? (buffer.observedState ?? null) : null,
     sourceType: 'human',
     sourceId: actorId(),
-    acquisition: { mode: 'manual', confirmedOnCurrentPhoto: null, basis: null },
+    acquisition,
     confidence: null,
     reason: buffer.evidenceStatus === 'OBSERVED' ? null : (buffer.reason ?? null),
     notes: buffer.notes ?? null,
@@ -511,6 +523,47 @@ function evidencePatch() {
   return patchFromBuffer(readFormBuffer());
 }
 
+function priorObservationCandidates(session=currentSession()) {
+  if (!session || !state.activeIndividualId || !state.formCharacterId) return [];
+  return session.evidence.filter(item =>
+    item.current === true &&
+    item.lifecycleStatus === 'CONFIRMED' &&
+    item.evidenceStatus === 'OBSERVED' &&
+    item.individualId === state.activeIndividualId &&
+    item.characterId === state.formCharacterId &&
+    item.photoId !== state.activePhotoId
+  );
+}
+
+function prefillFromPriorObservation() {
+  const key = bufferKey();
+  if (!key || !inWriteMode()) return message('Prefill requiere ACTIVE_REVIEW_TARGET en write mode');
+  const candidates = priorObservationCandidates();
+  if (!candidates.length) return message('Prefill: no existe observación previa CONFIRMED para este individuo/carácter');
+
+  const prior = candidates.slice().sort((a,b) => b.revision - a.revision)[0];
+  const refs = [...new Set(candidates.map(item => item.photoEvidenceRef).filter(Boolean))];
+  const buffer = {
+    evidenceStatus: prior.evidenceStatus,
+    observedState: prior.observedState ?? null,
+    reason: prior.reason ?? null,
+    notes: prior.notes ?? null,
+    acquisition: {
+      mode: 'prefilled',
+      confirmedOnCurrentPhoto: false,
+      basis: { type: 'prior_observations', photoEvidenceRefs: refs },
+    },
+  };
+
+  const timer = state.autosaveTimers.get(key);
+  if (timer) clearTimeout(timer);
+  state.autosaveTimers.delete(key);
+  state.editBuffers.set(key, buffer);
+  writeFormBuffer(buffer);
+  message('Prefill aplicado sólo a editBuffer; requiere confirmación humana sobre la foto actual');
+  render();
+}
+
 function evidenceCommand(type) {
   const ev = currentEvidence();
   return commandBase({
@@ -569,7 +622,7 @@ async function confirmEvidence() {
     targetPhotoId: state.activePhotoId,
     targetIndividualId: state.activeIndividualId,
     characterId: state.formCharacterId ?? $('character').value,
-    patch: patchFromBuffer(buffer),
+    patch: patchFromBuffer(buffer, { confirming: true }),
   });
   command.confirmation = {
     confirmedByType: 'human',
@@ -727,6 +780,7 @@ for (const id of ['observedState', 'reason', 'notes']) {
   $(id).addEventListener('input', captureAndScheduleAutosave);
   $(id).addEventListener('change', captureAndScheduleAutosave);
 }
+$('prefillEvidence').onclick = prefillFromPriorObservation;
 $('saveDraft').onclick = saveDraft;
 $('confirmEvidence').onclick = confirmEvidence;
 
