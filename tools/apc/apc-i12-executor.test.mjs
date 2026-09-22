@@ -627,7 +627,9 @@ test('TD-I12-58 SUGGEST_INSPECTION_TARGETS is runtime-only and cannot mutate APC
   assert.match(operationSource, /deriveInspectionTargetSuggestions/);
   assert.doesNotMatch(operationSource, /dispatch\s*\(/);
   assert.doesNotMatch(operationSource, /commandBase\s*\(/);
-  assert.doesNotMatch(operationSource, /observedState/);
-  assert.doesNotMatch(operationSource, /semanticRevision\s*=/);
+  // Ignore comments when asserting forbidden executable tokens.
+  const executableSource = operationSource.replace(/\/\/.*$/gm, '');
+  assert.doesNotMatch(executableSource, /observedState/);
+  assert.doesNotMatch(executableSource, /semanticRevision\s*=/);
   assert.doesNotMatch(operationSource, /writeFormBuffer\s*\(/);
 });
