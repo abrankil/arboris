@@ -771,19 +771,6 @@ function prefillFromPriorObservation() {
   render();
 }
 
-function evidenceCommand(type) {
-  const ev = currentEvidence();
-  return commandBase({
-    type,
-    evidenceId: ev?.evidenceId ?? null,
-    baseRevision: ev?.revision ?? null,
-    targetPhotoId: state.activePhotoId,
-    targetIndividualId: state.activeIndividualId,
-    characterId: $('character').value,
-    patch: evidencePatch(),
-  });
-}
-
 async function saveDraft() {
   if (!activePhoto() || !activeIndividual()) return message('Falta ACTIVE_REVIEW_TARGET');
   captureActiveEditBuffer();
@@ -1179,6 +1166,7 @@ window.addEventListener('beforeunload', () => state.assets.clear());
   try {
     state.dataset = await loadBrowserCanonicalDataset();
     state.contextDependencies = { dataset: state.dataset };
+    state.contextGeneration = 1;
     renderCharacters();
     resetExecutor(state.contextDependencies);
     state.contextGate.finish('READY');
