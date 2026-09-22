@@ -947,3 +947,68 @@ test('T-I12-12 filter, active target changes, and selection remain separate UI-o
   assert.match(renderSource, /selector\.onclick = event => event\.stopPropagation\(\)/);
   assert.match(renderSource, /selector\.onchange = \(\) => togglePhotoSelection\(photo\.photoId\)/);
 });
+
+
+test('PHOTO_UI_STATUS_V0.2 derives only PHOTO-scoped unresolved requirements and current evidence', async () => {
+  const { derivePhotoUiStatus } = await import('./ui/apc-ui.mjs');
+  const photo = { photoId: 'PHOTO-1', individualRefs: ['IND-1'] };
+  const base = { evidence: [], pending: [] };
+  const status = (evidence = [], pending = []) =>
+    derivePhotoUiStatus(photo, { ...base, evidence, pending });
+  const ev = (lifecycleStatus, current = true) => ({
+    evidenceId: `EV-${lifecycleStatus}-${current}`,
+    revision: 1,
+    current,
+    photoId: 'PHOTO-1',
+    lifecycleStatus,
+  });
+
+  assert.equal(status(), 'sin revisar');
+  assert.equal(status([ev('DRAFT')]), 'DRAFT');
+  assert.equal(status([ev('CONFIRMED')]), 'CONFIRMED');
+  assert.equal(status([ev('DRAFT'), ev('CONFIRMED')]), 'revisada parcialmente');
+  assert.equal(status([ev('CONFIRMED', false)]), 'sin revisar');
+
+  assert.equal(status([], [{
+    kind: 'UNRESOLVED_REQUIREMENT',
+    status: 'OPEN',
+    scopeLevel: 'PHOTO',
+    scopeRef: 'PHOTO-1',
+  }]), 'required pendiente');
+
+  for (const pending of [
+    { kind: 'UNRESOLVED_REQUIREMENT', status: 'RESOLVED', scopeLevel: 'PHOTO', scopeRef: 'PHOTO-1' },
+    { kind: 'UNRESOLVED_REQUIREMENT', status: 'OPEN', scopeLevel: 'INDIVIDUAL', scopeRef: 'IND-1' },
+    { kind: 'UNRESOLVED_REQUIREMENT', status: 'OPEN', scopeLevel: 'SESSION', scopeRef: 'SESSION-1' },
+    { kind: 'REPRESENTATION_GAP', status: 'OPEN', sourceLevel: 'INDIVIDUAL', sourceRef: 'IND-1' },
+  ]) {
+    assert.equal(status([], [pending]), 'sin revisar');
+  }
+
+  assert.equal(status([ev('DRAFT'), ev('CONFIRMED')], [{
+    kind: 'UNRESOLVED_REQUIREMENT',
+    status: 'OPEN',
+    scopeLevel: 'PHOTO',
+    scopeRef: 'PHOTO-1',
+  }]), 'required pendiente');
+});
+
+test('PHOTO_UI_STATUS_V0.2 derivation is pure and does not mutate APC session', async () => {
+  const { derivePhotoUiStatus } = await import('./ui/apc-ui.mjs');
+  const photo = { photoId: 'PHOTO-1', individualRefs: ['IND-1'] };
+  const session = {
+    semanticRevision: 7,
+    evidence: [{
+      evidenceId: 'EV-1',
+      revision: 1,
+      current: true,
+      photoId: 'PHOTO-1',
+      lifecycleStatus: 'CONFIRMED',
+    }],
+    pending: [],
+  };
+  const before = structuredClone(session);
+  assert.equal(derivePhotoUiStatus(photo, session), 'CONFIRMED');
+  assert.deepEqual(session, before);
+  assert.equal(session.semanticRevision, 7);
+});
