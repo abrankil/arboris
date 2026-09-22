@@ -1,11 +1,12 @@
 # Árboris — APC I12 Implementation Design
 
 **ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.10`  
-**Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
+**Estado:** VALIDATED WITH ASC, FROZEN para implementación técnica.  
 **Ámbito:** Hito 16 / APC I12 implementation design.  
 **Contrato base:** `ARBORIS_APC_I12_UI_CONTRACT_R9`, VALIDATED WITH ASC y FROZEN en `h16/apc-i12-ui@4ba8f837f75eccf44054b7ef7c7b23b4c82efe40`.  
 **Base canónica I1–I11:** `main@54824efea9ec5806eef720fc07b6bdd44339d609`.  
-**No autoriza:** implementación, PR, merge a `main`, Gate B, cierre del Hito 16 ni integración runtime/producto H17.
+**Autoriza:** implementación técnica I12 conforme a R9 + V0.10 congelados.  
+**No autoriza:** PR, merge a `main`, Gate B, cierre del Hito 16 ni integración runtime/producto H17.
 
 ## 1. Objetivo
 
@@ -1978,7 +1979,7 @@ El diseño puede congelarse cuando:
 
 ### AUDITORÍA
 
-V0.10 resuelve los hallazgos adversariales remanentes B13–B15 y H07 sin modificar R9, y conserva todas las correcciones v0.9. Endurece la totalidad/cardinalidad PHOTO↔PhotoEvidence, fija la semántica stale de commands encolados, corrige el boundary de fallo durable hasta antes de promover `currentSession` y aplica el gate writer-ready I12 antes de export normativo.
+Auditoría adversarial final de V0.10 contra R9 y la implementación canónica I1–I11: PASS, sin blockers abiertos dentro del alcance del diseño. B01–B15 y H01–H07 permanecen cerrados. V0.10 no modifica R9, no introduce una segunda fuente de verdad y deja explícitas las precondiciones de implementación, concurrencia, persistencia, validación, export y handoff. Resultado: VALIDATED WITH ASC y FROZEN para implementación técnica I12.
 
 ### INCONSISTENCIAS
 
@@ -1986,7 +1987,7 @@ B13 queda resuelto haciendo obligatorio `PHOTO.photoEvidenceId` en todo writable
 
 ### VACÍOS / OMISIONES
 
-Siguen fuera de alcance layout final, accesibilidad de producto, backend remoto, blobs permanentes, eliminación de sesiones, hypothesis y H17 runtime. Un snapshot externo que viole invariantes I12 de fingerprint/colecciones puede inspeccionarse READ_ONLY, pero v0.9 no define reparación automática porque fusionar IDs o reescribir historia excedería I12. El versionado histórico del dataset continúa fuera de alcance; revisiones no-current se conservan por integridad intrínseca.
+Siguen fuera de alcance layout final, accesibilidad de producto, backend remoto, blobs permanentes, eliminación de sesiones, hypothesis y H17 runtime. Un snapshot externo que viole invariantes I12 de fingerprint/colecciones puede inspeccionarse READ_ONLY, pero V0.10 no define reparación automática porque fusionar IDs o reescribir historia excedería I12. El versionado histórico del dataset continúa fuera de alcance; revisiones no-current se conservan por integridad intrínseca.
 
 ### REDUNDANCIAS
 
