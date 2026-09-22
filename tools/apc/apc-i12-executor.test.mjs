@@ -457,3 +457,146 @@ test('TD-I12-48 close barrier waits active command and invalidates queued comman
   assert.equal(locks._held.has(created.session.sessionId), false);
   assert.equal(executor.snapshot(), null);
 });
+
+
+function prefilledObservedPatch(photoEvidenceRefs, { confirmedOnCurrentPhoto = false } = {}) {
+  return {
+    evidenceStatus: 'OBSERVED',
+    observedState: 'entero',
+    sourceType: 'human',
+    sourceId: 'Alejandra',
+    acquisition: {
+      mode: 'prefilled',
+      confirmedOnCurrentPhoto,
+      basis: { type: 'prior_observations', photoEvidenceRefs },
+    },
+    confidence: null,
+    reason: null,
+    notes: null,
+  };
+}
+
+async function setupTwoPhotoReviewTarget(executor) {
+  let r = await executor.dispatch(executor.commandBase({
+    type: 'INGEST_PHOTOS',
+    photos: [
+      { fileRef: 'prior.jpg', fingerprintSha256: '1'.repeat(64) },
+      { fileRef: 'current.jpg', fingerprintSha256: '2'.repeat(64) },
+    ],
+  }));
+  const [priorPhoto, currentPhoto] = r.session.photos;
+  r = await executor.dispatch(executor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  const individualId = r.created.individualId;
+  for (const photo of [priorPhoto, currentPhoto]) {
+    r = await executor.dispatch(executor.commandBase({
+      type: 'ASSIGN_PHOTO',
+      photoId: photo.photoId,
+      individualId,
+    }));
+    assert.equal(r.status, 'COMMITTED');
+  }
+  return { priorPhoto, currentPhoto, individualId };
+}
+
+test('T-I12-11 prefilled DRAFT remains traceable and not confirmed on current photo', async () => {
+  const { executor } = await setup();
+  const { priorPhoto, currentPhoto, individualId } = await setupTwoPhotoReviewTarget(executor);
+  const r = await executor.dispatch(executor.commandBase({
+    type: 'SAVE_DRAFT',
+    evidenceId: null,
+    baseRevision: null,
+    targetPhotoId: currentPhoto.photoId,
+    targetIndividualId: individualId,
+    characterId: 'CH-003',
+    patch: prefilledObservedPatch([priorPhoto.photoEvidenceId]),
+  }));
+  assert.equal(r.status, 'COMMITTED');
+  const draft = r.session.evidence.find(item => item.current);
+  assert.equal(draft.lifecycleStatus, 'DRAFT');
+  assert.equal(draft.acquisition.mode, 'prefilled');
+  assert.equal(draft.acquisition.confirmedOnCurrentPhoto, false);
+  assert.deepEqual(draft.acquisition.basis, {
+    type: 'prior_observations',
+    photoEvidenceRefs: [priorPhoto.photoEvidenceId],
+  });
+  assert.equal(draft.confirmation, null);
+  await executor.close();
+});
+
+test('TD-I12-57 prefill requires explicit human confirmation before CONFIRMED', async () => {
+  const { executor } = await setup();
+  const { priorPhoto, currentPhoto, individualId } = await setupTwoPhotoReviewTarget(executor);
+
+  const rejected = await executor.dispatch(executor.commandBase({
+    type: 'CONFIRM_EVIDENCE',
+    evidenceId: null,
+    baseRevision: null,
+    targetPhotoId: currentPhoto.photoId,
+    targetIndividualId: individualId,
+    characterId: 'CH-003',
+    patch: prefilledObservedPatch([priorPhoto.photoEvidenceId]),
+    confirmation: {
+      confirmedByType: 'human',
+      confirmedById: 'Alejandra',
+      confirmedAt: '2026-09-22T04:00:00-03:00',
+    },
+  }));
+  assert.equal(rejected.status, 'REJECTED');
+  assert.match(rejected.errors.join(' '), /confirmedOnCurrentPhoto=true/);
+  assert.equal(executor.snapshot().evidence.length, 0);
+
+  const confirmed = await executor.dispatch(executor.commandBase({
+    type: 'CONFIRM_EVIDENCE',
+    evidenceId: null,
+    baseRevision: null,
+    targetPhotoId: currentPhoto.photoId,
+    targetIndividualId: individualId,
+    characterId: 'CH-003',
+    patch: prefilledObservedPatch([priorPhoto.photoEvidenceId], { confirmedOnCurrentPhoto: true }),
+    confirmation: {
+      confirmedByType: 'human',
+      confirmedById: 'Alejandra',
+      confirmedAt: '2026-09-22T04:01:00-03:00',
+    },
+  }));
+  assert.equal(confirmed.status, 'COMMITTED');
+  assert.equal(confirmed.session.evidence.length, 1);
+  assert.equal(confirmed.session.evidence[0].revision, 1);
+  assert.equal(confirmed.session.evidence[0].lifecycleStatus, 'CONFIRMED');
+  assert.equal(confirmed.session.evidence[0].acquisition.confirmedOnCurrentPhoto, true);
+  await executor.close();
+});
+
+test('TD-I12-65 prefilled DRAFT rejects missing or unknown prior-observation refs', async () => {
+  const { executor } = await setup();
+  const { currentPhoto, individualId } = await setupTwoPhotoReviewTarget(executor);
+
+  const missing = await executor.dispatch(executor.commandBase({
+    type: 'SAVE_DRAFT',
+    evidenceId: null,
+    baseRevision: null,
+    targetPhotoId: currentPhoto.photoId,
+    targetIndividualId: individualId,
+    characterId: 'CH-003',
+    patch: {
+      ...prefilledObservedPatch([]),
+      acquisition: { mode: 'prefilled', confirmedOnCurrentPhoto: false, basis: null },
+    },
+  }));
+  assert.equal(missing.status, 'REJECTED');
+  assert.match(missing.errors.join(' '), /acquisition.basis/);
+
+  const unknown = await executor.dispatch(executor.commandBase({
+    type: 'SAVE_DRAFT',
+    evidenceId: null,
+    baseRevision: null,
+    targetPhotoId: currentPhoto.photoId,
+    targetIndividualId: individualId,
+    characterId: 'CH-003',
+    patch: prefilledObservedPatch(['PE-DOES-NOT-EXIST']),
+  }));
+  assert.equal(unknown.status, 'REJECTED');
+  assert.match(unknown.errors.join(' '), /Unknown acquisition.basis.photoEvidenceRef/);
+  assert.equal(executor.snapshot().evidence.length, 0);
+  await executor.close();
+});
