@@ -6,7 +6,7 @@ import {
   createMemoryApcPersistence,
   createMemoryWriterLockProvider,
 } from './apc-i12-executor.mjs';
-import { createWriterContextGate } from './ui/apc-ui-context.mjs';
+import { createWriterContextGate, createWriterIntentLeaseRegistry, leaseAuthorizesExecutor } from './ui/apc-ui-context.mjs';
 
 function testContext() {
   let id = 0;
@@ -1145,4 +1145,106 @@ test('TD-I12-71 reopening same session under a new context revalidates before wr
   assert.equal(reopened.status, 'READ_ONLY');
   assert.equal(newExecutor.snapshot(), null);
   await newExecutor.close();
+});
+
+
+test('T-CTX-32 replacement drain waits for admitted writer lease', async () => {
+  const leases = createWriterIntentLeaseRegistry();
+  const executorRef = {};
+  const lease = leases.begin({ executorRef, sessionEpoch: 4, contextGeneration: 7, canAccept: true });
+  let drained = false;
+  const drain = leases.waitForDrain().then(() => { drained = true; });
+  await Promise.resolve();
+  assert.equal(drained, false);
+  assert.equal(leases.release(lease), true);
+  await drain;
+  assert.equal(drained, true);
+});
+
+test('T-CTX-33 failed admitted intent can release lease without blocking drain', async () => {
+  const leases = createWriterIntentLeaseRegistry();
+  const lease = leases.begin({ executorRef: {}, sessionEpoch: 1, contextGeneration: 1, canAccept: true });
+  assert.equal(leases.size, 1);
+  assert.equal(leases.release(lease), true);
+  assert.equal(leases.release(lease), false);
+  await leases.waitForDrain();
+  assert.equal(leases.size, 0);
+});
+
+test('T-CTX-35 OLD lease never authorizes a NEW executor or changed epoch/generation', () => {
+  const leases = createWriterIntentLeaseRegistry();
+  const oldExecutor = {};
+  const newExecutor = {};
+  const lease = leases.begin({ executorRef: oldExecutor, sessionEpoch: 3, contextGeneration: 5, canAccept: true });
+  const active = leases.isActive(lease);
+  assert.equal(leaseAuthorizesExecutor(lease, {
+    executorRef: oldExecutor, sessionEpoch: 3, contextGeneration: 5, isActive: active,
+  }), true);
+  assert.equal(leaseAuthorizesExecutor(lease, {
+    executorRef: newExecutor, sessionEpoch: 3, contextGeneration: 5, isActive: active,
+  }), false);
+  assert.equal(leaseAuthorizesExecutor(lease, {
+    executorRef: oldExecutor, sessionEpoch: 4, contextGeneration: 5, isActive: active,
+  }), false);
+  assert.equal(leaseAuthorizesExecutor(lease, {
+    executorRef: oldExecutor, sessionEpoch: 3, contextGeneration: 6, isActive: active,
+  }), false);
+  leases.release(lease);
+  assert.equal(leaseAuthorizesExecutor(lease, {
+    executorRef: oldExecutor, sessionEpoch: 3, contextGeneration: 5, isActive: leases.isActive(lease),
+  }), false);
+});
+
+test('T-CTX-38 drain waits for every OLD lease and unadmitted work never enters wait-set', async () => {
+  const leases = createWriterIntentLeaseRegistry();
+  const executorRef = {};
+  const a = leases.begin({ executorRef, sessionEpoch: 2, contextGeneration: 9, canAccept: true });
+  const b = leases.begin({ executorRef, sessionEpoch: 2, contextGeneration: 9, canAccept: true });
+  const blocked = leases.begin({ executorRef, sessionEpoch: 2, contextGeneration: 9, canAccept: false });
+  assert.equal(blocked, null);
+  assert.equal(leases.size, 2);
+  let drained = false;
+  const drain = leases.waitForDrain().then(() => { drained = true; });
+  leases.release(a);
+  await Promise.resolve();
+  assert.equal(drained, false);
+  leases.release(b);
+  await drain;
+  assert.equal(drained, true);
+});
+
+test('T-CTX-34 NEEDS_DECISION flow releases OLD lease before human decision and retry uses runWriterIntent', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('async function runWriterIntent');
+  const end = source.indexOf('\nfunction patchFromBuffer', start);
+  const body = source.slice(start, end);
+  assert.match(body, /finally\s*\{\s*state\.writerIntentLeases\.release\(lease\)/);
+  const finallyAt = body.indexOf('finally');
+  const decisionAt = body.indexOf("result.status === 'NEEDS_DECISION'");
+  assert.ok(finallyAt >= 0 && decisionAt > finallyAt);
+  assert.match(body, /result = await runWriterIntent\(retryIntent, \{ allowDecisionRetry: false \}\)/);
+});
+
+test('T-CTX-40 autosave and replacement use lease authority rather than autosaveInFlight as close barrier', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const saveStart = source.indexOf('async function saveBufferKey');
+  const saveEnd = source.indexOf('\nfunction scheduleAutosave', saveStart);
+  assert.match(source.slice(saveStart, saveEnd), /const promise = runWriterIntent\(/);
+  const replaceStart = source.indexOf('export async function replaceWriterContext');
+  const replaceEnd = source.indexOf('\nasync function sessionSwitchBarrier', replaceStart);
+  const replaceBody = source.slice(replaceStart, replaceEnd);
+  assert.match(replaceBody, /contextGate\.beginReplacement\(\)/);
+  assert.match(replaceBody, /await state\.writerIntentLeases\.waitForDrain\(\)/);
+  assert.ok(replaceBody.indexOf('waitForDrain()') < replaceBody.indexOf('state.executor.close()'));
+});
+
+test('T-CTX-43 NEW context installation advances generation before constructing NEW executor', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('export async function replaceWriterContext');
+  const end = source.indexOf('\nasync function sessionSwitchBarrier', start);
+  const body = source.slice(start, end);
+  const generationAt = body.indexOf('state.contextGeneration += 1');
+  const resetAt = body.indexOf('resetExecutor(state.contextDependencies)');
+  assert.ok(generationAt >= 0 && resetAt > generationAt);
+  assert.doesNotMatch(body.slice(generationAt, resetAt), /await /);
 });
