@@ -1098,24 +1098,31 @@ test('TD-I12-71 reopening same session under a new context revalidates before wr
   const created = await oldExecutor.bootstrap({ objective: 'context barrier regression' });
   assert.equal(created.status, 'COMMITTED');
   const sessionId = oldExecutor.snapshot().sessionId;
-  const photo = oldExecutor.snapshot().photos[0];
-  const individualId = oldExecutor.snapshot().individuals[0]?.individualId;
-  // Make the durable snapshot actually depend on CH-003 so replacing the
-  // dataset with one that lacks CH-003 must fail writer revalidation.
-  const createdIndividual = individualId ?? (await oldExecutor.dispatch(oldExecutor.commandBase({
-    type: 'CREATE_INDIVIDUAL',
-  }))).session.individuals[0].individualId;
-  if (!(oldExecutor.snapshot().photos[0]?.individualRefs ?? []).includes(createdIndividual)) {
-    await oldExecutor.dispatch(oldExecutor.commandBase({
-      type: 'ASSIGN_PHOTO',
-      photoId: photo.photoId,
-      individualId: createdIndividual,
-    }));
-  }
-  await oldExecutor.dispatch(oldExecutor.commandBase({
+
+  let r = await oldExecutor.dispatch(oldExecutor.commandBase({
+    type: 'INGEST_PHOTOS',
+    photos: [{ fileRef: 'context.jpg', fingerprintSha256: 'c'.repeat(64) }],
+  }));
+  assert.equal(r.status, 'COMMITTED');
+  const photoId = r.session.photos[0].photoId;
+
+  r = await oldExecutor.dispatch(oldExecutor.commandBase({ type: 'CREATE_INDIVIDUAL' }));
+  assert.equal(r.status, 'COMMITTED');
+  const individualId = r.created.individualId;
+
+  r = await oldExecutor.dispatch(oldExecutor.commandBase({
+    type: 'ASSIGN_PHOTO',
+    photoId,
+    individualId,
+  }));
+  assert.equal(r.status, 'COMMITTED');
+
+  r = await oldExecutor.dispatch(oldExecutor.commandBase({
     type: 'SAVE_DRAFT',
-    targetPhotoId: photo.photoId,
-    targetIndividualId: createdIndividual,
+    evidenceId: null,
+    baseRevision: null,
+    targetPhotoId: photoId,
+    targetIndividualId: individualId,
     characterId: 'CH-003',
     patch: {
       evidenceStatus: 'OBSERVED',
@@ -1128,6 +1135,7 @@ test('TD-I12-71 reopening same session under a new context revalidates before wr
       notes: null,
     },
   }));
+  assert.equal(r.status, 'COMMITTED');
   await oldExecutor.close();
 
   const incompatible = testContext();
