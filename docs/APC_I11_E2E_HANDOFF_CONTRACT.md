@@ -1,6 +1,6 @@
 # Árboris — APC I11 E2E Handoff Contract
 
-**ID:** `ARBORIS_APC_I11_E2E_HANDOFF_CONTRACT_R1`  
+**ID:** `ARBORIS_APC_I11_E2E_HANDOFF_CONTRACT_R2`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I11.  
 **Base canónica:** `main@805890c3c11f9de82922ac89e1369b7324a6e223`.  
@@ -18,7 +18,7 @@ APC_SESSION
 → assessIdentification()
 ```
 
-I11 integra componentes ya existentes. No introduce un clasificador de especies, no convierte una fotografía en identificación directa y no modifica conocimiento botánico canónico.
+I11 es un **verification harness E2E** entre contratos existentes. No constituye integración runtime o de producto de H17, no cambia el roadmap y no materializa el flujo completo visión → identificación. No introduce un clasificador de especies, no convierte una fotografía en identificación directa y no modifica conocimiento botánico canónico.
 
 ## 2. Unidad de ejecución
 
@@ -37,13 +37,17 @@ runApcIndividualThroughAce({
 
 La función:
 
-1. valida la sesión APC;
+1. valida la integridad estructural de la sesión mediante `validateApcSession()`;
 2. valida que `individualId` exista;
 3. selecciona únicamente revisiones `current=true`;
 4. selecciona únicamente evidencia `lifecycleStatus='CONFIRMED'`;
 5. selecciona únicamente evidencia del individuo solicitado;
-6. adapta cada evidencia por el contrato APC → CharacterObservation → ACE ya existente;
-7. entrega el conjunto resultante a `assessIdentification()`.
+6. adapta cada evidencia seleccionada a CharacterObservation;
+7. evalúa separadamente si cada CharacterObservation es ACE-eligible;
+8. entrega a `assessIdentification()` sólo el subset ACE-eligible;
+9. conserva trazabilidad explícita de cualquier evidencia APC seleccionada que no sea ACE-eligible.
+
+I11 **no requiere** `session.status=CLOSED`, `EXPORTABLE=true` ni `PASS=true`. PASS/EXPORTABLE siguen siendo gates APC distintos del handoff técnico. Una sesión estructuralmente válida puede ser usada por I11 aunque mantenga pending no críticos, contradictions u objectiveAssessment no satisfecho, siempre que la evidencia individual que cruce el handoff cumpla sus propios contratos.
 
 ## 3. Elegibilidad de evidencia
 
@@ -64,7 +68,20 @@ Consecuencias:
 - evidencia de otro individuo nunca entra a ACE.
 - una sesión puede contener evidencia válida de múltiples individuos sin contaminación cruzada.
 
-El handoff reutiliza `validateApcEvidenceForHandoff()`; I11 no crea una segunda definición de elegibilidad.
+El handoff reutiliza `validateApcEvidenceForHandoff()`; I11 no crea una segunda definición de elegibilidad APC.
+
+I11 distingue obligatoriamente dos niveles:
+
+```text
+APC_HANDOFF_ELIGIBLE
+= current + CONFIRMED + individual objetivo + contrato APC válido
+
+ACE_ELIGIBLE
+= APC_HANDOFF_ELIGIBLE
+  + carácter computable por ACE
+```
+
+Una evidencia APC válida pero no ACE-eligible no se transforma en evidencia positiva, no se omite silenciosamente y no aborta por sí sola toda la ejecución. Debe registrarse en `excludedFromAce` con una razón explícita derivada del contrato ACE.
 
 ## 4. Estados observacionales
 
@@ -99,13 +116,15 @@ confirmation
 photoEvidenceRef
 ```
 
+`photoEvidenceRef` debe preservarse dentro de `provenance.apc.photoEvidenceRef` antes de construir la evidencia ACE. I11 no depende de un campo top-level nuevo en ACE para esta trazabilidad.
+
 I11 no aplana múltiples evidencias a un único valor por carácter antes de ACE.
 
 ## 6. Contradicciones
 
 I11 preserva todas las evidencias current+CONFIRMED elegibles, incluso si existen valores incompatibles para el mismo carácter.
 
-`contradictions[]` es contexto APC y no se convierte en evidencia positiva adicional.
+`contradictions[]` es contexto APC y no se convierte en evidencia positiva adicional ni genera un tercer item ACE derivado del episodio de contradicción.
 
 I11 no:
 
@@ -120,13 +139,13 @@ ACE recibe la evidencia observacional real y aplica su contrato de compatibilida
 
 `pending[]` y `REPRESENTATION_GAP` no se convierten en evidencia ACE.
 
-Pueden conservarse como contexto de resultado I11, pero no deben incrementar dimensiones evaluables ni eliminar candidatos.
+Se exponen únicamente en `context.pending` como contexto diagnóstico no positivo. No deben incrementar dimensiones evaluables ni eliminar candidatos.
 
 Un pending crítico pertenece al gate APC/PASS; I11 no lo transforma en observación botánica.
 
 ## 8. Hypothesis e identidad
 
-Una `speciesHypothesis` o identificación provisional, cuando exista en el individuo/sesión, no se usa como evidencia positiva para ACE ni restringe silenciosamente `candidateIds`.
+Una `speciesHypothesis` o identificación provisional, cuando exista en el individuo/sesión, no se usa como evidencia positiva para ACE ni restringe silenciosamente `candidateIds`. Puede exponerse únicamente como `context.provisionalHypothesis`.
 
 Sólo un `candidateIds` explícito suministrado por el caller puede limitar el conjunto inicial de candidatos.
 
@@ -139,17 +158,27 @@ El resultado debe distinguir al menos:
 ```js
 {
   individualId,
+  selectedApcEvidence,
   handoffEvidence,
+  excludedFromAce,
   aceAssessment,
-  context
+  context: {
+    contradictions,
+    pending,
+    provisionalHypothesis
+  }
 }
 ```
 
 donde:
 
-- `handoffEvidence` contiene exactamente la evidencia ACE derivada de APC elegible;
+- `selectedApcEvidence` contiene exactamente la evidencia APC current+CONFIRMED del individuo objetivo;
+- `handoffEvidence` contiene exactamente el subset ACE-eligible convertido a evidencia ACE;
+- `excludedFromAce` contiene las evidencias APC seleccionadas que no son ACE-eligible y su razón explícita;
 - `aceAssessment` es el resultado directo de `assessIdentification()`;
-- `context` puede exponer contradictions/pending/provisional hypothesis de forma no positiva.
+- `context.contradictions` contiene sólo episodios APC relevantes al individuo objetivo;
+- `context.pending` contiene sólo pending APC relevantes al individuo objetivo o propagados desde él;
+- `context.provisionalHypothesis` es diagnóstico y nunca restringe candidatos por sí mismo.
 
 No se persiste una identificación nueva dentro de APC como efecto lateral de I11.
 
@@ -166,7 +195,17 @@ candidateIds
 
 I11 debe producir el mismo handoff y el mismo resultado ACE.
 
-El orden de evidencia debe ser estable y no depender del orden accidental de arrays cuando ello pueda cambiar la salida observable.
+El orden canónico de `selectedApcEvidence`, `handoffEvidence` y `excludedFromAce` es:
+
+```text
+characterId
+→ evidenceId
+→ revision
+```
+
+No depende del orden accidental de `session.evidence[]`.
+
+I11 no reordena `candidateIds`: el array explícito se entrega a ACE sin sorting adicional, de modo que ACE pueda aplicar su contrato canónico de deduplicación conservando el orden de primera aparición.
 
 ## 11. Fallos explícitos
 
@@ -174,8 +213,9 @@ I11 debe fallar explícitamente cuando:
 
 - la sesión APC es inválida;
 - el `individualId` no existe;
-- una evidencia seleccionada no puede adaptarse por el contrato APC/H16;
-- un carácter no es válido para el dataset;
+- una evidencia seleccionada que declara ser ACE-eligible no puede adaptarse por el contrato APC/H16;
+- un carácter desconocido para el dataset impide adaptar la evidencia y produce fallo explícito;
+- un carácter conocido pero no computable para ACE se registra en `excludedFromAce` y no aborta por sí solo la ejecución;
 - `candidateIds` contiene especies desconocidas;
 - una dependencia necesaria para ACE es inválida.
 
@@ -188,7 +228,7 @@ La suite I11 debe demostrar como mínimo:
 ```text
 T-I11-01
 CONFIRMED + current + OBSERVED
-→ llega a ACE con provenance
+→ llega a ACE con provenance completa, incluido provenance.apc.photoEvidenceRef
 
 T-I11-02
 DRAFT
@@ -221,6 +261,7 @@ dos observaciones del mismo carácter
 T-I11-09
 contradictory confirmed evidence
 → ambas evidencias preservadas
+→ contradictions[] no genera evidencia ACE adicional
 → I11 no elige ganadora
 
 T-I11-10
@@ -244,23 +285,36 @@ evidencia seleccionada inválida
 → fallo explícito, no drop silencioso
 
 T-I11-15
-ejecución repetida mismo snapshot
-→ resultado determinista
+dos snapshots semánticamente equivalentes con distinto orden de session.evidence[]
+→ mismo orden canónico de salida
+→ mismo resultado ACE
+
+T-I11-16
+APC_HANDOFF_ELIGIBLE pero carácter conocido no computable por ACE
+→ excludedFromAce con razón explícita
+→ no drop silencioso
+→ no aborto global por sí solo
+
+T-I11-17
+photoEvidenceRef
+→ preservado exactamente en provenance.apc.photoEvidenceRef hasta ACE
 ```
 
 ## 13. Criterio de cierre I11
 
 I11 puede considerarse implementado cuando:
 
-- existe una función E2E explícita APC → H16 → ACE;
-- sólo current+CONFIRMED del individuo objetivo cruza el handoff;
+- existe una función E2E explícita de verificación APC → H16 → ACE sin constituir integración runtime H17;
+- sólo current+CONFIRMED del individuo objetivo entra en `selectedApcEvidence`;
+- sólo el subset ACE-eligible entra en `handoffEvidence`;
+- evidencia APC válida pero no ACE-eligible queda explícita en `excludedFromAce`;
 - DRAFT e históricos quedan excluidos;
-- provenance se preserva;
+- provenance se preserva, incluido `photoEvidenceRef`;
 - contradicciones se preservan sin resolución automática;
 - pending/gaps/hypotheses no se convierten en evidencia positiva;
 - `candidateIds` sólo se restringe explícitamente;
 - la salida ACE es resultado directo del motor canónico;
-- T-I11-01..15 pasan;
+- T-I11-01..17 pasan;
 - I1–I10 permanecen verdes;
 - `npm test` pasa;
 - la auditoría del diff no encuentra blockers;
@@ -268,15 +322,15 @@ I11 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R1 mantiene la frontera epistemológica definida por H16/APC y H15/ACE: APC captura y confirma observaciones; el adaptador conserva el significado observacional; ACE evalúa compatibilidad e identificación. I11 sólo prueba e integra ese trayecto.
+R2 mantiene la frontera epistemológica definida por H16/APC y H15/ACE: APC captura y confirma observaciones; el adaptador conserva el significado observacional; ACE evalúa compatibilidad e identificación. I11 funciona exclusivamente como verification harness E2E y no adelanta la integración runtime de H17.
 
 ### INCONSISTENCIAS
 
-No se detecta una contradicción necesaria entre los contratos existentes. Debe verificarse durante implementación que el adaptador actual preserve todos los campos de provenance requeridos y que no exista filtrado implícito adicional en ACE.
+No quedan inconsistencias contractuales conocidas de R1 sin tratamiento. R2 separa APC_HANDOFF_ELIGIBLE de ACE_ELIGIBLE, desacopla I11 de PASS/EXPORTABLE, congela el orden canónico de salida y exige preservar photoEvidenceRef dentro de provenance.apc.
 
 ### VACÍOS / OMISIONES
 
-R1 no define persistencia de una identificación resultante, UI, política de cierre de Gate B ni flujo multi-individuo agregado. Esos puntos quedan fuera de I11.
+R2 no define persistencia de una identificación resultante, UI, política de cierre de Gate B, integración runtime de H17 ni flujo multi-individuo agregado. Esos puntos quedan fuera de I11.
 
 ### REDUNDANCIAS
 
