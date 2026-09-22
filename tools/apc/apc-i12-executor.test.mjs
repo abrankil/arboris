@@ -1012,3 +1012,51 @@ test('PHOTO_UI_STATUS_V0.2 derivation is pure and does not mutate APC session', 
   assert.deepEqual(session, before);
   assert.equal(session.semanticRevision, 7);
 });
+
+
+test('FILTERED_PHOTO_NAVIGATION_V0.2 resolves circular, filtered-out, singleton, empty, and invalid navigation', async () => {
+  const { derivePhotoNavigationTarget } = await import('./ui/apc-ui-navigation.mjs');
+  const go = (visiblePhotoIds, activePhotoId, delta) =>
+    derivePhotoNavigationTarget({ visiblePhotoIds, activePhotoId, delta });
+
+  assert.equal(go(['A','B','C'], 'A', 1), 'B');
+  assert.equal(go(['A','B','C'], 'B', 1), 'C');
+  assert.equal(go(['A','B','C'], 'C', 1), 'A');
+  assert.equal(go(['A','B','C'], 'A', -1), 'C');
+  assert.equal(go(['A','B','C'], 'B', -1), 'A');
+  assert.equal(go(['A','B','C'], 'C', -1), 'B');
+  assert.equal(go(['A','B','C'], 'X', 1), 'A');
+  assert.equal(go(['A','B','C'], 'X', -1), 'C');
+  assert.equal(go(['A'], 'X', 1), 'A');
+  assert.equal(go(['A'], 'X', -1), 'A');
+  assert.equal(go(['A'], 'A', 1), 'A');
+  assert.equal(go(['A'], 'A', -1), 'A');
+  assert.equal(go([], 'X', 1), null);
+  assert.equal(go([], 'X', -1), null);
+  assert.throws(() => go(['A'], 'A', 0), RangeError);
+  assert.throws(() => go(['A'], 'A', 2), RangeError);
+});
+
+test('FILTERED_PHOTO_NAVIGATION_V0.2 apply path keeps filter UI-only and same-target navigation a strict no-op', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+
+  assert.match(source, /\$\('photoFilter'\)\.onchange = render/);
+
+  const navStart = source.indexOf('async function navigatePhoto');
+  const navEnd = source.indexOf('\nasync function batchInbox', navStart);
+  assert.ok(navStart >= 0 && navEnd > navStart);
+  const navSource = source.slice(navStart, navEnd);
+  assert.match(navSource, /derivePhotoNavigationTarget/);
+  assert.match(navSource, /visiblePhotos\(session\)\.map\(item => item\.photoId\)/);
+  assert.match(navSource, /targetPhotoId == null \|\| targetPhotoId === state\.activePhotoId/);
+  assert.match(navSource, /changeReviewTarget\(\{ photoId: targetPhotoId \}\)/);
+  assert.doesNotMatch(navSource, /dispatch\(|commandBase\(|flushAutosave\(|captureActiveEditBuffer\(/);
+
+  const targetStart = source.indexOf('async function changeReviewTarget');
+  const targetEnd = source.indexOf('\nfunction captureAndScheduleAutosave', targetStart);
+  const targetSource = source.slice(targetStart, targetEnd);
+  assert.match(targetSource, /captureActiveEditBuffer\(\)/);
+  assert.match(targetSource, /await flushAutosave\(oldKey\)/);
+  assert.match(targetSource, /Cambio de target bloqueado/);
+  assert.match(targetSource, /state\.activePhotoId = photoId \?\? null/);
+});
