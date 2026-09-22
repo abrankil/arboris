@@ -35,6 +35,7 @@ const state = {
   runtimeTail: Promise.resolve(),
   formCharacterId: null,
   batchUndo: null,
+  selectedPhotoIds: new Set(),
 };
 
 function message(text) {
@@ -319,6 +320,18 @@ export function deriveRepresentationGaps({ session, activeIndividualId = null })
     }));
 }
 
+export function selectedBatchPhotoIds(selectedPhotoIds, session) {
+  if (!session) return [];
+  const existing = new Set((session.photos ?? []).map(item => item.photoId));
+  return [...selectedPhotoIds].filter(photoId => existing.has(photoId));
+}
+
+function togglePhotoSelection(photoId) {
+  if (state.selectedPhotoIds.has(photoId)) state.selectedPhotoIds.delete(photoId);
+  else state.selectedPhotoIds.add(photoId);
+  render();
+}
+
 function render() {
   const session = currentSession();
   chooseFallbackTargets(session);
@@ -337,8 +350,16 @@ function render() {
   for (const photo of visiblePhotos(session)) {
     const div = document.createElement('div');
     div.className = 'item' + (photo.photoId===state.activePhotoId ? ' active' : '');
+    const selector = document.createElement('input');
+    selector.type = 'checkbox';
+    selector.checked = state.selectedPhotoIds.has(photo.photoId);
+    selector.setAttribute('aria-label', `Seleccionar ${photo.photoId} para batch`);
+    selector.onclick = event => event.stopPropagation();
+    selector.onchange = () => togglePhotoSelection(photo.photoId);
+    const label = document.createElement('span');
     const inInbox = session.inboxPhotoRefs.includes(photo.photoId);
-    div.textContent = `${photo.photoId.slice(0,18)} · ${photo.fileRef}${inInbox ? ' · inbox' : ''} · ${photoUiStatus(photo, session)}`;
+    label.textContent = `${photo.photoId.slice(0,18)} · ${photo.fileRef}${inInbox ? ' · inbox' : ''} · ${photoUiStatus(photo, session)}`;
+    div.append(selector, label);
     div.onclick = () => {
       void changeReviewTarget({ photoId: photo.photoId });
     };
@@ -799,8 +820,8 @@ async function navigatePhoto(delta) {
 
 async function batchInbox(type) {
   const before = state.executor?.snapshot();
-  const photoIds = visiblePhotos(before).map(item => item.photoId);
-  if (!photoIds.length) return message('No hay fotos en el filtro actual');
+  const photoIds = selectedBatchPhotoIds(state.selectedPhotoIds, before);
+  if (!photoIds.length) return message('Selecciona al menos una foto para el batch');
   const result = await dispatch(commandBase({ type, photoIds }));
   if (result.status === 'COMMITTED') {
     state.batchUndo = deriveBatchUndoDescriptor({
@@ -857,6 +878,7 @@ async function sessionSwitchBarrier(action) {
 
   clearEditBuffers();
   state.batchUndo = null;
+  state.selectedPhotoIds.clear();
   state.inspectionSession = null;
   state.assets.clear();
   state.activePhotoId = null;
