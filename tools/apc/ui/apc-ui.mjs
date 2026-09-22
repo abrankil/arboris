@@ -20,6 +20,7 @@ import { runApcIndividualThroughAce } from '../apc-i11-e2e.mjs';
 import { loadBrowserCanonicalDataset } from './apc-ui-dataset.mjs';
 import { derivePhotoUiStatus } from './apc-ui-status.mjs';
 import { derivePhotoNavigationTarget } from './apc-ui-navigation.mjs';
+import { createWriterContextGate } from './apc-ui-context.mjs';
 
 const $ = id => document.getElementById(id);
 const state = {
@@ -38,7 +39,7 @@ const state = {
   formCharacterId: null,
   batchUndo: null,
   selectedPhotoIds: new Set(),
-  contextState: 'ERROR',
+  contextGate: createWriterContextGate('ERROR'),
   contextDependencies: null,
 };
 
@@ -64,7 +65,7 @@ function hasWriterAuthority() {
 }
 
 function canAcceptWriterIntent() {
-  return state.contextState === 'READY' && hasWriterAuthority();
+  return state.contextGate.state === 'READY' && hasWriterAuthority();
 }
 
 function inWriteMode() {
@@ -879,13 +880,12 @@ async function setSessionStatus(status) {
 }
 
 export async function replaceWriterContext(newDependencies) {
-  if (state.contextState === 'REPLACING') {
+  if (!state.contextGate.beginReplacement()) {
     return { status: 'REPLACEMENT_IN_PROGRESS' };
   }
 
   // The gate closes synchronously before the first await. Work already
   // admitted under READY may finish; no new OLD intent may be admitted.
-  state.contextState = 'REPLACING';
   const sessionId = state.executor?.snapshot()?.sessionId ?? null;
 
   try {
@@ -916,24 +916,24 @@ export async function replaceWriterContext(newDependencies) {
     resetExecutor(state.contextDependencies);
 
     if (!sessionId) {
-      state.contextState = 'READY';
+      state.contextGate.finish('READY');
       render();
       return { status: 'NO_SESSION' };
     }
 
     const result = await state.executor.openAsWriter(sessionId);
     if (result.status === 'COMMITTED') {
-      state.contextState = 'READY';
+      state.contextGate.finish('READY');
       render();
       return { status: 'REOPENED_WRITER', result };
     }
 
     state.inspectionSession = result.session ?? null;
-    state.contextState = result.status === 'READ_ONLY' ? 'READ_ONLY' : 'ERROR';
+    state.contextGate.finish(result.status === 'READ_ONLY' ? 'READ_ONLY' : 'ERROR');
     render();
     return { status: result.status, result };
   } catch (error) {
-    state.contextState = 'ERROR';
+    state.contextGate.finish('ERROR');
     disableWrites(true);
     render();
     return { status: 'ERROR', error };
@@ -1145,7 +1145,7 @@ window.addEventListener('beforeunload', () => state.assets.clear());
     state.contextDependencies = { dataset: state.dataset };
     renderCharacters();
     resetExecutor(state.contextDependencies);
-    state.contextState = 'READY';
+    state.contextGate.finish('READY');
     $('mode').textContent = 'LISTO';
     message('dataset canónico cargado');
     render();
