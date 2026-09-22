@@ -6,6 +6,7 @@ import {
 import {
   ApcAssetRuntime,
   stageApcPhotoFile,
+  verifyApcRelinkFile,
 } from '../apc-i12-assets.mjs';
 import {
   buildApcI12Export,
@@ -259,6 +260,35 @@ function syncEvidenceFormMode() {
   else $('observedState').value = '';
 }
 
+function photoUiStatus(photo, session=currentSession()) {
+  const refs = photo?.individualRefs ?? [];
+  const evidence = (session?.evidence ?? []).filter(item => item.current === true && item.photoId === photo?.photoId);
+  const hasDraft = evidence.some(item => item.lifecycleStatus === 'DRAFT');
+  const hasConfirmed = evidence.some(item => item.lifecycleStatus === 'CONFIRMED');
+  const hasPending = (session?.pending ?? []).some(item => item.status === 'OPEN' && (
+    item.scopeRef === photo?.photoId ||
+    (item.scopeLevel === 'INDIVIDUAL' && refs.includes(item.scopeRef))
+  ));
+  if (hasPending) return 'required pendiente';
+  if (hasDraft && hasConfirmed) return 'revisada parcialmente';
+  if (hasDraft) return 'DRAFT';
+  if (hasConfirmed) return 'CONFIRMED';
+  return 'sin revisar';
+}
+
+function visiblePhotos(session=currentSession()) {
+  const photos = session?.photos ?? [];
+  const filter = $('photoFilter')?.value ?? 'ALL';
+  return photos.filter(photo => {
+    if (filter === 'INBOX') return session.inboxPhotoRefs.includes(photo.photoId);
+    const status = photoUiStatus(photo, session);
+    if (filter === 'DRAFT') return status === 'DRAFT' || status === 'revisada parcialmente';
+    if (filter === 'PENDING') return status === 'required pendiente';
+    if (filter === 'CONFIRMED') return status === 'CONFIRMED' || status === 'revisada parcialmente';
+    return true;
+  });
+}
+
 function render() {
   const session = currentSession();
   chooseFallbackTargets(session);
@@ -270,11 +300,11 @@ function render() {
   $('actorId').disabled = Boolean(session);
 
   $('photos').replaceChildren();
-  for (const photo of session?.photos ?? []) {
+  for (const photo of visiblePhotos(session)) {
     const div = document.createElement('div');
     div.className = 'item' + (photo.photoId===state.activePhotoId ? ' active' : '');
     const inInbox = session.inboxPhotoRefs.includes(photo.photoId);
-    div.textContent = `${photo.photoId.slice(0,18)} · ${photo.fileRef}${inInbox ? ' · inbox' : ''}`;
+    div.textContent = `${photo.photoId.slice(0,18)} · ${photo.fileRef}${inInbox ? ' · inbox' : ''} · ${photoUiStatus(photo, session)}`;
     div.onclick = () => {
       void changeReviewTarget({ photoId: photo.photoId });
     };
@@ -540,6 +570,49 @@ async function confirmEvidence() {
   if (result.status === 'COMMITTED' || result.status === 'NO_OP') state.editBuffers.delete(key);
 }
 
+async function relinkActivePhoto(file) {
+  const session = currentSession();
+  const photo = activePhoto(session);
+  if (!photo || !file) return;
+  const pe = session?.photoEvidence?.find(item => item.photoEvidenceId === photo.photoEvidenceId);
+  const fingerprint = pe?.sourcePhoto?.fingerprintSha256;
+  if (!fingerprint) return message('Relink rechazado: PHOTO sin fingerprint canónico');
+
+  const verification = await verifyApcRelinkFile(file, fingerprint);
+  if (!verification.match) {
+    return message(`Relink rechazado: ${verification.reason}`);
+  }
+  state.assets.attach(photo.photoId, file);
+  message('Relink OK: fingerprint coincide; APC_SESSION sin cambios');
+  render();
+}
+
+async function navigatePhoto(delta) {
+  const session = currentSession();
+  const photos = visiblePhotos(session);
+  if (!photos.length) return;
+  const index = Math.max(0, photos.findIndex(item => item.photoId === state.activePhotoId));
+  const next = photos[(index + delta + photos.length) % photos.length];
+  await changeReviewTarget({ photoId: next.photoId });
+}
+
+async function batchInbox(type) {
+  const session = currentSession();
+  const photoIds = visiblePhotos(session).map(item => item.photoId);
+  if (!photoIds.length) return message('No hay fotos en el filtro actual');
+  await dispatch(commandBase({ type, photoIds }));
+}
+
+async function setSessionStatus(status) {
+  const key = bufferKey();
+  captureActiveEditBuffer();
+  const flushed = await flushAutosave(key);
+  if (flushed && flushed.status !== 'COMMITTED' && flushed.status !== 'NO_OP') {
+    return message('Cambio de estado bloqueado: DRAFT previo no persistido');
+  }
+  await dispatch(commandBase({ type:'SET_SESSION_STATUS', status }));
+}
+
 async function ingestFiles(files) {
   if (!inWriteMode()) return;
   const staged = [];
@@ -602,6 +675,14 @@ $('importJson').onchange = async event => {
 };
 
 $('photoFiles').onchange = event => ingestFiles([...event.target.files ?? []]);
+$('relinkPhoto').onchange = event => relinkActivePhoto(event.target.files?.[0]);
+$('photoFilter').onchange = render;
+$('prevPhoto').onclick = () => navigatePhoto(-1);
+$('nextPhoto').onclick = () => navigatePhoto(1);
+$('batchAddInbox').onclick = () => batchInbox('BATCH_ADD_TO_INBOX');
+$('batchRemoveInbox').onclick = () => batchInbox('BATCH_REMOVE_FROM_INBOX');
+$('closeSession').onclick = () => setSessionStatus('CLOSED');
+$('reopenSession').onclick = () => setSessionStatus('OPEN');
 $('character').onchange = event => {
   const characterId = event.target.value;
   event.target.value = state.formCharacterId ?? characterId;
