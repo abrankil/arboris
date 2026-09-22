@@ -195,6 +195,7 @@ function render() {
   $('mode').textContent = mode;
   $('sessionLabel').textContent = session?.sessionId ?? '';
   disableWrites(!inWriteMode());
+  $('actorId').disabled = Boolean(session);
 
   $('photos').replaceChildren();
   for (const photo of session?.photos ?? []) {
@@ -258,8 +259,33 @@ function commandBase(extra={}) {
   return state.executor.commandBase(extra);
 }
 
-async function dispatch(command) {
-  const result = await state.executor.dispatch(command);
+async function dispatch(command, { allowDecisionRetry = true } = {}) {
+  let result = await state.executor.dispatch(command);
+
+  if (
+    result.status === 'NEEDS_DECISION' &&
+    allowDecisionRetry &&
+    (result.decisionsRequired ?? []).every(item => item.type === 'PENDING_CRITICAL')
+  ) {
+    const pendingCriticalByRequirement = {};
+    for (const decision of result.decisionsRequired) {
+      pendingCriticalByRequirement[decision.requirementId] = window.confirm(
+        `Requirement ${decision.requirementId} quedó insatisfecho.\n\nOK = pending crítico\nCancelar = pending no crítico`,
+      );
+    }
+
+    const intent = structuredClone(command);
+    delete intent.targetSessionId;
+    delete intent.baseSessionEpoch;
+    delete intent.baseCommitGeneration;
+    intent.pendingCriticalByRequirement = {
+      ...(intent.pendingCriticalByRequirement ?? {}),
+      ...pendingCriticalByRequirement,
+    };
+
+    result = await state.executor.dispatch(state.executor.commandBase(intent));
+  }
+
   if (result.status !== 'COMMITTED' && result.status !== 'NO_OP') {
     message(`${result.status}: ${(result.errors ?? []).join('; ') || JSON.stringify(result.decisionsRequired ?? [])}`);
   } else {
@@ -484,3 +510,11 @@ window.addEventListener('beforeunload', () => state.assets.clear());
     disableWrites(true);
   }
 })();
+
+
+$('actorId').addEventListener('change', async () => {
+  if (currentSession()) return;
+  if (state.executor) await state.executor.close();
+  resetExecutor();
+  message('actor actualizado para el próximo contexto writer');
+});
