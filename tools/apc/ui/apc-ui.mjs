@@ -38,6 +38,8 @@ const state = {
   formCharacterId: null,
   batchUndo: null,
   selectedPhotoIds: new Set(),
+  contextState: 'ERROR',
+  contextDependencies: null,
 };
 
 function message(text) {
@@ -57,8 +59,16 @@ function currentSession() {
   return state.executor?.snapshot() ?? state.inspectionSession;
 }
 
-function inWriteMode() {
+function hasWriterAuthority() {
   return Boolean(state.executor?.snapshot());
+}
+
+function canAcceptWriterIntent() {
+  return state.contextState === 'READY' && hasWriterAuthority();
+}
+
+function inWriteMode() {
+  return hasWriterAuthority();
 }
 
 function activePhoto(session=currentSession()) {
@@ -154,11 +164,12 @@ function evidenceHistory(session=currentSession()) {
     .sort((a,b)=>a.revision-b.revision);
 }
 
-function buildContext() {
-  const areStatesIncompatible = createApcStateIncompatibilityProvider(state.dataset);
-  const isContradictionRelevant = createApcContradictionRelevanceProvider();
+function buildContext(dependencies = state.contextDependencies) {
+  const dataset = dependencies?.dataset ?? state.dataset;
+  const areStatesIncompatible = dependencies?.areStatesIncompatible ?? createApcStateIncompatibilityProvider(dataset);
+  const isContradictionRelevant = dependencies?.isContradictionRelevant ?? createApcContradictionRelevanceProvider();
   return {
-    dataset: state.dataset,
+    dataset,
     newId,
     now: () => new Date().toISOString(),
     actorId: actorId(),
@@ -167,8 +178,8 @@ function buildContext() {
   };
 }
 
-function resetExecutor() {
-  state.context = buildContext();
+function resetExecutor(dependencies = state.contextDependencies) {
+  state.context = buildContext(dependencies);
   state.executor = new ApcI12CommandExecutor({
     persistence: createLocalStorageApcPersistence(localStorage),
     lockProvider: createBrowserWriterLockProvider(),
@@ -328,7 +339,7 @@ function render() {
   const mode = inWriteMode() ? 'WRITER' : (session ? 'READ_ONLY' : 'SIN SESIÓN');
   $('mode').textContent = mode;
   $('sessionLabel').textContent = session?.sessionId ?? '';
-  disableWrites(!inWriteMode());
+  disableWrites(!canAcceptWriterIntent());
   $('actorId').disabled = Boolean(session);
   const undoValid = inWriteMode() &&
     batchUndoIsValid(state.batchUndo, session, state.executor?.sessionEpoch);
@@ -342,7 +353,7 @@ function render() {
     const selector = document.createElement('input');
     selector.type = 'checkbox';
     selector.checked = state.selectedPhotoIds.has(photo.photoId);
-    selector.disabled = !inWriteMode();
+    selector.disabled = !canAcceptWriterIntent();
     selector.setAttribute('aria-label', `Seleccionar ${photo.photoId} para batch`);
     selector.onclick = event => event.stopPropagation();
     selector.onchange = () => togglePhotoSelection(photo.photoId);
@@ -475,10 +486,14 @@ export function batchUndoIsValid(descriptor, session, sessionEpoch) {
 }
 
 function commandBase(extra={}) {
+  if (!canAcceptWriterIntent()) return { ...extra, __blockedWriterIntent: true };
   return state.executor.commandBase(extra);
 }
 
 async function dispatch(command, { allowDecisionRetry = true } = {}) {
+  if (!canAcceptWriterIntent() || command?.__blockedWriterIntent) {
+    return { status: 'READ_ONLY', session: currentSession(), errors: ['writer intent blocked by runtime context gate'], warnings: [], decisionsRequired: [] };
+  }
   let result = await state.executor.dispatch(command);
 
   if (
@@ -502,7 +517,11 @@ async function dispatch(command, { allowDecisionRetry = true } = {}) {
       ...pendingCriticalByRequirement,
     };
 
-    result = await state.executor.dispatch(state.executor.commandBase(intent));
+    if (!canAcceptWriterIntent()) {
+      result = { status: 'READ_ONLY', session: currentSession(), errors: ['writer intent blocked by runtime context gate'], warnings: [], decisionsRequired: [] };
+    } else {
+      result = await state.executor.dispatch(state.executor.commandBase(intent));
+    }
   }
 
   if (result.status !== 'COMMITTED' && result.status !== 'NO_OP') {
@@ -534,7 +553,7 @@ function patchFromBuffer(buffer, { confirming = false } = {}) {
 }
 
 async function saveBufferKey(key) {
-  if (!key || !inWriteMode()) return null;
+  if (!key || !canAcceptWriterIntent()) return null;
   const buffer = state.editBuffers.get(key);
   if (!buffer || !bufferIsPersistible(buffer)) return null;
 
@@ -546,7 +565,7 @@ async function saveBufferKey(key) {
   const ev = findCurrentEvidenceForTarget(session, photoId, individualId, characterId);
   const type = ev?.lifecycleStatus === 'CONFIRMED' ? 'EDIT_CONFIRMED_AS_DRAFT' : 'SAVE_DRAFT';
 
-  const promise = dispatch(state.executor.commandBase({
+  const promise = dispatch(commandBase({
     type,
     evidenceId: ev?.evidenceId ?? null,
     baseRevision: ev?.revision ?? null,
@@ -567,7 +586,7 @@ async function saveBufferKey(key) {
 }
 
 function scheduleAutosave(key = bufferKey()) {
-  if (!key || !inWriteMode()) return;
+  if (!key || !canAcceptWriterIntent()) return;
   const existing = state.autosaveTimers.get(key);
   if (existing) clearTimeout(existing);
   const timer = setTimeout(() => {
@@ -624,6 +643,7 @@ async function changeReviewTarget({ photoId = state.activePhotoId, individualId 
 }
 
 function captureAndScheduleAutosave() {
+  if (!canAcceptWriterIntent()) return;
   const key = bufferKey();
   if (!key) return;
   captureActiveEditBuffer();
@@ -858,6 +878,68 @@ async function setSessionStatus(status) {
   await dispatch(commandBase({ type:'SET_SESSION_STATUS', status }));
 }
 
+export async function replaceWriterContext(newDependencies) {
+  if (state.contextState === 'REPLACING') {
+    return { status: 'REPLACEMENT_IN_PROGRESS' };
+  }
+
+  // The gate closes synchronously before the first await. Work already
+  // admitted under READY may finish; no new OLD intent may be admitted.
+  state.contextState = 'REPLACING';
+  const sessionId = state.executor?.snapshot()?.sessionId ?? null;
+
+  try {
+    for (const timer of state.autosaveTimers.values()) clearTimeout(timer);
+    state.autosaveTimers.clear();
+
+    const inFlight = [...state.autosaveInFlight.values()];
+    if (inFlight.length) await Promise.allSettled(inFlight);
+
+    if (state.executor) await state.executor.close();
+
+    clearEditBuffers();
+    state.batchUndo = null;
+    state.selectedPhotoIds.clear();
+    state.inspectionSession = null;
+    state.assets.clear();
+    state.activePhotoId = null;
+    state.activeIndividualId = null;
+    state.formCharacterId = $('character').value || null;
+
+    state.dataset = newDependencies.dataset;
+    state.contextDependencies = {
+      dataset: newDependencies.dataset,
+      areStatesIncompatible: newDependencies.areStatesIncompatible,
+      isContradictionRelevant: newDependencies.isContradictionRelevant,
+    };
+    renderCharacters();
+    resetExecutor(state.contextDependencies);
+
+    if (!sessionId) {
+      state.contextState = 'READY';
+      render();
+      return { status: 'NO_SESSION' };
+    }
+
+    const result = await state.executor.openAsWriter(sessionId);
+    if (result.status === 'COMMITTED') {
+      state.contextState = 'READY';
+      render();
+      return { status: 'REOPENED_WRITER', result };
+    }
+
+    state.inspectionSession = result.session ?? null;
+    state.contextState = result.status === 'READ_ONLY' ? 'READ_ONLY' : 'ERROR';
+    render();
+    return { status: result.status, result };
+  } catch (error) {
+    state.contextState = 'ERROR';
+    disableWrites(true);
+    render();
+    return { status: 'ERROR', error };
+  }
+}
+
 async function sessionSwitchBarrier(action) {
   // Stop accepting UI autosaves immediately, cancel debounce work, then wait
   // for every already-started save and the executor queue before replacement.
@@ -1060,8 +1142,10 @@ window.addEventListener('beforeunload', () => state.assets.clear());
 (async function init() {
   try {
     state.dataset = await loadBrowserCanonicalDataset();
+    state.contextDependencies = { dataset: state.dataset };
     renderCharacters();
-    resetExecutor();
+    resetExecutor(state.contextDependencies);
+    state.contextState = 'READY';
     $('mode').textContent = 'LISTO';
     message('dataset canónico cargado');
     render();
@@ -1076,6 +1160,6 @@ window.addEventListener('beforeunload', () => state.assets.clear());
 $('actorId').addEventListener('change', async () => {
   if (currentSession()) return;
   if (state.executor) await state.executor.close();
-  resetExecutor();
+  resetExecutor(state.contextDependencies);
   message('actor actualizado para el próximo contexto writer');
 });
