@@ -74,6 +74,65 @@ function currentEvidence(session=currentSession()) {
   ) ?? null;
 }
 
+function bufferKey(photoId = state.activePhotoId, individualId = state.activeIndividualId, characterId = $('character').value) {
+  if (!photoId || !individualId || !characterId) return null;
+  return `${photoId}::${individualId}::${characterId}`;
+}
+
+function readFormBuffer() {
+  return {
+    evidenceStatus: $('evidenceStatus').value,
+    observedState: $('evidenceStatus').value === 'OBSERVED' ? ($('observedState').value || null) : null,
+    reason: $('evidenceStatus').value === 'OBSERVED' ? null : ($('reason').value.trim() || null),
+    notes: $('notes').value.trim() || null,
+  };
+}
+
+function writeFormBuffer(buffer) {
+  if (!buffer) return;
+  $('evidenceStatus').value = buffer.evidenceStatus ?? 'OBSERVED';
+  $('observedState').value = buffer.observedState ?? '';
+  $('reason').value = buffer.reason ?? '';
+  $('notes').value = buffer.notes ?? '';
+  syncEvidenceFormMode();
+}
+
+function captureActiveEditBuffer() {
+  const key = bufferKey();
+  if (!key) return;
+  state.editBuffers.set(key, readFormBuffer());
+}
+
+function clearEditBuffers() {
+  for (const timer of state.autosaveTimers.values()) clearTimeout(timer);
+  state.autosaveTimers.clear();
+  state.autosaveInFlight.clear();
+  state.editBuffers.clear();
+}
+
+function bufferIsPersistible(buffer) {
+  if (!buffer) return false;
+  if (buffer.evidenceStatus === 'OBSERVED') return Boolean(buffer.observedState);
+  if (buffer.evidenceStatus === 'UNCERTAIN' || buffer.evidenceStatus === 'NOT_OBSERVABLE') {
+    return Boolean(buffer.reason);
+  }
+  return false;
+}
+
+function parseBufferKey(key) {
+  const [photoId, individualId, characterId] = String(key).split('::');
+  return { photoId, individualId, characterId };
+}
+
+function findCurrentEvidenceForTarget(session, photoId, individualId, characterId) {
+  return session?.evidence?.find(item =>
+    item.current === true &&
+    item.photoId === photoId &&
+    item.individualId === individualId &&
+    item.characterId === characterId
+  ) ?? null;
+}
+
 function evidenceHistory(session=currentSession()) {
   const current = currentEvidence(session);
   if (!current) return [];
