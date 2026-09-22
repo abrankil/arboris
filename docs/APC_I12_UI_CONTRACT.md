@@ -1,6 +1,6 @@
 # Árboris — APC I12 Single-Screen UI Contract
 
-**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R8`  
+**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R9`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12.  
 **Base canónica:** `main@54824efea9ec5806eef720fc07b6bdd44339d609`.  
@@ -201,7 +201,7 @@ Un modelo, herramienta o heurística puede señalar estructuras o caracteres pot
 
 ## 9. DRAFT y CONFIRMED
 
-Toda captura editable comienza o permanece en estado `DRAFT` hasta confirmación humana explícita.
+Toda captura editable comienza como estado efímero de formulario. Sólo pasa a ser `DRAFT` cuando se persiste sin confirmación humana, o `CONFIRMED` cuando una acción explícita de confirmación materializa evidencia canónica.
 
 `DRAFT`:
 
@@ -216,10 +216,15 @@ Toda captura editable comienza o permanece en estado `DRAFT` hasta confirmación
 
 - requiere confirmación humana conforme al contrato APC;
 - entra a la capa de evidencia;
+- si el dato sólo existe como estado efímero de formulario y nunca fue persistido como DRAFT, la primera acción Confirmar crea directamente `evidenceId` revisión 1 con `lifecycleStatus=CONFIRMED`; I12 no inventa una revisión DRAFT histórica que nunca existió;
 - si el DRAFT previo ya estaba persistido como `APC_EVIDENCE`, la transición `DRAFT → CONFIRMED` se materializa como una nueva revisión I6 y nunca sobrescribe la revisión DRAFT existente;
 - la revisión CONFIRMED debe incorporar la metadata de confirmación humana exigida por el contrato APC;
+- toda nueva revisión CONFIRMED debe pasar `validateApcEvidenceForHandoff()` antes de persistirse como confirmada;
 - la transición a CONFIRMED participa en la misma transacción APC atómica que la reconciliación I8/I9, `semanticRevision` y el reset de `objectiveAssessment`;
-- si posteriormente se corrige, debe producir una nueva revisión;
+- editar contenido normativo de una revisión current CONFIRMED nunca conserva automáticamente `CONFIRMED` ni reutiliza la `confirmation` anterior como validación del contenido nuevo;
+- si una edición de CONFIRMED se guarda sin una nueva acción humana de confirmación, la nueva revisión nace `DRAFT`;
+- si la misma acción humana edita y confirma explícitamente el contenido nuevo, puede materializarse directamente una nueva revisión `CONFIRMED`, pero debe registrar una nueva `confirmation` correspondiente a esa acción;
+- la revisión CONFIRMED anterior permanece histórica `current=false`;
 - no destruye la revisión anterior.
 
 La UI debe mostrar claramente si el dato visible es DRAFT o CONFIRMED.
@@ -525,12 +530,21 @@ AUTOSAVE COMMIT
 → materializa además cualquier reconciliación I8/I9 necesaria dentro de la misma transacción APC
 
 CONFIRM COMMIT
-→ si el DRAFT ya está persistido: crea exactamente una nueva revisión I6 CONFIRMED
+→ si no existe APC_EVIDENCE persistida para ese dato: crea evidenceId revision=1 CONFIRMED
+→ no inventa revision DRAFT histórica
+→ si existe DRAFT persistido: crea exactamente una nueva revisión I6 CONFIRMED
 → conserva la revisión DRAFT anterior current=false
 → nueva revisión current=true
 → incorpora confirmation humana válida
-→ crea revision event adyacente
+→ validateApcEvidenceForHandoff(newConfirmedEvidence).valid = true antes de persistir como CONFIRMED
+→ crea revision event adyacente cuando existe revisión previa
 → reconcilia I8/I9 y semanticRevision en la misma transacción
+
+EDIT CONFIRMED COMMIT
+→ editar contenido normativo de current CONFIRMED invalida la applicability de su confirmation anterior al contenido nuevo
+→ sin nueva acción Confirmar: nueva revisión DRAFT
+→ con edición + confirmación humana explícita en la misma acción: nueva revisión CONFIRMED con nueva confirmation
+→ nunca copia silenciosamente la confirmation anterior
 ```
 
 El estado efímero de formulario puede existir sólo para agrupar la interacción previa al commit. No se presenta como evidencia, no participa en requirements, pending, contradictions, handoff, export ni PASS, y no constituye una segunda persistencia normativa.
@@ -644,15 +658,42 @@ DRAFT ya persistido
 → confirmation.confirmedByType = human
 → confirmation.confirmedById presente
 → confirmation.confirmedAt presente
+→ validateApcEvidenceForHandoff(newConfirmedEvidence).valid = true
 → revision event adyacente
 → reconciliación I8/I9 en la misma transacción
 → semanticRevision/objectiveAssessment conforme I10
 → no overwrite destructivo
 
+T-I12-05A
+dato sólo efímero, nunca persistido como DRAFT
+→ acción humana explícita Confirmar
+→ crea evidenceId revision=1 CONFIRMED current=true
+→ no crea revision DRAFT ficticia
+→ confirmation humana completa
+→ validateApcEvidenceForHandoff(newConfirmedEvidence).valid = true
+→ reconciliación I8/I9/I10 en la misma transacción
+
+T-I12-05B
+current CONFIRMED
+→ usuario cambia contenido normativo
+→ commit sin nueva confirmación crea nueva revisión DRAFT
+→ confirmation anterior no se reutiliza para el contenido nuevo
+→ revisión CONFIRMED anterior permanece histórica current=false
+
+T-I12-05C
+current CONFIRMED
+→ usuario cambia contenido normativo y confirma explícitamente en la misma acción
+→ nueva revisión CONFIRMED
+→ nueva confirmation correspondiente a esa acción
+→ confirmation anterior no se copia
+→ validateApcEvidenceForHandoff(newConfirmedEvidence).valid = true
+
 T-I12-06
 corrección de CONFIRMED
 → nueva revisión
 → revisión previa retenida
+→ lifecycle de la nueva revisión depende de si existe nueva confirmación humana explícita
+→ nunca hereda silenciosamente confirmation de la revisión anterior
 
 T-I12-07
 UNCERTAIN
@@ -792,7 +833,10 @@ I12 puede considerarse implementado cuando:
 - calcula fingerprintSha256 sobre bytes originales exactos y lo conserva sin recálculo espurio al reimportar;
 - DRAFT y CONFIRMED están claramente separados;
 - cualquier edición de contenido de un DRAFT ya persistido usa una nueva revisión I6;
+- confirmar un dato nunca persistido crea directamente revision 1 CONFIRMED sin inventar una revision DRAFT;
 - confirmar un DRAFT ya persistido crea una nueva revisión CONFIRMED con confirmation humana y revision event;
+- editar una revisión CONFIRMED crea DRAFT salvo que exista una nueva confirmación humana explícita para el contenido nuevo;
+- toda revisión CONFIRMED nueva pasa validateApcEvidenceForHandoff() antes de persistirse como confirmada;
 - el autosave agrupa cambios efímeros y crea como máximo una revisión nueva por evidenceId y commit;
 - la comparación de cambio normativo excluye sólo revision/current y respeta la identidad inmutable I6;
 - correcciones confirmadas usan revisiones;
@@ -804,7 +848,7 @@ I12 puede considerarse implementado cuando:
 - produce al menos una exportación APC normativa con `buildApcSessionExport(...).exportable = true`;
 - puede reimportar la sesión sin pérdida de trazabilidad;
 - distingue registro de asset de disponibilidad de bytes y permite relink sólo mediante fingerprint coincidente;
-- T-I12-01..24 + T-I12-03A..03D + T-I12-04A..04B + T-I12-12A + T-I12-14A..14B + T-I12-15A..15B pasan;
+- T-I12-01..24 + T-I12-03A..03D + T-I12-04A..04B + T-I12-05A..05C + T-I12-12A + T-I12-14A..14B + T-I12-15A..15B pasan;
 - I1–I11 permanecen verdes;
 - `npm test` pasa;
 - la auditoría del diff no encuentra blockers;
@@ -812,16 +856,16 @@ I12 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R8 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R7 y congela la transición DRAFT persistido → CONFIRMED como nueva revisión I6, además de precisar qué significa cambio de contenido normativo en autosave.
+R9 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R8 y congela las rutas de primera confirmación y reconfirmación de contenido corregido, evitando historia DRAFT ficticia y confirmation heredada.
 
 ### INCONSISTENCIAS
 
-R8 resuelve los hallazgos adversariales de R7: confirmar un DRAFT ya persistido crea una nueva revisión CONFIRMED con metadata humana y reconciliación atómica I8/I9/I10; y la detección de cambio normativo compara el payload APC_EVIDENCE excluyendo sólo revision/current, sin usar eventos de revisión como señal de cambio. Conserva atomicidad, versionado I6, deduplicación, desasignación segura, relink no semántico y las correcciones previas.
+R9 resuelve los hallazgos adversariales de R8: una primera confirmación desde estado sólo efímero crea directamente revision 1 CONFIRMED; editar contenido de una revisión CONFIRMED no conserva ni copia su confirmation anterior; y toda nueva revisión CONFIRMED debe pasar validateApcEvidenceForHandoff() antes de persistirse como confirmada. Conserva atomicidad I8/I9/I10, versionado I6, autosave, deduplicación, desasignación segura, relink no semántico y las correcciones previas.
 
 ### VACÍOS / OMISIONES
 
-R8 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. El estado efímero de formulario existe sólo antes del autosave/confirm commit y no es evidencia ni persistencia normativa.
+R9 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. El estado efímero de formulario existe sólo antes del autosave/confirm commit y no es evidencia ni persistencia normativa; por tanto no genera revisiones históricas hasta materializarse en APC.
 
 ### REDUNDANCIAS
 
-Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot, estado efímero de formulario y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional. Pending y contradictions se actualizan en sus arrays canónicos, sin caches UI persistidos paralelos. La confirmación no introduce estados intermedios como CONFIRMING/PENDING_CONFIRMATION; DRAFT y CONFIRMED siguen siendo los únicos lifecycle canónicos y su transición persistida se expresa mediante I6.
+Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot, estado efímero de formulario y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional. Pending y contradictions se actualizan en sus arrays canónicos, sin caches UI persistidos paralelos. La confirmación no introduce estados intermedios como CONFIRMING/PENDING_CONFIRMATION; DRAFT y CONFIRMED siguen siendo los únicos lifecycle canónicos. Una primera confirmación puede comenzar directamente en CONFIRMED revision 1 si no existía evidencia persistida; las transiciones posteriores se expresan mediante I6 y nunca heredan confirmation a contenido nuevo sin una nueva acción humana.
