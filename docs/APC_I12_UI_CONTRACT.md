@@ -1,6 +1,6 @@
 # Árboris — APC I12 Single-Screen UI Contract
 
-**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R4`  
+**ID:** `ARBORIS_APC_I12_UI_CONTRACT_R5`  
 **Estado:** CANDIDATO A VALIDACIÓN CON ASC.  
 **Ámbito:** Hito 16 / APC I12.  
 **Base canónica:** `main@54824efea9ec5806eef720fc07b6bdd44339d609`.  
@@ -107,6 +107,22 @@ Para una carga nueva, `fingerprintSha256` debe calcularse sobre los bytes origin
 Para una sesión reimportada sin acceso a los bytes originales, se conserva exactamente el `fingerprintSha256` ya persistido y no se recalcula desde `fileRef`.
 
 Dos cargas de exactamente los mismos bytes originales deben producir el mismo fingerprint.
+
+Dentro de una misma sesión, `fingerprintSha256` también funciona como detector de duplicación de asset durante el ingreso:
+
+```text
+fingerprint X no existente
+→ crear PHOTO
+→ crear PhotoEvidence
+
+fingerprint X ya existente
+→ reutilizar la PHOTO existente
+→ reutilizar su PhotoEvidence existente
+→ no crear un segundo photoId
+→ no crear un segundo photoEvidenceId
+```
+
+El fingerprint no sustituye a `photoId` como identidad canónica. Se usa únicamente para impedir que los mismos bytes originales queden registrados dos veces como assets distintos dentro de la misma sesión.
 
 ## 6. Identidad e individuos
 
@@ -221,10 +237,26 @@ La UI puede ofrecer acciones por lote para reducir repetición, siempre que sean
 
 Las acciones por lote permitidas en I12 se limitan a operaciones que no afirmen automáticamente un estado botánico positivo, por ejemplo:
 
-- asignar/desasignar fotografías a un individuo;
+- asignar fotografías a un individuo;
+- desasignar una fotografía de un individuo sólo cuando la operación no rompe integridad referencial;
 - quitar/agregar referencias en `inboxPhotoRefs[]`;
 - aplicar metadata operacional común;
 - seleccionar fotografías para una acción posterior.
+
+Antes de desasignar una PHOTO de un INDIVIDUAL, la UI debe comprobar si existe cualquier revisión de `APC_EVIDENCE` que referencie simultáneamente ese `photoId` y ese `individualId`.
+
+```text
+sin evidence histórica para PHOTO + INDIVIDUAL
+→ desasignación permitida
+
+existe al menos una revisión de evidence para PHOTO + INDIVIDUAL
+→ desasignación bloqueada
+→ no se reatribuye evidence
+→ no se borra historial
+→ snapshot permanece sin cambios
+```
+
+`individualId` forma parte de la identidad inmutable de `evidenceId`; una desasignación no puede resolverse modificando silenciosamente la identidad de evidencia existente.
 
 La UI no persiste `classifiedPhotoRefs[]`, `classifiedPhotos[]` ni un conjunto canónico paralelo. Una PHOTO se considera fuera de inbox cuando existe en `photos[]` y su `photoId` no está presente en `inboxPhotoRefs[]`.
 
@@ -347,7 +379,43 @@ La exportación APC normativa debe reutilizar los contratos I10 vigentes, incluy
 
 I12 no modifica los criterios de Gate B.
 
-## 19. Mutaciones semánticas y autoridad del autosave
+
+
+## 19. Disponibilidad del asset y relink tras reimportación
+
+La existencia del registro APC de una fotografía y la disponibilidad de sus bytes son conceptos distintos:
+
+```text
+asset record available
+≠ asset bytes available
+```
+
+Una sesión reimportada puede conservar correctamente `PHOTO`, `PhotoEvidence`, `fileRef` y `fingerprintSha256` aunque el navegador ya no tenga acceso al archivo binario original.
+
+En ese caso, la UI debe representar explícitamente que el asset no está disponible para visualización y no debe fingir que `fileRef` es resoluble.
+
+La recuperación visual se realiza mediante relink explícito:
+
+```text
+usuario selecciona archivo candidato
+→ calcular SHA-256 sobre sus bytes originales exactos
+→ comparar con fingerprintSha256 persistido
+
+si coincide
+→ reutilizar PHOTO existente
+→ reutilizar PhotoEvidence existente
+→ conservar photoId y photoEvidenceId
+→ restaurar vínculo visual local
+
+si no coincide
+→ rechazar relink para esa PHOTO
+→ no sustituir silenciosamente el asset original
+→ no modificar fingerprint persistido
+```
+
+El relink es estado/runtime local de UI y no crea una segunda PHOTO ni un nuevo PhotoEvidence cuando el fingerprint coincide.
+
+## 20. Mutaciones semánticas y autoridad del autosave
 
 La persistencia local de I12 debe conservar una única representación normativa del estado APC.
 
@@ -384,7 +452,7 @@ Las operaciones puramente visuales o de navegación no modifican `semanticRevisi
 
 I12 no permite editar manualmente `semanticRevision` ni los campos de binding de `objectiveAssessment` como controles independientes de UI.
 
-## 20. Integración con I11
+## 21. Integración con I11
 
 I12 no ejecuta identificación como efecto implícito de confirmar un dato.
 
@@ -399,7 +467,7 @@ APC evidence
 
 El resultado ACE no reescribe automáticamente la evidencia APC.
 
-## 21. Seguridad epistemológica
+## 22. Seguridad epistemológica
 
 La UI no puede:
 
@@ -412,7 +480,7 @@ La UI no puede:
 - resolver contradicciones por mayoría;
 - ocultar revisiones históricas necesarias para trazabilidad.
 
-## 22. Regresiones mínimas I12
+## 23. Regresiones mínimas I12
 
 La implementación debe demostrar como mínimo:
 
@@ -438,8 +506,11 @@ cada PHOTO registrada
 → fingerprintSha256 = SHA-256 de los bytes originales exactos del archivo
 
 T-I12-03B
-mismos bytes originales cargados dos veces
+mismos bytes originales cargados dos veces en la misma sesión
 → mismo fingerprintSha256
+→ una sola PHOTO
+→ un solo PhotoEvidence
+→ no se crean segundo photoId ni segundo photoEvidenceId
 → decode/resize/recompression no participan del cálculo
 
 T-I12-03C
@@ -496,6 +567,14 @@ batch assignment de individuo / inbox
 → no crea estado botánico positivo
 → no persiste classifiedPhotoRefs[] ni colección paralela
 
+T-I12-12A
+PHOTO asociada a IND-A
++ existe cualquier revisión de evidence para PHOTO/IND-A
+→ intento de desasignar IND-A es rechazado
+→ evidence permanece intacta
+→ snapshot permanece válido
+→ no se reatribuye ni borra historial
+
 T-I12-13
 REPRESENTATION_GAP
 → visible como contexto
@@ -546,15 +625,24 @@ STRUCTURALLY VALID / SERIALIZABLE / EXPORTABLE / PASS / CLOSED
 T-I12-23
 reimportar sesión exportada
 → conserva IDs, evidence revisions, pending, contradictions, provenance y semanticRevision
+
+T-I12-24
+reimportar sesión sin bytes locales del asset
+→ registro PHOTO/PhotoEvidence sigue disponible
+→ UI distingue asset record de asset bytes
+→ relink con archivo cuyo fingerprint coincide restaura visualización sin crear nueva PHOTO
+→ relink con fingerprint distinto es rechazado sin modificar el asset registrado
 ```
 
-## 23. Criterio de cierre I12
+## 24. Criterio de cierre I12
 
 I12 puede considerarse implementado cuando:
 
 - existe una interfaz HTML/JavaScript local funcional de una sola vista principal;
 - puede ingresar múltiples fotografías en una sesión;
+- deduplica dentro de la sesión los assets con fingerprint idéntico sin crear PHOTO/PhotoEvidence duplicados;
 - permite atribuir fotografías a individuos sin duplicarlas;
+- bloquea desasignaciones que romperían referencias históricas de evidence;
 - exige un ACTIVE_REVIEW_TARGET válido (photo + individual) antes de crear evidencia botánica;
 - permite revisar evidencia por fotografía/individuo con estados APC canónicos;
 - calcula fingerprintSha256 sobre bytes originales exactos y lo conserva sin recálculo espurio al reimportar;
@@ -566,7 +654,8 @@ I12 puede considerarse implementado cuando:
 - puede persistir working snapshots estructuralmente válidos sin presentarlos como export APC;
 - produce al menos una exportación APC normativa con `buildApcSessionExport(...).exportable = true`;
 - puede reimportar la sesión sin pérdida de trazabilidad;
-- T-I12-01..23 + T-I12-03A..03D pasan;
+- distingue registro de asset de disponibilidad de bytes y permite relink sólo mediante fingerprint coincidente;
+- T-I12-01..24 + T-I12-03A..03D + T-I12-12A pasan;
 - I1–I11 permanecen verdes;
 - `npm test` pasa;
 - la auditoría del diff no encuentra blockers;
@@ -574,16 +663,16 @@ I12 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R4 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R3 y añade un target explícito photo+individual para edición multi-individuo, congela los bytes canónicos del fingerprint y elimina las últimas referencias ambiguas a "fotografía confirmada".
+R5 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R4 y añade deduplicación por fingerprint dentro de la sesión, protección de integridad al desasignar individuos y relink explícito cuando los bytes del asset no están disponibles tras reimportar.
 
 ### INCONSISTENCIAS
 
-R4 resuelve los hallazgos adversariales de R3: ACTIVE_REVIEW_TARGET evita atribución ambigua en PHOTO multi-individuo; fingerprintSha256 queda definido como SHA-256 de bytes originales exactos; y CONFIRMED queda reservado a APC_EVIDENCE, no a PHOTO. Conserva las correcciones previas sobre exportación I10, PhotoEvidence e inbox.
+R5 resuelve los hallazgos adversariales de R4: fingerprints idénticos ya no pueden materializar assets duplicados dentro de la misma sesión; la desasignación PHOTO↔INDIVIDUAL queda bloqueada cuando existe historia de evidence dependiente; y la reimportación distingue registro de asset de disponibilidad de bytes con relink verificado por fingerprint. Conserva ACTIVE_REVIEW_TARGET, bytes canónicos del fingerprint y las correcciones previas.
 
 ### VACÍOS / OMISIONES
 
-R4 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. ACTIVE_REVIEW_TARGET es estado exclusivo de UI y no introduce campos nuevos en APC_SESSION.
+R5 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. La disponibilidad local de bytes y el relink son estado/runtime de UI y no introducen campos canónicos nuevos en APC_SESSION.
 
 ### REDUNDANCIAS
 
-Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, el working snapshot local y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos.
+Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional.
