@@ -1,15 +1,3 @@
-import { readFile } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(HERE, '..', '..');
-const DEFAULT_BOTANICAL_DIR = join(REPO_ROOT, 'data', 'botanical');
-
-async function readJson(path) {
-  return JSON.parse(await readFile(path, 'utf8'));
-}
-
 function listFromValue(value) {
   if (value == null || value === '') return [];
   if (Array.isArray(value)) {
@@ -236,8 +224,19 @@ function buildVariabilityIndex(variabilityEntries) {
 }
 
 export async function loadCanonicalDataset(options = {}) {
-  const botanicalDir =
-    options.botanicalDir ?? DEFAULT_BOTANICAL_DIR;
+  // Node-only filesystem loading is resolved lazily so the pure dataset
+  // accessors in this module remain importable by the local I12 browser harness.
+  const [{ readFile }, pathModule, urlModule] = await Promise.all([
+    import('node:fs/promises'),
+    import('node:path'),
+    import('node:url'),
+  ]);
+  const { dirname, join, resolve } = pathModule;
+  const { fileURLToPath } = urlModule;
+  const here = dirname(fileURLToPath(import.meta.url));
+  const repoRoot = resolve(here, '..', '..');
+  const botanicalDir = options.botanicalDir ?? join(repoRoot, 'data', 'botanical');
+  const readJson = async path => JSON.parse(await readFile(path, 'utf8'));
 
   const [
     metadata,
