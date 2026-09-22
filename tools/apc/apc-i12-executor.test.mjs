@@ -874,3 +874,43 @@ test('TD-I12-53 runtime assignment Undo becomes non-executable after evidence hi
   assert.equal(executor.snapshot().photos[0].individualRefs.includes(individualId), true);
   await executor.close();
 });
+
+
+test('T-I12-12 explicit selectedPhotoIds remain runtime-only and define batch intent independently of filters', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+
+  assert.match(source, /selectedPhotoIds: new Set\(\)/);
+  assert.match(source, /export function selectedBatchPhotoIds\(selectedPhotoIds, session\)/);
+  assert.match(source, /const photoIds = selectedBatchPhotoIds\(state\.selectedPhotoIds, before\)/);
+  assert.doesNotMatch(
+    source.slice(source.indexOf('async function batchInbox'), source.indexOf('\nasync function undoLastBatch')),
+    /visiblePhotos\(before\)\.map/
+  );
+
+  const barrierStart = source.indexOf('async function sessionSwitchBarrier');
+  const barrierEnd = source.indexOf('\nasync function ingestFiles', barrierStart);
+  assert.match(source.slice(barrierStart, barrierEnd), /state\.selectedPhotoIds\.clear\(\)/);
+
+  const renderStart = source.indexOf('function render()');
+  const renderEnd = source.indexOf('\nexport function deriveBatchUndoDescriptor', renderStart);
+  const renderSource = source.slice(renderStart, renderEnd);
+  assert.match(renderSource, /selector\.type = 'checkbox'/);
+  assert.match(renderSource, /selector\.checked = state\.selectedPhotoIds\.has\(photo\.photoId\)/);
+  assert.match(renderSource, /changeReviewTarget\(\{ photoId: photo\.photoId \}\)/);
+});
+
+test('T-I12-12 selected batch targets reject stale ids, deduplicate selection, and allow empty selection without APC mutation', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('export function selectedBatchPhotoIds');
+  const end = source.indexOf('\nfunction togglePhotoSelection', start);
+  assert.ok(start >= 0 && end > start);
+  const helper = source.slice(start, end);
+  assert.match(helper, /new Set\(\(session\.photos \?\? \[\]\)\.map\(item => item\.photoId\)\)/);
+  assert.match(helper, /\[\.\.\.selectedPhotoIds\]\.filter\(photoId => existing\.has\(photoId\)\)/);
+
+  const batchStart = source.indexOf('async function batchInbox');
+  const batchEnd = source.indexOf('\nasync function undoLastBatch', batchStart);
+  const batchSource = source.slice(batchStart, batchEnd);
+  assert.match(batchSource, /if \(!photoIds\.length\) return message/);
+  assert.match(batchSource, /deriveBatchUndoDescriptor/);
+});
