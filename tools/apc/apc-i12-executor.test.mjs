@@ -6,6 +6,7 @@ import {
   createMemoryApcPersistence,
   createMemoryWriterLockProvider,
 } from './apc-i12-executor.mjs';
+import { createWriterContextGate } from './ui/apc-ui-context.mjs';
 
 function testContext() {
   let id = 0;
@@ -1059,4 +1060,51 @@ test('FILTERED_PHOTO_NAVIGATION_V0.2 apply path keeps filter UI-only and same-ta
   assert.match(targetSource, /await flushAutosave\(oldKey\)/);
   assert.match(targetSource, /Cambio de target bloqueado/);
   assert.match(targetSource, /state\.activePhotoId = photoId \?\? null/);
+});
+
+
+test('T-CTX-15 context replacement gate closes synchronously before async teardown', () => {
+  const gate = createWriterContextGate('READY');
+  assert.equal(gate.canAccept(true), true);
+  assert.equal(gate.beginReplacement(), true);
+  assert.equal(gate.state, 'REPLACING');
+  assert.equal(gate.canAccept(true), false);
+});
+
+test('T-CTX-16 concurrent context replacement is rejected by the runtime gate', () => {
+  const gate = createWriterContextGate('READY');
+  assert.equal(gate.beginReplacement(), true);
+  assert.equal(gate.beginReplacement(), false);
+  gate.finish('READY');
+  assert.equal(gate.canAccept(true), true);
+});
+
+test('T-CTX-20 writer intent remains blocked until replacement reaches READY', () => {
+  const gate = createWriterContextGate('READY');
+  gate.beginReplacement();
+  assert.equal(gate.canAccept(true), false);
+  gate.finish('READ_ONLY');
+  assert.equal(gate.canAccept(true), false);
+  gate.finish('ERROR');
+  assert.equal(gate.canAccept(true), false);
+  gate.finish('READY');
+  assert.equal(gate.canAccept(true), true);
+});
+
+test('TD-I12-71 reopening same session under a new context revalidates before writer authority', async () => {
+  const persistence = createMemoryApcPersistence();
+  const lockProvider = createMemoryWriterLockProvider();
+  const oldExecutor = new ApcI12CommandExecutor({ persistence, lockProvider, context: testContext() });
+  const created = await oldExecutor.bootstrap({ objective: 'context barrier regression' });
+  assert.equal(created.status, 'COMMITTED');
+  const sessionId = oldExecutor.snapshot().sessionId;
+  await oldExecutor.close();
+
+  const incompatible = testContext();
+  incompatible.dataset = { allCharactersById: new Map() };
+  const newExecutor = new ApcI12CommandExecutor({ persistence, lockProvider, context: incompatible });
+  const reopened = await newExecutor.openAsWriter(sessionId);
+  assert.equal(reopened.status, 'READ_ONLY');
+  assert.equal(newExecutor.snapshot(), null);
+  await newExecutor.close();
 });
