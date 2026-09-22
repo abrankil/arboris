@@ -127,10 +127,10 @@ export class ApcI12CommandExecutor {
   commandBase(extra = {}) {
     if (!this.currentSession) throw new Error('No active APC session');
     return {
+      ...extra,
       targetSessionId: this.currentSession.sessionId,
       baseSessionEpoch: this.sessionEpoch,
       baseCommitGeneration: this.runtimeGeneration,
-      ...extra,
     };
   }
 
