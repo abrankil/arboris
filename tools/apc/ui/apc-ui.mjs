@@ -535,6 +535,34 @@ function priorObservationCandidates(session=currentSession()) {
   );
 }
 
+function suggestInspectionTargets() {
+  const session = currentSession();
+  if (!session || !state.dataset) return message('Sugerencias requieren sesión y dataset');
+
+  const requiredIds = new Set((session.requirements ?? [])
+    .filter(item => item.required === true)
+    .filter(item =>
+      item.scopeLevel === 'SESSION' ||
+      (item.scopeLevel === 'INDIVIDUAL' && item.scopeRef === state.activeIndividualId) ||
+      (item.scopeLevel === 'PHOTO' && item.scopeRef === state.activePhotoId)
+    )
+    .map(item => item.characterId));
+
+  const candidates = (state.dataset.allCharacters ?? [])
+    .filter(character => requiredIds.size === 0 || requiredIds.has(character.characterId))
+    .map(character => ({
+      characterId: character.characterId,
+      structure: character.structure ?? character.organ ?? character.name ?? null,
+      help: character.description ?? character.observationInstruction ?? null,
+    }));
+
+  // Runtime-only descriptor. Deliberately no observedState field and no form
+  // mutation: automatic suggestions may guide inspection, never infer state.
+  $('inspectionSuggestions').textContent = JSON.stringify(candidates, null, 2);
+  message(`SUGGEST_INSPECTION_TARGETS: ${candidates.length} candidato(s); sin estado botánico`);
+  return candidates;
+}
+
 function prefillFromPriorObservation() {
   const key = bufferKey();
   if (!key || !inWriteMode()) return message('Prefill requiere ACTIVE_REVIEW_TARGET en write mode');
@@ -780,6 +808,7 @@ for (const id of ['observedState', 'reason', 'notes']) {
   $(id).addEventListener('input', captureAndScheduleAutosave);
   $(id).addEventListener('change', captureAndScheduleAutosave);
 }
+$('suggestInspection').onclick = suggestInspectionTargets;
 $('prefillEvidence').onclick = prefillFromPriorObservation;
 $('saveDraft').onclick = saveDraft;
 $('confirmEvidence').onclick = confirmEvidence;
