@@ -914,3 +914,36 @@ test('T-I12-12 selected batch targets reject stale ids, deduplicate selection, a
   assert.match(batchSource, /if \(!photoIds\.length\) return message/);
   assert.match(batchSource, /deriveBatchUndoDescriptor/);
 });
+
+
+test('NV-SEL-01 explicit batch selection is disabled outside writer mode', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+  const renderStart = source.indexOf('function render()');
+  const renderEnd = source.indexOf('\nexport function deriveBatchUndoDescriptor', renderStart);
+  assert.ok(renderStart >= 0 && renderEnd > renderStart);
+  const renderSource = source.slice(renderStart, renderEnd);
+  assert.match(renderSource, /selector\.disabled = !inWriteMode\(\)/);
+});
+
+test('T-I12-12 filter, active target changes, and selection remain separate UI-only concerns', async () => {
+  const source = await fs.readFile(new URL('./ui/apc-ui.mjs', import.meta.url), 'utf8');
+
+  assert.match(source, /\$\('photoFilter'\)\.onchange = render/);
+
+  const toggleStart = source.indexOf('function togglePhotoSelection');
+  const toggleEnd = source.indexOf('\nfunction render()', toggleStart);
+  const toggleSource = source.slice(toggleStart, toggleEnd);
+  assert.match(toggleSource, /state\.selectedPhotoIds\.(has|delete|add)/);
+  assert.doesNotMatch(toggleSource, /dispatch\(|commandBase\(|scheduleAutosave\(|changeReviewTarget\(/);
+
+  const targetStart = source.indexOf('async function changeReviewTarget');
+  const targetEnd = source.indexOf('\nfunction captureAndScheduleAutosave', targetStart);
+  const targetSource = source.slice(targetStart, targetEnd);
+  assert.doesNotMatch(targetSource, /selectedPhotoIds/);
+
+  const renderStart = source.indexOf('function render()');
+  const renderEnd = source.indexOf('\nexport function deriveBatchUndoDescriptor', renderStart);
+  const renderSource = source.slice(renderStart, renderEnd);
+  assert.match(renderSource, /selector\.onclick = event => event\.stopPropagation\(\)/);
+  assert.match(renderSource, /selector\.onchange = \(\) => togglePhotoSelection\(photo\.photoId\)/);
+});
