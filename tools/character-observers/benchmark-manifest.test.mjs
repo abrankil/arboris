@@ -26,3 +26,15 @@ test('PH-029 remains excluded while PH-028 remains holdout', async () => {
   assert.ok(result.manifest.partitions.holdout.includes('PH-028'));
   assert.equal(result.manifest.partitions.holdout.includes('PH-029'), false);
 });
+
+
+test('every frozen benchmark asset has a Git blob identity', async () => {
+  const result = await validateH16BenchmarkManifest();
+  assert.ok(result.manifest.photos.every(item => /^[0-9a-f]{40}$/.test(item.assetIdentity.gitBlobSha1)));
+});
+
+test('PH-028 and excluded PH-029 resolve to the same frozen blob identity', async () => {
+  const result = await validateH16BenchmarkManifest();
+  const byId = new Map(result.manifest.photos.map(item => [item.photoId, item]));
+  assert.equal(byId.get('PH-028').assetIdentity.gitBlobSha1, byId.get('PH-029').assetIdentity.gitBlobSha1);
+});
