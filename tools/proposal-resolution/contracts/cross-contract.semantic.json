@@ -1,1 +1,286 @@
-{"schemaVersion":"0.1","contractId":"MAP001-CROSS-CONTRACT-SEMANTICS-001","scope":"MAP001_LOCAL_NAVIGATION_PROPOSAL_RESOLUTION","status":"R1_CANDIDATE","principles":["DOMAIN_AUTHORITY_IS_NEVER_REPAIRED","AGENT_WRITES_ONLY_PROPOSAL_INTENT_OR_REPAIR_PATCH","OPEN_IS_NOT_AUTO_CLOSED","DOMAIN_PASS_IS_NOT_ASC_AUTHORIZATION","FAIL_CLOSED_ON_PROVENANCE_OR_SEMANTIC_MISMATCH"],"hashPolicy":{"logicalJson":{"algorithm":"SHA-256","canonicalization":"ARBORIS_CANONICAL_JSON_V1","rule":"Recursively sort object keys using JavaScript UTF-16 lexical order; preserve array order; serialize with JSON.stringify semantics and no insignificant whitespace."},"repoFiles":{"algorithm":"SHA-256","canonicalization":"RAW_FILE_BYTES"},"candidateStateHash":{"source":"proposal.intent.candidate","hashPolicy":"logicalJson","purpose":"cycle detection"},"artifactObjectHash":{"sources":["proposal","validation-report","repair"],"hashPolicy":"logicalJson","purpose":"lineage and cross-artifact bindings"}},"patchPolicy":{"pointerRoot":"proposal.intent.candidate","rootReplacement":"PROHIBITED","overlappingTargets":"PROHIBITED","duplicateTargets":"PROHIBITED","add":"target must be absent; array '-' append is allowed only when the parent is an array","remove":"target must exist and equal expectedBefore","replace":"target must exist and equal expectedBefore; after must differ","childCandidate":"must equal parent candidate after applying the repair patch exactly","childChanges":"must be semantically equivalent to the originating repair operations"},"lineagePolicy":{"mode":"DISTRIBUTED_CROSS_VERIFIED","initialProposal":"parentProposal=null and originatingRepair=null","childProposal":"must bind the immediately previous proposal and its originating repair by id+logicalJsonSha256","runState":"must contain the same contiguous lineage"},"artifactWritePolicy":{"source":"run-state.control.policy.artifactWritePolicy.allowedRoots","pathMode":"CANONICAL_REPO_RELATIVE_POSIX","create":"target path must not already exist in the artifact store","modifyInitial":"base artifact must exist and match baseSha256","modifyChild":"base is the immediately preceding proposal candidate and baseSha256 must match its candidateStateHash"},"findingPolicy":{"uniqueFindingId":true,"autoRepairOnlyFrom":"REJECT_FIXABLE","repairFindingRefs":"must resolve to AUTO_REPAIR findings in the exact validation report","repairPathScope":"for each cited finding, the operation target must be equal to or a descendant of at least one targetPaths scope declared by that finding","sourceRef":"repo-local source path before # must exist when the reference is repo-local"},"runStatePolicy":{"candidateCycleKey":"candidateStateHash","stallFingerprint":"SHA-256 of canonical sorted finding signatures {disposition,code,targetPaths}","stallRule":"STALLED when the latest N consecutive REJECT_FIXABLE reports have the same fingerprint, where N=stallRepeatThreshold","regressionRule":"REGRESSION when a post-repair validation introduces any finding signature absent from the repair-basis validation","maxIterationsRule":"MAX_ITERATIONS only when the current iteration reached maxIterations and would otherwise be READY_TO_REPAIR","domainStateMapping":{"no report":"READY_TO_VALIDATE","PASS":"DOMAIN_PASS","REJECT_FIXABLE":"READY_TO_REPAIR unless STALLED, REGRESSION, CYCLE_DETECTED or MAX_ITERATIONS applies","OPEN_BLOCKER":"OPEN_BLOCKED","AUTHORITY_BLOCKER":"AUTHORITY_BLOCKED"}},"invariants":[{"id":"SEM-PROV-001","check":"RUN_ID_MATCH_ACROSS_ARTIFACTS","failure":"SYSTEM_ERROR"},{"id":"SEM-PROV-002","check":"RUN_BASELINE_MATCH_PROPOSALS_AND_REPORTS","failure":"SYSTEM_ERROR"},{"id":"SEM-PROV-003","check":"RUN_VALIDATOR_MATCH_REPORTS","failure":"SYSTEM_ERROR"},{"id":"SEM-PROV-004","check":"RAW_FILE_HASHES_MATCH_PINNED_AUTHORITY_VALIDATOR_RESOLVER_CONTRACT_SET","failure":"AUTHORITY_CHANGED_OR_SYSTEM_ERROR"},{"id":"SEM-PROV-005","check":"DERIVED_ARTIFACT_PATH_WITHIN_RUN_ALLOWLIST","failure":"SYSTEM_ERROR"},{"id":"SEM-LIN-001","check":"ITERATIONS_CONTIGUOUS_AND_CURRENT_MATCHES_LAST","failure":"SYSTEM_ERROR"},{"id":"SEM-LIN-002","check":"DISTRIBUTED_LINEAGE_MATCHES_RUN_HISTORY","failure":"SYSTEM_ERROR"},{"id":"SEM-LIN-003","check":"ARTIFACT_OBJECT_HASH_BINDINGS_MATCH","failure":"SYSTEM_ERROR"},{"id":"SEM-LIN-004","check":"SEEN_CANDIDATE_HASHES_EQUAL_COMMITTED_CANDIDATE_STATES","failure":"SYSTEM_ERROR"},{"id":"SEM-PROP-001","check":"CHANGE_IDS_UNIQUE","failure":"SYSTEM_ERROR"},{"id":"SEM-PROP-002","check":"CHANGE_TARGETS_NONOVERLAPPING","failure":"SYSTEM_ERROR"},{"id":"SEM-PROP-003","check":"BASE_HASH_MATCHES_INITIAL_ARTIFACT_OR_PARENT_CANDIDATE","failure":"SYSTEM_ERROR"},{"id":"SEM-PROP-004","check":"DECLARED_CHANGES_RECONSTRUCT_CANDIDATE_EXACTLY","failure":"SYSTEM_ERROR"},{"id":"SEM-VAL-001","check":"FINDING_IDS_UNIQUE","failure":"SYSTEM_ERROR"},{"id":"SEM-VAL-002","check":"STATUS_REDERIVED_FROM_FINDINGS","failure":"SYSTEM_ERROR"},{"id":"SEM-VAL-003","check":"SOURCE_REFS_EXIST_WHEN_REPO_LOCAL","failure":"SYSTEM_ERROR"},{"id":"SEM-REP-001","check":"REPAIR_PARENT_AND_VALIDATION_BASIS_MATCH","failure":"SYSTEM_ERROR"},{"id":"SEM-REP-002","check":"EDIT_IDS_UNIQUE_AND_TARGETS_NONOVERLAPPING","failure":"SYSTEM_ERROR"},{"id":"SEM-REP-003","check":"FINDING_REFS_EXIST_AND_ARE_AUTO_REPAIR","failure":"SYSTEM_ERROR"},{"id":"SEM-REP-004","check":"REPAIR_TARGETS_WITHIN_FINDING_SCOPE","failure":"SYSTEM_ERROR"},{"id":"SEM-REP-005","check":"EXPECTED_BEFORE_ADD_REMOVE_REPLACE_SEMANTICS","failure":"SYSTEM_ERROR"},{"id":"SEM-REP-006","check":"PATCH_RESULT_EQUALS_CHILD_CANDIDATE_AND_CHILD_DECLARED_CHANGES","failure":"SYSTEM_ERROR"},{"id":"SEM-RUN-001","check":"CYCLE_DETECTION_USES_CANDIDATE_STATE_HASH_NOT_PROPOSAL_ARTIFACT_HASH","failure":"SYSTEM_ERROR"},{"id":"SEM-RUN-002","check":"STALL_FINGERPRINT_AND_THRESHOLD_VALID","failure":"SYSTEM_ERROR"},{"id":"SEM-RUN-003","check":"REGRESSION_EVIDENCE_VALID","failure":"SYSTEM_ERROR"},{"id":"SEM-RUN-004","check":"MAX_ITERATIONS_EVIDENCE_VALID","failure":"SYSTEM_ERROR"},{"id":"SEM-RUN-005","check":"LATEST_REPORT_MAPS_TO_RUN_STATE","failure":"SYSTEM_ERROR"},{"id":"SEM-AUTH-001","check":"AUTHORITY_MANIFEST_AND_SOURCE_CANDIDATE_UNCHANGED_DURING_RUN","failure":"AUTHORITY_CHANGED"},{"id":"SEM-ASC-001","check":"DOMAIN_PASS_NEVER_IMPLIES_AUTHORIZED_FOR_ASC","failure":"SYSTEM_ERROR"}]}
+{
+  "schemaVersion": "0.2",
+  "contractId": "MAP001-CROSS-CONTRACT-SEMANTICS-002",
+  "scope": "MAP001_LOCAL_NAVIGATION_PROPOSAL_RESOLUTION",
+  "status": "R2_CANDIDATE",
+  "principles": [
+    "DOMAIN_AUTHORITY_IS_NEVER_REPAIRED",
+    "AGENT_WRITES_ONLY_PROPOSAL_INTENT_OR_REPAIR_PATCH",
+    "OPEN_IS_NOT_AUTO_CLOSED",
+    "DOMAIN_PASS_IS_NOT_ASC_AUTHORIZATION",
+    "FAIL_CLOSED_ON_PROVENANCE_OR_SEMANTIC_MISMATCH"
+  ],
+  "hashPolicy": {
+    "logicalJson": {
+      "algorithm": "SHA-256",
+      "canonicalization": "ARBORIS_CANONICAL_JSON_V1",
+      "rule": "Recursively sort object keys using JavaScript UTF-16 lexical order; preserve array order; serialize with JSON.stringify semantics and no insignificant whitespace."
+    },
+    "repoFiles": {
+      "algorithm": "SHA-256",
+      "canonicalization": "RAW_FILE_BYTES"
+    },
+    "candidateStateHash": {
+      "source": "proposal.intent.candidate",
+      "hashPolicy": "logicalJson",
+      "purpose": "cycle detection"
+    },
+    "artifactObjectHash": {
+      "sources": [
+        "proposal",
+        "validation-report",
+        "repair"
+      ],
+      "hashPolicy": "logicalJson",
+      "purpose": "lineage and cross-artifact bindings"
+    }
+  },
+  "patchPolicy": {
+    "pointerRoot": "proposal.intent.candidate",
+    "rootReplacement": "PROHIBITED",
+    "overlappingTargets": "PROHIBITED",
+    "duplicateTargets": "PROHIBITED",
+    "add": "target must be absent; array '-' append is allowed only when the parent is an array",
+    "remove": "target must exist and equal expectedBefore",
+    "replace": "target must exist and equal expectedBefore; after must differ",
+    "childCandidate": "must equal parent candidate after applying the repair patch exactly",
+    "childChanges": "must be semantically equivalent to the originating repair operations"
+  },
+  "lineagePolicy": {
+    "mode": "DISTRIBUTED_CROSS_VERIFIED",
+    "initialProposal": "parentProposal=null and originatingRepair=null",
+    "childProposal": "must bind the immediately previous proposal and its originating repair by id+logicalJsonSha256",
+    "runState": "must contain the same contiguous lineage"
+  },
+  "artifactWritePolicy": {
+    "source": "run-state.control.policy.artifactWritePolicy.allowedRoots",
+    "pathMode": "CANONICAL_REPO_RELATIVE_POSIX",
+    "create": "target path must not already exist in the artifact store",
+    "modifyInitial": "base artifact must exist and match baseSha256",
+    "modifyChild": "base is the immediately preceding proposal candidate and baseSha256 must match its candidateStateHash"
+  },
+  "findingPolicy": {
+    "uniqueFindingId": true,
+    "autoRepairOnlyFrom": "REJECT_FIXABLE",
+    "repairFindingRefs": "must resolve to AUTO_REPAIR findings in the exact validation report",
+    "repairPathScope": "for each cited finding, the operation target must be equal to or a descendant of at least one targetPaths scope declared by that finding",
+    "sourceRef": "repo-local source path before # must exist when the reference is repo-local"
+  },
+  "runStatePolicy": {
+    "candidateCycleKey": "candidateStateHash",
+    "candidateHistorySource": "run-state.candidateHistory",
+    "candidateHistoryRule": "Exactly one ordered entry per committed proposal iteration. candidateSha256 is the logical hash of proposal.intent.candidate. Duplicate hashes are allowed and required to represent cycles.",
+    "cycleRule": "CYCLE_DETECTED when the latest candidateSha256 equals any earlier candidateSha256; firstSeenIteration is the earliest prior iteration containing that same hash.",
+    "statePrecedence": [
+      "SYSTEM_ERROR",
+      "AUTHORITY_CHANGED",
+      "CYCLE_DETECTED",
+      "READY_TO_VALIDATE",
+      "AUTHORITY_BLOCKED",
+      "OPEN_BLOCKED",
+      "DOMAIN_PASS",
+      "REGRESSION",
+      "STALLED",
+      "MAX_ITERATIONS",
+      "READY_TO_REPAIR"
+    ],
+    "precedenceRule": "Evaluate conditions in statePrecedence order and choose the first applicable state. REGRESSION, STALLED and MAX_ITERATIONS are evaluated only when the latest validation status is REJECT_FIXABLE.",
+    "provenanceClassification": {
+      "authorityComponents": [
+        "AUTHORITY_MANIFEST",
+        "SOURCE_CANDIDATE"
+      ],
+      "authorityFailureState": "AUTHORITY_CHANGED",
+      "systemComponents": [
+        "VALIDATOR_IMPLEMENTATION",
+        "RESOLVER_IMPLEMENTATION",
+        "CONTRACT_PROPOSAL",
+        "CONTRACT_REPAIR",
+        "CONTRACT_VALIDATION_REPORT",
+        "CONTRACT_RUN_STATE",
+        "CONTRACT_SEMANTIC"
+      ],
+      "systemFailureState": "SYSTEM_ERROR"
+    },
+    "stallFingerprint": "SHA-256 of canonical sorted finding signatures {disposition,code,targetPaths}",
+    "stallRule": "STALLED when the latest N consecutive REJECT_FIXABLE reports have the same fingerprint, where N=stallRepeatThreshold.",
+    "stalledRepeatCountRule": "stalledEvidence.repeatCount must equal the maximal consecutive count of the current finding fingerprint ending at currentIteration.",
+    "regressionRule": "REGRESSION when a post-repair REJECT_FIXABLE validation introduces any finding signature absent from the immediate repair-basis validation.",
+    "maxIterationsRule": "MAX_ITERATIONS only when currentIteration reached maxIterations, latest status is REJECT_FIXABLE, and no higher-precedence terminal state applies.",
+    "repairChildAtomicity": "A repair and its child proposal are one durable commit boundary. Before commit the visible state remains READY_TO_REPAIR with repair=null. After commit the parent iteration contains the repair and the immediately following child iteration exists with validationReport=null, yielding READY_TO_VALIDATE unless a higher-precedence terminal state applies. No durable snapshot may contain a persisted repair without its child proposal.",
+    "domainStateMapping": {
+      "no report": "READY_TO_VALIDATE unless SYSTEM_ERROR, AUTHORITY_CHANGED or CYCLE_DETECTED applies",
+      "PASS": "DOMAIN_PASS",
+      "REJECT_FIXABLE": "REGRESSION, STALLED, MAX_ITERATIONS or READY_TO_REPAIR according to precedence",
+      "OPEN_BLOCKER": "OPEN_BLOCKED",
+      "AUTHORITY_BLOCKER": "AUTHORITY_BLOCKED"
+    }
+  },
+  "invariants": [
+    {
+      "id": "SEM-PROV-001",
+      "check": "RUN_ID_MATCH_ACROSS_ARTIFACTS",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-PROV-002",
+      "check": "RUN_BASELINE_MATCH_PROPOSALS_AND_REPORTS",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-PROV-003",
+      "check": "RUN_VALIDATOR_MATCH_REPORTS",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-PROV-004",
+      "check": "RAW_FILE_HASHES_MATCH_PINNED_AUTHORITY_VALIDATOR_RESOLVER_CONTRACT_SET",
+      "failure": "AUTHORITY_CHANGED_FOR_AUTHORITY_COMPONENTS_OR_SYSTEM_ERROR_FOR_EXECUTION_COMPONENTS"
+    },
+    {
+      "id": "SEM-PROV-005",
+      "check": "DERIVED_ARTIFACT_PATH_WITHIN_RUN_ALLOWLIST",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-LIN-001",
+      "check": "ITERATIONS_CONTIGUOUS_AND_CURRENT_MATCHES_LAST",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-LIN-002",
+      "check": "DISTRIBUTED_LINEAGE_MATCHES_RUN_HISTORY",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-LIN-003",
+      "check": "ARTIFACT_OBJECT_HASH_BINDINGS_MATCH",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-LIN-004",
+      "check": "CANDIDATE_HISTORY_EQUALS_COMMITTED_CANDIDATE_STATES_IN_ITERATION_ORDER",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-PROP-001",
+      "check": "CHANGE_IDS_UNIQUE",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-PROP-002",
+      "check": "CHANGE_TARGETS_NONOVERLAPPING",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-PROP-003",
+      "check": "BASE_HASH_MATCHES_INITIAL_ARTIFACT_OR_PARENT_CANDIDATE",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-PROP-004",
+      "check": "DECLARED_CHANGES_RECONSTRUCT_CANDIDATE_EXACTLY",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-VAL-001",
+      "check": "FINDING_IDS_UNIQUE",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-VAL-002",
+      "check": "STATUS_REDERIVED_FROM_FINDINGS",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-VAL-003",
+      "check": "SOURCE_REFS_EXIST_WHEN_REPO_LOCAL",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-REP-001",
+      "check": "REPAIR_PARENT_AND_VALIDATION_BASIS_MATCH",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-REP-002",
+      "check": "EDIT_IDS_UNIQUE_AND_TARGETS_NONOVERLAPPING",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-REP-003",
+      "check": "FINDING_REFS_EXIST_AND_ARE_AUTO_REPAIR",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-REP-004",
+      "check": "REPAIR_TARGETS_WITHIN_FINDING_SCOPE",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-REP-005",
+      "check": "EXPECTED_BEFORE_ADD_REMOVE_REPLACE_SEMANTICS",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-REP-006",
+      "check": "PATCH_RESULT_EQUALS_CHILD_CANDIDATE_AND_CHILD_DECLARED_CHANGES",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-RUN-001",
+      "check": "CYCLE_DETECTION_USES_CANDIDATE_HISTORY_AND_FIRST_PRIOR_OCCURRENCE",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-RUN-002",
+      "check": "STALL_FINGERPRINT_AND_THRESHOLD_VALID",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-RUN-003",
+      "check": "REGRESSION_EVIDENCE_VALID",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-RUN-004",
+      "check": "MAX_ITERATIONS_EVIDENCE_VALID",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-RUN-005",
+      "check": "LATEST_REPORT_MAPS_TO_RUN_STATE",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-AUTH-001",
+      "check": "AUTHORITY_MANIFEST_AND_SOURCE_CANDIDATE_UNCHANGED_DURING_RUN",
+      "failure": "AUTHORITY_CHANGED"
+    },
+    {
+      "id": "SEM-ASC-001",
+      "check": "DOMAIN_PASS_NEVER_IMPLIES_AUTHORIZED_FOR_ASC",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-RUN-006",
+      "check": "STATE_PRECEDENCE_MATCHES_CONTRACT_ORDER",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-RUN-007",
+      "check": "NO_DURABLE_REPAIR_WITHOUT_IMMEDIATE_CHILD_PROPOSAL",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-RUN-008",
+      "check": "STALLED_REPEAT_COUNT_EQUALS_MAX_CONSECUTIVE_COUNT",
+      "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-RUN-009",
+      "check": "CYCLE_FIRST_SEEN_ITERATION_IS_EARLIEST_PRIOR_MATCH",
+      "failure": "SYSTEM_ERROR"
+    }
+  ]
+}
