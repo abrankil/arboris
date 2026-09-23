@@ -153,3 +153,50 @@ test('real runtime + protected authority drift -> AUTHORITY_BLOCKER', async () =
   assert.equal(report.findings[0].disposition, 'AUTHORITY_BLOCKER');
   assert.deepEqual(report.findings[0].targetPaths, ['/authority/authorityId']);
 });
+
+test('pinned validator SHA mismatch fails before validation report is fabricated', async () => {
+  const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
+  const proposal = makeProposal(buildMap001ValidationView(authorityReport));
+
+  await assert.rejects(
+    validateMap001Proposal({
+      proposal,
+      reportId: 'MAP001-VAL-0005',
+      validatorBinding: { ...validatorBinding, implementationSha256: '0'.repeat(64) },
+      root: ROOT,
+    }),
+    (error) => error?.code === 'VALIDATOR_PROVENANCE_MISMATCH'
+  );
+});
+
+test('pinned authority manifest SHA mismatch fails before domain validation', async () => {
+  const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
+  const proposal = makeProposal(buildMap001ValidationView(authorityReport));
+  proposal.control.baseline.authorityManifestSha256 = '0'.repeat(64);
+
+  await assert.rejects(
+    validateMap001Proposal({
+      proposal,
+      reportId: 'MAP001-VAL-0006',
+      validatorBinding,
+      root: ROOT,
+    }),
+    (error) => error?.code === 'AUTHORITY_PROVENANCE_MISMATCH'
+  );
+});
+
+test('explicit authority path cannot bypass the proposal baseline', async () => {
+  const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
+  const proposal = makeProposal(buildMap001ValidationView(authorityReport));
+
+  await assert.rejects(
+    validateMap001Proposal({
+      proposal,
+      reportId: 'MAP001-VAL-0007',
+      validatorBinding,
+      root: ROOT,
+      authorityPath: 'data/baselines/another-authority.json',
+    }),
+    (error) => error?.code === 'AUTHORITY_PATH_MISMATCH'
+  );
+});
