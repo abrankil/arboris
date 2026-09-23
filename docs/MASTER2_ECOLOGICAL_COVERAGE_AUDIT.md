@@ -1,6 +1,6 @@
 # Árboris — Auditoría de cobertura ecológica del Master 2.0 y derivados
 
-**Estado:** auditoría no normativa / resultado parcial por acceso de fuente  
+**Estado:** auditoría no normativa / inspección directa completada  
 **Gate:** MASTER2-ECOLOGICAL-COVERAGE-AUDIT-001  
 **Fecha:** 23 septiembre 2026  
 **Ámbito:** determinar si hábitat, distribución, altitud, fenología, microhábitat y relaciones ecológicas ya están disponibles en la autoridad botánica o se pierden en la derivación.
@@ -9,45 +9,99 @@
 
 > ¿La información ecológica necesaria para `OBSERVAR → RECONOCER → CONTEXTUALIZAR` ya existe en Master Botánico 2.0 y se pierde en la derivación, o realmente falta incorporarla con fuentes autorizadas?
 
-## 2. Autoridades revisadas
+## 2. Inspección directa realizada
 
-Se revisaron:
+Se inspeccionó directamente el XLSX canónico:
 
-- `data/source/README.md`;
-- `tools/botanical-data/export_master.py`;
-- `tools/botanical-data/validate_master_export.py`;
-- `tools/botanical-data/build_species_data.py`;
+`data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx`
+
+Hojas encontradas:
+
+```text
+Listado_original
+Especies_Piloto
+Caracteres
+Fuentes
+Especie_Caracter
+Errores_Modelo
+LEEME
+Evidencia_Fotografica
+Glosario
+Metadatos
+Diccionario_Campos
+Exportar_JSON
+```
+
+También se revisaron:
+
+- `export_master.py`;
+- `validate_master_export.py`;
+- `build_species_data.py`;
 - `data/README.md`;
-- `data/botanical/metadata.json`;
-- `data/botanical/species.json`;
-- `data/botanical/contexts.json`;
-- fichas derivadas de Peumo, Litre y Quillay;
-- documentación vigente de arquitectura, visión y principios.
+- JSON canónicos y fichas derivadas.
 
-El archivo XLSX canónico está identificado y disponible en el repositorio, pero en esta ejecución no fue posible inspeccionar directamente sus celdas internas mediante el conector GitHub, porque el artefacto binario no se expone como hoja tabular legible por las herramientas conectadas de esta sesión.
+## 3. Hallazgo principal
 
-Por esa razón, esta auditoría puede probar con certeza el **contrato de exportación y el contenido de los derivados**, pero no puede afirmar todavía si existen columnas o hojas ecológicas no exportadas dentro del XLSX.
+La situación real no corresponde completamente ni a la hipótesis A ni a la B formuladas inicialmente.
 
-## 3. Qué sí queda demostrado
+El Master **sí contiene señales ecológicas y fenológicas**, pero no están modeladas como una capa ecológica canónica estructurada por especie.
 
-### 3.1 Los JSON derivados reproducen exactamente el contrato declarado del Master
+Se observan al menos cuatro formas de presencia:
 
-`export_master.py`:
+### 3.1 Listado_original
 
-- lee `Exportar_JSON`;
-- lee `Diccionario_Campos`;
-- exporta únicamente las hojas activas y campos declarados;
-- transforma esos campos a JSON.
+`Listado_original` contiene una columna:
 
-`validate_master_export.py` vuelve a leer el Master y comprueba que cada JSON reproduzca exactamente los registros y campos definidos por ese contrato.
+```text
+Ambiente/afinidad
+```
 
-Por tanto:
+y registros del inventario original con valores como `Esclerófilo`.
 
-> un campo ecológico declarado en `Diccionario_Campos` y perteneciente a una hoja exportable no podría desaparecer silenciosamente de los JSON sin hacer fallar la validación.
+Esta hoja no forma parte del contrato canónico exportable vigente.
 
-### 3.2 El canon derivado actual no contiene una capa ecológica suficiente
+### 3.2 Fuentes
 
-Los ocho JSON canónicos vigentes son:
+`Fuentes` contiene fuentes cuyo `uso_prioritario` incluye explícitamente:
+
+- distribución;
+- altitud;
+- ecología;
+- fenología;
+- variación ambiental.
+
+Ejemplos:
+
+- F-005: “Variación foliar, anatomía y ecología del peumo”;
+- F-010, F-013 y F-016: “Taxonomía, endemismo, distribución y altitud”;
+- F-011, F-014 y F-019: incluyen fenología;
+- F-012 y F-015: incluyen ecología.
+
+Además, algunas notas ya conservan hechos ecológicos concretos, por ejemplo asociación a matorral/bosque esclerófilo o rangos altitudinales.
+
+Esos datos son actualmente **metadatos o notas de fuente**, no hechos ecológicos normalizados por especie.
+
+### 3.3 Caracteres
+
+`Caracteres` incluye el campo:
+
+```text
+dependencia_fenologica
+```
+
+Esto gobierna cuándo un carácter puede depender de fase fenológica, pero no describe la fenología propia de cada especie.
+
+### 3.4 Evidencia_Fotografica
+
+Las notas de evidencia incluyen referencias puntuales a estado reproductivo o utilidad fenológica.
+
+Eso describe evidencia concreta de individuos/fotografías, no conocimiento canónico de fenología de especie.
+
+## 4. Qué exporta realmente el contrato vigente
+
+`Exportar_JSON` y `Diccionario_Campos` gobiernan las exportaciones canónicas.
+
+Los ocho datasets derivados son:
 
 ```text
 metadata
@@ -60,167 +114,197 @@ photos
 model_errors
 ```
 
-`species.json` contiene identidad/taxonomía y estado del piloto, pero no campos sistemáticos de:
+`Especies_Piloto` contiene:
+
+```text
+species_id
+nombre_cientifico
+nombre_comun
+familia
+orden
+habito
+origen
+endemismo
+estado_piloto
+notas
+```
+
+No contiene campos canónicos específicos de:
 
 - hábitat;
-- microhábitat;
 - ecosistema;
-- distribución;
-- altitud;
-- fenología;
-- especies asociadas;
-- relaciones ecológicas.
-
-`species_characters.json` conserva caracteres, variabilidad, fuente, observabilidad, seguridad, costo y confianza, no una matriz ecológica de especie.
-
-`contexts.json`, que ACE consume como capa complementaria y que no deriva del Master, contiene actualmente un único contexto:
-
-```text
-hojas_de_sombra
-```
-
-### 3.3 Las fichas por especie no recuperan información adicional
-
-`build_species_data.py` construye cada ficha exclusivamente desde los JSON canónicos.
-
-`validate_species_data.py` exige que esas fichas reproduzcan exclusivamente esa información y declara explícitamente que no contienen conocimiento botánico adicional ni una segunda fuente de verdad.
-
-Por tanto, si la información ecológica no está en los JSON canónicos, tampoco puede aparecer legítimamente en `data/species/*.json`.
-
-## 4. Lo que NO puede concluirse todavía
-
-No está probado todavía cuál de estas dos situaciones es la real:
-
-### Hipótesis A — datos existentes pero no incorporados al contrato exportable
-
-```text
-MASTER XLSX
-contiene datos ecológicos
-→ no están declarados en Exportar_JSON / Diccionario_Campos
-→ no llegan a JSON
-```
-
-### Hipótesis B — datos realmente ausentes del Master
-
-```text
-MASTER XLSX
-no contiene todavía esos datos ecológicos
-→ no existe nada que exportar
-```
-
-El pipeline actual no permite distinguir A de B sólo leyendo los derivados.
-
-## 5. Hallazgo material
-
-Sí queda demostrado un punto independiente de A/B:
-
-> **La capa canónica consumible actual de Árboris no está preparada para generar contextualización ecológica sistemática por especie.**
-
-Esto significa que cualquier UX que hoy explicara automáticamente hábitat, altitud, fenología o relaciones ecológicas por especie tendría que:
-
-1. usar información fuera del canon vigente; o
-2. inferir conocimiento no registrado.
-
-Ambas rutas violarían la política actual de autoridad y procedencia.
-
-## 6. Relación con PRODUCT_VISION y PRODUCT_PRINCIPLES
-
-Existe una brecha de cobertura, no una contradicción normativa.
-
-La visión y los principios ya exigen conservar o considerar, cuando corresponda:
-
-- contexto geográfico;
-- ecosistema;
-- hábitat;
-- altitud;
-- fenología;
+- distribución regional;
+- rango altitudinal;
+- fenología de especie;
 - microhábitat;
-- variables ambientales.
+- asociaciones ecológicas.
 
-El sistema de datos vigente cubre de forma sólida identidad, caracteres, evidencia, fuentes, fotos y errores, pero todavía no materializa sistemáticamente esa dimensión ecológica en su capa canónica derivada.
+## 5. ¿Se están perdiendo datos durante la exportación?
 
-## 7. AUDITORÍA
+No en el sentido de pérdida silenciosa.
 
-**Resultado:** `PARTIAL PASS — DERIVATION GAP PROVEN; MASTER-CONTENT STATUS OPEN`.
+`export_master.py` exporta exactamente las hojas y campos declarados por `Exportar_JSON` y `Diccionario_Campos`.
+
+`validate_master_export.py` vuelve a leer el XLSX y exige equivalencia exacta entre ese contrato y los JSON.
+
+Por tanto:
+
+```text
+CAMPO DECLARADO EN CONTRATO EXPORTABLE
+→ debe aparecer en JSON
+
+CAMPO/INFORMACIÓN FUERA DEL CONTRATO
+→ no se exporta
+→ no constituye pérdida silenciosa del pipeline
+```
+
+El problema es de **modelado y cobertura canónica**, no de corrupción del exportador.
+
+## 6. Diagnóstico ASC
+
+La respuesta a la pregunta inicial queda:
+
+```text
+¿Existe información ecológica en el XLSX?
+→ SÍ, PARCIAL Y DISPERSA
+
+¿Existe una capa ecológica canónica estructurada por especie?
+→ NO
+
+¿El exportador está descartando campos canónicos declarados?
+→ NO EVIDENCE
+
+¿Puede la UX contextual consumir hoy ecología de especie de forma sistemática?
+→ NO
+```
+
+La categoría correcta es:
+
+> **ECOLOGICAL KNOWLEDGE PRESENT BUT UNDER-MODELED**
+
+## 7. Cobertura ya disponible por procedencia
+
+La tabla `Fuentes` muestra que parte de las autoridades necesarias ya están incorporadas al Master.
+
+Cobertura visible:
+
+- **Peumo:** F-005 incluye ecología y variación ambiental;
+- **Mitique:** F-010 distribución/altitud, F-011 fenología, F-012 ecología;
+- **Colliguay:** F-013 distribución/altitud, F-014 fenología, F-015 ecología;
+- **Quillay:** F-016 distribución/altitud, F-019 fenología;
+- **Litre y Bollén:** existen fuentes botánicas vigentes, pero la cobertura ecológica estructurable debe revisarse antes de asumir suficiencia.
+
+Esto significa que una futura extensión no necesariamente parte de cero, pero tampoco puede poblarse automáticamente a partir de las notas actuales.
+
+## 8. Separación crítica: especie vs. observación
+
+La ampliación debe respetar:
+
+```text
+SPECIES ECOLOGY
+→ conocimiento general documentado sobre una especie
+
+OBSERVATION CONTEXT
+→ condiciones realmente observadas en un encuentro concreto
+```
+
+No deben mezclarse.
+
+Ejemplo:
+
+```text
+“la especie ocurre entre X–Y m”
+≠
+“esta observación ocurrió a Z m”
+```
+
+y:
+
+```text
+“hábitat documentado para la especie”
+≠
+“hábitat observado en este individuo”
+```
+
+## 9. AUDITORÍA
+
+**Resultado:** `PASS WITH OPEN — ECOLOGICAL SIGNALS PRESENT, CANONICAL MODEL INSUFFICIENT`.
 
 Se prueba que:
 
-- los derivados actuales carecen de cobertura ecológica sistemática;
-- el pipeline no pierde campos que estén correctamente declarados en el contrato exportable;
-- las fichas no agregan conocimiento adicional;
-- no se debe diseñar UX ecológica específica usando conocimiento no canónico.
+- el XLSX contiene señales ecológicas/fenológicas reales;
+- varias fuentes ya contemplan distribución, altitud, fenología o ecología;
+- esas señales no constituyen todavía una capa ecológica estructurada por especie;
+- el pipeline exporta correctamente su contrato actual;
+- la brecha está en el modelo editorial/canónico, no en el exportador;
+- la UX contextual específica sigue bloqueada hasta estructurar y validar esos datos.
 
-No se prueba todavía si el XLSX contiene información ecológica fuera del contrato exportable.
+## 10. INCONSISTENCIAS
 
-## 8. INCONSISTENCIAS
+No se detecta inconsistencia funcional del pipeline.
 
-No se encontró inconsistencia en el pipeline.
-
-El pipeline hace correctamente lo que declara.
-
-La tensión real es de alcance:
+Sí existe una brecha entre:
 
 ```text
-PRODUCT REQUIREMENTS
-esperan contexto ecológico
+PRODUCT_VISION / PRODUCT_PRINCIPLES
+→ requieren contexto ecológico
 
-CURRENT CANONICAL EXPORT CONTRACT
-no lo expone sistemáticamente
+MASTER 2.0 CURRENT CANONICAL SCHEMA
+→ no lo estructura sistemáticamente por especie
 ```
 
-## 9. VACÍOS / OMISIONES
+`Listado_original.Ambiente/afinidad` no debe promocionarse automáticamente a verdad canónica porque pertenece al inventario original y carece del contrato de procedencia por hecho requerido para la capa vigente.
 
-Permanece OPEN:
+## 11. VACÍOS / OMISIONES
 
-- inspección directa de hojas y columnas del XLSX;
-- existencia de datos ecológicos no exportados;
-- campos ecológicos mínimos requeridos;
-- fuente y procedencia por campo;
-- separación entre conocimiento canónico de especie y contexto observado de una observación;
-- diseño de relaciones especie–hábitat;
-- representación de fenología;
+Quedan abiertos:
+
+- esquema mínimo de ecología de especie;
+- autoridad por hecho/campo;
+- cobertura suficiente para Litre y Bollén;
+- normalización de distribución geográfica;
 - representación de rango altitudinal;
+- representación de fenología;
+- taxonomía de hábitat/ecosistema;
 - representación de asociaciones ecológicas;
-- política de actualización y validación de esos datos.
+- microhábitat;
+- reglas para múltiples fuentes y desacuerdos;
+- integración con `contexts.json` sin confundir contexto de ACE con ecología general de especie.
 
-## 10. REDUNDANCIAS
+## 12. REDUNDANCIAS
 
-No corresponde crear todavía:
+No corresponde crear:
 
-- un segundo “Master ecológico”;
-- fichas ecológicas paralelas;
-- JSON manuales de hábitat;
-- conocimiento hardcodeado en UX;
-- un motor de contextualización separado.
+- un segundo Master;
+- JSON ecológicos mantenidos manualmente;
+- conocimiento ecológico hardcodeado en UI;
+- una entidad `Itrofill`;
+- un motor nuevo.
 
-Primero debe resolverse A vs. B en la autoridad editorial existente.
+La ampliación, si se aprueba, debe entrar en la autoridad editorial existente y seguir el mismo patrón de exportación/validación.
 
-## 11. Gate
-
-```text
-DERIVED ECOLOGICAL COVERAGE: INSUFFICIENT
-EXPORT PIPELINE SILENT LOSS OF DECLARED FIELDS: NOT SUPPORTED
-SPECIES CARDS AS EXTRA KNOWLEDGE SOURCE: PROHIBITED / NOT PRESENT
-MASTER HAS UNEXPORTED ECOLOGICAL DATA: OPEN
-MASTER LACKS ECOLOGICAL DATA: OPEN
-CONTEXTUAL UX WITH SPECIES-SPECIFIC CLAIMS: BLOCKED
-NEW ARCHITECTURE: NOT WARRANTED
-DIRECT MASTER INSPECTION: REQUIRED NEXT
-```
-
-## 12. Próximo paso
-
-El siguiente paso exacto es una inspección directa del XLSX canónico sobre:
+## 13. Gate
 
 ```text
-sheet names
-→ export map
-→ field dictionary
-→ species sheet
-→ any non-exported sheets
-→ columns containing habitat/distribution/altitude/phenology/microhabitat/ecology/context
+DIRECT MASTER INSPECTION: PASS
+ECOLOGICAL SIGNALS IN MASTER: PASS
+STRUCTURED SPECIES ECOLOGY: FAIL / NOT PRESENT
+SILENT EXPORT LOSS: NOT SUPPORTED
+SOURCE BASE FOR EXTENSION: PARTIAL
+CONTEXTUAL UX: BLOCKED PENDING STRUCTURED DATA
+SECOND MASTER: REJECTED
+CONTROLLED MASTER EXTENSION: WARRANTED
 ```
 
-Si esos datos existen, corresponde ampliar de forma controlada el contrato de exportación.
+## 14. Próximo paso
 
-Si no existen, corresponde diseñar una ampliación del Master con fuentes autorizadas antes de cualquier UX contextual por especie.
+Corresponde diseñar, sin modificar todavía el XLSX canónico, un contrato candidato mínimo para **ecología de especie** que:
+
+1. preserve procedencia por hecho;
+2. no mezcle conocimiento de especie con contexto observado;
+3. aproveche las fuentes ya registradas;
+4. pueda exportarse y validarse como el resto del Master;
+5. no obligue a completar dimensiones sin evidencia suficiente;
+6. mantenga `OPEN` cualquier dato faltante.
+
+Sólo después de auditar ese contrato candidato corresponde decidir si modificar Master 2.0.
