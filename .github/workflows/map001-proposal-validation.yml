@@ -63,3 +63,6 @@ jobs:
 
       - name: E5.1 deterministic repair gate tests
         run: node --test tools/proposal-resolution/map001_repair_gate_r1.test.mjs
+
+      - name: E5.2 repair run-context transaction candidate tests
+        run: node --test tools/proposal-resolution/map001_repair_transaction_candidate_r1.test.mjs
