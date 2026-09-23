@@ -271,21 +271,18 @@ Permanecen abiertos:
 
 ## 17. Procedencia conceptual
 
-La procedencia debe mantenerse separada:
+`Ipotocaticac` funciona únicamente como antecedente creativo e inspiración posteriormente investigada. La historia personal por la que el término llegó al proyecto se conserva, sin autoridad normativa, en [`IPOTOCATICAC_CREATIVE_PROVENANCE.md`](IPOTOCATICAC_CREATIVE_PROVENANCE.md).
+
+La derivación conceptual relevante para esta especificación es:
 
 ```text
-ipotocaticac histórico
-→ inspiración documentada
-
-manifestación perceptible
-→ interpretación contemporánea de Árboris
-
-enseñar a observar
-→ hipótesis de diseño
-
-Perceptual Scaffold R4
-→ patrón UX validado dentro de su alcance
+término histórico investigado
+→ interpretación contemporánea de “manifestación perceptible”
+→ hipótesis de enseñar a observar
+→ Perceptual Scaffold R4
 ```
+
+Esta cadena describe una derivación de diseño de Árboris, no una traducción lingüística.
 
 No debe afirmarse que `ipotocaticac` signifique identificación, conocimiento, transmisión de conocimiento o este patrón UX.
 
