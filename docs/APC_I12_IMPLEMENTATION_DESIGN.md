@@ -10,7 +10,7 @@
 
 ## 1. Objetivo
 
-Este diseño traduce el contrato I12 R9 congelado a una arquitectura implementable sin introducir una segunda fuente de verdad, una taxonomía epistemológica paralela ni autoridad nueva.
+Este diseño traduce el contrato I12 R10 congelado a una arquitectura implementable sin introducir una segunda fuente de verdad, una taxonomía epistemológica paralela ni autoridad nueva.
 
 Principio central:
 
@@ -166,7 +166,7 @@ RUN_I11_VERIFICATION
 
 `ASSIGN_PHOTO` y `BATCH_ASSIGN_PHOTOS` sólo agregan `individualId` a `PHOTO.individualRefs[]`; nunca duplican PHOTO, PhotoEvidence ni evidencia botánica.
 
-`UNASSIGN_PHOTO` y `BATCH_UNASSIGN_PHOTOS` aplican antes de toda mutación el guard R9 sobre TODA la historia:
+`UNASSIGN_PHOTO` y `BATCH_UNASSIGN_PHOTOS` aplican antes de toda mutación el guard R10 sobre TODA la historia:
 
 ```text
 exists session.evidence revision
@@ -696,7 +696,7 @@ reason ← command semántico ejecutado
 
 ## 12. DRAFT / CONFIRMED
 
-Las rutas R9 se implementan literalmente.
+Las rutas R10 se implementan literalmente.
 
 ### Nueva evidencia nunca persistida
 
@@ -739,7 +739,7 @@ validateApcEvidenceForHandoff(newConfirmedEvidence).valid = true
 validación registrada fuerte definida abajo
 ```
 
-antes de persistirse como confirmada. La validación fuerte es adicional; no reemplaza el requisito explícito R9 de `validateApcEvidenceForHandoff()`.
+antes de persistirse como confirmada. La validación fuerte es adicional; no reemplaza el requisito explícito R10 de `validateApcEvidenceForHandoff()`.
 
 ### 12.1 Validación común de APC_EVIDENCE persistida
 
@@ -1146,7 +1146,7 @@ validateApcSessionForExport()
 buildApcSessionExport()
 ```
 
-Esto no redefine EXPORTABLE/PASS de I10. Es un gate de la superficie I12 para impedir que un snapshot abierto sólo como READ_ONLY por violar R9 sea presentado por la UI como export APC normativo.
+Esto no redefine EXPORTABLE/PASS de I10. Es un gate de la superficie I12 para impedir que un snapshot abierto sólo como READ_ONLY por violar R10 sea presentado por la UI como export APC normativo.
 
 ## 19. Durable persistence
 
@@ -1267,7 +1267,7 @@ Si el usuario trata el archivo específicamente como export APC normativa, se ev
 
 ## 20.1 CREATE_INDIVIDUAL
 
-R9 exige poder crear individuos dentro de la sesión. `CREATE_INDIVIDUAL` es un command normativo y atraviesa writer guard, freshness, cola, working-snapshot validation y atomic commit.
+R10 exige poder crear individuos dentro de la sesión. `CREATE_INDIVIDUAL` es un command normativo y atraviesa writer guard, freshness, cola, working-snapshot validation y atomic commit.
 
 Input mínimo:
 
@@ -1444,7 +1444,7 @@ closed
 → currentSession.status === CLOSED
 ```
 
-`writerReady` es sólo diagnóstico runtime adicional y no reemplaza ninguna categoría R9. En particular:
+`writerReady` es sólo diagnóstico runtime adicional y no reemplaza ninguna categoría R10. En particular:
 
 ```text
 STRUCTURALLY VALID
@@ -1525,7 +1525,7 @@ intent normativo equivalente a previousSession
 → no runtimeGeneration++
 ```
 
-La comparación de una evidencia se realiza sobre el payload APC_EVIDENCE persistido completo excluyendo únicamente `revision` y `current`, exactamente como exige R9. Esto incluye lifecycle, evidenceStatus, observedState, source/provenance, confirmation, acquisition, confidence, reason, notes y cualquier otro campo normativo vigente. Los eventos de `revisions[]` son consecuencia y no participan de la detección.
+La comparación de una evidencia se realiza sobre el payload APC_EVIDENCE persistido completo excluyendo únicamente `revision` y `current`, exactamente como exige R10. Esto incluye lifecycle, evidenceStatus, observedState, source/provenance, confirmation, acquisition, confidence, reason, notes y cualquier otro campo normativo vigente. Los eventos de `revisions[]` son consecuencia y no participan de la detección.
 
 Los campos de identidad I6 (`sessionId`, `photoId`, `photoEvidenceRef`, `individualId`, `characterId`) tampoco se ignoran: si el intent pretende cambiarlos, no corresponde una revisión del mismo evidenceId sino una nueva identidad lógica según I6.
 
@@ -1541,7 +1541,7 @@ Un `NO_OP` puede producir un efecto estrictamente runtime si éste está autoriz
 
 ## 25. Regresiones mínimas del diseño
 
-Además de T-I12 del contrato R9, la implementación debe cubrir:
+Además de T-I12 del contrato R10, la implementación debe cubrir:
 
 ```text
 TD-I12-01
@@ -1941,7 +1941,7 @@ snapshot READ_ONLY viola integridad PHOTO/PhotoEvidence o fingerprint
 
 El diseño puede congelarse cuando:
 
-- R9 permanece VALIDATED WITH ASC y FROZEN;
+- R10 es candidato a revalidación sobre la base que ya integra I11 R4;
 - este documento pasa auditoría adversarial sin blockers;
 - G1/G2/D6/D7/H4/H5 permanecen cerrados;
 - B01/B02/B03/B04 y H01/H02 permanecen cerrados;
@@ -1950,7 +1950,7 @@ El diseño puede congelarse cuando:
 - B13/B14/B15 y H07 permanecen cerrados;
 - guards de unassignment y batch/inbox satisfacen T-I12-12/T-I12-12A;
 - ACTIVE_REVIEW_TARGET queda desacoplado de commands mediante target IDs capturados;
-- prefill/suggestions respetan la frontera epistemológica de R9;
+- prefill/suggestions respetan la frontera epistemológica de R10;
 - export I10 e I11 verification son acciones explícitas y no mutantes;
 - no introduce campos normativos nuevos en APC_SESSION;
 - el single-writer guard es de vida de sesión writer y queda exigido para write mode;
@@ -1979,15 +1979,15 @@ El diseño puede congelarse cuando:
 
 ### AUDITORÍA
 
-Auditoría adversarial final de V0.10 contra R9 y la implementación canónica I1–I11: PASS, sin blockers abiertos dentro del alcance del diseño. B01–B15 y H01–H07 permanecen cerrados. V0.10 no modifica R9, no introduce una segunda fuente de verdad y deja explícitas las precondiciones de implementación, concurrencia, persistencia, validación, export y handoff. Resultado: VALIDATED WITH ASC y FROZEN para implementación técnica I12.
+El baseline V0.10 había superado auditoría adversarial contra R9. V0.11 conserva esos cierres y modifica únicamente la frontera de verificación I11 para alinearla con I11 R4. Su estado permanece CANDIDATE FOR REVALIDATION hasta completar CI, regresiones y auditoría final del diff sobre main.
 
 ### INCONSISTENCIAS
 
-B13 queda resuelto haciendo obligatorio `PHOTO.photoEvidenceId` en todo writable snapshot y exigiendo cardinalidad total 1:1 PHOTO↔PhotoEvidence sobre las verificaciones bidireccionales existentes. B14 permanece cerrado con unicidad case-insensitive de fingerprint. B15 queda resuelto incluyendo fallos de `saveAtomic()`/confirmación durable dentro de ABORT hasta antes de promover `currentSession`. H07 queda cerrado declarando que los commands capturan generación al dispatch: si un commit previo cambia la generación, el command queued queda STALE y debe reconstruirse conscientemente; la cola nunca auto-rebasa intención. La exportación I12 exige además el gate writer-ready antes de delegar a I10, evitando exportar normativamente snapshots READ_ONLY que violen R9.
+B13 queda resuelto haciendo obligatorio `PHOTO.photoEvidenceId` en todo writable snapshot y exigiendo cardinalidad total 1:1 PHOTO↔PhotoEvidence sobre las verificaciones bidireccionales existentes. B14 permanece cerrado con unicidad case-insensitive de fingerprint. B15 queda resuelto incluyendo fallos de `saveAtomic()`/confirmación durable dentro de ABORT hasta antes de promover `currentSession`. H07 queda cerrado declarando que los commands capturan generación al dispatch: si un commit previo cambia la generación, el command queued queda STALE y debe reconstruirse conscientemente; la cola nunca auto-rebasa intención. La exportación I12 exige además el gate writer-ready antes de delegar a I10, evitando exportar normativamente snapshots READ_ONLY que violen R10.
 
 ### VACÍOS / OMISIONES
 
-Siguen fuera de alcance layout final, accesibilidad de producto, backend remoto, blobs permanentes, eliminación de sesiones, hypothesis y H17 runtime. Un snapshot externo que viole invariantes I12 de fingerprint/colecciones puede inspeccionarse READ_ONLY, pero V0.10 no define reparación automática porque fusionar IDs o reescribir historia excedería I12. El versionado histórico del dataset continúa fuera de alcance; revisiones no-current se conservan por integridad intrínseca.
+Siguen fuera de alcance layout final, accesibilidad de producto, backend remoto, blobs permanentes, eliminación de sesiones, hypothesis y H17 runtime. Un snapshot externo que viole invariantes I12 de fingerprint/colecciones puede inspeccionarse READ_ONLY, pero V0.11 no define reparación automática porque fusionar IDs o reescribir historia excedería I12. El versionado histórico del dataset continúa fuera de alcance; revisiones no-current se conservan por integridad intrínseca.
 
 ### REDUNDANCIAS
 
