@@ -156,24 +156,23 @@ Un OPEN se vuelve blocker sólo si impide reproducibilidad, interpretación del 
 
 ## 11. Resultado de Gate B
 
-Gate B debe emitir uno de estos estados documentales:
+Gate B reutiliza el vocabulario transversal vigente:
 
 ```text
-NOT_READY
-→ faltan requisitos obligatorios o existe blocker
+FAIL
+→ existe un criterio obligatorio incumplido o un blocker
 
-READY_FOR_FINAL_DECISION
-→ requisitos técnicos/empíricos completos
-→ sólo resta una decisión explícita de dirección
+PARTIAL
+→ la evidencia es incompleta o existe una decisión OPEN necesaria para cierre
 
 PASS
-→ requisitos completos
-→ OPEN-B1 resuelto
+→ todos los criterios obligatorios están satisfechos
+→ OPEN-B1 está resuelto o documentado como no bloqueante por dirección
 → auditoría ASC final PASS
 → aprobación formal de dirección registrada
 ```
 
-Estos estados describen el gate de H16 y no sustituyen `PASS` de APC I10.
+Este resultado pertenece al gate de H16 y no sustituye `PASS` de APC I10.
 
 ## 12. Cierre de Hito 16
 
