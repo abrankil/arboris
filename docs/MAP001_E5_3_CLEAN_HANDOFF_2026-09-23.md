@@ -251,7 +251,7 @@ El merge no introdujo diferencias de contenido respecto del head validado: ambos
 
 No se detectan inconsistencias bloqueantes post-merge en E5.3.
 
-Se detectó una inconsistencia documental menor en el documento de implementación: §§11-12 conservan redacción de un momento previo del proceso como si la revalidación aún estuviera pendiente. No contradice el cierre registrado en §§18-19, pero puede inducir a lectura ambigua. Debe corregirse como aclaración histórica, sin modificar resultados ni decisiones.
+Se detectó una inconsistencia documental menor en el documento de implementación: §§11-12 conservaban redacción de un momento previo del proceso como si la revalidación aún estuviera pendiente. No contradecía el cierre registrado en §§18-19, pero podía inducir a lectura ambigua. Esta inconsistencia queda corregida en este mismo PR mediante aclaraciones históricas, sin modificar resultados ni decisiones.
 
 ## 10. VACÍOS / OMISIONES
 
