@@ -1,0 +1,251 @@
+# MAP-001 — E5.3 Durable Repair+Child Persistence Implementation 001
+
+**Fecha:** 2026-09-23  
+**Ámbito:** implementación ejecutable de E5.3  
+**Estado:** `TECHNICAL_CANDIDATE / CI_PENDING`  
+**Baseline:** `main@281e251315065d8765d4f8bc3f561d3f49fb707b`  
+**Diseño:** `docs/MAP001_E5_3_DURABLE_REPAIR_PERSISTENCE_DESIGN_001.md`  
+**Frontera:** repair agent fuera de alcance.
+
+## 1. Implementación
+
+Se agregan:
+
+```text
+tools/proposal-resolution/map001_durable_repair_store_r1.mjs
+tools/proposal-resolution/map001_durable_repair_store_r1.test.mjs
+```
+
+y el `MAP-001 Proposal Validation Gate` ejecuta la suite E5.3.
+
+Entry points:
+
+```text
+commitMap001RepairSnapshot
+recoverMap001RepairStore
+```
+
+## 2. Plataforma demostrada
+
+La primera implementación falla cerrada fuera de:
+
+```text
+Linux
+```
+
+No se afirma soporte durable equivalente para Windows o macOS.
+
+En Linux usa:
+
+```text
+exclusive-create lock
+fsync file
+fsync containing directory
+rename within same directory
+logical SHA-256 CAS
+```
+
+El reemplazo visible se realiza con `renameSync(nextPath, runPath)` después de fsync del archivo `next`; la suite E5.3 se ejecuta en el runner Ubuntu del gate MAP-001.
+
+## 3. CAS y writer lock
+
+Antes del journal:
+
+```text
+expectedBeforeSha256 == logicalSha256(current durable run)
+```
+
+El lock se crea con `wx`, contiene:
+
+```text
+transactionId
+runId
+beforeSha256
+afterSha256
+operationalDependencies
+```
+
+y se fsynca antes de continuar.
+
+## 4. Revalidación pre-commit
+
+Antes de escribir `PREPARED` se vuelve a verificar:
+
+```text
+Run State R5 schema
+execution pins vigentes
+persisted state == reducer state
+before state == READY_TO_REPAIR
+repair+child delta exacta
+after state schema/semantic válida
+E5.1 operational dependency hash
+E5.2 operational dependency hash
+```
+
+La capa durable no genera repair ni child.
+
+## 5. Atomic commit
+
+Secuencia implementada:
+
+```text
+lock + fsync
+→ reread/CAS
+→ validate before/after
+→ journal PREPARED + fsync
+→ next complete snapshot + fsync
+→ rename next -> visible
+→ directory fsync
+→ verify/validate visible AFTER
+→ cleanup journal/next
+→ directory fsync
+→ remove lock
+→ directory fsync
+```
+
+No existe una escritura visible intermedia de repair sin child.
+
+## 6. Recovery
+
+Se implementa la matriz R2:
+
+```text
+no lock + journal/next              → fail closed
+lock only + visible BEFORE          → RECOVERED_BEFORE
+lock only + visible AFTER           → RECOVERED_AFTER
+lock + journal + no next + BEFORE   → RECOVERED_BEFORE
+lock + journal + no next + AFTER    → RECOVERED_AFTER
+lock + journal + valid next + BEFORE→ complete replace → RECOVERED_AFTER
+lock + journal + valid next + AFTER → cleanup → RECOVERED_AFTER
+next hash mismatch                  → fail closed
+lock/journal binding mismatch       → fail closed
+visible neither BEFORE nor AFTER    → fail closed
+```
+
+No usa edad/mtime para decidir staleness.
+
+## 7. Fault injection
+
+La suite fuerza crashes en:
+
+```text
+C1 C2 C3 C4 C5 C6 C7 C8
+```
+
+Resultado esperado:
+
+```text
+C1 C2 → RECOVERED_BEFORE
+C3..C8 → RECOVERED_AFTER
+```
+
+Además cubre:
+
+```text
+restart equivalence
+stale CAS rejection
+second writer rejection
+corrupt next fail-closed
+orphan journal fail-closed
+```
+
+## 8. Pin operativo E5.1/E5.2
+
+La transacción fija los bytes de:
+
+```text
+tools/proposal-resolution/map001_repair_gate_r1.mjs
+tools/proposal-resolution/map001_repair_transaction_candidate_r1.mjs
+```
+
+en lock y journal.
+
+Recovery exige que esos bindings sigan coincidiendo antes de completar o limpiar una transacción.
+
+Esto no convierte E5.3 en autoridad de E5.1/E5.2; solo cierra procedencia ejecutable durante la transacción durable.
+
+## 9. ASC
+
+ASC v0.1 se usó en la revisión de diseño para compilar restricciones y mantener explícitos los OPEN.
+
+ASC no participa en:
+
+```text
+commit
+recovery
+CAS
+filesystem
+reducer
+repair generation
+domain validation
+```
+
+No se amplió ASC.
+
+## 10. AUDITORÍA
+
+La implementación sigue el diseño R2 y conserva una sola snapshot visible. Los estados transaccionales auxiliares son metadata o staging y no adquieren autoridad.
+
+La validación se repite inmediatamente antes del commit para reducir TOCTOU. El AFTER se vuelve a validar después del rename.
+
+El soporte inicial se limita deliberadamente a Linux para no afirmar semánticas de fsync/rename no demostradas en otras plataformas.
+
+## 11. INCONSISTENCIAS
+
+No se detecta contradicción intencional con E5.2, Run State R5 o Semantic Contract R3.
+
+La implementación no modifica el schema del run para introducir pins E5.1/E5.2; estos viven en la metadata transaccional E5.3. Esto evita convertir información de recovery en una nueva fuente de verdad del run.
+
+Debe verificarse en CI que `fsync` de directorio y el reemplazo por rename se comporten como espera la implementación en el runner Linux soportado.
+
+## 12. VACÍOS / OMISIONES
+
+Hasta ejecución externa siguen pendientes:
+
+```text
+CI real
+MAP-001 Proposal Validation Gate real
+Audit Protocol Check real
+prueba Ubuntu real C1-C8
+human approval
+```
+
+Fuera de alcance y aún no autorizados:
+
+```text
+Windows/macOS durable guarantee
+repair agent
+agent sandbox
+automatic retry
+full loop
+AUTHORIZED_FOR_ASC
+```
+
+## 13. REDUNDANCIAS
+
+La lógica de dominio no se duplicó.
+
+Redundancia intencional:
+
+```text
+schema/reducer/pin validation pre-commit
++
+schema/reducer validation post-replace/recovery
+```
+
+Es defensa contra TOCTOU y corrupción, no una segunda autoridad.
+
+## 14. Gate
+
+E5.3 no puede declararse `CLOSED / PASS` hasta:
+
+```text
+E5.3 tests PASS on Linux
+MAP-001 Proposal Validation Gate PASS
+CI PASS
+Audit Protocol Check PASS
+strict post-pass audit
+human approval
+```
+
+Repair agent permanece bloqueado hasta ese cierre.
