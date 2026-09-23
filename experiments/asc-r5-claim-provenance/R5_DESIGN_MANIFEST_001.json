@@ -1,0 +1,57 @@
+{
+  "experimentId": "ASC-R5-CLAIM-PROVENANCE-CONTRAST-001",
+  "status": "DESIGN_CANDIDATE_NOT_EXECUTED",
+  "source": {
+    "path": "experiments/asc-r5-claim-provenance/R5_SOURCE_001.svg",
+    "sha256": "f73dd125a91a17d0034752ecfd8edacdbc44e47394273ad1c1fa9e636a39bd87",
+    "description": "Synthetic visual stimulus with two outlined circles of unequal radius, no labels, no scale, no functional metadata."
+  },
+  "primaryClaims": [
+    {
+      "id": "C1",
+      "text": "Hay dos elementos circulares.",
+      "experimentalStatus": "DERIVED_VISUAL_OBSERVATION"
+    },
+    {
+      "id": "C2",
+      "text": "El elemento izquierdo es mayor que el derecho.",
+      "experimentalStatus": "DERIVED_RELATIVE_OBSERVATION"
+    },
+    {
+      "id": "C3",
+      "text": "Los elementos emiten luz.",
+      "experimentalStatus": "INTERPRETATION_HYPOTHESIS"
+    }
+  ],
+  "secondarySentinels": [
+    {
+      "id": "C4",
+      "text": "Diámetro aproximado: 40 cm.",
+      "experimentalStatus": "UNSUPPORTED_QUANTIFICATION",
+      "primaryVerdict": false
+    },
+    {
+      "id": "C5",
+      "text": "La función exacta no está establecida.",
+      "experimentalStatus": "OPEN_NOT_ESTABLISHED",
+      "primaryVerdict": false
+    }
+  ],
+  "statusVocabulary": [
+    "DERIVED_VISUAL_OBSERVATION",
+    "DERIVED_RELATIVE_OBSERVATION",
+    "INTERPRETATION_HYPOTHESIS",
+    "UNSUPPORTED_QUANTIFICATION",
+    "OPEN_NOT_ESTABLISHED"
+  ],
+  "independentVariable": "EXPLICIT_CLAIM_STATUS_BINDING",
+  "primaryAuditOutcomes": [
+    "PRESERVED",
+    "AMBIGUOUS",
+    "ELEVATED",
+    "LOST",
+    "INVENTED"
+  ],
+  "normativeEffect": "NONE",
+  "ascV01Change": false
+}
