@@ -25,6 +25,10 @@ export async function validateH16BenchmarkManifest({
   if (!/^\d+\.\d+\.\d+$/.test(manifest.manifestVersion ?? '')) errors.push('manifestVersion must be semver');
   if (!manifest.sourceDataset?.commit || !/^[0-9a-f]{40}$/.test(manifest.sourceDataset.commit)) errors.push('sourceDataset.commit must be a full Git SHA');
   if (!manifest.sourceDataset?.gitBlobSha1 || !/^[0-9a-f]{40}$/.test(manifest.sourceDataset.gitBlobSha1)) errors.push('sourceDataset.gitBlobSha1 must be a Git blob SHA');
+  if (manifest.sourceDataset?.semantic !== 'expanded_registry_snapshot') errors.push('sourceDataset.semantic must describe the expanded registry snapshot');
+  if (manifest.benchmarkPopulation?.semantic !== 'historical_pre_expansion_subset') errors.push('benchmarkPopulation.semantic must describe the frozen historical subset');
+  if (manifest.status !== 'CANDIDATE') errors.push('manifest status must remain CANDIDATE until final ASC validation');
+  if (manifest.validationState !== 'PENDING_FINAL_ASC_VALIDATION') errors.push('validationState must remain PENDING_FINAL_ASC_VALIDATION before freeze');
 
   const entries = Array.isArray(manifest.photos) ? manifest.photos : [];
   const seen = new Set();
@@ -44,7 +48,16 @@ export async function validateH16BenchmarkManifest({
     if (canonical && canonical.individual_id !== item.individualId) errors.push(`individual mismatch for ${item.photoId}`);
     if (!item.assetIdentity || item.assetIdentity.kind !== 'git_commit_path') errors.push(`assetIdentity.kind invalid for ${item.photoId}`);
     if (item.assetIdentity?.commit !== manifest.sourceDataset?.commit) errors.push(`asset commit mismatch for ${item.photoId}`);
-    if (typeof item.assetIdentity?.path !== 'string' || !item.assetIdentity.path.endsWith('.jpg')) errors.push(`asset path invalid for ${item.photoId}`);
+    if (typeof item.assetIdentity?.path !== 'string' || !item.assetIdentity.path.endsWith('.jpg')) {
+      errors.push(`asset path invalid for ${item.photoId}`);
+    }
+    if (canonical && typeof item.assetIdentity?.path === 'string') {
+      const expectedTail = `/${canonical.individual_id}/${canonical.archivo}`;
+      const expectedPrefix = `species/${canonical.species_id}_`;
+      if (!item.assetIdentity.path.startsWith(expectedPrefix) || !item.assetIdentity.path.endsWith(expectedTail)) {
+        errors.push(`asset path does not match canonical photo metadata for ${item.photoId}`);
+      }
+    }
     partitionIds[item.partition]?.add(item.photoId);
     if (item.partition === 'development') devIndividuals.add(item.individualId);
     if (item.partition === 'holdout') holdIndividuals.add(item.individualId);
