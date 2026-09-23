@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E4.1 — definición determinista de estados y transiciones del resolver cíclico MAP-001  
-**Estado:** `CANDIDATE / REVISE_REQUIRED_BEFORE_IMPLEMENTATION`  
+**Estado:** `R4_CANDIDATE / VALIDATION_PENDING`  
 **Baseline:** `main@6664a9a99c70143819aa338c3713d1624e1c9f62`  
 **Precondición:** G3 cerrado y fusionado mediante PR #68.
 
@@ -274,18 +274,37 @@ No debe existir un estado durable intermedio ambiguo.
 
 Debe verificarse semánticamente.
 
-## 8. Cambio mínimo requerido antes de E4.2
+## 8. Materialización R4 / R2
 
-E4.2 no debe comenzar implementando el reducer sobre R3.
+Los bloqueadores contractuales de E4.1 fueron materializados en la rama:
 
-Primero corresponde producir `run-state.schema R4` y una revisión del contrato semántico que:
+```text
+tools/proposal-resolution/schemas/run-state.schema.json
+→ Run State R4
 
-1. renombre `repeatProposalHashAction` a `repeatCandidateHashAction`;
-2. reemplace `seenCandidateHashes` por historial de candidate-state apto para repeticiones;
-3. congele la precedencia exacta de §4;
-4. cierre la atomicidad repair → child proposal;
-5. exija `STALLED.repeatCount` exacto;
-6. preserve `DOMAIN_PASS != AUTHORIZED_FOR_ASC`.
+tools/proposal-resolution/contracts/cross-contract.semantic.json
+→ Semantic Contract R2
+```
+
+Cambios incorporados:
+
+1. `repeatProposalHashAction` fue sustituido por `repeatCandidateHashAction`;
+2. `seenCandidateHashes` fue sustituido por `candidateHistory[{iteration,candidateSha256}]`, admitiendo repetición de hashes;
+3. la precedencia exacta de §4 quedó serializada como `runStatePolicy.statePrecedence`;
+4. la atomicidad repair → child proposal quedó declarada como invariante durable del resolver;
+5. `STALLED.repeatCount` quedó definido como el conteo consecutivo máximo real;
+6. `CYCLE_DETECTED.firstSeenIteration` debe apuntar a la primera aparición previa del hash repetido;
+7. `DOMAIN_PASS != AUTHORIZED_FOR_ASC` permanece como invariante explícita.
+
+Se agregó además:
+
+```text
+tools/proposal-resolution/validate_run_state_r4.py
+```
+
+para probar estructuralmente que R4 acepta un ciclo `A → B → A`, rechaza los campos legacy de R3 y conserva la precedencia e invariantes nuevas.
+
+E4.2 no debe comenzar hasta que este candidato R4/R2 pase los checks externos y la revisión de G4.1.
 
 ## 9. Papel de ASC
 
@@ -307,24 +326,24 @@ No corresponde modificar `tools/asc/compile_asc.mjs`.
 
 ## 10. AUDITORÍA
 
-La transición candidata cubre todos los estados actualmente declarados por Run State R3 y conserva la separación entre estados de dominio, diagnósticos del resolver y autorización posterior para ASC.
+La transición candidata cubre todos los estados del resolver y conserva la separación entre estados de dominio, diagnósticos del resolver y autorización posterior para ASC.
 
-La revisión encontró dos defectos estructurales reales de R3 que impiden implementar correctamente cycle detection sin una revisión contractual.
+Los defectos estructurales encontrados en R3 ya fueron trasladados a correcciones explícitas en Run State R4 y Semantic Contract R2. La validez ejecutable de esos contratos queda sujeta al gate externo de la rama antes de avanzar a E4.2.
 
 ## 11. INCONSISTENCIAS
 
-Se detectan dos inconsistencias materiales:
+Las dos inconsistencias materiales detectadas en R3 fueron corregidas en el candidato R4:
 
-1. `repeatProposalHashAction` nombra proposal hash aunque la regla vigente usa candidate-state hash.
-2. `seenCandidateHashes.uniqueItems=true` es incompatible con representar una historia que contiene una repetición de candidate-state.
+1. `repeatCandidateHashAction` reemplaza la nomenclatura incorrecta basada en proposal hash.
+2. `candidateHistory` permite representar repeticiones reales de candidate-state y conserva el orden de iteración.
 
-Ambas deben corregirse antes del reducer ejecutable.
+No se declara todavía cierre de E4.1 hasta obtener evidencia de ejecución del gate sobre estos contratos.
 
 ## 12. VACÍOS / OMISIONES
 
-Falta congelar contractualmente la precedencia global de estados, la atomicidad entre repair y child proposal y la semántica exacta de `STALLED.repeatCount`.
+La precedencia global, la atomicidad repair → child proposal y la semántica exacta de `STALLED.repeatCount` ya están declaradas en Semantic Contract R2.
 
-Estos vacíos se mantienen explícitos y no deben completarse por conveniencia durante la implementación.
+Permanece pendiente comprobarlas mediante el gate externo y, después, decidir si E4.1 puede cerrarse y habilitar E4.2.
 
 ## 13. REDUNDANCIAS
 
