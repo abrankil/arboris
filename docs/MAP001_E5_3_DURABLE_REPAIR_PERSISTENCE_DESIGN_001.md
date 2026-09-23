@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E5.3 — persistencia durable y recuperación del snapshot `repair + child` producido por E5.2  
-**Estado:** `DESIGN_CANDIDATE / IMPLEMENTATION_PENDING`  
+**Estado:** `DESIGN_REVIEW_PASS / IMPLEMENTATION_AUTHORIZED`  
 **Baseline:** `main@922f7ab7bb697b3dd5adc6628051aaebf7f89e0c`  
 **Precondición:** E5.2 `CLOSED / PASS`.  
 **Frontera explícita:** el repair agent permanece fuera de alcance.
@@ -172,51 +172,133 @@ La snapshot nunca se actualiza por edición parcial del JSON visible.
 
 Al abrir/reanudar un run, E5.3 debe ejecutar recovery antes de aceptar nuevas escrituras. Recovery se ejecuta bajo propiedad exclusiva de arranque del run-store; no compite con un `commit()` activo. Si esa precondición operativa no puede garantizarse, debe fallar cerrado en lugar de retirar un lock.
 
-### Caso A — no existe journal
+La decisión de recovery se toma únicamente desde bindings demostrables:
 
 ```text
-validar visible run
-→ continuar
+lock
+journal
+next snapshot
+visible run hash
 ```
 
-### Caso B — journal PREPARED y visible hash == afterSha256
+No se usa edad, mtime ni “archivo más nuevo” como sustituto de evidencia.
 
-El reemplazo durable ocurrió; faltó solo cleanup.
+### 7.1 Bindings de recovery
+
+Cuando existe lock, debe poder parsearse y contener:
 
 ```text
-validar visible run
-→ eliminar journal/next residual
-→ continuar con after snapshot
+transactionId
+runId
+beforeSha256
+afterSha256
 ```
 
-### Caso C — journal PREPARED y visible hash == beforeSha256
-
-El commit visible todavía no ocurrió.
-
-Si `next` existe, su hash es `afterSha256` y pasa validación:
+Cuando existen lock + journal, ambos deben coincidir exactamente en esos cuatro campos. Un mismatch produce:
 
 ```text
-→ completar reemplazo
-→ verificar afterSha256
-→ cleanup
-```
-
-Si `next` falta o no coincide:
-
-```text
-→ conservar visible before snapshot
+RECOVERY_BINDING_MISMATCH
 → fail closed
-→ RECOVERY_INCOMPLETE
 ```
 
-### Caso D — visible hash no coincide con before ni after
+### 7.2 Matriz de recovery
 
 ```text
-→ no inferir
-→ no elegir una versión
-→ fail closed
+LOCK  JOURNAL  NEXT                     VISIBLE HASH   RESULTADO
+----  -------  -----------------------  -------------  ----------------------------------------
+no    no       no                       valid          NORMAL / no recovery
+no    *        *                        any            RECOVERY_ORPHAN_METADATA / fail closed
+yes   no       no                       before         RECOVERED_BEFORE; remove residual lock
+yes   no       no                       after          RECOVERED_AFTER; validate after; remove lock
+yes   no       no                       other          RECOVERY_DIVERGENCE / fail closed
+yes   no       present                  any            RECOVERY_ORPHAN_NEXT / fail closed
+yes   yes      absent                   before         RECOVERED_BEFORE; cleanup journal + lock
+yes   yes      absent                   after          RECOVERED_AFTER; cleanup journal + lock
+yes   yes      absent                   other          RECOVERY_DIVERGENCE / fail closed
+yes   yes      hash == afterSha256      before         complete atomic replace; RECOVERED_AFTER
+yes   yes      hash == afterSha256      after          RECOVERED_AFTER; cleanup residual metadata
+yes   yes      hash == afterSha256      other          RECOVERY_DIVERGENCE / fail closed
+yes   yes      hash != afterSha256      any            RECOVERY_NEXT_HASH_MISMATCH / fail closed
+```
+
+`*` significa cualquier metadata transaccional residual. Dado que el lock es creado primero y retirado último, journal/next sin lock contradicen el protocolo y no se limpian por inferencia.
+
+### 7.3 Locks sin journal: C1 vs C8
+
+Un lock residual sin journal no es ambiguo si el binding del lock es válido y el visible hash coincide exactamente con uno de sus extremos:
+
+```text
+visible == beforeSha256
+→ crash pre-journal (C1)
+→ BEFORE ya era durable
+→ RECOVERED_BEFORE
+
+visible == afterSha256
+→ crash post-cleanup/pre-unlock (C8)
+→ AFTER ya era durable
+→ RECOVERED_AFTER
+```
+
+Si el visible hash no coincide con ninguno:
+
+```text
 → RECOVERY_DIVERGENCE
+→ fail closed
 ```
+
+### 7.4 Journal PREPARED con visible BEFORE
+
+Se distinguen dos casos que no deben colapsarse:
+
+```text
+next absent
+→ el AFTER no quedó preparado de forma demostrable
+→ preservar BEFORE
+→ cleanup journal + lock
+→ RECOVERED_BEFORE
+```
+
+```text
+next present && logicalSha256(next) == afterSha256
+→ AFTER quedó preparado y validado
+→ completar atomic replace
+→ verificar AFTER
+→ cleanup
+→ RECOVERED_AFTER
+```
+
+Si `next` existe pero su hash no coincide:
+
+```text
+→ corrupción/divergencia
+→ no borrar evidencia
+→ RECOVERY_NEXT_HASH_MISMATCH
+→ fail closed
+```
+
+### 7.5 Journal PREPARED con visible AFTER
+
+```text
+validar visible AFTER
+→ validar visible hash == afterSha256
+→ si next existe, exigir también hash == afterSha256
+→ cleanup metadata residual
+→ RECOVERED_AFTER
+```
+
+Un `next` residual divergente bloquea cleanup automático.
+
+### 7.6 Regla final de recovery
+
+Toda fila recuperable termina de forma explícita en:
+
+```text
+RECOVERED_BEFORE
+o
+RECOVERED_AFTER
+```
+
+Toda combinación no cubierta, binding inconsistente o hash no demostrable termina fail closed.
 
 Recovery no inventa el estado correcto.
 
@@ -235,12 +317,25 @@ C7 durante cleanup de journal/next
 C8 después de cleanup durable y antes de retirar lock
 ```
 
-Para cada crash point, reiniciar el store y demostrar uno de dos resultados válidos:
+Mapeo mínimo exigido:
 
 ```text
-visible before completo
+C1 → lock only + visible BEFORE → RECOVERED_BEFORE
+C2 → lock + journal + no next + visible BEFORE → RECOVERED_BEFORE
+C3 → lock + journal + valid next + visible BEFORE → RECOVERED_AFTER
+C4 → lock + journal + valid next + visible BEFORE → RECOVERED_AFTER
+C5 → lock + journal + visible AFTER → RECOVERED_AFTER
+C6 → lock + journal + visible AFTER → RECOVERED_AFTER
+C7 → metadata residual compatible + visible AFTER → RECOVERED_AFTER
+C8 → lock only + visible AFTER → RECOVERED_AFTER
+```
+
+Para cada crash point, reiniciar el store y demostrar uno de dos estados visibles válidos:
+
+```text
+visible BEFORE completo
 o
-visible after completo
+visible AFTER completo
 ```
 
 Nunca un híbrido.
@@ -264,7 +359,10 @@ Pruebas negativas:
 stale expectedBeforeSha256         → reject
 second writer / lock collision     → reject
 journal collision                  → reject
-next hash mismatch                 → reject
+next absent + journal + BEFORE     → RECOVERED_BEFORE
+next hash mismatch                 → fail closed
+orphan journal/next without lock   → fail closed
+lock/journal binding mismatch      → fail closed
 visible divergence during recovery → fail closed
 repair without child candidate     → reject
 candidate schema invalid           → reject
@@ -337,13 +435,24 @@ La persistencia queda separada del repair gate y del reducer. E5.3 no toma decis
 
 La combinación lock + CAS evita dos clases distintas de fallo: escrituras simultáneas y escrituras basadas en una versión obsoleta.
 
-El journal se usa para distinguir con evidencia un crash pre-commit de un crash post-replace.
+El journal y el lock tienen funciones distintas: el journal prueba una transacción PREPARED; el lock conserva el binding mínimo que permite distinguir un crash C1 pre-journal de un crash C8 post-cleanup. La matriz de recovery evita tratar ambos casos como el mismo “stale lock”.
+
+La revisión asistida por ASC v0.1, en modo compile-only, hizo explícitas las relaciones obligatorias y reveló dos vacíos del diseño inicial: C1/C8 no estaban cerrados de forma determinista y `next absent` estaba mezclado con `next hash mismatch`. Ambos quedan corregidos en §7. ASC no decide la validez de dominio ni cierra los OPEN de plataforma.
 
 ## 14. INCONSISTENCIAS
 
 No se detecta contradicción con E5.2: E5.2 declara explícitamente `CANDIDATE_NOT_PERSISTED`; E5.3 comienza exactamente en esa frontera.
 
 La regla de `repairChildAtomicity` ya exige un único boundary durable, por lo que una estrategia de dos escrituras visibles —primero repair y luego child— sería incompatible y queda prohibida.
+
+La revisión R2 detectó y corrigió dos inconsistencias operativas del borrador anterior:
+
+```text
+R2-I1 lock residual sin journal no distinguía C1 de C8
+R2-I2 next ausente se trataba igual que next corrupto
+```
+
+C1/C8 se resuelven ahora usando el binding del lock + visible hash. `next absent + visible BEFORE` recupera BEFORE; `next present con hash distinto de afterSha256` es corrupción y falla cerrado.
 
 Permanece una cuestión de implementación que no debe cerrarse por suposición: la semántica exacta de atomic replace y directory fsync en cada plataforma soportada debe demostrarse con la API/filesystem elegidos.
 
@@ -360,6 +469,7 @@ tests de restart
 tests de CAS
 tests de concurrent writer
 tests de stale-lock recovery sin timeout inferido
+tests exhaustivos de la matriz lock/journal/next/visible
 pin operativo E5.1/E5.2
 CI gate E5.3
 evidencia de plataforma/filesystem soportado
@@ -406,9 +516,44 @@ MAP-001 Proposal Validation Gate PASS
 human approval
 ```
 
+## 18. Evidencia ASC de revisión R2
+
+```text
+ASC VERSION: 0.1
+EXECUTION MODE: compile-only
+TEST ID: MAP001-E5.3-DESIGN-RECOVERY-R2-ASC-001
+```
+
+El contrato compilado preservó como `OPEN`:
+
+```text
+filesystem/plataformas soportadas
+API concreta del durable store
+representación final del pin operativo E5.1/E5.2
+```
+
+y prohibió explícitamente:
+
+```text
+repair y child en commits visibles separados
+borrar lock inexplicado desde commit()
+recovery por mtime/archivo más nuevo
+conectar repair agent en E5.3
+```
+
+Resultado de la revisión de diseño:
+
+```text
+R2-I1  RESOLVED
+R2-I2  RESOLVED
+NUEVAS INCONSISTENCIAS BLOQUEANTES  NONE FOUND
+OPEN DE IMPLEMENTACIÓN             PRESERVED
+```
+
 Estado de salida de este documento:
 
 ```text
-E5.3 DESIGN_CANDIDATE
-IMPLEMENTATION_PENDING
+E5.3 DESIGN_REVIEW_PASS
+IMPLEMENTATION_AUTHORIZED
+REPAIR_AGENT_OUT_OF_SCOPE
 ```
