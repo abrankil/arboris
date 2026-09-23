@@ -2,9 +2,10 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E4.2 — reducer ejecutable de estados para el resolver cíclico MAP-001  
-**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
+**Estado:** `CLOSED / PASS`  
 **Baseline:** `main@5401eb0bb35cbbcfabe2a7ff3faf0e9060c157d3`  
-**Precondición:** E4.1 / G4.1 cerrado; Run State R4 + Semantic Contract R2 vigentes.
+**Precondición:** E4.1 / G4.1 cerrado; Run State R4 + Semantic Contract R2 vigentes.  
+**Aprobación humana de E4.2:** recibida el 2026-09-23.
 
 ## 1. Objetivo
 
@@ -324,8 +325,8 @@ Resultado:
 
 ```text
 E4.2
-TECHNICAL_PASS
-HUMAN_APPROVAL_PENDING
+PASS
+CLOSED
 ```
 
-No se registra cierre formal mientras no exista aprobación humana explícita.
+La aprobación humana explícita fue recibida después de la validación técnica y contractual del head corregido. E4.2 queda formalmente cerrado.
