@@ -222,7 +222,7 @@ El guard de ejecución inicial se limita deliberadamente a Linux. La garantía d
 
 ## 11. INCONSISTENCIAS
 
-Las inconsistencias P1-P3 del primer PASS fueron corregidas antes de cualquier cierre. El nuevo candidato requiere revalidación externa completa.
+Las inconsistencias P1-P3 del primer PASS fueron corregidas antes del cierre. Esta sección conserva contexto histórico del proceso; el estado vigente está en §§18-19, donde la revalidación final y el cierre quedan registrados como PASS.
 
 No se detecta contradicción intencional con E5.2, Run State R5 o Semantic Contract R3.
 
@@ -232,7 +232,7 @@ Debe verificarse en CI que `fsync` de directorio y el reemplazo por rename se co
 
 ## 12. VACÍOS / OMISIONES
 
-Hasta ejecución externa siguen pendientes:
+Contexto histórico previo al cierre: los siguientes elementos estuvieron pendientes durante la iteración y luego fueron resueltos en §§16-19:
 
 ```text
 revalidación CI del head corregido
