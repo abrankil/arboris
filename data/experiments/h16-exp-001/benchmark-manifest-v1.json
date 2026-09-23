@@ -83,7 +83,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-001_cryptocarya_alba/CA001/SP-001_CA001_hojas_01.jpg"
+        "path": "species/SP-001_cryptocarya_alba/CA001/SP-001_CA001_hojas_01.jpg",
+        "gitBlobSha1": "b39f6501956c11720694b50835a059a9149aa63d"
       }
     },
     {
@@ -93,7 +94,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-001_cryptocarya_alba/CA001/SP-001_CA001_hojas_02.jpg"
+        "path": "species/SP-001_cryptocarya_alba/CA001/SP-001_CA001_hojas_02.jpg",
+        "gitBlobSha1": "6643402d53c4b6e7efb8ebb0b8f056a3698fae43"
       }
     },
     {
@@ -103,7 +105,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-001_cryptocarya_alba/CA001/SP-001_CA001_ramilla_apical_01.jpg"
+        "path": "species/SP-001_cryptocarya_alba/CA001/SP-001_CA001_ramilla_apical_01.jpg",
+        "gitBlobSha1": "e4f556db8560c28a916d595f0f84eadf8780ac83"
       }
     },
     {
@@ -113,7 +116,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_hojas_01.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_hojas_01.jpg",
+        "gitBlobSha1": "33a36842279b35ca31a3838e03ff7ac51c608802"
       }
     },
     {
@@ -123,7 +127,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_hojas_02.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_hojas_02.jpg",
+        "gitBlobSha1": "766f7513676e70e4d95145b6eed4d34219d308b8"
       }
     },
     {
@@ -133,7 +138,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_ramilla_01.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_ramilla_01.jpg",
+        "gitBlobSha1": "7f58275eca14436146c1957cbaf147e1b987fd23"
       }
     },
     {
@@ -143,7 +149,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_estructuras_reproductivas_01.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_estructuras_reproductivas_01.jpg",
+        "gitBlobSha1": "2ea279666f4e16aec148b4552ef1e003164ec4ee"
       }
     },
     {
@@ -153,7 +160,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_estructuras_reproductivas_02.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_estructuras_reproductivas_02.jpg",
+        "gitBlobSha1": "5966ad2d5708836c948d60c410c36f879799301d"
       }
     },
     {
@@ -163,7 +171,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC002/SP-002_LC002_hojas_01.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC002/SP-002_LC002_hojas_01.jpg",
+        "gitBlobSha1": "55b9e5fead3cf69cc9eed5691b5104b9cc6ff1bc"
       }
     },
     {
@@ -173,7 +182,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_hojas_01.jpg"
+        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_hojas_01.jpg",
+        "gitBlobSha1": "89121c87e79a38542240f546394baefce31b0f96"
       }
     },
     {
@@ -183,7 +193,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_fruto_01.jpg"
+        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_fruto_01.jpg",
+        "gitBlobSha1": "098ec563aadbbfa52223f6db0760941a062084ec"
       }
     },
     {
@@ -193,7 +204,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_fruto_02.jpg"
+        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_fruto_02.jpg",
+        "gitBlobSha1": "5499e9446000526ec02be4b26671f21f91e76fbf"
       }
     },
     {
@@ -203,7 +215,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_hojas_fruto_01.jpg"
+        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_hojas_fruto_01.jpg",
+        "gitBlobSha1": "559647ee9ab4f0912bafc2fdba3f163647af779d"
       }
     },
     {
@@ -213,7 +226,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-003_kageneckia_oblonga/KO002/SP-003_KO002_hojas_01.jpg"
+        "path": "species/SP-003_kageneckia_oblonga/KO002/SP-003_KO002_hojas_01.jpg",
+        "gitBlobSha1": "753bf986f9d0c75a9fc0a780480526bc07a600eb"
       }
     },
     {
@@ -223,7 +237,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_ramilla_hojas_01.jpg"
+        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_ramilla_hojas_01.jpg",
+        "gitBlobSha1": "f31a716cab5af317a857ddc02675a8a64103bb8a"
       }
     },
     {
@@ -233,7 +248,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_ramilla_hojas_02.jpg"
+        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_ramilla_hojas_02.jpg",
+        "gitBlobSha1": "bf4ecf456766bd280f011b00e88010c04a74cf13"
       }
     },
     {
@@ -243,7 +259,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_capitulo_inmaduro_01.jpg"
+        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_capitulo_inmaduro_01.jpg",
+        "gitBlobSha1": "fca1b2b502c67184d57389f49f664a99852e7c1f"
       }
     },
     {
@@ -253,7 +270,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_capitulo_amarillo_01.jpg"
+        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_capitulo_amarillo_01.jpg",
+        "gitBlobSha1": "3117df05d2d809a3988da376c6fe6222ec38cbe4"
       }
     },
     {
@@ -263,7 +281,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_inflorescencia_masculina_01.jpg"
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_inflorescencia_masculina_01.jpg",
+        "gitBlobSha1": "66394a079e87acbe517e4670dce028ecc7bfeb10"
       }
     },
     {
@@ -273,7 +292,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_inflorescencia_masculina_02.jpg"
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_inflorescencia_masculina_02.jpg",
+        "gitBlobSha1": "9257804e08d4ae770f9c009d390026579c968ce4"
       }
     },
     {
@@ -283,7 +303,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_hojas_01.jpg"
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_hojas_01.jpg",
+        "gitBlobSha1": "2bd3a1b16f0adefd54b04840a064af5a9f8da4b9"
       }
     },
     {
@@ -293,7 +314,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_hojas_02.jpg"
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_hojas_02.jpg",
+        "gitBlobSha1": "8bf2a4c974d76c1d3a782538d2e61042425ec216"
       }
     },
     {
@@ -303,7 +325,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_inflorescencia_fruto_01.jpg"
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_inflorescencia_fruto_01.jpg",
+        "gitBlobSha1": "acdce95afc66272b1646fdbb6b9a1d626a5d4867"
       }
     },
     {
@@ -313,7 +336,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-006_quillaja_saponaria/QS001/SP-006_QS001_hojas_01.jpg"
+        "path": "species/SP-006_quillaja_saponaria/QS001/SP-006_QS001_hojas_01.jpg",
+        "gitBlobSha1": "144caad86651a99cf28f6e217d13d59e910e9959"
       }
     },
     {
@@ -323,7 +347,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-006_quillaja_saponaria/QS001/SP-006_QS001_hojas_02.jpg"
+        "path": "species/SP-006_quillaja_saponaria/QS001/SP-006_QS001_hojas_02.jpg",
+        "gitBlobSha1": "a2b1f4ec78a6e9c04a4689e90d77da57a13bf362"
       }
     },
     {
@@ -333,7 +358,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-006_quillaja_saponaria/QS001/SP-006_QS001_ramilla_01.jpg"
+        "path": "species/SP-006_quillaja_saponaria/QS001/SP-006_QS001_ramilla_01.jpg",
+        "gitBlobSha1": "5ee4f04e91fc8196a84480ffd68b62a9dbe28d6e"
       }
     },
     {
@@ -343,7 +369,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-001_cryptocarya_alba/CA002/SP-001_CA002_hojas_01.jpg"
+        "path": "species/SP-001_cryptocarya_alba/CA002/SP-001_CA002_hojas_01.jpg",
+        "gitBlobSha1": "c25a6fc8d82bf7b87f5bc1b3371422bb1dd09e29"
       }
     },
     {
@@ -353,7 +380,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC003/SP-002_LC003_hojas_01.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC003/SP-002_LC003_hojas_01.jpg",
+        "gitBlobSha1": "49e6fa2887e6a3407a2110d509f5a740ee2cfe19"
       }
     },
     {
@@ -363,7 +391,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC003/SP-002_LC003_hojas_02.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC003/SP-002_LC003_hojas_02.jpg",
+        "gitBlobSha1": "49e6fa2887e6a3407a2110d509f5a740ee2cfe19"
       }
     },
     {
@@ -373,7 +402,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_hojas_01.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_hojas_01.jpg",
+        "gitBlobSha1": "45a5158ec07953567b1cd0c0661a0faf1758085d"
       }
     },
     {
@@ -383,7 +413,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_hojas_02.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_hojas_02.jpg",
+        "gitBlobSha1": "fd8f4311ccc8dd6324efa0b3f8e450ce4fa2abac"
       }
     },
     {
@@ -393,7 +424,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_hojas_03.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_hojas_03.jpg",
+        "gitBlobSha1": "21891579b2aba2337126b4abc428a817bc90df90"
       }
     },
     {
@@ -403,7 +435,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_ramilla_01.jpg"
+        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_ramilla_01.jpg",
+        "gitBlobSha1": "f0730ad1bdbff07f5f767449b80c17435608ffc4"
       }
     },
     {
@@ -413,7 +446,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-003_kageneckia_oblonga/KO003/SP-003_KO003_hojas_01.jpg"
+        "path": "species/SP-003_kageneckia_oblonga/KO003/SP-003_KO003_hojas_01.jpg",
+        "gitBlobSha1": "8c0ede23bf4748664f0e77c55b3c1b36bc5d2fae"
       }
     },
     {
@@ -423,7 +457,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-003_kageneckia_oblonga/KO003/SP-003_KO003_hojas_02.jpg"
+        "path": "species/SP-003_kageneckia_oblonga/KO003/SP-003_KO003_hojas_02.jpg",
+        "gitBlobSha1": "ab921773918a62d0b3b66de3c2cb3d20178e20a0"
       }
     },
     {
@@ -433,7 +468,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_hojas_01.jpg"
+        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_hojas_01.jpg",
+        "gitBlobSha1": "fe4970dbae9cc50054b1f94055cefc986ba288d5"
       }
     },
     {
@@ -443,7 +479,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_capitulo_01.jpg"
+        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_capitulo_01.jpg",
+        "gitBlobSha1": "cb0e1372522fa42f8bf84fcc365057e5c1a252ea"
       }
     },
     {
@@ -453,7 +490,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_capitulo_02.jpg"
+        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_capitulo_02.jpg",
+        "gitBlobSha1": "99a90ef0de47b32227e94a2009e7727f15015054"
       }
     },
     {
@@ -463,7 +501,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_ramilla_capitulo_01.jpg"
+        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_ramilla_capitulo_01.jpg",
+        "gitBlobSha1": "11e5f21273a6e400383996d2cc9780c006094356"
       }
     },
     {
@@ -473,7 +512,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-005_colliguaja_odorifera/CO002/SP-005_CO002_hojas_01.jpg"
+        "path": "species/SP-005_colliguaja_odorifera/CO002/SP-005_CO002_hojas_01.jpg",
+        "gitBlobSha1": "db507772d96353084436083626ba2d8719e63cba"
       }
     },
     {
@@ -483,7 +523,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-005_colliguaja_odorifera/CO002/SP-005_CO002_ramilla_hojas_01.jpg"
+        "path": "species/SP-005_colliguaja_odorifera/CO002/SP-005_CO002_ramilla_hojas_01.jpg",
+        "gitBlobSha1": "8b1345791759b18edb30f7b0188b0f90431976cc"
       }
     },
     {
@@ -493,7 +534,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_hojas_01.jpg"
+        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_hojas_01.jpg",
+        "gitBlobSha1": "4d53304c270bd8dd0807c6ab33925fe47d6d682f"
       }
     },
     {
@@ -503,7 +545,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_hojas_02.jpg"
+        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_hojas_02.jpg",
+        "gitBlobSha1": "aa4889b18c818af801aa438891989f45c3fdc419"
       }
     },
     {
@@ -513,7 +556,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_hojas_03.jpg"
+        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_hojas_03.jpg",
+        "gitBlobSha1": "5501321ab2d974c658ae5d95992b5361dba99b90"
       }
     },
     {
@@ -523,7 +567,8 @@
       "assetIdentity": {
         "kind": "git_commit_path",
         "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_ramilla_hojas_01.jpg"
+        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_ramilla_hojas_01.jpg",
+        "gitBlobSha1": "f906bacbc84865658d912d5c50e11564375b9b9e"
       }
     }
   ],
