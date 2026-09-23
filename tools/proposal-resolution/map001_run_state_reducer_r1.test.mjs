@@ -61,12 +61,12 @@ const CONTRACT_SET = {
     sha256: SHA_C,
   },
   runState: {
-    schemaId: 'arboris:proposal-resolution:map001:run-state:r4',
+    schemaId: 'arboris:proposal-resolution:map001:run-state:r5',
     path: 'tools/proposal-resolution/schemas/run-state.schema.json',
     sha256: SHA_C,
   },
   semanticContract: {
-    schemaId: 'MAP001-CROSS-CONTRACT-SEMANTICS-002',
+    schemaId: 'MAP001-CROSS-CONTRACT-SEMANTICS-003',
     path: 'tools/proposal-resolution/contracts/cross-contract.semantic.json',
     sha256: SHA_C,
   },
@@ -183,7 +183,31 @@ function makeRun({
       scope: 'MAP001_LOCAL_NAVIGATION',
       baseline: structuredClone(BASELINE),
       validatorBinding: structuredClone(VALIDATOR_BINDING),
-      resolverBinding: structuredClone(RESOLVER_BINDING),
+      resolverBinding: {
+        ...structuredClone(RESOLVER_BINDING),
+        dependencies: [
+          {
+            dependencyId: 'VALIDATION_ADAPTER',
+            path: 'tools/proposal-resolution/map001_validation_adapter_r1.mjs',
+            sha256: SHA_C,
+          },
+          {
+            dependencyId: 'RUN_STATE_REDUCER',
+            path: 'tools/proposal-resolution/map001_run_state_reducer_r1.mjs',
+            sha256: SHA_C,
+          },
+          {
+            dependencyId: 'ITERATION_CONTRACT_GATE',
+            path: 'tools/proposal-resolution/validate_e4_3_iteration_contracts.py',
+            sha256: SHA_C,
+          },
+          {
+            dependencyId: 'E3_CONTRACT_GATE',
+            path: 'tools/proposal-resolution/validate_e3_contracts.py',
+            sha256: SHA_C,
+          },
+        ],
+      },
       contractSet: structuredClone(CONTRACT_SET),
       policy: {
         maxIterations,
