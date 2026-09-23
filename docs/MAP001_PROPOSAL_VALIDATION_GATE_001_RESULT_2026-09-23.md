@@ -2,9 +2,11 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E3 / G3 — integración de propuestas MAP-001 con validator de dominio real  
-**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
+**Estado:** `CLOSED / PASS`  
 **PR de implementación:** #68 — `E3: MAP-001 proposal validation adapter`  
-**Commit de implementación validado:** `1484a037ec6a21d23900eaa715957310b6f4e916`
+**Commit de implementación validado:** `1484a037ec6a21d23900eaa715957310b6f4e916`  
+**Commit documental revalidado:** `70a0ee8c4d3d9bf951835806cdd313caef369d6b`  
+**Aprobación humana de G3:** recibida el 2026-09-23
 
 ## 1. Objetivo
 
@@ -261,11 +263,11 @@ Audit Protocol Check                             PASS
 ASC boundary                                     PASS
 
 G3 — VALIDATION GATE
-TECHNICAL_PASS
-HUMAN_APPROVAL_PENDING
+PASS
+CLOSED
 ```
 
-No se registra `G3 CLOSED` mientras no exista aprobación humana explícita.
+La aprobación humana fue recibida después de completar la revisión técnica, la documentación y la revalidación de los checks del head documental. G3 queda formalmente cerrado.
 
 ## 11. AUDITORÍA
 
@@ -280,8 +282,6 @@ La inconsistencia material encontrada en el fixture `CREATE_DERIVED` fue corregi
 No se detecta una inconsistencia técnica pendiente que invalide el objetivo de E3.
 
 ## 13. VACÍOS / OMISIONES
-
-Permanece pendiente únicamente el cierre humano de G3.
 
 La ejecución completa de `repair.schema R1`, `run-state.schema R3`, detección de `STALLED`, `CYCLE_DETECTED`, `REGRESSION` y el bucle automático pertenece a E4 y no se declara resuelta por este documento.
 
