@@ -32,6 +32,20 @@
     "otherConditionOutput",
     "expectedVerdict"
   ],
+  "auditorVisible": [
+    "blindAuditRubric",
+    "experimentalKey",
+    "outputX",
+    "outputY"
+  ],
+  "auditorHiddenUntilIndividualEvaluationsClosed": [
+    "manifest",
+    "packageRoleAssignment",
+    "XYtoABAssignment",
+    "conditionPackages",
+    "priorAuditsRevealingAssignment",
+    "expectedVerdict"
+  ],
   "independentVariable": "EXPLICIT_CLAIM_STATUS_BINDING",
   "primaryClaims": [
     "C1",
