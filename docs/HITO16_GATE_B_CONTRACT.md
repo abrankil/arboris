@@ -1,6 +1,6 @@
-# Árboris — Hito 16 Gate B Contract R1
+# Árboris — Hito 16 Gate B Contract R2
 
-**ID:** `ARBORIS_H16_GATE_B_CONTRACT_R1`  
+**ID:** `ARBORIS_H16_GATE_B_CONTRACT_R2`  
 **Estado:** VALIDATED WITH ASC / FROZEN.  
 **Ámbito:** Hito 16 / cierre empírico y técnico.  
 **Base:** APC I1–I12 integrados; I11 R4 e I12 R10/V0.11 validados y congelados.  
@@ -20,6 +20,8 @@ fotografía real
 ```
 
 Gate B no exige observadores para todos los caracteres ni convierte H16 en un identificador directo de especies.
+
+R2 añade una corrección de reproducibilidad: el benchmark no puede depender de una partición por individuo cuyo conjunto de fotografías pueda crecer silenciosamente después de haber sido congelado.
 
 ## 2. Fuentes de autoridad
 
@@ -85,6 +87,36 @@ auditoría ASC final
 ```
 
 Los resultados de holdout deben registrarse sin reusar el holdout para ajustar reglas, arquitectura o thresholds posteriores a su evaluación.
+
+### 5.1 Freeze inmutable del benchmark
+
+La partición por individuo evita leakage entre individuos, pero no congela por sí sola la composición fotográfica del benchmark.
+
+Por tanto, antes del primer uso del holdout, debe existir un manifiesto inmutable que fije como mínimo:
+
+```text
+experimentId
+characterId
+manifestVersion
+sourceDatasetRef
+sourceDatasetHash
+developmentPhotoIds[]
+holdoutPhotoIds[]
+excludedPhotoIds[]
+assetIdentity por foto
+createdAt
+```
+
+Reglas:
+
+- agregar posteriormente una PHOTO al mismo individuo no la incorpora automáticamente al development ni al holdout congelados;
+- remover o reemplazar una foto del manifest requiere nueva versión del manifest;
+- la identidad del asset debe poder verificarse mediante fingerprint/hash o referencia equivalente estable;
+- el benchmark debe reportar exactamente qué versión de manifest consumió;
+- development y holdout se derivan del manifest congelado, no de una consulta dinámica a todos los registros actuales del individuo;
+- fotos nuevas pueden permanecer fuera del benchmark hasta una decisión explícita de nueva versión.
+
+Esto preserva tanto anti-leakage como reproducibilidad temporal.
 
 ## 6. Anti-leakage
 
@@ -192,24 +224,24 @@ No se cierra H16 por el solo hecho de que I1–I12 estén implementados.
 
 ## 13. AUDITORÍA
 
-R1 separa infraestructura validada de demostración empírica. No convierte I12, PASS de I10 ni handoff I11 en prueba de desempeño del observador. Los doce criterios de éxito se preservan y se hace explícito el vacío cuantitativo existente.
+R2 conserva la separación de R1 entre infraestructura validada y demostración empírica y añade el freeze explícito del conjunto de fotografías. No convierte I12, PASS de I10 ni handoff I11 en prueba de desempeño del observador. Los doce criterios de éxito se preservan y se hace explícito el vacío cuantitativo existente.
 
 ## 14. INCONSISTENCIAS
 
-Se corrige la ambigüedad previa en la que `Gate B` era citado como gate final sin contrato canónico en `main`. R1 no declara el gate satisfecho y mantiene OPEN-B1 en vez de inventar un umbral.
+R2 corrige un hallazgo posterior a R1: una partición definida sólo por `individualId` puede cambiar materialmente si se agregan fotografías nuevas a esos mismos individuos después del freeze. El benchmark queda ahora ligado a un manifest de PHOTO/asset explícito y versionado. Se mantiene además la corrección de R1 respecto de Gate B y OPEN-B1.
 
 ## 15. VACÍOS / OMISIONES
 
-OPEN-B1 permanece sin resolver. También faltan, en el estado actual de H16, anotación humana completa, cobertura por clase, baseline, observador CH-003, benchmark holdout y auditoría empírica.
+OPEN-B1 permanece sin resolver. También faltan, en el estado actual de H16, el manifest congelado del benchmark, anotación humana completa, cobertura por clase, baseline, observador CH-003, benchmark holdout y auditoría empírica.
 
 ## 16. REDUNDANCIAS
 
 Gate B no redefine APC PASS, ACE supported ni contratos de observación. Sólo compila los requisitos de cierre de H16 y referencia esas autoridades.
 
 
-## 17. VALIDACIÓN FINAL ASC
+## 17. HISTORIAL DE R1
 
-Validación ejecutada sobre R1.
+R1 fue validado con ASC e integrado. R2 lo supersede únicamente para añadir el requisito de freeze inmutable del conjunto de fotografías y assets del benchmark.
 
 ```text
 AUDITORÍA             PASS
@@ -228,4 +260,29 @@ Verificación ejecutable:
 - no hay cambios de runtime, Master, ACE, APC ni datos botánicos;
 - OPEN-B1 permanece explícitamente abierto.
 
-R1 queda FROZEN como contrato de Gate B. Esto valida el contrato, no declara Gate B PASS ni cierra Hito 16.
+R1 permanece como antecedente histórico. R2 requiere nueva validación completa antes de quedar FROZEN.
+
+
+## 18. VALIDACIÓN FINAL ASC R2
+
+Validación ejecutada sobre la corrección de freeze del benchmark.
+
+```text
+AUDITORÍA             PASS
+INCONSISTENCIAS       PASS
+VACÍOS / OMISIONES    PASS
+REDUNDANCIAS          PASS
+BLOCKERS DEL CONTRATO 0
+```
+
+Verificación:
+
+- CI #227 → PASS;
+- canonical tests / `npm test` → PASS;
+- Audit Protocol Check #158 → PASS;
+- diff limitado al contrato Gate B;
+- no cambia runtime, Master, ACE, APC ni datos;
+- OPEN-B1 permanece abierto;
+- R2 añade únicamente el requisito de manifest fotográfico/asset inmutable y versionado.
+
+R2 queda FROZEN. Esto no declara Gate B PASS ni cierra Hito 16.
