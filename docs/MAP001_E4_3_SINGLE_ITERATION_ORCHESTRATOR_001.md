@@ -2,9 +2,9 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E4.3 — una iteración real completa del resolver MAP-001  
-**Estado:** `CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
+**Estado:** `REVISED_CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
 **Baseline:** `main@78290df3c59068ddf7c2fc350db3cb9fa61c4a25`  
-**Precondición:** E4.1 y E4.2 cerrados; Run State R4, Semantic Contract R2, adapter E3 y reducer E4.2 disponibles.
+**Precondición:** E4.1 y E4.2 cerrados; adapter E3 y reducer E4.2 disponibles. Durante la auditoría E4.3, Run State R5 / Semantic Contract R3 fueron revisados a Run State R5 / Semantic Contract R3 para cerrar procedencia de dependencias ejecutables.
 
 ## 1. Objetivo
 
@@ -37,7 +37,7 @@ El orquestador pertenece a Árboris.
 Recibe:
 
 ```text
-run-state R4
+run-state R5
 proposal R2
 reportId
 repository root
@@ -64,7 +64,7 @@ tools/proposal-resolution/validate_e4_3_iteration_contracts.py
 El precheck comprueba:
 
 ```text
-Run State R4 schema
+Run State R5 schema
 Proposal R2 schema
 SEM-PROP-004
 runId binding
@@ -97,7 +97,8 @@ Antes de invocar el domain validator, E4.3 verifica bytes reales de:
 authority manifest
 source candidate
 validator implementation
-resolver implementation
+resolver entrypoint
+resolver dependency closure
 Proposal schema
 Repair schema
 Validation Report schema
@@ -111,11 +112,24 @@ Clasificación:
 authority/source candidate SHA drift
 → AUTHORITY_CHANGED
 
-validator/resolver/contract SHA drift
+validator/resolver entrypoint/resolver dependency/contract SHA drift
 → SYSTEM_ERROR
 ```
 
 También se verifica que cada `contractSet.schemaId` coincida con el `$id` real del schema o con `contractId` en el contrato semántico.
+
+La auditoría posterior al primer PASS detectó que fijar solo el entrypoint del orquestador no cerraba la procedencia de sus dependencias ejecutables. Eso permitía, en principio, modificar el adapter, el reducer o los gates Python sin alterar `resolverBinding.implementationSha256`.
+
+Se corrigió mediante Run State R5 + Semantic Contract R3. El resolver debe declarar exactamente estas dependencias:
+
+```text
+VALIDATION_ADAPTER
+RUN_STATE_REDUCER
+ITERATION_CONTRACT_GATE
+E3_CONTRACT_GATE
+```
+
+Cada una queda fijada por path repo-relative canónico y SHA-256 de bytes reales. El conjunto debe coincidir exactamente con `resolverDependencyPolicy.requiredDependencyIds`.
 
 ## 5. Precedencia antes de validar
 
@@ -204,6 +218,8 @@ real protected authority drift → AUTHORITY_BLOCKED
 authority manifest SHA drift → AUTHORITY_CHANGED before domain validation
 validator SHA drift → SYSTEM_ERROR before domain validation
 contract-set SHA drift → SYSTEM_ERROR before domain validation
+resolver dependency SHA drift → SYSTEM_ERROR before domain validation
+resolver dependency set incomplete → SYSTEM_ERROR before domain validation
 candidateHistory wrong logical hash → contract precondition failure
 artifactPath outside allowlist → contract precondition failure
 ```
@@ -255,9 +271,11 @@ E4.3 compone piezas previamente validadas sin mover responsabilidades entre ella
 
 El pre/post contract gate impide considerar válida una iteración solo porque el adapter o el reducer produzcan una salida plausible.
 
+La auditoría adversarial posterior al primer PASS añadió además cierre de procedencia transitiva del resolver. Por ello, el PASS inicial de E4.3 queda como evidencia histórica pero no como evidencia suficiente de cierre; el candidato revisado R5/R3 debe volver a ejecutar el gate completo.
+
 ## 12. INCONSISTENCIAS
 
-Existe una inconsistencia documental heredada: el archivo materializado del Semantic Contract R2 conserva:
+Existe una inconsistencia documental heredada: el archivo materializado del Semantic Contract R3 conserva:
 
 ```text
 status = R2_CANDIDATE
