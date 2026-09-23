@@ -2,6 +2,8 @@
 import argparse
 import hashlib
 import json
+import re
+from copy import deepcopy
 from pathlib import Path
 
 from jsonschema import Draft7Validator
@@ -43,6 +45,156 @@ def validate_report_status(report):
         raise AssertionError(
             f"validation-report status mismatch: expected {expected}, got {report['status']}"
         )
+
+
+
+
+def decode_pointer(pointer):
+    if not isinstance(pointer, str) or not pointer.startswith("/") or pointer == "/":
+        raise AssertionError(f"invalid candidate pointer: {pointer!r}")
+    raw_tokens = pointer[1:].split("/")
+    tokens = []
+    for raw in raw_tokens:
+        index = 0
+        while index < len(raw):
+            if raw[index] == "~":
+                if index + 1 >= len(raw) or raw[index + 1] not in ("0", "1"):
+                    raise AssertionError(f"invalid JSON Pointer escape: {pointer!r}")
+                index += 2
+                continue
+            index += 1
+        tokens.append(raw.replace("~1", "/").replace("~0", "~"))
+    return tokens
+
+
+def strict_array_index(token):
+    if not re.fullmatch(r"0|[1-9][0-9]*", token):
+        raise AssertionError(f"invalid strict array index: {token!r}")
+    return int(token)
+
+
+def parent_and_key(doc, pointer):
+    tokens = decode_pointer(pointer)
+    current = doc
+    for token in tokens[:-1]:
+        if isinstance(current, list):
+            index = strict_array_index(token)
+            if index >= len(current):
+                raise AssertionError(f"missing array parent for {pointer}")
+            current = current[index]
+        elif isinstance(current, dict):
+            if token not in current:
+                raise AssertionError(f"missing object parent for {pointer}")
+            current = current[token]
+        else:
+            raise AssertionError(f"cannot traverse scalar for {pointer}")
+    return current, tokens[-1]
+
+
+def apply_child_change(doc, change):
+    parent, key = parent_and_key(doc, change["targetPath"])
+    operation = change["operation"]
+
+    if operation == "add":
+        if isinstance(parent, list):
+            if key == "-":
+                parent.append(deepcopy(change["after"]))
+                return
+            index = strict_array_index(key)
+            if index != len(parent):
+                raise AssertionError("array add requires index == length or /-")
+            parent.append(deepcopy(change["after"]))
+            return
+        if not isinstance(parent, dict) or key in parent:
+            raise AssertionError("object add target must be absent")
+        parent[key] = deepcopy(change["after"])
+        return
+
+    if isinstance(parent, list):
+        index = strict_array_index(key)
+        if index >= len(parent):
+            raise AssertionError("array target missing")
+        observed = parent[index]
+        if observed != change["before"]:
+            raise AssertionError("child change before mismatch")
+        if operation == "remove":
+            parent.pop(index)
+        elif operation == "replace":
+            if change["before"] == change["after"]:
+                raise AssertionError("replace cannot be a no-op")
+            parent[index] = deepcopy(change["after"])
+        else:
+            raise AssertionError(f"unsupported child operation: {operation}")
+        return
+
+    if not isinstance(parent, dict) or key not in parent:
+        raise AssertionError("object target missing")
+    if parent[key] != change["before"]:
+        raise AssertionError("child change before mismatch")
+    if operation == "remove":
+        del parent[key]
+    elif operation == "replace":
+        if change["before"] == change["after"]:
+            raise AssertionError("replace cannot be a no-op")
+        parent[key] = deepcopy(change["after"])
+    else:
+        raise AssertionError(f"unsupported child operation: {operation}")
+
+
+def pointer_within(pointer, scope):
+    return pointer == scope or pointer.startswith(scope + "/")
+
+
+def validate_repair_semantics(report, repair):
+    finding_ids = [finding["findingId"] for finding in report["findings"]]
+    if len(finding_ids) != len(set(finding_ids)):
+        raise AssertionError("validation-report findingId values must be unique")
+    finding_by_id = {finding["findingId"]: finding for finding in report["findings"]}
+
+    operations = repair["patch"]["operations"]
+    edit_ids = [operation["editId"] for operation in operations]
+    if len(edit_ids) != len(set(edit_ids)):
+        raise AssertionError("repair editId values must be unique")
+
+    targets = [operation["targetPath"] for operation in operations]
+    if len(targets) != len(set(targets)):
+        raise AssertionError("repair target paths must be unique")
+    for index, left in enumerate(targets):
+        for right in targets[index + 1 :]:
+            if pointer_within(left, right) or pointer_within(right, left):
+                raise AssertionError("repair target paths must not overlap")
+
+    for operation in operations:
+        for finding_id in operation["findingRefs"]:
+            finding = finding_by_id.get(finding_id)
+            if finding is None:
+                raise AssertionError(f"unknown findingRef: {finding_id}")
+            if finding["disposition"] != "AUTO_REPAIR":
+                raise AssertionError(f"findingRef is not AUTO_REPAIR: {finding_id}")
+            if not any(
+                pointer_within(operation["targetPath"], scope)
+                for scope in finding["targetPaths"]
+            ):
+                raise AssertionError(
+                    f"repair target is outside cited finding scope: {finding_id}"
+                )
+
+
+def expected_child_changes(repair):
+    changes = []
+    for index, operation in enumerate(repair["patch"]["operations"], start=1):
+        change = {
+            "changeId": f"CHG-{index:03d}",
+            "operation": operation["operation"],
+            "targetPath": operation["targetPath"],
+            "rationale": operation["rationale"],
+        }
+        if operation["operation"] != "add":
+            change["before"] = deepcopy(operation["expectedBefore"])
+        if operation["operation"] != "remove":
+            change["after"] = deepcopy(operation["after"])
+        changes.append(change)
+    return changes
 
 
 def raw_sha256(path):
@@ -103,6 +255,7 @@ def validate_pre(parent, report, repair, args):
     validate(repair, REPAIR_SCHEMA, "repair R1")
     validate_report_status(report)
     validate_report_provenance(parent, report)
+    validate_repair_semantics(report, repair)
 
     if report["status"] != "REJECT_FIXABLE":
         raise AssertionError("repair basis must be REJECT_FIXABLE")
@@ -165,6 +318,20 @@ def validate_post(parent, repair, child, args):
             raise AssertionError(f"child subject {key} must match parent")
     if subject["baseSha256"] != args.parent_candidate_sha:
         raise AssertionError("child baseSha256 must match parent candidate logical hash")
+    if child["proposalId"] == parent["proposalId"]:
+        raise AssertionError("child proposalId must differ from parent proposalId")
+
+    expected_changes = expected_child_changes(repair)
+    if child["intent"]["changes"] != expected_changes:
+        raise AssertionError("child declared changes are not equivalent to repair operations")
+
+    reconstructed = deepcopy(parent["intent"]["candidate"])
+    for change in child["intent"]["changes"]:
+        apply_child_change(reconstructed, change)
+    if reconstructed != child["intent"]["candidate"]:
+        raise AssertionError(
+            "child declared changes do not reconstruct child candidate from parent candidate"
+        )
 
 
 def main():
@@ -206,6 +373,8 @@ def main():
         validate_post(parent, repair, child, args)
         checked["childProposalSchema"] = "R2"
         checked["childLineage"] = "BOUND"
+        checked["repairSemantics"] = "VERIFIED"
+        checked["childChanges"] = "RECONSTRUCT_CHILD"
 
     print(json.dumps(checked))
 
