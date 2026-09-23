@@ -57,3 +57,6 @@ jobs:
 
       - name: E4.2 deterministic run-state reducer tests
         run: node --test tools/proposal-resolution/map001_run_state_reducer_r1.test.mjs
+
+      - name: E4.3 real single-iteration orchestrator tests
+        run: node --test tools/proposal-resolution/map001_single_iteration_orchestrator_r1.test.mjs
