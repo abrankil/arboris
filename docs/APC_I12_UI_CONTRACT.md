@@ -856,17 +856,17 @@ I12 puede considerarse implementado cuando:
 
 ### AUDITORÍA
 
-R9 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones R8 y congela las rutas de primera confirmación y reconfirmación de contenido corregido, evitando historia DRAFT ficticia y confirmation heredada.
+R10 mantiene separadas captura, confirmación, cobertura, persistencia local, exportabilidad e identificación. Conserva las correcciones heredadas del baseline R9 y añade el binding explícito de RUN_I11_VERIFICATION con I11 R4 y su provider de incompatibilidad.
 
-Auditoría adversarial final con ASC: PASS. No se detectan blockers contractuales abiertos en R9. Queda FROZEN como contrato base de la implementación I12; cualquier cambio posterior requiere nueva revisión contractual y regresión del diseño dependiente.
+El baseline R9 había superado auditoría adversarial con ASC. R10 conserva esas decisiones y añade la compatibilidad explícita con I11 R4; requiere revalidación ejecutable sobre la nueva base antes de volver a quedar FROZEN.
 
 ### INCONSISTENCIAS
 
-R9 resuelve los hallazgos adversariales de R8: una primera confirmación desde estado sólo efímero crea directamente revision 1 CONFIRMED; editar contenido de una revisión CONFIRMED no conserva ni copia su confirmation anterior; y toda nueva revisión CONFIRMED debe pasar validateApcEvidenceForHandoff() antes de persistirse como confirmada. Conserva atomicidad I8/I9/I10, versionado I6, autosave, deduplicación, desasignación segura, relink no semántico y las correcciones previas.
+R10 resuelve los hallazgos adversariales de R8: una primera confirmación desde estado sólo efímero crea directamente revision 1 CONFIRMED; editar contenido de una revisión CONFIRMED no conserva ni copia su confirmation anterior; y toda nueva revisión CONFIRMED debe pasar validateApcEvidenceForHandoff() antes de persistirse como confirmada. Conserva atomicidad I8/I9/I10, versionado I6, autosave, deduplicación, desasignación segura, relink no semántico y las correcciones previas.
 
 ### VACÍOS / OMISIONES
 
-R9 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. El estado efímero de formulario existe sólo antes del autosave/confirm commit y no es evidencia ni persistencia normativa; por tanto no genera revisiones históricas hasta materializarse en APC.
+R10 todavía no congela detalles puramente visuales como layout exacto, estilos, tamaños, accesibilidad final ni packaging de producto. Tampoco define un contrato nuevo de hypothesis. Esos elementos permanecen fuera de alcance. El estado efímero de formulario existe sólo antes del autosave/confirm commit y no es evidencia ni persistencia normativa; por tanto no genera revisiones históricas hasta materializarse en APC.
 
 ### REDUNDANCIAS
 
