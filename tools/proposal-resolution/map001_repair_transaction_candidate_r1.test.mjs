@@ -452,3 +452,121 @@ test('run must derive READY_TO_REPAIR before transaction candidate is built', as
     (error) => error instanceof Map001RepairTransactionCandidateError
   );
 });
+
+
+test('persisted run.state must equal derived READY_TO_REPAIR state', async () => {
+  const fixture = await makeReadyToRepairFixture();
+  const repair = makeRepair(fixture.parentProposal, fixture.validationReport);
+  const run = structuredClone(fixture.run);
+  run.state = { status: 'READY_TO_VALIDATE', currentIteration: 1 };
+
+  assert.throws(
+    () => buildMap001RepairTransactionCandidate({
+      run,
+      parentProposal: fixture.parentProposal,
+      validationReport: fixture.validationReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+      root: ROOT,
+      validationReportsById: fixture.validationReportsById,
+    }),
+    (error) => error instanceof Map001RepairTransactionCandidateError
+      && error.code === 'RUN_STATE_DERIVATION_MISMATCH'
+  );
+});
+
+test('run validator binding must match the current validation report', async () => {
+  const fixture = await makeReadyToRepairFixture();
+  const repair = makeRepair(fixture.parentProposal, fixture.validationReport);
+  const run = structuredClone(fixture.run);
+  run.control.validatorBinding.validatorId = 'MAP001.NAV.AUTHORITY.RUNTIME.999';
+
+  assert.throws(
+    () => buildMap001RepairTransactionCandidate({
+      run,
+      parentProposal: fixture.parentProposal,
+      validationReport: fixture.validationReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+      root: ROOT,
+      validationReportsById: fixture.validationReportsById,
+    }),
+    (error) => error instanceof Map001RepairTransactionCandidateError
+      && error.code === 'RUN_REPORT_VALIDATOR_MISMATCH'
+  );
+});
+
+test('run baseline must match the current parent proposal baseline', async () => {
+  const fixture = await makeReadyToRepairFixture();
+  const repair = makeRepair(fixture.parentProposal, fixture.validationReport);
+  const run = structuredClone(fixture.run);
+  run.control.baseline.authorityManifestSha256 = '0'.repeat(64);
+
+  assert.throws(
+    () => buildMap001RepairTransactionCandidate({
+      run,
+      parentProposal: fixture.parentProposal,
+      validationReport: fixture.validationReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+      root: ROOT,
+      validationReportsById: fixture.validationReportsById,
+    }),
+    (error) => error instanceof Map001RepairTransactionCandidateError
+      && error.code === 'RUN_PARENT_BASELINE_MISMATCH'
+  );
+});
+
+test('existing proposalId duplicates in run history are rejected fail-closed', async () => {
+  const fixture = await makeReadyToRepairFixture();
+  const repair = makeRepair(fixture.parentProposal, fixture.validationReport);
+  const run = structuredClone(fixture.run);
+  run.iterations.push({
+    iteration: 2,
+    proposal: {
+      proposalId: fixture.parentProposal.proposalId,
+      sha256: 'a'.repeat(64),
+    },
+    validationReport: null,
+    repair: null,
+  });
+  run.candidateHistory.push({
+    iteration: 2,
+    candidateSha256: 'b'.repeat(64),
+  });
+  run.state = { status: 'READY_TO_VALIDATE', currentIteration: 2 };
+
+  assert.throws(
+    () => buildMap001RepairTransactionCandidate({
+      run,
+      parentProposal: fixture.parentProposal,
+      validationReport: fixture.validationReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+      root: ROOT,
+      validationReportsById: fixture.validationReportsById,
+    }),
+    (error) => error instanceof Map001RepairTransactionCandidateError
+  );
+});
+
+test('execution pin drift prevents repair transaction candidate', async () => {
+  const fixture = await makeReadyToRepairFixture();
+  const repair = makeRepair(fixture.parentProposal, fixture.validationReport);
+  const run = structuredClone(fixture.run);
+  run.control.resolverBinding.dependencies[0].sha256 = '0'.repeat(64);
+
+  assert.throws(
+    () => buildMap001RepairTransactionCandidate({
+      run,
+      parentProposal: fixture.parentProposal,
+      validationReport: fixture.validationReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+      root: ROOT,
+      validationReportsById: fixture.validationReportsById,
+    }),
+    (error) => error instanceof Map001RepairTransactionCandidateError
+      && error.code === 'RUN_NOT_READY_TO_REPAIR'
+  );
+});
