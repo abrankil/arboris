@@ -2,9 +2,10 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E4.1 — definición determinista de estados y transiciones del resolver cíclico MAP-001  
-**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
+**Estado:** `CLOSED / PASS`  
 **Baseline:** `main@6664a9a99c70143819aa338c3713d1624e1c9f62`  
-**Precondición:** G3 cerrado y fusionado mediante PR #68.
+**Precondición:** G3 cerrado y fusionado mediante PR #68.  
+**Aprobación humana de E4.1:** recibida el 2026-09-23.
 
 ## 1. Objetivo
 
@@ -329,7 +330,7 @@ stalledRepeatCountExactness       declared
 DOMAIN_PASS / ASC separation      preserved
 ```
 
-E4.2 no debe comenzar hasta la aprobación humana explícita de E4.1 / G4.1.
+La aprobación humana explícita de E4.1 / G4.1 fue recibida. E4.1 queda cerrado y E4.2 queda habilitado.
 
 ## 9. Papel de ASC
 
@@ -353,7 +354,7 @@ No corresponde modificar `tools/asc/compile_asc.mjs`.
 
 La transición candidata cubre todos los estados del resolver y conserva la separación entre estados de dominio, diagnósticos del resolver y autorización posterior para ASC.
 
-Los defectos estructurales encontrados en R3 fueron trasladados a correcciones explícitas en Run State R4 y Semantic Contract R2. El gate externo confirmó que ambos contratos son estructuralmente válidos y que no producen regresión en E3. E4.1 queda técnicamente validado, pendiente de aprobación humana.
+Los defectos estructurales encontrados en R3 fueron trasladados a correcciones explícitas en Run State R4 y Semantic Contract R2. El gate externo confirmó que ambos contratos son estructuralmente válidos y que no producen regresión en E3. E4.1 queda técnicamente validado y aprobado.
 
 ## 11. INCONSISTENCIAS
 
@@ -362,13 +363,13 @@ Las dos inconsistencias materiales detectadas en R3 fueron corregidas en el cand
 1. `repeatCandidateHashAction` reemplaza la nomenclatura incorrecta basada en proposal hash.
 2. `candidateHistory` permite representar repeticiones reales de candidate-state y conserva el orden de iteración.
 
-No se detecta una inconsistencia técnica pendiente en el alcance de E4.1. El cierre formal requiere aprobación humana explícita.
+No se detecta una inconsistencia técnica pendiente en el alcance de E4.1. El cierre formal fue aprobado humanamente.
 
 ## 12. VACÍOS / OMISIONES
 
 La precedencia global, la atomicidad repair → child proposal y la semántica exacta de `STALLED.repeatCount` están declaradas en Semantic Contract R2 y fueron comprobadas por el gate contractual.
 
-Permanece pendiente únicamente la aprobación humana de E4.1 antes de habilitar E4.2.
+No queda un vacío pendiente dentro del alcance de E4.1. E4.2 queda habilitado.
 
 ## 13. REDUNDANCIAS
 
