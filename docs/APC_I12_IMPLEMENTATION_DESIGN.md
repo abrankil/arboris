@@ -10,7 +10,7 @@
 
 ## 1. Objetivo
 
-Este diseño traduce el contrato I12 R10 congelado a una arquitectura implementable sin introducir una segunda fuente de verdad, una taxonomía epistemológica paralela ni autoridad nueva.
+Este diseño traduce el contrato I12 R10 candidato a revalidación a una arquitectura implementable sin introducir una segunda fuente de verdad, una taxonomía epistemológica paralela ni autoridad nueva.
 
 Principio central:
 
