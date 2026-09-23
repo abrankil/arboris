@@ -1,0 +1,44 @@
+name: MAP-001 Proposal Validation Gate
+
+on:
+  pull_request:
+    paths:
+      - 'tools/proposal-resolution/**'
+      - 'tools/map-navigation/**'
+      - 'data/baselines/map001-walkable-envelope-authority-001.json'
+      - 'data/maps/map-001-walkable-envelope-candidate-001.json'
+      - '.github/workflows/map001-proposal-validation.yml'
+      - 'package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proposal-validation:
+    name: proposal-validation (Node 24)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Runtime
+        run: |
+          node --version
+          node -e "const major=Number(process.versions.node.split('.')[0]); if (major !== 24) throw new Error('Node 24 required')"
+
+      - name: Existing MAP-001 authority runtime tests
+        run: node --test tools/map-navigation/materialize_walkable_envelope_001.test.mjs
+
+      - name: Proposal validation adapter unit tests
+        run: node --test tools/proposal-resolution/map001_validation_adapter_r1.test.mjs
+
+      - name: Real authority-runtime integration tests
+        run: node --test tools/proposal-resolution/map001_validation_adapter_r1.integration.test.mjs
