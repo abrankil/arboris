@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -44,11 +45,64 @@ def validate_report_status(report):
         )
 
 
+def raw_sha256(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def resolve_repo_file(repo_relative, label):
+    root = ROOT.resolve()
+    target = (ROOT / repo_relative).resolve()
+    try:
+        target.relative_to(root)
+    except ValueError as exc:
+        raise AssertionError(f"{label} resolves outside repository root") from exc
+    if not target.is_file():
+        raise AssertionError(f"{label} does not exist: {repo_relative}")
+    return target
+
+
+def validate_report_provenance(parent, report):
+    baseline = parent["control"]["baseline"]
+    authority = report["control"]["authorityBinding"]
+    expected_authority = {
+        "authorityId": baseline["authorityId"],
+        "authorityManifestSha256": baseline["authorityManifestSha256"],
+        "sourceCandidate": {
+            "id": baseline["sourceCandidate"]["id"],
+            "sha256": baseline["sourceCandidate"]["sha256"],
+        },
+    }
+    if authority != expected_authority:
+        raise AssertionError("validation-report authorityBinding does not match parent baseline")
+
+    authority_path = resolve_repo_file(baseline["authorityPath"], "authority manifest")
+    source_path = resolve_repo_file(baseline["sourceCandidate"]["path"], "source candidate")
+    if raw_sha256(authority_path) != baseline["authorityManifestSha256"]:
+        raise AssertionError("parent authority manifest raw hash mismatch")
+    if raw_sha256(source_path) != baseline["sourceCandidate"]["sha256"]:
+        raise AssertionError("parent source candidate raw hash mismatch")
+
+    validator = report["control"]["validatorBinding"]
+    validator_path = resolve_repo_file(
+        validator["implementationPath"], "validator implementation"
+    )
+    if raw_sha256(validator_path) != validator["implementationSha256"]:
+        raise AssertionError("validation-report validator implementation raw hash mismatch")
+
+    for finding in report["findings"]:
+        for ref in finding.get("sourceRefs", []):
+            path_part = ref.split("#", 1)[0]
+            if "://" in path_part:
+                continue
+            resolve_repo_file(path_part, "finding sourceRef")
+
+
 def validate_pre(parent, report, repair, args):
     validate(parent, PROPOSAL_SCHEMA, "parent proposal R2")
     validate(report, REPORT_SCHEMA, "validation-report R1")
     validate(repair, REPAIR_SCHEMA, "repair R1")
     validate_report_status(report)
+    validate_report_provenance(parent, report)
 
     if report["status"] != "REJECT_FIXABLE":
         raise AssertionError("repair basis must be REJECT_FIXABLE")
@@ -139,6 +193,7 @@ def main():
         "validationReportSchema": "R1",
         "repairSchema": "R1",
         "reportStatus": "REDERIVED",
+        "reportProvenance": "VERIFIED",
         "parentReportRepairBindings": "BOUND",
     }
 
