@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** implementación ejecutable de E5.3  
-**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
+**Estado:** `CLOSED / PASS`  
 **Baseline:** `main@281e251315065d8765d4f8bc3f561d3f49fb707b`  
 **Diseño:** `docs/MAP001_E5_3_DURABLE_REPAIR_PERSISTENCE_DESIGN_001.md`  
 **Frontera:** repair agent fuera de alcance.
@@ -504,3 +504,67 @@ HUMAN_APPROVAL_PENDING
 ```
 
 No se declara `CLOSED / PASS`, no se mergea y no se conecta repair agent hasta aprobación humana explícita. El commit documental que contiene este registro debe revalidarse antes de solicitar esa aprobación.
+
+
+## 19. Validación humana y cierre E5.3
+
+Aprobación humana explícita recibida el 2026-09-23 mediante instrucción de validar E5.3 con apoyo de ASC.
+
+Apoyo ASC aplicado dentro de su alcance:
+
+```text
+ASC VERSION: 0.1
+EXECUTION MODE: compile-only
+TEST ID: MAP001-E5.3-HUMAN-CLOSURE-ASC-001
+```
+
+Contrato de cierre preservado:
+
+```text
+AUTHORIZED SOURCES
+- docs/DEVELOPMENT_MANUAL.md
+- docs/MAP001_E5_3_DURABLE_REPAIR_PERSISTENCE_DESIGN_001.md
+- docs/MAP001_E5_3_DURABLE_REPAIR_PERSISTENCE_IMPLEMENTATION_001.md
+- Run State R5
+- Semantic Contract R3
+- evidencia CI/MAP-001/Audit del head técnico final
+
+MANDATORY RELATIONS
+- repair + immediate child permanecen una sola unidad durable visible
+- recovery no inventa estado
+- metadata de recovery debe mantener provenance y run identity
+- P4-P8 deben permanecer resueltos
+
+OPEN
+- filesystems/configuraciones Linux no ejercitados por CI
+- Windows/macOS durable guarantee
+- repair agent
+- agent sandbox
+- automatic retry
+- full loop
+- AUTHORIZED_FOR_ASC
+
+DO NOT INFER
+- CLOSED / PASS de E5.3 autoriza conexión del repair agent
+- evidencia Ubuntu/Linux certifica otros filesystems
+- PASS de dominio implica AUTHORIZED_FOR_ASC
+
+PROHIBITED
+- conectar repair agent dentro de E5.3
+- reabrir decisiones P1-P8 sin nueva evidencia
+- escribir repair y child en commits visibles separados
+```
+
+La validación humana acepta el alcance demostrado de E5.3 y no cierra los OPEN anteriores.
+
+Resultado de cierre:
+
+```text
+P1-P8 RESOLVED WITHIN DECLARED EVIDENCE
+NEW_BLOCKING_FINDINGS NONE
+E5.3 PASS
+E5.3 CLOSED
+REPAIR_AGENT_OUT_OF_SCOPE
+```
+
+Este cierre no autoriza todavía la siguiente etapa funcional. El PR #76 debe conservar todos los gates obligatorios en PASS sobre este commit de cierre antes del merge.
