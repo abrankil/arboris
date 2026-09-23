@@ -1,0 +1,23 @@
+EXPERIMENT: ASC-R5-CLAIM-PROVENANCE-CONTRAST-001
+CONDITION: CONTROL
+
+SOURCE:
+experiments/asc-r5-claim-provenance/R5_SOURCE_001.svg
+SHA256: f73dd125a91a17d0034752ecfd8edacdbc44e47394273ad1c1fa9e636a39bd87
+
+CLAIMS:
+C1: Hay dos elementos circulares.
+C2: El elemento izquierdo es mayor que el derecho.
+C3: Los elementos emiten luz.
+C4: Diámetro aproximado: 40 cm.
+C5: La función exacta no está establecida.
+
+STATUS VOCABULARY (UNORDERED SET; ORDER HAS NO SEMANTIC MEANING):
+- INTERPRETATION_HYPOTHESIS
+- DERIVED_VISUAL_OBSERVATION
+- OPEN_NOT_ESTABLISHED
+- DERIVED_RELATIVE_OBSERVATION
+- UNSUPPORTED_QUANTIFICATION
+
+All five status labels occur somewhere in this component.
+No explicit claim-to-status mapping is provided.
