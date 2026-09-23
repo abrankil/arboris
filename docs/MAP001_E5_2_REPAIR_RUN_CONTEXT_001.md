@@ -2,9 +2,10 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E5.2 — integración del repair gate con contexto completo de run-state  
-**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
+**Estado:** `CLOSED / PASS`  
 **Baseline:** `main@f53eaf883bae8a36dbf22b69557a917571d95273`  
-**Precondición:** E5.1 cerrado; Run State R5 + Semantic Contract R3 vigentes.
+**Precondición:** E5.1 cerrado; Run State R5 + Semantic Contract R3 vigentes.  
+**Aprobación humana de E5.2:** recibida el 2026-09-23.
 
 ## 1. Objetivo
 
@@ -282,15 +283,24 @@ E5.2 run-context tests               PASS
 
 La ejecución duplicada de Audit Protocol Check #243 seguía en progreso al momento de documentar; #242 ya había pasado sobre el mismo head exacto.
 
-Resultado técnico:
+Resultado técnico previo al cierre:
 
 ```text
 E5.2
 TECHNICAL_PASS
-HUMAN_APPROVAL_PENDING
 ```
 
-No se declara `CLOSED / PASS` hasta aprobación humana explícita.
+La aprobación humana explícita fue recibida el 2026-09-23 después de verificar el head `4445ac4885c73ffbde95f69dd3995d5f50036027` con CI, MAP-001 Proposal Validation Gate y Audit Protocol Check en `PASS`.
+
+Resultado de cierre:
+
+```text
+E5.2
+PASS
+CLOSED
+```
+
+El cierre conserva fuera de alcance la persistencia durable y no conecta el repair agent.
 
 ## 14. Continuación recomendada
 
