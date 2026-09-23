@@ -1,7 +1,7 @@
 # Árboris — APC I11 E2E Handoff Contract R4
 
 **ID:** `ARBORIS_APC_I11_E2E_HANDOFF_CONTRACT_R4`  
-**Estado:** CANDIDATE FOR VALIDATION WITH ASC.  
+**Estado:** VALIDATED WITH ASC / FROZEN.  
 **Ámbito:** Hito 16 / APC I11.  
 **Base:** I11 R3.1 integrado en `main`.  
 **No autoriza:** Gate B, I12, cierre de Hito 16 ni integración runtime H17.
@@ -205,3 +205,29 @@ No se resuelve aquí si una contradicción representa variabilidad natural, erro
 ## 16. REDUNDANCIAS
 
 No se crea una segunda fuente de contradicciones. `contradictions[]` sigue siendo la fuente APC; `excludedFromAce[]` sólo explica por qué una evidencia concreta no cruzó el handoff.
+
+
+## 17. VALIDACIÓN FINAL ASC
+
+Validación ejecutada sobre la implementación R4 integrada en la rama `h16/apc-i11-r4-contradiction-safe-handoff`.
+
+Resultado:
+
+```text
+AUDITORÍA             PASS
+INCONSISTENCIAS       PASS
+VACÍOS / OMISIONES    PASS
+REDUNDANCIAS          PASS
+BLOCKERS              0
+```
+
+Verificación ejecutable:
+
+- CI #204 → PASS;
+- canonical tests / `npm test` → PASS;
+- Audit Protocol Check #136 → PASS;
+- regresiones APC I1–I11 + R4 → PASS dentro del gate canónico;
+- regresiones ACE y character observers → PASS dentro del gate canónico;
+- diff final limitado a contrato R4, handoff I11 y regresiones I11/R4.
+
+R4 queda congelado con esta semántica. Cualquier cambio posterior que altere suspensión por contradicción, forma de `excludedFromAce`, precondiciones de validación semántica o relación con ACE requiere nueva versión contractual y nueva regresión.
