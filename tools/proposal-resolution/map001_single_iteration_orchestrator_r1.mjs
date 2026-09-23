@@ -125,6 +125,8 @@ export function verifyMap001ExecutionPins({ run, root }) {
     ['semanticContract', 'CONTRACT_SEMANTIC', 'contractId'],
   ];
 
+  let semanticContract = null;
+
   for (const [key, component, idField] of contracts) {
     const binding = contractSet[key];
     if (!binding) {
@@ -168,6 +170,61 @@ export function verifyMap001ExecutionPins({ run, root }) {
           component,
         },
       };
+    }
+    if (key === 'semanticContract') semanticContract = parsed;
+  }
+
+  const dependencyPolicy = semanticContract?.resolverDependencyPolicy;
+  const requiredIds = dependencyPolicy?.requiredDependencyIds;
+  const dependencies = resolverBinding.dependencies;
+
+  if (!Array.isArray(requiredIds) || dependencyPolicy?.exactSetRequired !== true) {
+    return {
+      systemError: {
+        code: 'RESOLVER_DEPENDENCY_POLICY_INVALID',
+        message: 'Semantic contract does not define an exact resolver dependency set.',
+        component: 'CONTRACT_SEMANTIC',
+      },
+    };
+  }
+  if (!Array.isArray(dependencies)) {
+    return {
+      systemError: {
+        code: 'RESOLVER_DEPENDENCIES_MISSING',
+        message: 'resolverBinding.dependencies is required by the active semantic contract.',
+        component: 'RESOLVER_IMPLEMENTATION',
+      },
+    };
+  }
+
+  const observedIds = dependencies.map((item) => item.dependencyId);
+  const uniqueIds = new Set(observedIds);
+  const sortedRequired = [...requiredIds].sort();
+  const sortedObserved = [...observedIds].sort();
+
+  if (
+    uniqueIds.size !== observedIds.length
+    || JSON.stringify(sortedObserved) !== JSON.stringify(sortedRequired)
+  ) {
+    return {
+      systemError: {
+        code: 'RESOLVER_DEPENDENCY_SET_MISMATCH',
+        message: 'resolverBinding.dependencies must match the semantic contract required dependency set exactly.',
+        component: 'RESOLVER_IMPLEMENTATION',
+      },
+    };
+  }
+
+  for (const dependency of dependencies) {
+    const absolute = ensureFile(root, dependency.path, 'resolver dependency ' + dependency.dependencyId);
+    const observedSha = rawSha256(absolute);
+    if (observedSha !== dependency.sha256) {
+      return systemMismatch(
+        'RESOLVER_IMPLEMENTATION',
+        dependency.sha256,
+        observedSha,
+        'Pinned resolver dependency ' + dependency.dependencyId + ' SHA-256 does not match repository bytes.'
+      );
     }
   }
 
