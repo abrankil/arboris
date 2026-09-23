@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E5.2 — integración del repair gate con contexto completo de run-state  
-**Estado:** `REVISED_CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
+**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
 **Baseline:** `main@f53eaf883bae8a36dbf22b69557a917571d95273`  
 **Precondición:** E5.1 cerrado; Run State R5 + Semantic Contract R3 vigentes.
 
@@ -257,3 +257,53 @@ E4.2
 ```
 
 ASC permanece fuera de esta decisión.
+
+
+## 13. Evidencia de validación técnica
+
+Head validado:
+
+```text
+a1adfdf6480a567ae65d5dea3b71032db67efa03
+```
+
+Evidencia externa:
+
+```text
+CI                                   PASS
+MAP-001 Proposal Validation Gate     PASS
+Audit Protocol Check #242            PASS
+Run State R5 + Semantic Contract R3  PASS
+E4.2 regression                      PASS
+E4.3 regression                      PASS
+E5.1 regression                      PASS
+E5.2 run-context tests               PASS
+```
+
+La ejecución duplicada de Audit Protocol Check #243 seguía en progreso al momento de documentar; #242 ya había pasado sobre el mismo head exacto.
+
+Resultado técnico:
+
+```text
+E5.2
+TECHNICAL_PASS
+HUMAN_APPROVAL_PENDING
+```
+
+No se declara `CLOSED / PASS` hasta aprobación humana explícita.
+
+## 14. Continuación recomendada
+
+Después de aprobación y merge de E5.2, la siguiente subetapa debe resolver persistencia durable del snapshot repair+child antes de conectar un repair agent.
+
+Frontera esperada:
+
+```text
+validated E5.2 transaction candidate
+→ compare-and-swap / single-writer guard
+→ durable atomic commit
+→ crash recovery proof
+→ persisted run-state
+```
+
+El repair agent debe permanecer fuera de esta subetapa de persistencia.
