@@ -1,0 +1,291 @@
+# MAP-001 — E4.3 Single-Iteration Orchestrator 001
+
+**Fecha:** 2026-09-23  
+**Ámbito:** E4.3 — una iteración real completa del resolver MAP-001  
+**Estado:** `CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
+**Baseline:** `main@78290df3c59068ddf7c2fc350db3cb9fa61c4a25`  
+**Precondición:** E4.1 y E4.2 cerrados; Run State R4, Semantic Contract R2, adapter E3 y reducer E4.2 disponibles.
+
+## 1. Objetivo
+
+Conectar en una sola operación ejecutable las piezas ya validadas:
+
+```text
+proposal
+→ contract precheck
+→ provenance / execution pins
+→ MAP-001 domain validator real
+→ validation-report
+→ report binding en run-state
+→ E4.2 reducer
+→ run-state resultante
+→ contract postcheck
+```
+
+La implementación es:
+
+```text
+tools/proposal-resolution/map001_single_iteration_orchestrator_r1.mjs
+```
+
+E4.3 todavía no genera repairs ni repite el ciclo.
+
+## 2. Responsabilidad
+
+El orquestador pertenece a Árboris.
+
+Recibe:
+
+```text
+run-state R4
+proposal R2
+reportId
+repository root
+historical validation-reports cuando correspondan
+```
+
+y devuelve:
+
+```text
+updated run-state
+validation-report o null
+derived resolver state
+evidencia de pre/post contract gate
+```
+
+## 3. Contract gate
+
+Se agregó:
+
+```text
+tools/proposal-resolution/validate_e4_3_iteration_contracts.py
+```
+
+El precheck comprueba:
+
+```text
+Run State R4 schema
+Proposal R2 schema
+SEM-PROP-004
+runId binding
+iteration binding
+baseline binding
+proposal logical hash binding
+candidate logical hash binding
+artifactPath dentro de allowedRoots
+```
+
+El postcheck añade:
+
+```text
+Validation Report R1 schema
+status derivado desde findings
+repo-local sourceRefs existentes
+authority binding
+validator binding
+run/report binding
+report logical hash binding
+```
+
+La canonicalización lógica sigue viniendo de `logicalSha256` del adapter E3 y se pasa al gate Python como binding explícito. El gate Python no redefine la canonicalización.
+
+## 4. Provenance / execution pins
+
+Antes de invocar el domain validator, E4.3 verifica bytes reales de:
+
+```text
+authority manifest
+source candidate
+validator implementation
+resolver implementation
+Proposal schema
+Repair schema
+Validation Report schema
+Run State schema
+Semantic Contract
+```
+
+Clasificación:
+
+```text
+authority/source candidate SHA drift
+→ AUTHORITY_CHANGED
+
+validator/resolver/contract SHA drift
+→ SYSTEM_ERROR
+```
+
+También se verifica que cada `contractSet.schemaId` coincida con el `$id` real del schema o con `contractId` en el contrato semántico.
+
+## 5. Precedencia antes de validar
+
+E4.3 usa el reducer E4.2 antes del domain validator.
+
+Si el estado derivado no es:
+
+```text
+READY_TO_VALIDATE
+```
+
+no ejecuta el validator de dominio y retorna el estado correspondiente.
+
+Esto evita ejecutar trabajo de dominio cuando ya existe:
+
+```text
+SYSTEM_ERROR
+AUTHORITY_CHANGED
+CYCLE_DETECTED
+u otro estado no validable
+```
+
+## 6. Ejecución de dominio
+
+Solo cuando:
+
+```text
+execution pins conformes
++
+run-state derivado = READY_TO_VALIDATE
++
+contract precheck = PASS
+```
+
+se invoca:
+
+```text
+validateMap001Proposal
+```
+
+que a su vez ejecuta el authority-runtime MAP-001 real y produce Validation Report R1.
+
+## 7. Binding y reducción
+
+El report se enlaza a la iteración actual mediante:
+
+```text
+reportId
+logicalSha256(report)
+status
+```
+
+Luego E4.2 calcula el estado.
+
+Ejemplos esperados:
+
+```text
+PASS
+→ DOMAIN_PASS
+
+REJECT_FIXABLE
+→ READY_TO_REPAIR
+
+OPEN_BLOCKER
+→ OPEN_BLOCKED
+
+AUTHORITY_BLOCKER
+→ AUTHORITY_BLOCKED
+```
+
+## 8. Pruebas E4.3
+
+Archivo:
+
+```text
+tools/proposal-resolution/map001_single_iteration_orchestrator_r1.test.mjs
+```
+
+Casos:
+
+```text
+real PASS → DOMAIN_PASS
+real derived drift → READY_TO_REPAIR
+real OPEN closure attempt → OPEN_BLOCKED
+real protected authority drift → AUTHORITY_BLOCKED
+authority manifest SHA drift → AUTHORITY_CHANGED before domain validation
+validator SHA drift → SYSTEM_ERROR before domain validation
+contract-set SHA drift → SYSTEM_ERROR before domain validation
+candidateHistory wrong logical hash → contract precondition failure
+artifactPath outside allowlist → contract precondition failure
+```
+
+Cada caso que alcanza domain validation usa el validator MAP-001 real.
+
+## 9. Límite de E4.3
+
+No pertenece a E4.3:
+
+```text
+repair generation
+repair patch application
+child proposal creation
+atomic persistence
+automatic next iteration
+loop until terminal state
+resume/recovery after process failure
+authorization DOMAIN_PASS → AUTHORIZED_FOR_ASC
+ASC compilation
+```
+
+## 10. Papel de ASC
+
+ASC se usa como control de frontera arquitectónica.
+
+```text
+orchestrator
+→ coordina la iteración
+
+domain validator
+→ determina conformidad MAP-001
+
+reducer
+→ determina estado del resolver
+
+ASC
+→ no participa en esas decisiones
+→ no cierra OPEN
+→ no convierte DOMAIN_PASS en autorización
+→ permanece compile-only
+```
+
+No se modifica `tools/asc/compile_asc.mjs`.
+
+## 11. AUDITORÍA
+
+E4.3 compone piezas previamente validadas sin mover responsabilidades entre ellas. El orquestador añade controles de procedencia y bindings que antes estaban distribuidos entre E3, E4.1 y E4.2.
+
+El pre/post contract gate impide considerar válida una iteración solo porque el adapter o el reducer produzcan una salida plausible.
+
+## 12. INCONSISTENCIAS
+
+Existe una inconsistencia documental heredada: el archivo materializado del Semantic Contract R2 conserva:
+
+```text
+status = R2_CANDIDATE
+```
+
+aunque E4.1 fue cerrado y aprobado humanamente.
+
+E4.3 no cambia ese campo silenciosamente. Usa el artefacto exacto fijado por hash. La normalización del estado documental del contrato deberá resolverse explícitamente antes del freeze final de E4.
+
+No se detecta otra inconsistencia conceptual en el diseño E4.3.
+
+## 13. VACÍOS / OMISIONES
+
+La persistencia atómica real de la iteración todavía no se ejecuta. E4.3 devuelve el run-state actualizado en memoria.
+
+Por ello E4.3 demuestra composición ejecutable de una iteración, no durabilidad ni recuperación.
+
+## 14. REDUNDANCIAS
+
+No se duplican reglas geométricas MAP-001 ni lógica de estado:
+
+```text
+adapter E3
+→ sigue siendo la integración de dominio
+
+reducer E4.2
+→ sigue siendo la única lógica de transición
+
+orchestrator E4.3
+→ solo compone y controla bindings/provenance
+```
