@@ -7,7 +7,10 @@ import { validateApcEvidenceForHandoff } from './evidence-lifecycle.mjs';
 import {
   adaptRegisteredApcEvidenceToCharacterObservation,
 } from './apc-to-character-observation.mjs';
-import { validateApcSession } from './session-contract.mjs';
+import {
+  validateApcContradictions,
+  validateApcSession,
+} from './session-contract.mjs';
 
 function compareText(a, b) {
   const left = String(a ?? '');
@@ -85,6 +88,7 @@ export function runApcIndividualThroughAce({
   session,
   individualId,
   candidateIds,
+  areStatesIncompatible,
 } = {}) {
   const sessionResult = validateApcSession(session);
   if (!sessionResult.valid) {
@@ -96,6 +100,30 @@ export function runApcIndividualThroughAce({
   if (!sessionResult.indexes.individualsById.has(individualId)) {
     throw new Error(`Unknown individualId: ${individualId}`);
   }
+
+  const hasContradictions = (session.contradictions ?? []).length > 0;
+  if (hasContradictions) {
+    const contradictionResult = validateApcContradictions(
+      session,
+      { areStatesIncompatible },
+    );
+    if (!contradictionResult.valid) {
+      const error = new Error(
+        `Invalid APC contradictions: ${contradictionResult.errors.join('; ')}`,
+      );
+      error.validationErrors = contradictionResult.errors;
+      throw error;
+    }
+  }
+
+  const openContradictionsByCharacter = new Map(
+    (session.contradictions ?? [])
+      .filter(item => (
+        item?.status === 'OPEN'
+        && item?.individualId === individualId
+      ))
+      .map(item => [item.characterId, item]),
+  );
 
   const selectedEvidenceCandidates = (session.evidence ?? [])
     .filter(item => (
@@ -129,6 +157,22 @@ export function runApcIndividualThroughAce({
 
     selectedApcEvidence.push(clone(evidence));
 
+    const openContradiction = openContradictionsByCharacter.get(
+      observation.characterId,
+    );
+    if (openContradiction) {
+      excludedFromAce.push({
+        evidenceId: evidence.evidenceId,
+        revision: evidence.revision,
+        characterId: evidence.characterId,
+        exclusionCategory: 'APC_OPERATIONAL',
+        reason: 'open_contradiction',
+        contradictionId: openContradiction.contradictionId,
+        canonicalStatus: null,
+      });
+      continue;
+    }
+
     const eligibility = assessAceEligibility(dataset, observation.characterId);
 
     if (!eligibility.eligible) {
@@ -145,7 +189,9 @@ export function runApcIndividualThroughAce({
         evidenceId: evidence.evidenceId,
         revision: evidence.revision,
         characterId: evidence.characterId,
+        exclusionCategory: 'ACE_ELIGIBILITY',
         reason: eligibility.reason,
+        contradictionId: null,
         canonicalStatus: eligibility.canonicalStatus,
       });
       continue;

@@ -6,6 +6,8 @@ import { runApcIndividualThroughAce } from './apc-i11-e2e.mjs';
 
 let dataset;
 
+const incompatible = (a, b) => a !== b;
+
 before(async () => {
   dataset = await loadCanonicalDataset();
 });
@@ -318,7 +320,7 @@ test('T-I11-08 repeated observations of one character remain one ACE dimension',
   assert.equal(result.aceAssessment.status, 'tentative');
 });
 
-test('T-I11-09 contradictory evidence is preserved and contradiction metadata creates no ACE item', () => {
+test('T-I11-09 OPEN contradiction preserves APC evidence but suspends the character from ACE', () => {
   const evs = [
     evidence({ evidenceId: 'EV-A', characterId: 'CH-003', observedState: 'entero' }),
     evidence({ evidenceId: 'EV-B', characterId: 'CH-003', observedState: 'serrado' }),
@@ -338,8 +340,33 @@ test('T-I11-09 contradictory evidence is preserved and contradiction metadata cr
     dataset,
     session: session({ evidenceItems: evs, contradictions }),
     individualId: 'IND-001',
+    areStatesIncompatible: incompatible,
   });
-  assert.equal(result.handoffEvidence.length, 2);
+  assert.equal(result.selectedApcEvidence.length, 2);
+  assert.equal(result.handoffEvidence.length, 0);
+  assert.equal(result.excludedFromAce.length, 2);
+  assert.deepEqual(
+    result.excludedFromAce.map(item => ({
+      evidenceId: item.evidenceId,
+      exclusionCategory: item.exclusionCategory,
+      reason: item.reason,
+      contradictionId: item.contradictionId,
+    })),
+    [
+      {
+        evidenceId: 'EV-A',
+        exclusionCategory: 'APC_OPERATIONAL',
+        reason: 'open_contradiction',
+        contradictionId: 'CON-001',
+      },
+      {
+        evidenceId: 'EV-B',
+        exclusionCategory: 'APC_OPERATIONAL',
+        reason: 'open_contradiction',
+        contradictionId: 'CON-001',
+      },
+    ],
+  );
   assert.equal(result.context.contradictions.length, 1);
 });
 
@@ -464,7 +491,9 @@ test('T-I11-16 known non-computable character is traced in excludedFromAce witho
     evidenceId: 'EV-NONCOMP',
     revision: 1,
     characterId: 'CH-007',
+    exclusionCategory: 'ACE_ELIGIBILITY',
     reason: 'non_computable_character',
+    contradictionId: null,
     canonicalStatus: 'retirado',
   }]);
 });
@@ -500,5 +529,232 @@ test('I11 explicit unknown candidate species fails through canonical ACE validat
       candidateIds: ['SP-999'],
     }),
     /Unknown candidate species_id SP-999/,
+  );
+});
+
+
+test('T-I11-R4-01 OPEN contradiction suspends only the target character and ACE continues with other dimensions', () => {
+  const speciesId = dataset.species[0].speciesId;
+  const conflictCharacter = 'CH-003';
+  const allowed = dataset.charactersById.get(conflictCharacter).allowedStates;
+  assert.ok(allowed.length >= 2, 'test setup requires CH-003 to expose at least two allowed states');
+  const otherSpecs = [];
+  for (const character of dataset.characters) {
+    if (character.characterId === conflictCharacter) continue;
+    const relation = getRelation(dataset, speciesId, character.characterId);
+    if (!relation?.expectedStates?.length) continue;
+    otherSpecs.push({
+      characterId: character.characterId,
+      observedState: relation.expectedStates[0],
+    });
+    if (otherSpecs.length === 2) break;
+  }
+  assert.equal(otherSpecs.length, 2, 'test setup requires two additional computable relations');
+  const evs = [
+    evidence({ evidenceId: 'EV-C1', characterId: conflictCharacter, observedState: allowed[0] }),
+    evidence({ evidenceId: 'EV-C2', characterId: conflictCharacter, observedState: allowed[1] }),
+    evidence({ evidenceId: 'EV-OTHER-1', ...otherSpecs[0] }),
+    evidence({ evidenceId: 'EV-OTHER-2', ...otherSpecs[1] }),
+  ];
+  const contradictions = [{
+    contradictionId: 'CON-R4-01',
+    individualId: 'IND-001',
+    characterId: conflictCharacter,
+    status: 'OPEN',
+    evidenceRefs: [
+      { evidenceId: 'EV-C1', revision: 1 },
+      { evidenceId: 'EV-C2', revision: 1 },
+    ],
+    previousContradictionId: null,
+  }];
+  const result = runApcIndividualThroughAce({
+    dataset,
+    session: session({ evidenceItems: evs, contradictions }),
+    individualId: 'IND-001',
+    candidateIds: [speciesId],
+    areStatesIncompatible: incompatible,
+  });
+  assert.deepEqual(
+    result.handoffEvidence.map(item => item.characterId),
+    [otherSpecs[0].characterId, otherSpecs[1].characterId].sort(),
+  );
+  assert.equal(result.aceAssessment.status, 'supported');
+});
+
+test('T-I11-R4-02 OPEN contradiction for another individual does not suspend target individual character', () => {
+  const evTarget = evidence({ evidenceId: 'EV-TARGET', characterId: 'CH-003', observedState: 'entero' });
+  const evOtherA = evidence({ evidenceId: 'EV-OTHER-A', individualId: 'IND-002', characterId: 'CH-003', observedState: 'entero' });
+  const evOtherB = evidence({ evidenceId: 'EV-OTHER-B', individualId: 'IND-002', characterId: 'CH-003', observedState: 'serrado' });
+  const contradictions = [{
+    contradictionId: 'CON-OTHER',
+    individualId: 'IND-002',
+    characterId: 'CH-003',
+    status: 'OPEN',
+    evidenceRefs: [
+      { evidenceId: 'EV-OTHER-A', revision: 1 },
+      { evidenceId: 'EV-OTHER-B', revision: 1 },
+    ],
+    previousContradictionId: null,
+  }];
+  const result = runApcIndividualThroughAce({
+    dataset,
+    session: session({ evidenceItems: [evTarget, evOtherA, evOtherB], contradictions }),
+    individualId: 'IND-001',
+    areStatesIncompatible: incompatible,
+  });
+  assert.equal(result.handoffEvidence.length, 1);
+  assert.equal(result.handoffEvidence[0].characterId, 'CH-003');
+});
+
+test('T-I11-R4-03 RESOLVED contradiction does not suspend current valid evidence or revive historical revisions', () => {
+  const v1 = evidence({ evidenceId: 'EV-R', revision: 1, current: false, observedState: 'serrado' });
+  const v2 = evidence({ evidenceId: 'EV-R', revision: 2, current: true, observedState: 'entero' });
+  const peer = evidence({ evidenceId: 'EV-P', observedState: 'entero' });
+  const contradictions = [{
+    contradictionId: 'CON-RES',
+    individualId: 'IND-001',
+    characterId: 'CH-003',
+    status: 'RESOLVED',
+    evidenceRefs: [
+      { evidenceId: 'EV-R', revision: 1 },
+      { evidenceId: 'EV-P', revision: 1 },
+    ],
+    previousContradictionId: null,
+  }];
+  const revisions = [{
+    revisionEventId: 'REV-EV-R-1-2',
+    entityType: 'EVIDENCE',
+    entityId: 'EV-R',
+    fromRevision: 1,
+    toRevision: 2,
+    changedAt: '2026-09-21T21:35:00-03:00',
+    changedBy: 'Alejandra',
+    reason: 'correction',
+  }];
+  const result = runApcIndividualThroughAce({
+    dataset,
+    session: session({ evidenceItems: [v1, v2, peer], contradictions, revisions }),
+    individualId: 'IND-001',
+    areStatesIncompatible: incompatible,
+  });
+  assert.deepEqual(result.selectedApcEvidence.map(item => [item.evidenceId, item.revision]), [
+    ['EV-P', 1],
+    ['EV-R', 2],
+  ]);
+  assert.equal(result.handoffEvidence.length, 2);
+  assert.equal(result.excludedFromAce.length, 0);
+});
+
+test('T-I11-R4-04 OPEN contradiction suspends the whole character dimension including neutral observations', () => {
+  const evs = [
+    evidence({ evidenceId: 'EV-A', observedState: 'entero' }),
+    evidence({ evidenceId: 'EV-B', observedState: 'serrado' }),
+    evidence({
+      evidenceId: 'EV-U',
+      evidenceStatus: 'UNCERTAIN',
+      observedState: null,
+      reason: 'ambiguous',
+    }),
+  ];
+  const contradictions = [{
+    contradictionId: 'CON-DIM',
+    individualId: 'IND-001',
+    characterId: 'CH-003',
+    status: 'OPEN',
+    evidenceRefs: [
+      { evidenceId: 'EV-A', revision: 1 },
+      { evidenceId: 'EV-B', revision: 1 },
+    ],
+    previousContradictionId: null,
+  }];
+  const result = runApcIndividualThroughAce({
+    dataset,
+    session: session({ evidenceItems: evs, contradictions }),
+    individualId: 'IND-001',
+    areStatesIncompatible: incompatible,
+  });
+  assert.equal(result.selectedApcEvidence.length, 3);
+  assert.equal(result.handoffEvidence.length, 0);
+  assert.equal(result.excludedFromAce.length, 3);
+  assert.ok(result.excludedFromAce.every(item => item.reason === 'open_contradiction'));
+});
+
+test('T-I11-R4-05 candidateIds remain delegated unchanged while contradiction filtering affects only evidence', () => {
+  const ids = [dataset.species[1].speciesId, dataset.species[0].speciesId];
+  const evs = [
+    evidence({ evidenceId: 'EV-A', observedState: 'entero' }),
+    evidence({ evidenceId: 'EV-B', observedState: 'serrado' }),
+  ];
+  const contradictions = [{
+    contradictionId: 'CON-CAND',
+    individualId: 'IND-001',
+    characterId: 'CH-003',
+    status: 'OPEN',
+    evidenceRefs: [
+      { evidenceId: 'EV-A', revision: 1 },
+      { evidenceId: 'EV-B', revision: 1 },
+    ],
+    previousContradictionId: null,
+  }];
+  const result = runApcIndividualThroughAce({
+    dataset,
+    session: session({ evidenceItems: evs, contradictions }),
+    individualId: 'IND-001',
+    candidateIds: ids,
+    areStatesIncompatible: incompatible,
+  });
+  assert.deepEqual(result.aceAssessment.remaining, ids);
+});
+
+test('T-I11-R4-06 incoherent OPEN contradiction cannot silently produce a filtered handoff', () => {
+  const evs = [
+    evidence({ evidenceId: 'EV-A', observedState: 'entero' }),
+    evidence({ evidenceId: 'EV-B', observedState: 'entero' }),
+  ];
+  const contradictions = [{
+    contradictionId: 'CON-BAD',
+    individualId: 'IND-001',
+    characterId: 'CH-003',
+    status: 'OPEN',
+    evidenceRefs: [
+      { evidenceId: 'EV-A', revision: 1 },
+      { evidenceId: 'EV-B', revision: 1 },
+    ],
+    previousContradictionId: null,
+  }];
+  assert.throws(
+    () => runApcIndividualThroughAce({
+      dataset,
+      session: session({ evidenceItems: evs, contradictions }),
+      individualId: 'IND-001',
+      areStatesIncompatible: incompatible,
+    }),
+    /Invalid APC contradictions:.*OPEN contradiction but no current incompatible pair/,
+  );
+});
+
+test('T-I11-R4-07 contradiction-bearing session requires semantic incompatibility validation', () => {
+  const evs = [
+    evidence({ evidenceId: 'EV-A', observedState: 'entero' }),
+    evidence({ evidenceId: 'EV-B', observedState: 'serrado' }),
+  ];
+  const contradictions = [{
+    contradictionId: 'CON-NOCB',
+    individualId: 'IND-001',
+    characterId: 'CH-003',
+    status: 'OPEN',
+    evidenceRefs: [
+      { evidenceId: 'EV-A', revision: 1 },
+      { evidenceId: 'EV-B', revision: 1 },
+    ],
+    previousContradictionId: null,
+  }];
+  assert.throws(
+    () => runApcIndividualThroughAce({
+      dataset,
+      session: session({ evidenceItems: evs, contradictions }),
+      individualId: 'IND-001',
+    }),
+    /areStatesIncompatible callback is required/,
   );
 });
