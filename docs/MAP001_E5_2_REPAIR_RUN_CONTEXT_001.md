@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E5.2 — integración del repair gate con contexto completo de run-state  
-**Estado:** `CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
+**Estado:** `REVISED_CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
 **Baseline:** `main@f53eaf883bae8a36dbf22b69557a917571d95273`  
 **Precondición:** E5.1 cerrado; Run State R5 + Semantic Contract R3 vigentes.
 
@@ -51,6 +51,12 @@ Run State R5 schema                       PASS
 current parent proposal binding           EXACT MATCH
 current validation-report binding         EXACT MATCH
 candidateHistory current hash             EXACT MATCH
+run baseline == parent baseline            EXACT MATCH
+run validator == report validator          EXACT MATCH
+historical proposalIds                     UNIQUE
+historical repairIds                       UNIQUE
+execution pins                             VERIFIED
+persisted run.state == derived state       EXACT MATCH
 current iteration repair                   null
 derived reducer state                      READY_TO_REPAIR
 ```
@@ -161,11 +167,39 @@ repairId reutilizado
 
 run no derivado READY_TO_REPAIR
 → REJECT
+
+persisted run.state distinto del derivado
+→ REJECT
+
+run/report validator mismatch
+→ REJECT
+
+run/parent baseline mismatch
+→ REJECT
+
+historial con IDs duplicados
+→ REJECT
+
+execution pin drift
+→ REJECT
 ```
 
 También se verifica que el run original no sea mutado.
 
 ## 9. AUDITORÍA
+
+La primera ejecución externa de E5.2 pasó, pero la revisión estricta posterior detectó brechas adicionales de integración que el PASS inicial no cubría:
+
+```text
+B1  run.state persistido podía no coincidir con el estado realmente derivado
+B2  run.control.baseline no se comparaba explícitamente con parentProposal.control.baseline
+B3  run.control.validatorBinding no se comparaba explícitamente con report.control.validatorBinding
+B4  la unicidad se comprobaba solo para los IDs nuevos, no la integridad histórica ya persistida
+B5  E5.2 no verificaba execution pins antes de construir la snapshot candidata
+B6  exactBinding dependía de JSON.stringify y por tanto del orden de claves
+```
+
+Todos estos puntos fueron corregidos antes de considerar cierre.
 
 E5.2 añade contexto de corrida alrededor de E5.1 sin trasladar autoridad al repair ni al futuro agente.
 
@@ -183,6 +217,8 @@ El agente futuro seguirá sin escribir run-state ni decidir transición.
 
 ## 10. INCONSISTENCIAS
 
+La revisión estricta encontró una tensión entre “estado persistido” y “estado derivado”: no basta con que la historia produzca `READY_TO_REPAIR`; el `run.state` almacenado también debe coincidir exactamente con ese resultado. Se añadió esta igualdad como precondición fail-closed.
+
 No se detecta necesidad de cambiar Run State R5 ni Semantic Contract R3 para demostrar esta subetapa.
 
 La atomicidad declarada por Semantic R3 sigue siendo una regla de persistencia durable. E5.2 solo construye el snapshot que una capa de persistencia futura deberá comprometer en una única frontera durable.
@@ -196,6 +232,7 @@ durable persistence
 write-ahead / journal
 crash recovery
 compare-and-swap / concurrent writer control
+pin explícito de E5.1/E5.2 como dependencias del futuro entrypoint operativo
 repair agent
 agent sandbox
 automatic retry
