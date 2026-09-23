@@ -19,6 +19,10 @@ desarrollo seguro
 → DEVELOPMENT_MANUAL.md
 → GENERAL_VOCABULARY_GUIDE.md   # referencia rápida, no normativa
 
+prompts oficiales validados
+→ ../prompts/README.md
+→ ASC_PROMPT_GOVERNANCE.md
+
 compilación de escenas / prompts generativos
 → ARBORIS_SCENE_COMPILER.md
 → ASC_V0_1_EXECUTABLE_SPEC.md   # implementación v0.1 compile-only
