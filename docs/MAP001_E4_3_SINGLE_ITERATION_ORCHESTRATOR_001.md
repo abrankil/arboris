@@ -4,7 +4,8 @@
 **Ámbito:** E4.3 — una iteración real completa del resolver MAP-001  
 **Estado:** `CLOSED / PASS`  
 **Baseline:** `main@78290df3c59068ddf7c2fc350db3cb9fa61c4a25`  
-**Precondición:** E4.1 y E4.2 cerrados; adapter E3 y reducer E4.2 disponibles. Durante la auditoría E4.3, Run State R5 / Semantic Contract R3 fueron revisados a Run State R5 / Semantic Contract R3 para cerrar procedencia de dependencias ejecutables.
+**Precondición:** E4.1 y E4.2 cerrados; adapter E3 y reducer E4.2 disponibles. Durante la auditoría E4.3, Run State R4 / Semantic Contract R2 fueron revisados a Run State R5 / Semantic Contract R3 para cerrar procedencia de dependencias ejecutables.  
+**Aprobación humana de E4.3:** recibida el 2026-09-23.
 
 ## 1. Objetivo
 
