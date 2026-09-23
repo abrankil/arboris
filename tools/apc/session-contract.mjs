@@ -857,6 +857,17 @@ function validateObjectiveAssessmentBinding(session, errors, reasons = null) {
   }
 }
 
+export function validateApcControlPlane(session) {
+  const errors = [];
+  if (!session || typeof session !== 'object') {
+    return { valid: false, errors: ['session object is required'] };
+  }
+  if (Object.prototype.hasOwnProperty.call(session, 'pass')) errors.push('session.pass must not be persisted');
+  if (Object.prototype.hasOwnProperty.call(session, 'exportable')) errors.push('session.exportable must not be persisted');
+  validateObjectiveAssessmentBinding(session, errors);
+  return { valid: errors.length === 0, errors };
+}
+
 function requirementCoverageErrors(session, indexes) {
   const errors = [];
   for (const requirement of session.requirements ?? []) {
@@ -874,6 +885,13 @@ function requirementCoverageErrors(session, indexes) {
     }
   }
   return errors;
+}
+
+export function validateApcRequirementCoverage(session) {
+  const base = validateApcSession(session);
+  if (!base.valid) return { valid: false, errors: base.errors.map(error => `snapshot: ${error}`) };
+  const errors = requirementCoverageErrors(session, base.indexes);
+  return { valid: errors.length === 0, errors };
 }
 
 function stableSorted(items, keyFn) {
