@@ -228,7 +228,7 @@ No se detecta contradicción intencional con E5.2, Run State R5 o Semantic Contr
 
 La implementación no modifica el schema del run para introducir pins E5.1/E5.2; estos viven en la metadata transaccional E5.3. Esto evita convertir información de recovery en una nueva fuente de verdad del run.
 
-Debe verificarse en CI que `fsync` de directorio y el reemplazo por rename se comporten como espera la implementación en el runner Linux soportado.
+La verificación posterior en CI del comportamiento esperado se ejecutó dentro del entorno Ubuntu/Linux probado; las revalidaciones quedan registradas en §§16-19 y la evidencia final de cierre se resume en `docs/MAP001_E5_3_CLEAN_HANDOFF_2026-09-23.md`.
 
 ## 12. VACÍOS / OMISIONES
 
