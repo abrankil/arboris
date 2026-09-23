@@ -1,0 +1,465 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "arboris:proposal-resolution:map001:proposal:r2",
+  "title": "Árboris MAP-001 Proposal Contract R2",
+  "description": "Contrato estructural R2 de una propuesta persistida para resolución cíclica de MAP-001 / navegación local. El control-plane es inyectado y poseído por el resolver. R2 incorpora lineage autosuficiente por proposal, JSON Pointer restringido para todos los changes y rutas de artefacto repo-relative canónicas. El esquema valida estructura; hashes reales, allowlist de destinos, existencia de paths, diff efectivo, autoridad y conformidad de dominio se verifican semánticamente en E2.5.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "proposalId",
+    "proposalType",
+    "control",
+    "intent"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.2"
+    },
+    "proposalId": {
+      "type": "string",
+      "pattern": "^MAP001-PROP-[0-9]{4,}$"
+    },
+    "proposalType": {
+      "type": "string",
+      "const": "MAP001_LOCAL_NAVIGATION_DERIVED"
+    },
+    "control": {
+      "type": "object",
+      "description": "Control-plane persistido. Debe ser construido por el resolver y tratado como inmutable para el agente.",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "runId",
+        "iteration",
+        "lineage",
+        "baseline",
+        "subject"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "const": "RESOLVER"
+        },
+        "runId": {
+          "type": "string",
+          "pattern": "^MAP001-RUN-[0-9]{4,}$"
+        },
+        "iteration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "baseline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "authorityId",
+            "authorityPath",
+            "authorityManifestSha256",
+            "sourceCandidate"
+          ],
+          "properties": {
+            "authorityId": {
+              "type": "string",
+              "pattern": "^MAP-001-WALKABLE-ENVELOPE-AUTHORITY-[0-9]{3}$"
+            },
+            "authorityPath": {
+              "type": "string",
+              "pattern": "^data/baselines/map001-walkable-envelope-authority-[0-9]{3}\\.json$"
+            },
+            "authorityManifestSha256": {
+              "$ref": "#/definitions/sha256"
+            },
+            "sourceCandidate": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "path",
+                "sha256"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^MAP-001-WALKABLE-ENVELOPE-CANDIDATE-[0-9]{3}$"
+                },
+                "path": {
+                  "type": "string",
+                  "pattern": "^data/maps/map-001-walkable-envelope-candidate-[0-9]{3}\\.json$"
+                },
+                "sha256": {
+                  "$ref": "#/definitions/sha256"
+                }
+              }
+            }
+          }
+        },
+        "subject": {
+          "type": "object",
+          "description": "Artefacto derivado no autoritativo sobre el que opera la propuesta. Nunca puede apuntar a la autoridad o al sourceCandidate autoritativo.",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "artifactRole",
+            "artifactId",
+            "artifactPath",
+            "baseSha256"
+          ],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "CREATE_DERIVED",
+                "MODIFY_DERIVED"
+              ]
+            },
+            "artifactRole": {
+              "type": "string",
+              "const": "NON_AUTHORITATIVE_DERIVED"
+            },
+            "artifactId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "artifactPath": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/repoRelativePath"
+                },
+                {
+                  "not": {
+                    "pattern": "^data/baselines(?:/|$)"
+                  }
+                },
+                {
+                  "not": {
+                    "pattern": "^data/maps/map-001-walkable-envelope-candidate-[0-9]{3}\\.json$"
+                  }
+                }
+              ],
+              "description": "Ruta repo-relative canónica con '/'. No admite rutas absolutas, drive letters, backslashes, segmentos vacíos, '.' ni '..'. Además rechaza estructuralmente las rutas de autoridad MAP-001 conocidas. E2.5 debe aplicar una allowlist positiva de destinos derivados autorizados por la corrida."
+            },
+            "baseSha256": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/sha256"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "mode": {
+                    "const": "CREATE_DERIVED"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "baseSha256": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "mode": {
+                    "const": "MODIFY_DERIVED"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "baseSha256": {
+                    "$ref": "#/definitions/sha256"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "lineage": {
+          "type": "object",
+          "description": "Lineage autosuficiente de la propuesta. Iteration 1 no tiene padre ni repair de origen; iteration >= 2 debe enlazar exactamente un proposal padre y el repair que produjo esta candidata. La correspondencia real entre hashes/IDs/iteraciones se verifica en E2.5.",
+          "additionalProperties": false,
+          "required": [
+            "parentProposal",
+            "originatingRepair"
+          ],
+          "properties": {
+            "parentProposal": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/parentProposalBinding"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "originatingRepair": {
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/originatingRepairBinding"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "iteration": {
+                "const": 1
+              }
+            },
+            "required": [
+              "iteration"
+            ]
+          },
+          "then": {
+            "properties": {
+              "lineage": {
+                "properties": {
+                  "parentProposal": {
+                    "type": "null"
+                  },
+                  "originatingRepair": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "iteration": {
+                "minimum": 2
+              }
+            },
+            "required": [
+              "iteration"
+            ]
+          },
+          "then": {
+            "properties": {
+              "lineage": {
+                "properties": {
+                  "parentProposal": {
+                    "$ref": "#/definitions/parentProposalBinding"
+                  },
+                  "originatingRepair": {
+                    "$ref": "#/definitions/originatingRepairBinding"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "intent": {
+      "type": "object",
+      "description": "Parte declarativa de la propuesta. Es la única zona del proposal que puede originarse en un agente o revisión humana antes de ser envuelta por el resolver.",
+      "additionalProperties": false,
+      "required": [
+        "objective",
+        "changes",
+        "candidate"
+      ],
+      "properties": {
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "changes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/change"
+          },
+          "uniqueItems": true
+        },
+        "candidate": {
+          "type": "object",
+          "description": "Payload completo del artefacto derivado propuesto. Su semántica y conformidad se validan mediante el validador de dominio; proposal.schema no duplica ese contrato."
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changeId",
+        "operation",
+        "targetPath",
+        "rationale"
+      ],
+      "properties": {
+        "changeId": {
+          "type": "string",
+          "pattern": "^CHG-[0-9]{3,}$"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "add",
+            "remove",
+            "replace"
+          ]
+        },
+        "targetPath": {
+          "$ref": "#/definitions/candidatePointer"
+        },
+        "before": {},
+        "after": {},
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "add"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "after"
+            ],
+            "not": {
+              "required": [
+                "before"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "remove"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "before"
+            ],
+            "not": {
+              "required": [
+                "after"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "replace"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "before",
+              "after"
+            ]
+          }
+        }
+      ]
+    },
+    "candidatePointer": {
+      "type": "string",
+      "description": "JSON Pointer relativo exclusivamente a intent.candidate. La raíz completa del candidate no es direccionable; se exige al menos un segmento. Los tokens '.' y '..' se prohíben para impedir interpretaciones inseguras por implementaciones que confundan JSON Pointer con paths de filesystem.",
+      "minLength": 2,
+      "pattern": "^/(?:[^/~]|~0|~1)+(?:/(?:[^/~]|~0|~1)+)*$",
+      "allOf": [
+        {
+          "not": {
+            "pattern": "(?:^|/)\\.(?:$|/)"
+          }
+        },
+        {
+          "not": {
+            "pattern": "(?:^|/)\\.\\.(?:$|/)"
+          }
+        }
+      ]
+    },
+    "repoRelativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$",
+      "description": "Ruta POSIX repo-relative canónica: separador '/', sin absoluto, drive letter, backslash, segmentos vacíos ni segmentos '.'/'..'."
+    },
+    "parentProposalBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposalId",
+        "sha256",
+        "iteration"
+      ],
+      "properties": {
+        "proposalId": {
+          "type": "string",
+          "pattern": "^MAP001-PROP-[0-9]{4,}$"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        },
+        "iteration": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "originatingRepairBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repairId",
+        "sha256"
+      ],
+      "properties": {
+        "repairId": {
+          "type": "string",
+          "pattern": "^MAP001-REPAIR-[0-9]{4,}$"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    }
+  }
+}
