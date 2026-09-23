@@ -66,3 +66,7 @@ jobs:
 
       - name: E5.2 repair run-context transaction candidate tests
         run: node --test tools/proposal-resolution/map001_repair_transaction_candidate_r1.test.mjs
+
+
+      - name: E5.3 durable repair store + recovery tests
+        run: node --test tools/proposal-resolution/map001_durable_repair_store_r1.test.mjs
