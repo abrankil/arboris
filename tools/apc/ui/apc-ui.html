@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Árboris APC I12</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color-scheme: light dark; }
+    body { margin: 0; }
+    header { padding: .8rem 1rem; border-bottom: 1px solid #7776; display:flex; gap:.7rem; align-items:center; flex-wrap:wrap; }
+    main { display:grid; grid-template-columns: 260px minmax(320px,1fr) 360px; min-height: calc(100vh - 62px); }
+    aside, section { padding: .8rem; border-right:1px solid #7774; overflow:auto; }
+    h1,h2,h3 { margin:.3rem 0 .7rem; }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; }
+    .stack { display:grid; gap:.55rem; }
+    .row { display:flex; gap:.45rem; align-items:center; flex-wrap:wrap; }
+    .photos, .individuals { display:grid; gap:.35rem; }
+    .item { padding:.45rem; border:1px solid #7775; border-radius:.35rem; cursor:pointer; }
+    .item.active { outline:2px solid currentColor; }
+    .muted { opacity:.7; font-size:.9em; }
+    .pill { display:inline-block; border:1px solid #7777; border-radius:999px; padding:.08rem .45rem; font-size:.82em; }
+    .warn { border-left:4px solid #c88; padding-left:.55rem; }
+    .ok { border-left:4px solid #6a8; padding-left:.55rem; }
+    #photoPreview { max-width:100%; max-height:42vh; object-fit:contain; background:#7771; }
+    pre { white-space:pre-wrap; word-break:break-word; font-size:.8rem; }
+    textarea { min-height:5rem; width:100%; box-sizing:border-box; }
+    fieldset { border:1px solid #7775; }
+    .diag { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.3rem; }
+    @media (max-width: 1050px) { main { grid-template-columns: 220px 1fr; } main > section:last-child { grid-column:1/-1; border-top:1px solid #7774; } }
+    @media (max-width: 720px) { main { display:block; } aside,section { border-right:0; border-bottom:1px solid #7774; } }
+  </style>
+</head>
+<body>
+<header>
+  <strong>Árboris · APC I12</strong>
+  <span id="mode" class="pill">inicializando</span>
+  <span id="sessionLabel" class="muted"></span>
+  <button id="newSession">Nueva sesión</button>
+  <input id="openSessionId" placeholder="sessionId">
+  <button id="openSession">Abrir</button>
+  <label>Importar JSON <input id="importJson" type="file" accept=".json,application/json"></label>
+  <button id="exportJson">Exportar APC</button>
+  <button id="closeSession">Cerrar sesión</button>
+  <button id="reopenSession">Reabrir sesión</button>
+</header>
+<main>
+  <aside>
+    <div class="stack">
+      <h2>Sesión / fotos</h2>
+      <label>Actor <input id="actorId" value="local-human"></label>
+      <label>Objetivo <input id="objective" value="Revisión APC I12"></label>
+      <label>Agregar fotos <input id="photoFiles" type="file" accept="image/*" multiple></label>
+      <div class="row">
+        <button id="prevPhoto">← Anterior</button>
+        <button id="nextPhoto">Siguiente →</button>
+        <select id="photoFilter" aria-label="Filtro de fotografías">
+          <option value="ALL">Todas</option>
+          <option value="INBOX">Inbox</option>
+          <option value="DRAFT">Con DRAFT</option>
+          <option value="PENDING">Con pending</option>
+          <option value="CONFIRMED">Con CONFIRMED</option>
+        </select>
+      </div>
+      <div class="row">
+        <button id="batchAddInbox">Agregar seleccionadas a inbox</button>
+        <button id="batchRemoveInbox">Quitar seleccionadas de inbox</button>
+        <button id="undoBatch" disabled>Deshacer último batch</button>
+      </div>
+      <div id="photos" class="photos"></div>
+      <h3>Individuos</h3>
+      <div class="row">
+        <button id="createIndividual">Crear individuo</button>
+        <button id="assignPhoto">Asignar foto</button>
+        <button id="unassignPhoto">Desasignar</button>
+      </div>
+      <div id="individuals" class="individuals"></div>
+    </div>
+  </aside>
+
+  <section>
+    <div class="stack">
+      <h2>Revisión activa</h2>
+      <div id="targetLabel" class="muted">Sin target</div>
+      <img id="photoPreview" alt="Fotografía activa">
+      <div id="assetStatus" class="muted"></div>
+      <label>Relink asset <input id="relinkPhoto" type="file" accept="image/*"></label>
+
+      <fieldset>
+        <legend>Evidencia</legend>
+        <div class="stack">
+          <label>Carácter <select id="character"></select></label>
+          <div id="characterHelp" class="muted"></div>
+          <div class="row"><button id="suggestInspection">Sugerir targets de inspección</button></div>
+          <pre id="inspectionSuggestions" class="muted"></pre>
+          <label>Estado APC
+            <select id="evidenceStatus">
+              <option value="OBSERVED">OBSERVED</option>
+              <option value="UNCERTAIN">UNCERTAIN</option>
+              <option value="NOT_OBSERVABLE">NOT_OBSERVABLE</option>
+            </select>
+          </label>
+          <label>Estado observado <select id="observedState"></select></label>
+          <label>Motivo <input id="reason" placeholder="obligatorio para UNCERTAIN / NOT_OBSERVABLE"></label>
+          <label>Notas <textarea id="notes"></textarea></label>
+          <div class="row">
+            <button id="prefillEvidence">Prefill desde observación previa</button>
+            <button id="saveDraft">Guardar DRAFT</button>
+            <button id="confirmEvidence">Confirmar</button>
+            <span id="evidenceLife" class="pill">sin evidencia</span>
+          </div>
+          <details>
+            <summary>Historia I6</summary>
+            <pre id="history"></pre>
+          </details>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Requirement</legend>
+        <div class="row">
+          <select id="requirementScope">
+            <option value="PHOTO">PHOTO</option>
+            <option value="INDIVIDUAL">INDIVIDUAL</option>
+            <option value="SESSION">SESSION</option>
+          </select>
+          <label><input id="requirementCritical" type="checkbox"> critical</label>
+          <button id="addRequirement">Agregar requirement</button>
+        </div>
+      </fieldset>
+    </div>
+  </section>
+
+  <section>
+    <div class="stack">
+      <h2>Diagnóstico</h2>
+      <div id="diagnostics" class="diag"></div>
+      <h3>Pending</h3>
+      <pre id="pending"></pre>
+      <h3>Representation gaps · contexto read-only</h3>
+      <pre id="representationGaps"></pre>
+      <h3>Contradicciones</h3>
+      <pre id="contradictions"></pre>
+      <h3>Provenance / evidencia actual</h3>
+      <pre id="currentEvidence"></pre>
+      <div class="row">
+        <button id="runI11">Ejecutar I11</button>
+      </div>
+      <pre id="i11Result"></pre>
+      <h3>Mensajes</h3>
+      <pre id="messages"></pre>
+    </div>
+  </section>
+</main>
+<script type="module" src="./apc-ui.mjs"></script>
+</body>
+</html>
