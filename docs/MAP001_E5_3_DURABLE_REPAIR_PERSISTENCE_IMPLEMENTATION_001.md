@@ -264,7 +264,11 @@ schema/reducer validation post-replace/recovery
 
 Es defensa contra TOCTOU y corrupción, no una segunda autoridad.
 
-## 14. Gate
+## 14. Revalidación del candidato corregido
+
+El head posterior a P1-P3 debe ejecutar nuevamente todos los gates. Ningún PASS del candidato anterior se reutiliza como prueba suficiente del candidato corregido.
+
+## 15. Gate
 
 E5.3 no puede declararse `CLOSED / PASS` hasta:
 
