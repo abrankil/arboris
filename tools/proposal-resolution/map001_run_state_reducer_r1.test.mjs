@@ -175,7 +175,7 @@ function makeRun({
   stallRepeatThreshold = 3,
 }) {
   return {
-    schemaVersion: '0.4',
+    schemaVersion: '0.5',
     runId: 'MAP001-RUN-0001',
     runType: 'MAP001_LOCAL_NAVIGATION_PROPOSAL_RESOLUTION',
     control: {
