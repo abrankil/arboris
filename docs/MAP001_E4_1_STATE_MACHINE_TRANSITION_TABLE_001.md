@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E4.1 — definición determinista de estados y transiciones del resolver cíclico MAP-001  
-**Estado:** `R4_CANDIDATE / VALIDATION_PENDING`  
+**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
 **Baseline:** `main@6664a9a99c70143819aa338c3713d1624e1c9f62`  
 **Precondición:** G3 cerrado y fusionado mediante PR #68.
 
@@ -304,7 +304,32 @@ tools/proposal-resolution/validate_run_state_r4.py
 
 para probar estructuralmente que R4 acepta un ciclo `A → B → A`, rechaza los campos legacy de R3 y conserva la precedencia e invariantes nuevas.
 
-E4.2 no debe comenzar hasta que este candidato R4/R2 pase los checks externos y la revisión de G4.1.
+El candidato R4/R2 pasó los checks externos del head `03bef1c9ba61b1611a6ce4f4bcceb1a563140eb7`.
+
+Evidencia ejecutada:
+
+```text
+MAP-001 authority-runtime                 21/21 PASS
+proposal validation adapter              10/10 PASS
+E2/E3 real integration                    8/8 PASS
+Run State R4 + Semantic Contract R2           PASS
+Audit Protocol Check                          PASS
+CI                                            PASS
+```
+
+La prueba R4 confirmó explícitamente:
+
+```text
+A → B → A                         accepted as representable history
+legacy seenCandidateHashes        rejected
+legacy repeatProposalHashAction   rejected
+statePrecedence                   frozen
+repairChildAtomicity              declared
+stalledRepeatCountExactness       declared
+DOMAIN_PASS / ASC separation      preserved
+```
+
+E4.2 no debe comenzar hasta la aprobación humana explícita de E4.1 / G4.1.
 
 ## 9. Papel de ASC
 
@@ -328,7 +353,7 @@ No corresponde modificar `tools/asc/compile_asc.mjs`.
 
 La transición candidata cubre todos los estados del resolver y conserva la separación entre estados de dominio, diagnósticos del resolver y autorización posterior para ASC.
 
-Los defectos estructurales encontrados en R3 ya fueron trasladados a correcciones explícitas en Run State R4 y Semantic Contract R2. La validez ejecutable de esos contratos queda sujeta al gate externo de la rama antes de avanzar a E4.2.
+Los defectos estructurales encontrados en R3 fueron trasladados a correcciones explícitas en Run State R4 y Semantic Contract R2. El gate externo confirmó que ambos contratos son estructuralmente válidos y que no producen regresión en E3. E4.1 queda técnicamente validado, pendiente de aprobación humana.
 
 ## 11. INCONSISTENCIAS
 
@@ -337,13 +362,13 @@ Las dos inconsistencias materiales detectadas en R3 fueron corregidas en el cand
 1. `repeatCandidateHashAction` reemplaza la nomenclatura incorrecta basada en proposal hash.
 2. `candidateHistory` permite representar repeticiones reales de candidate-state y conserva el orden de iteración.
 
-No se declara todavía cierre de E4.1 hasta obtener evidencia de ejecución del gate sobre estos contratos.
+No se detecta una inconsistencia técnica pendiente en el alcance de E4.1. El cierre formal requiere aprobación humana explícita.
 
 ## 12. VACÍOS / OMISIONES
 
-La precedencia global, la atomicidad repair → child proposal y la semántica exacta de `STALLED.repeatCount` ya están declaradas en Semantic Contract R2.
+La precedencia global, la atomicidad repair → child proposal y la semántica exacta de `STALLED.repeatCount` están declaradas en Semantic Contract R2 y fueron comprobadas por el gate contractual.
 
-Permanece pendiente comprobarlas mediante el gate externo y, después, decidir si E4.1 puede cerrarse y habilitar E4.2.
+Permanece pendiente únicamente la aprobación humana de E4.1 antes de habilitar E4.2.
 
 ## 13. REDUNDANCIAS
 
