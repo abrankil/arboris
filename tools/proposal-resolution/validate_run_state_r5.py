@@ -35,7 +35,7 @@ def fixture():
         for key, (sid, path) in schema_paths.items()
     }
     return {
-        "schemaVersion": "0.4",
+        "schemaVersion": "0.5",
         "runId": "MAP001-RUN-0001",
         "runType": "MAP001_LOCAL_NAVIGATION_PROPOSAL_RESOLUTION",
         "control": {
@@ -147,7 +147,7 @@ def main():
     Draft7Validator.check_schema(schema)
 
     assert schema["$id"] == "arboris:proposal-resolution:map001:run-state:r5"
-    assert schema["properties"]["schemaVersion"]["const"] == "0.4"
+    assert schema["properties"]["schemaVersion"]["const"] == "0.5"
 
     valid = fixture()
     assert not errors(valid, schema), errors(valid, schema)
@@ -163,7 +163,7 @@ def main():
     assert errors(legacy_policy, schema), "R5 must reject repeatProposalHashAction"
 
     assert semantic["contractId"] == "MAP001-CROSS-CONTRACT-SEMANTICS-003"
-    assert semantic["schemaVersion"] == "0.2"
+    assert semantic["schemaVersion"] == "0.3"
     expected_precedence = [
         "SYSTEM_ERROR",
         "AUTHORITY_CHANGED",
