@@ -290,6 +290,9 @@ export function validateAndApplyMap001Repair({
   if (!/^MAP001-PROP-[0-9]{4,}$/.test(childProposalId ?? '')) {
     fail('CHILD_PROPOSAL_ID_INVALID', 'childProposalId must match MAP001-PROP-NNNN');
   }
+  if (childProposalId === parentProposal?.proposalId) {
+    fail('CHILD_PROPOSAL_ID_REUSED', 'child proposalId must differ from parent proposalId');
+  }
   if (repair?.control?.runId !== parentProposal?.control?.runId) {
     fail('RUN_ID_MISMATCH', 'repair runId does not match parent proposal');
   }
