@@ -22,6 +22,7 @@ No leer el repositorio completo por defecto. Clasificar la tarea y abrir solo la
 ```text
 data/      datos, fuentes científicas, vistas derivadas y canon de personajes
 docs/      documentación vigente + trazabilidad documental
+prompts/   registro y artefactos canónicos de prompts validados
 tools/     herramientas vigentes de build, validación, identificación y compilación ASC
 species/   evidencia fotográfica de terreno; NO equivale a data/species/
 archive/   prototipos y experimentos históricos; ignorar por defecto
@@ -126,6 +127,10 @@ PILOT_ENVIRONMENT_VISUAL_CANON
 → ART_STYLE_GUIDE
 → ENVIRONMENT_PRODUCTION_SPEC
 ```
+
+### Prompts oficiales validados
+
+Para localizar o ejecutar un prompt oficial del proyecto, resolver primero `prompts/README.md`. Solo los artefactos promovidos bajo `prompts/validated/` y presentes en `main` constituyen prompts canónicos compartidos. La gobernanza de promoción y freeze está en `docs/ASC_PROMPT_GOVERNANCE.md`.
 
 ### ASC / generación de escenas
 
