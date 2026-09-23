@@ -575,3 +575,76 @@ test('expectedBefore object equality is independent of object key order', () => 
 
   assert.deepEqual(result.childProposal.intent.candidate.obj, { a: 1, b: 3 });
 });
+
+
+test('executable gate rejects structurally invalid Repair R1 before application', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const repair = makeRepair(parent, report);
+  repair.unexpected = true;
+
+  assert.throws(
+    () => executeMap001RepairGate({
+      parentProposal: parent,
+      validationReport: report,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+      root: ROOT,
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
+  );
+});
+
+test('executable gate rejects report authority binding drift before application', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const driftedReport = structuredClone(report);
+  driftedReport.control.authorityBinding.authorityManifestSha256 = '0'.repeat(64);
+  const repair = makeRepair(parent, driftedReport);
+
+  assert.throws(
+    () => executeMap001RepairGate({
+      parentProposal: parent,
+      validationReport: driftedReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+      root: ROOT,
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
+  );
+});
+
+test('executable gate rejects validator implementation hash drift before application', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const driftedReport = structuredClone(report);
+  driftedReport.control.validatorBinding.implementationSha256 = '0'.repeat(64);
+  const repair = makeRepair(parent, driftedReport);
+
+  assert.throws(
+    () => executeMap001RepairGate({
+      parentProposal: parent,
+      validationReport: driftedReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+      root: ROOT,
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
+  );
+});
+
+test('child proposal id cannot reuse parent proposal id', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const repair = makeRepair(parent, report);
+
+  assert.throws(
+    () => validateAndApplyMap001Repair({
+      parentProposal: parent,
+      validationReport: report,
+      repair,
+      childProposalId: parent.proposalId,
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'CHILD_PROPOSAL_ID_REUSED'
+  );
+});
