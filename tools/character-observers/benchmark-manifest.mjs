@@ -48,6 +48,7 @@ export async function validateH16BenchmarkManifest({
     if (canonical && canonical.individual_id !== item.individualId) errors.push(`individual mismatch for ${item.photoId}`);
     if (!item.assetIdentity || item.assetIdentity.kind !== 'git_commit_path') errors.push(`assetIdentity.kind invalid for ${item.photoId}`);
     if (item.assetIdentity?.commit !== manifest.sourceDataset?.commit) errors.push(`asset commit mismatch for ${item.photoId}`);
+    if (!/^[0-9a-f]{40}$/.test(item.assetIdentity?.gitBlobSha1 ?? '')) errors.push(`asset gitBlobSha1 invalid for ${item.photoId}`);
     if (typeof item.assetIdentity?.path !== 'string' || !item.assetIdentity.path.endsWith('.jpg')) {
       errors.push(`asset path invalid for ${item.photoId}`);
     }
