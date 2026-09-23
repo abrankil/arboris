@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "0.2",
-  "contractId": "MAP001-CROSS-CONTRACT-SEMANTICS-002",
+  "schemaVersion": "0.3",
+  "contractId": "MAP001-CROSS-CONTRACT-SEMANTICS-003",
   "scope": "MAP001_LOCAL_NAVIGATION_PROPOSAL_RESOLUTION",
-  "status": "R2_CANDIDATE",
+  "status": "R3_CANDIDATE",
   "principles": [
     "DOMAIN_AUTHORITY_IS_NEVER_REPAIRED",
     "AGENT_WRITES_ONLY_PROPOSAL_INTENT_OR_REPAIR_PATCH",
@@ -134,7 +134,7 @@
     },
     {
       "id": "SEM-PROV-004",
-      "check": "RAW_FILE_HASHES_MATCH_PINNED_AUTHORITY_VALIDATOR_RESOLVER_CONTRACT_SET",
+      "check": "RAW_FILE_HASHES_MATCH_PINNED_AUTHORITY_VALIDATOR_RESOLVER_ENTRYPOINT_CONTRACT_SET",
       "failure": "AUTHORITY_CHANGED_FOR_AUTHORITY_COMPONENTS_OR_SYSTEM_ERROR_FOR_EXECUTION_COMPONENTS"
     },
     {
@@ -281,6 +281,25 @@
       "id": "SEM-RUN-009",
       "check": "CYCLE_FIRST_SEEN_ITERATION_IS_EARLIEST_PRIOR_MATCH",
       "failure": "SYSTEM_ERROR"
+    },
+    {
+      "id": "SEM-PROV-006",
+      "check": "RESOLVER_DEPENDENCY_CLOSURE_MATCHES_REQUIRED_SET_AND_RAW_HASHES",
+      "failure": "SYSTEM_ERROR"
     }
-  ]
+  ],
+  "resolverDependencyPolicy": {
+    "source": "run-state.control.resolverBinding.dependencies",
+    "requiredDependencyIds": [
+      "VALIDATION_ADAPTER",
+      "RUN_STATE_REDUCER",
+      "ITERATION_CONTRACT_GATE",
+      "E3_CONTRACT_GATE"
+    ],
+    "exactSetRequired": true,
+    "pathMode": "CANONICAL_REPO_RELATIVE_POSIX",
+    "hashPolicy": "RAW_FILE_BYTES_SHA256",
+    "mismatchState": "SYSTEM_ERROR",
+    "rule": "The resolver entrypoint alone is insufficient provenance. Every required execution dependency must be present exactly once and its raw file SHA-256 must match before domain validation."
+  }
 }

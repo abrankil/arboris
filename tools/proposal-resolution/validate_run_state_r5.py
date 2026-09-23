@@ -27,15 +27,15 @@ def fixture():
         "proposal": ("arboris:proposal-resolution:map001:proposal:r2", "tools/proposal-resolution/schemas/proposal.schema.json"),
         "repair": ("arboris:proposal-resolution:map001:repair:r1", "tools/proposal-resolution/schemas/repair.schema.json"),
         "validationReport": ("arboris:proposal-resolution:map001:validation-report:r1", "tools/proposal-resolution/schemas/validation-report.schema.json"),
-        "runState": ("arboris:proposal-resolution:map001:run-state:r4", "tools/proposal-resolution/schemas/run-state.schema.json"),
-        "semanticContract": ("MAP001-CROSS-CONTRACT-SEMANTICS-002", "tools/proposal-resolution/contracts/cross-contract.semantic.json"),
+        "runState": ("arboris:proposal-resolution:map001:run-state:r5", "tools/proposal-resolution/schemas/run-state.schema.json"),
+        "semanticContract": ("MAP001-CROSS-CONTRACT-SEMANTICS-003", "tools/proposal-resolution/contracts/cross-contract.semantic.json"),
     }
     contract_set = {
         key: {"schemaId": sid, "path": path, "sha256": SHA_C}
         for key, (sid, path) in schema_paths.items()
     }
     return {
-        "schemaVersion": "0.4",
+        "schemaVersion": "0.5",
         "runId": "MAP001-RUN-0001",
         "runType": "MAP001_LOCAL_NAVIGATION_PROPOSAL_RESOLUTION",
         "control": {
@@ -61,6 +61,28 @@ def fixture():
                 "resolverId": "MAP001.RESOLVER.001",
                 "implementationPath": "tools/proposal-resolution/map001_resolver_r1.mjs",
                 "implementationSha256": SHA_C,
+                "dependencies": [
+                    {
+                        "dependencyId": "VALIDATION_ADAPTER",
+                        "path": "tools/proposal-resolution/map001_validation_adapter_r1.mjs",
+                        "sha256": SHA_C,
+                    },
+                    {
+                        "dependencyId": "RUN_STATE_REDUCER",
+                        "path": "tools/proposal-resolution/map001_run_state_reducer_r1.mjs",
+                        "sha256": SHA_C,
+                    },
+                    {
+                        "dependencyId": "ITERATION_CONTRACT_GATE",
+                        "path": "tools/proposal-resolution/validate_e4_3_iteration_contracts.py",
+                        "sha256": SHA_C,
+                    },
+                    {
+                        "dependencyId": "E3_CONTRACT_GATE",
+                        "path": "tools/proposal-resolution/validate_e3_contracts.py",
+                        "sha256": SHA_C,
+                    },
+                ],
             },
             "contractSet": contract_set,
             "policy": {
@@ -124,8 +146,8 @@ def main():
     semantic = load(SEMANTIC_CONTRACT)
     Draft7Validator.check_schema(schema)
 
-    assert schema["$id"] == "arboris:proposal-resolution:map001:run-state:r4"
-    assert schema["properties"]["schemaVersion"]["const"] == "0.4"
+    assert schema["$id"] == "arboris:proposal-resolution:map001:run-state:r5"
+    assert schema["properties"]["schemaVersion"]["const"] == "0.5"
 
     valid = fixture()
     assert not errors(valid, schema), errors(valid, schema)
@@ -133,15 +155,15 @@ def main():
     legacy_hashes = copy.deepcopy(valid)
     legacy_hashes["seenCandidateHashes"] = [SHA_A, SHA_B]
     del legacy_hashes["candidateHistory"]
-    assert errors(legacy_hashes, schema), "R4 must reject legacy seenCandidateHashes"
+    assert errors(legacy_hashes, schema), "R5 must reject legacy seenCandidateHashes"
 
     legacy_policy = copy.deepcopy(valid)
     policy = legacy_policy["control"]["policy"]
     policy["repeatProposalHashAction"] = policy.pop("repeatCandidateHashAction")
-    assert errors(legacy_policy, schema), "R4 must reject repeatProposalHashAction"
+    assert errors(legacy_policy, schema), "R5 must reject repeatProposalHashAction"
 
-    assert semantic["contractId"] == "MAP001-CROSS-CONTRACT-SEMANTICS-002"
-    assert semantic["schemaVersion"] == "0.2"
+    assert semantic["contractId"] == "MAP001-CROSS-CONTRACT-SEMANTICS-003"
+    assert semantic["schemaVersion"] == "0.3"
     expected_precedence = [
         "SYSTEM_ERROR",
         "AUTHORITY_CHANGED",
@@ -157,14 +179,24 @@ def main():
     ]
     assert semantic["runStatePolicy"]["statePrecedence"] == expected_precedence
 
+    assert semantic["status"] == "R3_CANDIDATE"
+    expected_dependencies = [
+        "VALIDATION_ADAPTER",
+        "RUN_STATE_REDUCER",
+        "ITERATION_CONTRACT_GATE",
+        "E3_CONTRACT_GATE",
+    ]
+    assert semantic["resolverDependencyPolicy"]["requiredDependencyIds"] == expected_dependencies
+    assert semantic["resolverDependencyPolicy"]["exactSetRequired"] is True
+
     invariant_ids = {item["id"] for item in semantic["invariants"]}
-    for required in ["SEM-RUN-006", "SEM-RUN-007", "SEM-RUN-008", "SEM-RUN-009", "SEM-ASC-001"]:
+    for required in ["SEM-RUN-006", "SEM-RUN-007", "SEM-RUN-008", "SEM-RUN-009", "SEM-PROV-006", "SEM-ASC-001"]:
         assert required in invariant_ids, f"missing invariant {required}"
 
     print(json.dumps({
         "status": "PASS",
-        "runStateSchema": "R4",
-        "semanticContract": "R2",
+        "runStateSchema": "R5",
+        "semanticContract": "R3",
         "cycleFixture": "A->B->A accepted",
         "legacySeenCandidateHashes": "rejected",
         "legacyRepeatProposalHashAction": "rejected",
@@ -172,6 +204,7 @@ def main():
         "repairChildAtomicity": "declared",
         "stalledRepeatCountExactness": "declared",
         "domainPassAscSeparation": "preserved",
+        "resolverDependencyClosure": "declared",
     }, ensure_ascii=False))
 
 

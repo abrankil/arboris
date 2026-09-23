@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "arboris:proposal-resolution:map001:run-state:r4",
-  "title": "Árboris MAP-001 Proposal Resolution Run State R4",
-  "description": "R4 corrige la semántica de cycle detection y congela la superficie estructural requerida por E4: la política usa candidate-state hash, el historial de candidates admite repeticiones por iteración y la atomicidad repair→child proposal se verifica semánticamente.",
+  "$id": "arboris:proposal-resolution:map001:run-state:r5",
+  "title": "Árboris MAP-001 Proposal Resolution Run State R5",
+  "description": "R5 extiende R4 con cierre explícito de dependencias ejecutables del resolver: el entrypoint sigue fijado por hash y cada dependencia de ejecución requerida queda declarada y fijada por bytes reales.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -17,7 +17,7 @@
   "properties": {
     "schemaVersion": {
       "type": "string",
-      "const": "0.4"
+      "const": "0.5"
     },
     "runId": {
       "type": "string",
@@ -752,12 +752,13 @@
     },
     "resolverBinding": {
       "type": "object",
-      "description": "Identidad de la implementación del resolver que gobierna la corrida. El hash debe calcularse desde bytes reales antes de iniciar o reanudar la corrida.",
+      "description": "Identidad del entrypoint del resolver y cierre explícito de sus dependencias ejecutables. Todos los hashes se calculan desde bytes reales antes de iniciar o reanudar la corrida.",
       "additionalProperties": false,
       "required": [
         "resolverId",
         "implementationPath",
-        "implementationSha256"
+        "implementationSha256",
+        "dependencies"
       ],
       "properties": {
         "resolverId": {
@@ -776,6 +777,15 @@
         },
         "implementationSha256": {
           "$ref": "#/definitions/sha256"
+        },
+        "dependencies": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Dependencias ejecutables del resolver fijadas por id, path y SHA-256. El conjunto exacto requerido se define en el contrato semántico.",
+          "items": {
+            "$ref": "#/definitions/resolverDependencyBinding"
+          }
         }
       }
     },
@@ -842,6 +852,27 @@
           "minimum": 1
         },
         "candidateSha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    },
+    "resolverDependencyBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependencyId",
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "dependencyId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9._-]{2,}$"
+        },
+        "path": {
+          "$ref": "#/definitions/repoRelativePath"
+        },
+        "sha256": {
           "$ref": "#/definitions/sha256"
         }
       }

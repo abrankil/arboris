@@ -34,14 +34,14 @@ def main():
     args = parser.parse_args()
 
     run = load(args.run)
-    validate(run, RUN_STATE_SCHEMA, "run-state R4")
+    validate(run, RUN_STATE_SCHEMA, "run-state R5")
 
     for index, report_path in enumerate(args.report, start=1):
         validate(load(report_path), VALIDATION_REPORT_SCHEMA, f"validation-report R1 #{index}")
 
     print(json.dumps({
         "status": "PASS",
-        "runStateSchema": "R4",
+        "runStateSchema": "R5",
         "validationReportSchema": "R1",
         "reportsChecked": len(args.report),
     }))
