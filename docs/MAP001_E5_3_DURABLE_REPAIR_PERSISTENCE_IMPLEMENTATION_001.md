@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** implementación ejecutable de E5.3  
-**Estado:** `CORRECTION_R3 / REVALIDATION_PENDING`  
+**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
 **Baseline:** `main@281e251315065d8765d4f8bc3f561d3f49fb707b`  
 **Diseño:** `docs/MAP001_E5_3_DURABLE_REPAIR_PERSISTENCE_DESIGN_001.md`  
 **Frontera:** repair agent fuera de alcance.
@@ -403,3 +403,104 @@ REVALIDATION EXTERNAL PENDING
 No se reutilizan los PASS anteriores como cierre de R3. El head resultante debe ejecutar nuevamente CI, MAP-001 Proposal Validation Gate y Audit Protocol Check, seguido de auditoría adversarial post-R3.
 
 Repair agent permanece fuera de alcance.
+
+
+## 18. Revalidación R3 y auditoría adversarial post-corrección
+
+Head revalidado:
+
+```text
+88b52c98abd1cabb367146ba854ea7b222469690
+```
+
+Evidencia externa:
+
+```text
+MAP-001 Proposal Validation Gate #76  PASS
+CI #325                              PASS
+Audit Protocol Check #266/#267       PASS
+```
+
+La primera ejecución R3 del gate MAP-001 (#75) detectó una regresión de prueba legítima: la nueva verificación P5 de `runId` interceptó antes que el caso antiguo de `RECOVERY_NEXT_HASH_MISMATCH` porque el fixture corrupto había eliminado también el `runId`. Se corrigió únicamente el fixture para preservar identidad de corrida mientras altera el hash de `next`. La ejecución #76 pasó 29/29 tests E5.3.
+
+Pruebas R3 demostradas en Ubuntu/Linux CI:
+
+```text
+P4 RUN_SCHEMA_GATE exact dependency + drift              PASS
+P5 lock runId != visible runId                            FAIL_CLOSED
+P5 journal runId != visible runId                         FAIL_CLOSED
+P6 lock schemaVersion != 0.1                              FAIL_CLOSED
+P6 journal schemaVersion != 0.1                           FAIL_CLOSED
+P7 garantía limitada al entorno Ubuntu/Linux probado      PRESERVED
+P8 C1-C8 writer/recovery en procesos Node distintos       PASS
+C1/C2 cross-process                                       RECOVERED_BEFORE
+C3..C8 cross-process                                      RECOVERED_AFTER
+E4.2/E4.3/E5.1/E5.2 regressions                           PASS
+```
+
+Apoyo ASC:
+
+```text
+ASC VERSION: 0.1
+EXECUTION MODE: compile-only
+TEST ID: MAP001-E5.3-P4-P8-POST-R3-AUDIT-ASC-001
+```
+
+ASC se usa únicamente para mantener explícitas restricciones, OPEN, prohibiciones y criterios de validación. No evalúa por sí mismo el código ni autoriza el cierre.
+
+### AUDITORÍA
+
+La corrección R3 resuelve los cinco hallazgos validados sin ampliar la autoridad del durable store. P4 incorpora el schema gate al cierre de provenance transaccional. P5 y P6 endurecen interpretación de metadata antes de recovery. P8 demuestra reinicio en un proceso distinto para cada crash point C1-C8. P7 elimina la generalización no demostrada desde `process.platform === "linux"` a todos los filesystems Linux.
+
+La frontera repair+child continúa indivisible y la snapshot AFTER sigue siendo reconstruida por E5.2, no suministrada arbitrariamente por el caller.
+
+### INCONSISTENCIAS
+
+No se encontraron nuevas inconsistencias bloqueantes en P4-P8.
+
+La primera regresión R3 no reveló un defecto de recovery: reveló que el fixture de corrupción mezclaba dos fallos distintos (identidad de corrida ausente + hash divergente). La corrección separó ambos casos, preservando P5 y la prueba específica de hash mismatch.
+
+### VACÍOS / OMISIONES
+
+Permanecen deliberadamente OPEN y fuera del cierre E5.3:
+
+```text
+filesystems/configuraciones Linux no ejercitados por CI
+Windows/macOS durable guarantee
+repair agent
+agent sandbox
+automatic retry
+full loop
+AUTHORIZED_FOR_ASC
+```
+
+No son prerequisitos para afirmar el comportamiento probado en el entorno Ubuntu/Linux de CI.
+
+### REDUNDANCIAS
+
+No aparece una nueva fuente de verdad.
+
+La presencia simultánea de:
+
+```text
+same-process fault injection
++
+cross-process crash/restart tests
+```
+
+es redundancia intencional. La primera prueba la matriz de estados de forma localizada; la segunda prueba que la metadata durable permite recuperación desde un proceso nuevo.
+
+Resultado técnico R3:
+
+```text
+P4 RESOLVED
+P5 RESOLVED
+P6 RESOLVED
+P7 RESOLVED_AS_EVIDENCE_BOUNDARY
+P8 RESOLVED
+NEW_BLOCKING_FINDINGS NONE
+E5.3 TECHNICAL_PASS
+HUMAN_APPROVAL_PENDING
+```
+
+No se declara `CLOSED / PASS`, no se mergea y no se conecta repair agent hasta aprobación humana explícita. El commit documental que contiene este registro debe revalidarse antes de solicitar esa aprobación.
