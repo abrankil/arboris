@@ -222,3 +222,26 @@ Permanecen abiertos:
 ## 12. REDUNDANCIAS
 
 Este documento sigue siendo una síntesis relacional. Los registros individuales conservan la autoridad contextual sobre Itrofill y Abrankill; las fuentes lingüísticas conservan la autoridad sobre sus respectivos dominios; la documentación histórica de Árboris conserva la autoridad sobre el proyecto. ASC se usa únicamente para compilar estados y preservar límites de inferencia.
+
+
+## 13. Gate de consolidación
+
+Aplicando el protocolo normativo de revisión de Árboris, los `OPEN` vigentes se clasifican como **no bloqueantes para consolidar este registro contextual** porque:
+
+- no alteran una fuente de verdad técnica, botánica, arquitectónica ni normativa;
+- están declarados explícitamente y no se han cerrado por inferencia;
+- no invalidan los hechos testimoniales ya separados de la evidencia externa;
+- no son necesarios para sostener las convergencias mínimas actualmente registradas.
+
+Por tanto:
+
+```text
+CRITICAL_BLOCKERS                              = NONE_DETECTED
+OPEN_ITEMS_PRESERVED                           = YES
+OPEN_ITEMS_BLOCK_CONTEXTUAL_CONSOLIDATION      = NO
+NORMATIVE_AUTHORITY_CHANGED                    = NO
+READY_FOR_CONTEXTUAL_CONSOLIDATION             = YES
+READY_TO_INFER_CAUSALITY_OR_PREDETERMINATION   = NO
+```
+
+Esta decisión no cierra los vacíos. Sólo establece que pueden permanecer `OPEN` sin bloquear la consolidación del registro contextual. Cualquier incorporación futura de nuevas fechas, testimonios o evidencia deberá reabrir la auditoría correspondiente antes de modificar estas determinaciones.
