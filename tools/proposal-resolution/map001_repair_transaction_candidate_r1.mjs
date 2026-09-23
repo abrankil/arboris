@@ -2,9 +2,11 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { isDeepStrictEqual } from 'node:util';
 
 import { logicalSha256 } from './map001_validation_adapter_r1.mjs';
 import { reduceMap001RunState } from './map001_run_state_reducer_r1.mjs';
+import { verifyMap001ExecutionPins } from './map001_single_iteration_orchestrator_r1.mjs';
 import { executeMap001RepairGate } from './map001_repair_gate_r1.mjs';
 
 export class Map001RepairTransactionCandidateError extends Error {
@@ -75,7 +77,7 @@ function runSchemaGate({ run, reportsById, root, pythonExecutable }) {
 }
 
 function exactBinding(actual, expected) {
-  return JSON.stringify(actual) === JSON.stringify(expected);
+  return isDeepStrictEqual(actual, expected);
 }
 
 function mergeCurrentReport(validationReportsById, validationReport) {
@@ -90,6 +92,41 @@ function mergeCurrentReport(validationReportsById, validationReport) {
   }
   merged[validationReport.reportId] = validationReport;
   return merged;
+}
+
+function assertHistoricalIdIntegrity(run) {
+  const proposalIds = run.iterations.map((iteration) => iteration.proposal.proposalId);
+  if (new Set(proposalIds).size !== proposalIds.length) {
+    fail(
+      'RUN_PROPOSAL_IDS_NOT_UNIQUE',
+      'existing run history contains duplicate proposalId values'
+    );
+  }
+
+  const repairIds = run.iterations
+    .map((iteration) => iteration.repair?.repairId)
+    .filter(Boolean);
+  if (new Set(repairIds).size !== repairIds.length) {
+    fail(
+      'RUN_REPAIR_IDS_NOT_UNIQUE',
+      'existing run history contains duplicate repairId values'
+    );
+  }
+}
+
+function assertRunControlBindings({ run, parentProposal, validationReport }) {
+  if (!isDeepStrictEqual(run.control.baseline, parentProposal.control.baseline)) {
+    fail(
+      'RUN_PARENT_BASELINE_MISMATCH',
+      'run control baseline does not match current parent proposal baseline'
+    );
+  }
+  if (!isDeepStrictEqual(run.control.validatorBinding, validationReport.control.validatorBinding)) {
+    fail(
+      'RUN_REPORT_VALIDATOR_MISMATCH',
+      'run validator binding does not match current validation report'
+    );
+  }
 }
 
 function assertFreshIds(run, repairId, childProposalId) {
@@ -188,7 +225,8 @@ export function buildMap001RepairTransactionCandidate({
   const normalizedParent = jsonClone(parentProposal, 'parentProposal');
   const normalizedReport = jsonClone(validationReport, 'validationReport');
   const normalizedRepair = jsonClone(repair, 'repair');
-  const reports = mergeCurrentReport(validationReportsById, normalizedReport);
+  const normalizedReportsById = jsonClone(validationReportsById, 'validationReportsById');
+  const reports = mergeCurrentReport(normalizedReportsById, normalizedReport);
 
   const inputSchemaCheck = runSchemaGate({
     run: normalizedRun,
@@ -202,18 +240,42 @@ export function buildMap001RepairTransactionCandidate({
     parentProposal: normalizedParent,
     validationReport: normalizedReport,
   });
-
+  assertRunControlBindings({
+    run: normalizedRun,
+    parentProposal: normalizedParent,
+    validationReport: normalizedReport,
+  });
+  assertHistoricalIdIntegrity(normalizedRun);
   assertFreshIds(normalizedRun, normalizedRepair.repairId, childProposalId);
+
+  let integrity;
+  try {
+    integrity = verifyMap001ExecutionPins({ run: normalizedRun, root });
+  } catch (error) {
+    fail(
+      'RUN_EXECUTION_PIN_CHECK_FAILED',
+      'run execution provenance check failed',
+      { code: error?.code, message: error?.message, details: error?.details }
+    );
+  }
 
   const derivedPreState = reduceMap001RunState({
     run: normalizedRun,
     validationReportsById: reports,
+    integrity,
   });
   if (derivedPreState.status !== 'READY_TO_REPAIR') {
     fail(
       'RUN_NOT_READY_TO_REPAIR',
       'repair transaction candidate requires derived READY_TO_REPAIR state',
       { derivedState: derivedPreState }
+    );
+  }
+  if (!isDeepStrictEqual(normalizedRun.state, derivedPreState)) {
+    fail(
+      'RUN_STATE_DERIVATION_MISMATCH',
+      'persisted run.state does not equal the state derived from current run history',
+      { persistedState: normalizedRun.state, derivedState: derivedPreState }
     );
   }
 
