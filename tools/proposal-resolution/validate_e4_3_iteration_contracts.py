@@ -101,7 +101,7 @@ def main():
     run = load(args.run)
     proposal = load(args.proposal)
 
-    validate_schema(run, RUN_SCHEMA, "run-state R4")
+    validate_schema(run, RUN_SCHEMA, "run-state R5")
     validate_schema(
         proposal,
         ROOT / "tools/proposal-resolution/schemas/proposal.schema.json",
@@ -116,7 +116,7 @@ def main():
     )
 
     checked = {
-        "runStateSchema": "R4",
+        "runStateSchema": "R5",
         "proposalSchema": "R2",
         "semanticInvariant": "SEM-PROP-004",
     }
