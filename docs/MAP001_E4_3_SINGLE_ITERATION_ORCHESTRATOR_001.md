@@ -220,8 +220,10 @@ validator SHA drift → SYSTEM_ERROR before domain validation
 contract-set SHA drift → SYSTEM_ERROR before domain validation
 resolver dependency SHA drift → SYSTEM_ERROR before domain validation
 resolver dependency set incomplete → SYSTEM_ERROR before domain validation
-candidateHistory wrong logical hash → contract precondition failure
-artifactPath outside allowlist → contract precondition failure
+candidateHistory wrong logical hash → SYSTEM_ERROR before domain validation
+artifactPath outside allowlist → SYSTEM_ERROR before domain validation
+missing resolver dependency file → SYSTEM_ERROR before domain validation
+resolver dependency path escaping repository → SYSTEM_ERROR before domain validation
 ```
 
 Cada caso que alcanza domain validation usa el validator MAP-001 real.
@@ -271,6 +273,8 @@ E4.3 compone piezas previamente validadas sin mover responsabilidades entre ella
 
 El pre/post contract gate impide considerar válida una iteración solo porque el adapter o el reducer produzcan una salida plausible.
 
+Una revisión adicional detectó otra brecha de fail-closed: ciertas fallas de pre/post contract gate o de resolución de archivos podían propagarse como excepciones del proceso en vez de materializarse como estados del resolver. Se corrigió para que esas fallas queden representadas en `SYSTEM_ERROR` o `AUTHORITY_CHANGED` según corresponda, sin fabricar validation-reports.
+
 La auditoría adversarial posterior al primer PASS añadió además cierre de procedencia transitiva del resolver. Por ello, el PASS inicial de E4.3 queda como evidencia histórica pero no como evidencia suficiente de cierre; el candidato revisado R5/R3 debe volver a ejecutar el gate completo.
 
 ## 12. INCONSISTENCIAS
@@ -290,6 +294,8 @@ No se detecta otra inconsistencia conceptual en el diseño E4.3.
 ## 13. VACÍOS / OMISIONES
 
 La persistencia atómica real de la iteración todavía no se ejecuta. E4.3 devuelve el run-state actualizado en memoria.
+
+Las fallas de integración detectables dentro de esta operación ya no deben escapar como excepciones no clasificadas: se convierten en estados fail-closed del resolver.
 
 Por ello E4.3 demuestra composición ejecutable de una iteración, no durabilidad ni recuperación.
 
