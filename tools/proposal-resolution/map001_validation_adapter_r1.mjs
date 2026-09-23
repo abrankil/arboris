@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -26,6 +27,107 @@ export function logicalSha256(value) {
     .createHash('sha256')
     .update(JSON.stringify(canonicalize(value)))
     .digest('hex');
+}
+
+function rawFileSha256(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+function fail(code, message, details = null) {
+  throw new Map001ProposalValidationAdapterError(code, message, details);
+}
+
+function verifyPinnedProvenance({ proposal, validatorBinding, root, authorityPath }) {
+  const baseline = proposal?.control?.baseline;
+  if (!baseline) fail('PROPOSAL_BASELINE_MISSING', 'proposal.control.baseline is required');
+
+  const selectedAuthorityPath = authorityPath ?? baseline.authorityPath;
+  if (selectedAuthorityPath !== baseline.authorityPath) {
+    fail(
+      'AUTHORITY_PATH_MISMATCH',
+      'Explicit authorityPath must equal proposal.control.baseline.authorityPath',
+      { expected: baseline.authorityPath, observed: selectedAuthorityPath }
+    );
+  }
+
+  const validatorAbsolute = path.resolve(root, validatorBinding.implementationPath);
+  const authorityAbsolute = path.resolve(root, baseline.authorityPath);
+  const candidateAbsolute = path.resolve(root, baseline.sourceCandidate.path);
+
+  for (const [label, filePath] of [
+    ['validator', validatorAbsolute],
+    ['authority manifest', authorityAbsolute],
+    ['source candidate', candidateAbsolute],
+  ]) {
+    if (!fs.existsSync(filePath)) {
+      fail('PINNED_FILE_MISSING', `${label} is missing`, { path: filePath });
+    }
+  }
+
+  const observedValidatorSha = rawFileSha256(validatorAbsolute);
+  if (observedValidatorSha !== validatorBinding.implementationSha256) {
+    fail(
+      'VALIDATOR_PROVENANCE_MISMATCH',
+      'Pinned validator SHA-256 does not match the implementation on disk',
+      { expected: validatorBinding.implementationSha256, observed: observedValidatorSha }
+    );
+  }
+
+  const observedAuthoritySha = rawFileSha256(authorityAbsolute);
+  if (observedAuthoritySha !== baseline.authorityManifestSha256) {
+    fail(
+      'AUTHORITY_PROVENANCE_MISMATCH',
+      'Pinned authority manifest SHA-256 does not match the file on disk',
+      { expected: baseline.authorityManifestSha256, observed: observedAuthoritySha }
+    );
+  }
+
+  const observedCandidateSha = rawFileSha256(candidateAbsolute);
+  if (observedCandidateSha !== baseline.sourceCandidate.sha256) {
+    fail(
+      'SOURCE_CANDIDATE_PROVENANCE_MISMATCH',
+      'Pinned source candidate SHA-256 does not match the file on disk',
+      { expected: baseline.sourceCandidate.sha256, observed: observedCandidateSha }
+    );
+  }
+
+  let manifest;
+  try {
+    manifest = JSON.parse(fs.readFileSync(authorityAbsolute, 'utf8'));
+  } catch (error) {
+    fail('AUTHORITY_MANIFEST_UNREADABLE', 'Pinned authority manifest is not valid JSON', { cause: error.message });
+  }
+
+  if (manifest.authorityId !== baseline.authorityId) {
+    fail(
+      'AUTHORITY_ID_MISMATCH',
+      'proposal baseline authorityId does not match the pinned manifest',
+      { expected: manifest.authorityId, observed: baseline.authorityId }
+    );
+  }
+
+  const src = manifest.sourceCandidate ?? {};
+  if (
+    src.id !== baseline.sourceCandidate.id
+    || src.path !== baseline.sourceCandidate.path
+    || src.sha256 !== baseline.sourceCandidate.sha256
+  ) {
+    fail(
+      'SOURCE_CANDIDATE_BINDING_MISMATCH',
+      'proposal baseline sourceCandidate does not match the pinned authority manifest',
+      {
+        expected: { id: src.id, path: src.path, sha256: src.sha256 },
+        observed: baseline.sourceCandidate,
+      }
+    );
+  }
+
+  return {
+    selectedAuthorityPath,
+    observedValidatorSha,
+    observedAuthoritySha,
+    observedCandidateSha,
+  };
 }
 
 export function buildMap001ValidationView(report) {
@@ -240,6 +342,13 @@ export async function validateMap001Proposal({
   root,
   authorityPath,
 }) {
+  const provenance = verifyPinnedProvenance({
+    proposal,
+    validatorBinding,
+    root,
+    authorityPath,
+  });
+
   const modulePath = path.resolve(root, validatorBinding.implementationPath);
   const domain = await import(pathToFileURL(modulePath).href);
   if (typeof domain.materializeWalkableEnvelopeAuthority !== 'function') {
@@ -248,10 +357,29 @@ export async function validateMap001Proposal({
       'Pinned validator does not export materializeWalkableEnvelopeAuthority'
     );
   }
+
   const { report } = domain.materializeWalkableEnvelopeAuthority(
     root,
-    authorityPath ?? proposal.control.baseline.authorityPath
+    provenance.selectedAuthorityPath
   );
+
+  if (
+    report?.status === 'PASS'
+    && (
+      report.authorityId !== proposal.control.baseline.authorityId
+      || report.envelopeId !== proposal.control.baseline.sourceCandidate.id
+    )
+  ) {
+    fail(
+      'AUTHORITY_RUNTIME_BINDING_MISMATCH',
+      'Authority runtime PASS report does not match proposal baseline identity',
+      {
+        reportAuthorityId: report.authorityId,
+        reportEnvelopeId: report.envelopeId,
+      }
+    );
+  }
+
   return validateProposalAgainstAuthorityReport({
     proposal,
     authorityReport: report,
