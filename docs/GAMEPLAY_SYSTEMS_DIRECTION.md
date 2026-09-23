@@ -15,6 +15,8 @@ Esta regla se inspira en el análisis de sistemas de *Trine 4*, pero se traduce 
 
 La identificación debe seguir siendo revisable. Una interacción nunca debe convertir una conjetura en certeza científica ni borrar la evidencia original.
 
+Cuando la interacción guíe al usuario para observar un carácter botánico, debe aplicar el patrón normativo de [andamiaje perceptivo](PERCEPTUAL_SCAFFOLDING.md): la identificación decide qué evidencia necesita, el contrato del carácter decide qué cuenta como evidencia válida y la UX ayuda a observar sin sesgar el estado esperado ni forzar resolución.
+
 ### Conexión con la identificación experimental
 
 El avance de Alejandra conecta BioCLIP con preguntas adaptativas por consola; todavía no implementa el escáner móvil, la extracción foliar ni la decisión de desbloqueo. Para el siguiente prototipo, preparar los estados «observación registrada», «necesitamos observar otro rasgo» y «evidencia insuficiente», además del acierto o rechazo sustentados. «No puedo observarlo» conserva candidatos. Un único candidato o un score alto no activa la recompensa. Los límites técnicos y la secuencia de integración están en [INTEGRATION_2026-09-15.md](INTEGRATION_2026-09-15.md).
