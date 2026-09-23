@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** implementación ejecutable de E5.3  
-**Estado:** `TECHNICAL_CANDIDATE / CI_PENDING`  
+**Estado:** `TECHNICAL_REVALIDATION_PENDING`  
 **Baseline:** `main@281e251315065d8765d4f8bc3f561d3f49fb707b`  
 **Diseño:** `docs/MAP001_E5_3_DURABLE_REPAIR_PERSISTENCE_DESIGN_001.md`  
 **Frontera:** repair agent fuera de alcance.
@@ -69,6 +69,8 @@ y se fsynca antes de continuar.
 
 ## 4. Revalidación pre-commit
 
+E5.3 no acepta una snapshot AFTER arbitraria. Recibe los inputs exactos de E5.2 (`parentProposal`, `validationReport`, `repair`, `childProposalId`) y reconstruye nuevamente el transaction candidate contra el run durable observado. La reconstrucción ocurre antes del lock solo para preparar el binding y se repite bajo lock; el hash AFTER debe ser idéntico en ambas ejecuciones.
+
 Antes de escribir `PREPARED` se vuelve a verificar:
 
 ```text
@@ -76,6 +78,9 @@ Run State R5 schema
 execution pins vigentes
 persisted state == reducer state
 before state == READY_TO_REPAIR
+E5.2 fresh reconstruction = CANDIDATE_NOT_PERSISTED
+E5.2 persistencePerformed = false
+E5.2 inputState = READY_TO_REPAIR
 repair+child delta exacta
 after state schema/semantic válida
 E5.1 operational dependency hash
@@ -143,13 +148,16 @@ Además cubre:
 
 ```text
 restart equivalence
+fresh E5.2 reconstruction binding
 stale CAS rejection
 second writer rejection
 corrupt next fail-closed
 orphan journal fail-closed
+operational path substitution fail-closed
+E5.3 self-provenance drift fail-closed
 ```
 
-## 8. Pin operativo E5.1/E5.2
+## 8. Pin operativo E5.1/E5.2/E5.3
 
 La transacción fija los bytes de:
 
@@ -160,7 +168,7 @@ tools/proposal-resolution/map001_repair_transaction_candidate_r1.mjs
 
 en lock y journal.
 
-Recovery exige que esos bindings sigan coincidiendo antes de completar o limpiar una transacción.
+Recovery exige que `dependencyId + path + raw sha256` coincidan exactamente con el conjunto esperado antes de completar o limpiar una transacción. Esto impide sustitución de path con bytes válidos y también recovery bajo drift del propio entrypoint E5.3.
 
 Esto no convierte E5.3 en autoridad de E5.1/E5.2; solo cierra procedencia ejecutable durante la transacción durable.
 
@@ -184,6 +192,24 @@ No se amplió ASC.
 
 ## 10. AUDITORÍA
 
+El primer PASS externo de PR #76 no se tomó como evidencia suficiente de cierre. La auditoría adversarial posterior, asistida por ASC v0.1 en modo compile-only con TEST ID `MAP001-E5.3-POSTPASS-ADV-AUDIT-ASC-001`, encontró tres brechas:
+
+```text
+P1 E5.3 aceptaba una proposedRunSnapshot arbitraria con forma repair+child
+P2 operational dependency verificaba id+hash pero no path exacto
+P3 lock/journal no fijaban el propio entrypoint E5.3
+```
+
+Además, se endureció el orden operativo para que un lock residual sea detectado antes de usar estado mutable como autorización de commit.
+
+Correcciones:
+
+```text
+P1 → E5.3 reconstruye E5.2 desde inputs exactos y exige mismo AFTER bajo lock
+P2 → dependency tuple exacta = dependencyId + path + raw sha256
+P3 → E5_3_DURABLE_STORE se incluye en provenance transaccional
+```
+
 La implementación sigue el diseño R2 y conserva una sola snapshot visible. Los estados transaccionales auxiliares son metadata o staging y no adquieren autoridad.
 
 La validación se repite inmediatamente antes del commit para reducir TOCTOU. El AFTER se vuelve a validar después del rename.
@@ -191,6 +217,8 @@ La validación se repite inmediatamente antes del commit para reducir TOCTOU. El
 El soporte inicial se limita deliberadamente a Linux para no afirmar semánticas de fsync/rename no demostradas en otras plataformas.
 
 ## 11. INCONSISTENCIAS
+
+Las inconsistencias P1-P3 del primer PASS fueron corregidas antes de cualquier cierre. El nuevo candidato requiere revalidación externa completa.
 
 No se detecta contradicción intencional con E5.2, Run State R5 o Semantic Contract R3.
 
@@ -203,10 +231,11 @@ Debe verificarse en CI que `fsync` de directorio y el reemplazo por rename se co
 Hasta ejecución externa siguen pendientes:
 
 ```text
-CI real
-MAP-001 Proposal Validation Gate real
-Audit Protocol Check real
-prueba Ubuntu real C1-C8
+revalidación CI del head corregido
+revalidación MAP-001 Proposal Validation Gate del head corregido
+revalidación Audit Protocol Check del head corregido
+regresiones P1/P2/P3 en Ubuntu
+strict post-correction audit
 human approval
 ```
 
