@@ -1,7 +1,7 @@
 # Árboris — Hito 16 Gate B Contract R2
 
 **ID:** `ARBORIS_H16_GATE_B_CONTRACT_R2`  
-**Estado:** CANDIDATE FOR VALIDATION WITH ASC.  
+**Estado:** VALIDATED WITH ASC / FROZEN.  
 **Ámbito:** Hito 16 / cierre empírico y técnico.  
 **Base:** APC I1–I12 integrados; I11 R4 e I12 R10/V0.11 validados y congelados.  
 **No autoriza:** cierre automático de Hito 16, H17 runtime ni modificación de conocimiento botánico.
@@ -261,3 +261,28 @@ Verificación ejecutable:
 - OPEN-B1 permanece explícitamente abierto.
 
 R1 permanece como antecedente histórico. R2 requiere nueva validación completa antes de quedar FROZEN.
+
+
+## 18. VALIDACIÓN FINAL ASC R2
+
+Validación ejecutada sobre la corrección de freeze del benchmark.
+
+```text
+AUDITORÍA             PASS
+INCONSISTENCIAS       PASS
+VACÍOS / OMISIONES    PASS
+REDUNDANCIAS          PASS
+BLOCKERS DEL CONTRATO 0
+```
+
+Verificación:
+
+- CI #227 → PASS;
+- canonical tests / `npm test` → PASS;
+- Audit Protocol Check #158 → PASS;
+- diff limitado al contrato Gate B;
+- no cambia runtime, Master, ACE, APC ni datos;
+- OPEN-B1 permanece abierto;
+- R2 añade únicamente el requisito de manifest fotográfico/asset inmutable y versionado.
+
+R2 queda FROZEN. Esto no declara Gate B PASS ni cierra Hito 16.
