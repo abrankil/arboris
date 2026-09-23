@@ -1,7 +1,7 @@
 # Árboris — APC I12 Implementation Design
 
 **ID:** `ARBORIS_APC_I12_IMPLEMENTATION_DESIGN_V0.11`  
-**Estado:** CANDIDATE FOR REVALIDATION WITH ASC.  
+**Estado:** VALIDATED WITH ASC / FROZEN.  
 **Ámbito:** Hito 16 / APC I12 implementation design.  
 **Contrato base:** `ARBORIS_APC_I12_UI_CONTRACT_R10`, candidato a revalidación sobre `main@035ff6edefd16df86eff5bc549efe7d41eae153e`.  
 **Base canónica I1–I11 R4:** `main@035ff6edefd16df86eff5bc549efe7d41eae153e`.  
@@ -1992,3 +1992,27 @@ Siguen fuera de alcance layout final, accesibilidad de producto, backend remoto,
 ### REDUNDANCIAS
 
 No se introducen nuevos campos persistidos para writerReady, undo, provider version, asset index, fingerprints indexados, diagnostics ni edit buffers. La unicidad se deriva de los arrays canónicos existentes. Export y handoff no mantienen copias paralelas: consumen currentSession committed y producen resultados derivados. `validateApcI12AssetAndCollectionInvariants()` añade sólo totalidad/cardinalidad/unicidad sobre relaciones ya canónicas; no crea una segunda fuente de verdad ni duplica la lógica bidireccional de `validateApcSession()`.
+
+
+## 31. VALIDACIÓN FINAL ASC V0.11
+
+V0.11 fue revalidado contra R10 e I11 R4 sobre la extracción limpia de I12.
+
+```text
+AUDITORÍA             PASS
+INCONSISTENCIAS       PASS
+VACÍOS / OMISIONES    PASS
+REDUNDANCIAS          PASS
+BLOCKERS              0
+```
+
+Gates:
+
+- CI #208 → PASS;
+- Audit Protocol Check #140 → PASS;
+- `npm test` → PASS;
+- tests I12 incluidos en `test:apc` → PASS;
+- regresiones I1–I11 R4 → PASS;
+- diff de integración limitado a superficie I12 y dependencias técnicas explícitas.
+
+V0.11 queda FROZEN para esta implementación I12. No autoriza Gate B, cierre H16 ni runtime H17.
