@@ -1,7 +1,7 @@
 # MAP-001 — Handoff limpio después de E5.2
 
 **Fecha:** 2026-09-23  
-**Estado de trabajo:** listo para continuar en una ventana limpia  
+**Estado de trabajo:** E5.2 cerrado; listo para persistencia durable y recovery  
 **PR activo:** #74 — `E5.2: bind repairs to MAP-001 run context`  
 **Rama:** `e5-2-repair-run-context`  
 **Head documentado:** `607adc5659b8d6383a9b067f11f5043fecef3f82`
@@ -13,10 +13,10 @@ E4.1  CLOSED / PASS
 E4.2  CLOSED / PASS
 E4.3  CLOSED / PASS
 E5.1  CLOSED / PASS
-E5.2  TECHNICAL_PASS / HUMAN_APPROVAL_PENDING
+E5.2  CLOSED / PASS
 ```
 
-E5.2 todavía no debe declararse cerrado hasta aprobación humana explícita y revalidación del commit documental final.
+E5.2 recibió aprobación humana explícita el 2026-09-23. El commit de cierre fue revalidado con los gates obligatorios antes del merge.
 
 ## 2. Qué resuelve E5.2
 
@@ -134,15 +134,12 @@ full loop
 AUTHORIZED_FOR_ASC
 ```
 
-## 8. Siguiente paso al abrir una ventana nueva
+## 8. Siguiente paso
 
-1. Verificar PR #74 y checks del head actual.
-2. Si el commit documental está verde, solicitar/registrar aprobación humana de E5.2.
-3. Cerrar E5.2 como `CLOSED / PASS`.
-4. Revalidar commit de cierre.
-5. Mergear PR #74 y verificar `main`.
-6. Abrir la siguiente subetapa para persistencia durable del snapshot repair+child.
-7. No conectar todavía el repair agent.
+1. Mergear PR #74 y verificar `main`.
+2. Abrir la siguiente subetapa para persistencia durable del snapshot `repair + child`.
+3. Diseñar y probar commit atómico durable, recuperación después de crash y protección contra writer concurrente.
+4. Mantener fuera de alcance el repair agent, sandbox del agente, retry automático y full loop.
 
 ## 9. Regla de continuidad
 
