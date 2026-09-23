@@ -1,0 +1,40 @@
+{
+  "artifact_id": "H16-EXP-001",
+  "version": "R2.2.2",
+  "package_type": "SCOPE_FREEZE_PACKAGE",
+  "status": "VALIDATED_FROZEN_SCOPE",
+  "validation_result": "PASS",
+  "blockers": 0,
+  "freeze_date": "2026-09-22",
+  "compatibility_base": "ceef42297d45cf3e8e159fc544fc9ce1622773f1",
+  "dependency_order": ["CONTRACT", "FREEZE", "MANIFEST"],
+  "artifacts": {
+    "contract": {
+      "path": "experiments/h16-exp-001/r2.2.2/H16-EXP-001_R2_2_2_SCOPE_CONTRACT.md",
+      "git_blob_sha": "590360fed727a1015c59c9ad7a94571fdfc97c7b"
+    },
+    "freeze": {
+      "path": "experiments/h16-exp-001/r2.2.2/H16-EXP-001_R2_2_2_SCOPE_FREEZE.md",
+      "git_blob_sha": "3409b2a3138a3f08b2da6701ba007595f074acb1"
+    }
+  },
+  "authority_binding": {
+    "trusted_domain": "APC",
+    "apc_base": "main@ceef42297d45cf3e8e159fc544fc9ce1622773f1",
+    "apc_i11": "ARBORIS_APC_I11_E2E_HANDOFF_CONTRACT_R4",
+    "apc_i12": "ARBORIS_APC_I12_UI_CONTRACT_R10",
+    "apc_i12_implementation": "integrated"
+  },
+  "manifest_identity_rule": "Manifest records CONTRACT + FREEZE identities and does not contain or depend on its own hash.",
+  "open_decisions": [
+    "OPEN-01 repeated / contradictory evidence semantics",
+    "OPEN-02 photo membership in multiple observations",
+    "OPEN-03 view-specific character applicability"
+  ],
+  "asc_change_required": false,
+  "ace_change_required": false,
+  "hito15_change_required": false,
+  "botanical_canon_change_required": false,
+  "hito16_complete": false,
+  "next_gate": "AUDIT_COMPLETE_SCOPE_PACKAGE"
+}
