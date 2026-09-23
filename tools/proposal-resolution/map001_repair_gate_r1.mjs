@@ -147,6 +147,13 @@ function pointerWithin(pointer, scope) {
   return pointer === scope || pointer.startsWith(scope + '/');
 }
 
+function validateOperationIdentity(operations) {
+  const editIds = operations.map((op) => op.editId);
+  if (new Set(editIds).size !== editIds.length) {
+    fail('DUPLICATE_EDIT_ID', 'Repair editId values must be unique');
+  }
+}
+
 function validateNonOverlappingTargets(operations) {
   const targets = operations.map((op) => op.targetPath);
   if (new Set(targets).size !== targets.length) {
@@ -166,7 +173,12 @@ function validateNonOverlappingTargets(operations) {
 }
 
 function findingMap(report) {
-  return new Map((report.findings ?? []).map((finding) => [finding.findingId, finding]));
+  const findings = report.findings ?? [];
+  const ids = findings.map((finding) => finding.findingId);
+  if (new Set(ids).size !== ids.length) {
+    fail('DUPLICATE_FINDING_ID', 'Validation report findingId values must be unique');
+  }
+  return new Map(findings.map((finding) => [finding.findingId, finding]));
 }
 
 function validateOperationAuthorization(operation, findingsById) {
@@ -316,6 +328,7 @@ export function validateAndApplyMap001Repair({
 
   const operations = repair.patch?.operations ?? [];
   if (operations.length === 0) fail('REPAIR_PATCH_EMPTY', 'repair patch must contain operations');
+  validateOperationIdentity(operations);
   validateNonOverlappingTargets(operations);
 
   const findingsById = findingMap(validationReport);
@@ -386,27 +399,38 @@ export function executeMap001RepairGate({
     fail('ROOT_REQUIRED', 'repository root is required for executable E5.1 contract validation');
   }
 
+  let normalizedParent;
+  let normalizedReport;
+  let normalizedRepair;
+  try {
+    normalizedParent = JSON.parse(JSON.stringify(parentProposal));
+    normalizedReport = JSON.parse(JSON.stringify(validationReport));
+    normalizedRepair = JSON.parse(JSON.stringify(repair));
+  } catch (error) {
+    fail('NON_JSON_INPUT', 'E5.1 inputs must be JSON-serializable artifacts', { message: error.message });
+  }
+
   const contractPrecheck = runContractGate({
     phase: 'pre',
-    parentProposal,
-    validationReport,
-    repair,
+    parentProposal: normalizedParent,
+    validationReport: normalizedReport,
+    repair: normalizedRepair,
     root,
     pythonExecutable,
   });
 
   const result = validateAndApplyMap001Repair({
-    parentProposal,
-    validationReport,
-    repair,
+    parentProposal: normalizedParent,
+    validationReport: normalizedReport,
+    repair: normalizedRepair,
     childProposalId,
   });
 
   const contractPostcheck = runContractGate({
     phase: 'post',
-    parentProposal,
-    validationReport,
-    repair,
+    parentProposal: normalizedParent,
+    validationReport: normalizedReport,
+    repair: normalizedRepair,
     result,
     root,
     pythonExecutable,
