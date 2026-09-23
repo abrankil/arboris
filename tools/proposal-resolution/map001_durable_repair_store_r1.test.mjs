@@ -253,6 +253,10 @@ async function fixture() {
     runPath,
     run: validated.run,
     proposed: transaction.proposedRunSnapshot,
+    parentProposal,
+    validationReport: validated.validationReport,
+    repair,
+    childProposalId: 'MAP001-PROP-0002',
     validationReportsById,
   };
 }
@@ -269,7 +273,10 @@ test('E5.3 persists complete repair+child snapshot and restart sees identical lo
     const result = commitMap001RepairSnapshot({
       runPath: f.runPath,
       expectedBeforeSha256: logicalSha256(f.run),
-      proposedRunSnapshot: f.proposed,
+      parentProposal: f.parentProposal,
+      validationReport: f.validationReport,
+      repair: f.repair,
+      childProposalId: f.childProposalId,
       validationReportsById: f.validationReportsById,
       root: ROOT,
       transactionId: 'TXN-0001',
@@ -301,7 +308,10 @@ test('stale CAS is rejected before creating transaction metadata', { skip: !linu
       () => commitMap001RepairSnapshot({
         runPath: f.runPath,
         expectedBeforeSha256: '0'.repeat(64),
-        proposedRunSnapshot: f.proposed,
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
         validationReportsById: f.validationReportsById,
         root: ROOT,
         transactionId: 'TXN-CAS',
@@ -322,7 +332,10 @@ test('C1 lock-only crash recovers deterministic BEFORE', { skip: !linux }, async
       () => commitMap001RepairSnapshot({
         runPath: f.runPath,
         expectedBeforeSha256: logicalSha256(f.run),
-        proposedRunSnapshot: f.proposed,
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
         validationReportsById: f.validationReportsById,
         root: ROOT,
         transactionId: 'TXN-C1',
@@ -350,7 +363,10 @@ test('C2 prepared journal without next recovers deterministic BEFORE', { skip: !
       () => commitMap001RepairSnapshot({
         runPath: f.runPath,
         expectedBeforeSha256: logicalSha256(f.run),
-        proposedRunSnapshot: f.proposed,
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
         validationReportsById: f.validationReportsById,
         root: ROOT,
         transactionId: 'TXN-C2',
@@ -378,7 +394,10 @@ for (const point of ['C3', 'C4', 'C5', 'C6', 'C7', 'C8']) {
         () => commitMap001RepairSnapshot({
           runPath: f.runPath,
           expectedBeforeSha256: logicalSha256(f.run),
-          proposedRunSnapshot: f.proposed,
+          parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
           validationReportsById: f.validationReportsById,
           root: ROOT,
           transactionId: 'TXN-' + point,
@@ -409,7 +428,10 @@ test('second writer is rejected while crash lock exists', { skip: !linux }, asyn
       () => commitMap001RepairSnapshot({
         runPath: f.runPath,
         expectedBeforeSha256: logicalSha256(f.run),
-        proposedRunSnapshot: f.proposed,
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
         validationReportsById: f.validationReportsById,
         root: ROOT,
         transactionId: 'TXN-LOCK-1',
@@ -422,7 +444,10 @@ test('second writer is rejected while crash lock exists', { skip: !linux }, asyn
       () => commitMap001RepairSnapshot({
         runPath: f.runPath,
         expectedBeforeSha256: logicalSha256(f.run),
-        proposedRunSnapshot: f.proposed,
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
         validationReportsById: f.validationReportsById,
         root: ROOT,
         transactionId: 'TXN-LOCK-2',
@@ -441,7 +466,10 @@ test('corrupt next snapshot fails closed and preserves recovery evidence', { ski
       () => commitMap001RepairSnapshot({
         runPath: f.runPath,
         expectedBeforeSha256: logicalSha256(f.run),
-        proposedRunSnapshot: f.proposed,
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
         validationReportsById: f.validationReportsById,
         root: ROOT,
         transactionId: 'TXN-CORRUPT',
@@ -480,6 +508,119 @@ test('orphan journal without lock fails closed', { skip: !linux }, async () => {
       }),
       (error) => error instanceof Map001DurableStoreError
         && error.code === 'RECOVERY_ORPHAN_METADATA'
+    );
+  } finally {
+    cleanup(f.dir);
+  }
+});
+
+
+test('fresh E5.2 reconstruction rejects forged/unauthorized repair before durable metadata', { skip: !linux }, async () => {
+  const f = await fixture();
+  try {
+    const forged = structuredClone(f.repair);
+    forged.patch.operations[0].targetPath = '/authority/id';
+
+    assert.throws(
+      () => commitMap001RepairSnapshot({
+        runPath: f.runPath,
+        expectedBeforeSha256: logicalSha256(f.run),
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: forged,
+        childProposalId: f.childProposalId,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+        transactionId: 'TXN-FORGED',
+      }),
+      (error) => error instanceof Map001DurableStoreError
+        && error.code === 'E5_2_REVALIDATION_FAILED'
+    );
+    assert.equal(fs.existsSync(f.runPath + '.lock'), false);
+    assert.equal(fs.existsSync(f.runPath + '.txn.json'), false);
+  } finally {
+    cleanup(f.dir);
+  }
+});
+
+test('operational dependency path substitution fails closed even with recomputed hash', { skip: !linux }, async () => {
+  const f = await fixture();
+  try {
+    assert.throws(
+      () => commitMap001RepairSnapshot({
+        runPath: f.runPath,
+        expectedBeforeSha256: logicalSha256(f.run),
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+        transactionId: 'TXN-PATH',
+        crashAt: 'C1',
+      }),
+      Map001DurableStoreCrash
+    );
+
+    const lockPath = f.runPath + '.lock';
+    const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+    lock.operationalDependencies[0].path =
+      'tools/proposal-resolution/map001_repair_transaction_candidate_r1.mjs';
+    lock.operationalDependencies[0].sha256 = rawSha256(
+      'tools/proposal-resolution/map001_repair_transaction_candidate_r1.mjs'
+    );
+    fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n');
+
+    assert.throws(
+      () => recoverMap001RepairStore({
+        runPath: f.runPath,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+      }),
+      (error) => error instanceof Map001DurableStoreError
+        && error.code === 'OPERATIONAL_DEPENDENCY_SET_MISMATCH'
+    );
+  } finally {
+    cleanup(f.dir);
+  }
+});
+
+test('E5.3 self provenance drift binding fails closed during recovery', { skip: !linux }, async () => {
+  const f = await fixture();
+  try {
+    assert.throws(
+      () => commitMap001RepairSnapshot({
+        runPath: f.runPath,
+        expectedBeforeSha256: logicalSha256(f.run),
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+        transactionId: 'TXN-SELF',
+        crashAt: 'C1',
+      }),
+      Map001DurableStoreCrash
+    );
+
+    const lockPath = f.runPath + '.lock';
+    const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+    const self = lock.operationalDependencies.find(
+      (item) => item.dependencyId === 'E5_3_DURABLE_STORE'
+    );
+    assert.ok(self);
+    self.sha256 = '0'.repeat(64);
+    fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n');
+
+    assert.throws(
+      () => recoverMap001RepairStore({
+        runPath: f.runPath,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+      }),
+      (error) => error instanceof Map001DurableStoreError
+        && error.code === 'OPERATIONAL_DEPENDENCY_DRIFT'
     );
   } finally {
     cleanup(f.dir);
