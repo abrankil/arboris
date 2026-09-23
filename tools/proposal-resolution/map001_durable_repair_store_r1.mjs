@@ -8,6 +8,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { logicalSha256 } from './map001_validation_adapter_r1.mjs';
 import { reduceMap001RunState } from './map001_run_state_reducer_r1.mjs';
 import { verifyMap001ExecutionPins } from './map001_single_iteration_orchestrator_r1.mjs';
+import { buildMap001RepairTransactionCandidate } from './map001_repair_transaction_candidate_r1.mjs';
 
 export class Map001DurableStoreError extends Error {
   constructor(code, message, details = null) {
@@ -30,6 +31,7 @@ const RUN_SCHEMA_GATE = 'tools/proposal-resolution/validate_e4_reducer_contracts
 const OPERATIONAL_DEPENDENCY_PATHS = [
   ['E5_1_REPAIR_GATE', 'tools/proposal-resolution/map001_repair_gate_r1.mjs'],
   ['E5_2_TRANSACTION_CANDIDATE', 'tools/proposal-resolution/map001_repair_transaction_candidate_r1.mjs'],
+  ['E5_3_DURABLE_STORE', 'tools/proposal-resolution/map001_durable_repair_store_r1.mjs'],
 ];
 
 function fail(code, message, details = null) {
@@ -109,10 +111,20 @@ function operationalDependencyBindings(root) {
 }
 
 function verifyOperationalDependencies(root, bindings) {
-  const expectedIds = OPERATIONAL_DEPENDENCY_PATHS.map(([id]) => id);
-  const observedIds = bindings.map((item) => item.dependencyId);
-  if (!isDeepStrictEqual(observedIds, expectedIds)) {
-    fail('OPERATIONAL_DEPENDENCY_SET_MISMATCH', 'E5 operational dependency set changed');
+  const expected = OPERATIONAL_DEPENDENCY_PATHS.map(([dependencyId, relPath]) => ({
+    dependencyId,
+    path: relPath,
+  }));
+  const observed = bindings.map((item) => ({
+    dependencyId: item.dependencyId,
+    path: item.path,
+  }));
+  if (!isDeepStrictEqual(observed, expected)) {
+    fail(
+      'OPERATIONAL_DEPENDENCY_SET_MISMATCH',
+      'E5 operational dependency id/path set changed',
+      { expected, observed }
+    );
   }
   for (const binding of bindings) {
     const abs = path.resolve(root, binding.path);
@@ -286,7 +298,10 @@ function cleanupTransactionFiles(paths, { journal = true, next = true, lock = tr
 export function commitMap001RepairSnapshot({
   runPath,
   expectedBeforeSha256,
-  proposedRunSnapshot,
+  parentProposal,
+  validationReport,
+  repair,
+  childProposalId,
   validationReportsById = {},
   root,
   transactionId,
@@ -304,34 +319,68 @@ export function commitMap001RepairSnapshot({
     fail('TRANSACTION_ID_REQUIRED', 'transactionId is required');
   }
 
-  const proposed = jsonClone(proposedRunSnapshot, 'proposedRunSnapshot');
+  const normalizedParent = jsonClone(parentProposal, 'parentProposal');
+  const normalizedReport = jsonClone(validationReport, 'validationReport');
+  const normalizedRepair = jsonClone(repair, 'repair');
   const reports = jsonClone(validationReportsById, 'validationReportsById');
   const paths = pathsFor(runPath);
   fs.mkdirSync(paths.dirPath, { recursive: true });
 
+  if (fs.existsSync(paths.lockPath)) {
+    fail('CONCURRENT_WRITER', 'writer lock already exists');
+  }
   if (fs.existsSync(paths.journalPath) || fs.existsSync(paths.nextPath)) {
     fail('RECOVERY_REQUIRED', 'transaction metadata exists; recover before commit');
   }
 
-  const before = readJson(paths.runPath, 'durable run');
-  const beforeSha256 = logicalSha256(before);
-  const afterSha256 = logicalSha256(proposed);
-  if (beforeSha256 !== expectedBeforeSha256) {
+  const prelockRun = readJson(paths.runPath, 'durable run');
+  const prelockBeforeSha256 = logicalSha256(prelockRun);
+  if (prelockBeforeSha256 !== expectedBeforeSha256) {
     fail('CAS_MISMATCH', 'durable run no longer matches expected before hash', {
       expectedBeforeSha256,
-      observedBeforeSha256: beforeSha256,
+      observedBeforeSha256: prelockBeforeSha256,
     });
   }
-  if (afterSha256 === beforeSha256) {
-    fail('NO_OP_TRANSACTION', 'proposed snapshot must differ from durable before snapshot');
+
+  let prelockCandidate;
+  try {
+    prelockCandidate = buildMap001RepairTransactionCandidate({
+      run: prelockRun,
+      parentProposal: normalizedParent,
+      validationReport: normalizedReport,
+      repair: normalizedRepair,
+      childProposalId,
+      root,
+      validationReportsById: reports,
+      pythonExecutable,
+    });
+  } catch (error) {
+    fail('E5_2_REVALIDATION_FAILED', 'fresh E5.2 reconstruction failed before lock', {
+      code: error?.code,
+      message: error?.message,
+      details: error?.details,
+    });
+  }
+  if (
+    prelockCandidate.transactionStatus !== 'CANDIDATE_NOT_PERSISTED'
+    || prelockCandidate.persistencePerformed !== false
+    || prelockCandidate.inputState?.status !== 'READY_TO_REPAIR'
+  ) {
+    fail('E5_2_CANDIDATE_CONTRACT_INVALID', 'E5.2 candidate contract flags are invalid');
+  }
+
+  const proposedPrelock = prelockCandidate.proposedRunSnapshot;
+  const afterSha256 = logicalSha256(proposedPrelock);
+  if (afterSha256 === prelockBeforeSha256) {
+    fail('NO_OP_TRANSACTION', 'E5.2 proposed snapshot must differ from durable before snapshot');
   }
 
   const dependencies = operationalDependencyBindings(root);
   const lock = {
     schemaVersion: '0.1',
     transactionId,
-    runId: before.runId,
-    beforeSha256,
+    runId: prelockRun.runId,
+    beforeSha256: expectedBeforeSha256,
     afterSha256,
     operationalDependencies: dependencies,
   };
@@ -352,13 +401,50 @@ export function commitMap001RepairSnapshot({
 
     maybeCrash(crashAt, 'C1');
 
-    const reread = readJson(paths.runPath, 'durable run');
-    if (logicalSha256(reread) !== beforeSha256) {
-      fail('CAS_MISMATCH', 'durable run changed after lock acquisition');
+    const before = readJson(paths.runPath, 'durable run');
+    const beforeSha256 = logicalSha256(before);
+    if (beforeSha256 !== expectedBeforeSha256) {
+      fail('CAS_MISMATCH', 'durable run changed after lock acquisition', {
+        expectedBeforeSha256,
+        observedBeforeSha256: beforeSha256,
+      });
+    }
+
+    let transactionCandidate;
+    try {
+      transactionCandidate = buildMap001RepairTransactionCandidate({
+        run: before,
+        parentProposal: normalizedParent,
+        validationReport: normalizedReport,
+        repair: normalizedRepair,
+        childProposalId,
+        root,
+        validationReportsById: reports,
+        pythonExecutable,
+      });
+    } catch (error) {
+      fail('E5_2_REVALIDATION_FAILED', 'fresh E5.2 reconstruction failed under lock', {
+        code: error?.code,
+        message: error?.message,
+        details: error?.details,
+      });
+    }
+
+    if (
+      transactionCandidate.transactionStatus !== 'CANDIDATE_NOT_PERSISTED'
+      || transactionCandidate.persistencePerformed !== false
+      || transactionCandidate.inputState?.status !== 'READY_TO_REPAIR'
+    ) {
+      fail('E5_2_CANDIDATE_CONTRACT_INVALID', 'E5.2 candidate contract flags are invalid');
+    }
+
+    const proposed = transactionCandidate.proposedRunSnapshot;
+    if (logicalSha256(proposed) !== afterSha256) {
+      fail('E5_2_CANDIDATE_CHANGED_AFTER_LOCK', 'E5.2 reconstructed candidate changed after lock');
     }
 
     const beforeValidation = validateRun({
-      run: reread,
+      run: before,
       reportsById: reports,
       root,
       pythonExecutable,
@@ -369,7 +455,7 @@ export function commitMap001RepairSnapshot({
       });
     }
 
-    assertRepairChildDelta(reread, proposed);
+    assertRepairChildDelta(before, proposed);
     const afterValidation = validateRun({
       run: proposed,
       reportsById: reports,
@@ -428,6 +514,12 @@ export function commitMap001RepairSnapshot({
       afterSha256,
       outputState: afterValidation.derived,
       operationalDependencies: dependencies,
+      e5_2: {
+        transactionStatus: transactionCandidate.transactionStatus,
+        persistencePerformed: transactionCandidate.persistencePerformed,
+        childProposalSha256: transactionCandidate.childProposalSha256,
+        repairSha256: transactionCandidate.repairSha256,
+      },
     };
   } catch (error) {
     if (error instanceof Map001DurableStoreCrash) throw error;
