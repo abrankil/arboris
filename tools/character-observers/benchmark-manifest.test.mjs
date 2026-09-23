@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateH16BenchmarkManifest } from './benchmark-manifest.mjs';
 
-test('H16-EXP-001 benchmark manifest V1 is frozen and anti-leakage', async () => {
+test('H16-EXP-001 benchmark manifest V1 has fixed membership and anti-leakage', async () => {
   const result = await validateH16BenchmarkManifest();
   assert.equal(result.valid, true, result.errors.join('; '));
   assert.deepEqual(result.counts, {
