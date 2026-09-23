@@ -52,8 +52,8 @@ jobs:
       - name: Real authority-runtime + approved E2 contract integration tests
         run: node --test tools/proposal-resolution/map001_validation_adapter_r1.integration.test.mjs
 
-      - name: Run State R4 + semantic contract R2 validation
-        run: python tools/proposal-resolution/validate_run_state_r4.py
+      - name: Run State R5 + semantic contract R3 validation
+        run: python tools/proposal-resolution/validate_run_state_r5.py
 
       - name: E4.2 deterministic run-state reducer tests
         run: node --test tools/proposal-resolution/map001_run_state_reducer_r1.test.mjs
