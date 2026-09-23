@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E4.3 — una iteración real completa del resolver MAP-001  
-**Estado:** `REVISED_CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
+**Estado:** `CLOSED / PASS`  
 **Baseline:** `main@78290df3c59068ddf7c2fc350db3cb9fa61c4a25`  
 **Precondición:** E4.1 y E4.2 cerrados; adapter E3 y reducer E4.2 disponibles. Durante la auditoría E4.3, Run State R5 / Semantic Contract R3 fueron revisados a Run State R5 / Semantic Contract R3 para cerrar procedencia de dependencias ejecutables.
 
@@ -313,3 +313,35 @@ reducer E4.2
 orchestrator E4.3
 → solo compone y controla bindings/provenance
 ```
+
+
+## 15. Cierre E4.3
+
+Head validado antes del cierre:
+
+```text
+a89e58a4df0eb6bf168d31ad74f3d0a2235561a1
+```
+
+Evidencia externa:
+
+```text
+Audit Protocol Check                 PASS
+CI                                   PASS
+MAP-001 Proposal Validation Gate     PASS
+Run State R5 + Semantic Contract R3  PASS
+E4.2 reducer regression              PASS
+E4.3 single-iteration orchestrator   PASS
+```
+
+La aprobación humana explícita fue recibida después de estas validaciones.
+
+Resultado:
+
+```text
+E4.3
+PASS
+CLOSED
+```
+
+Este cierre no autoriza `DOMAIN_PASS → AUTHORIZED_FOR_ASC`, no implementa repair agent y no implementa el loop repetitivo completo.
