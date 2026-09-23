@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E4.2 — reducer ejecutable de estados para el resolver cíclico MAP-001  
-**Estado:** `CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
+**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
 **Baseline:** `main@5401eb0bb35cbbcfabe2a7ff3faf0e9060c157d3`  
 **Precondición:** E4.1 / G4.1 cerrado; Run State R4 + Semantic Contract R2 vigentes.
 
@@ -290,3 +290,42 @@ Estos componentes corresponden a etapas posteriores de E4/E5.
 El reducer no reimplementa reglas geométricas MAP-001. Consume statuses y findings ya producidos por validadores.
 
 La función `logicalSha256` se reutiliza desde el adapter E3 para mantener una sola implementación vigente de canonicalización lógica en este dominio.
+
+
+## 16. Evidencia de ejecución
+
+Head validado:
+
+```text
+e2f9a00d5fd1c2c1b004f1359b4f14166d9322fb
+```
+
+Checks externos:
+
+```text
+Audit Protocol Check                 PASS
+CI                                   PASS
+MAP-001 Proposal Validation Gate     PASS
+```
+
+Regresión y validación específica:
+
+```text
+MAP-001 authority-runtime            21/21 PASS
+proposal validation adapter          10/10 PASS
+E2/E3 real integration                8/8 PASS
+Run State R4 + Semantic R2               PASS
+E4.2 deterministic reducer           13/13 PASS
+```
+
+La suite E4.2 final usa fixtures contract-valid contra Run State R4 y Validation Report R1 y valida también el state resultante reinyectado en R4.
+
+Resultado:
+
+```text
+E4.2
+TECHNICAL_PASS
+HUMAN_APPROVAL_PENDING
+```
+
+No se registra cierre formal mientras no exista aprobación humana explícita.
