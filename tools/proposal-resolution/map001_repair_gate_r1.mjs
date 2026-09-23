@@ -1,4 +1,79 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { isDeepStrictEqual } from 'node:util';
+
 import { logicalSha256 } from './map001_validation_adapter_r1.mjs';
+
+const CONTRACT_GATE = 'tools/proposal-resolution/validate_e5_repair_contracts.py';
+
+function runContractGate({
+  phase,
+  parentProposal,
+  validationReport,
+  repair,
+  result = null,
+  root,
+  pythonExecutable,
+}) {
+  const gatePath = path.resolve(root, CONTRACT_GATE);
+  const resolvedRoot = path.resolve(root);
+  const rootWithSep = resolvedRoot + path.sep;
+  if (!(gatePath === resolvedRoot || gatePath.startsWith(rootWithSep))) {
+    fail('CONTRACT_GATE_PATH_INVALID', 'E5.1 contract gate resolves outside repository root');
+  }
+  if (!fs.existsSync(gatePath) || !fs.statSync(gatePath).isFile()) {
+    fail('CONTRACT_GATE_MISSING', 'E5.1 contract gate is missing');
+  }
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'map001-e5-1-'));
+  try {
+    const parentPath = path.join(dir, 'parent.json');
+    const reportPath = path.join(dir, 'report.json');
+    const repairPath = path.join(dir, 'repair.json');
+    fs.writeFileSync(parentPath, JSON.stringify(parentProposal, null, 2));
+    fs.writeFileSync(reportPath, JSON.stringify(validationReport, null, 2));
+    fs.writeFileSync(repairPath, JSON.stringify(repair, null, 2));
+
+    const args = [
+      gatePath,
+      '--phase', phase,
+      '--parent', parentPath,
+      '--report', reportPath,
+      '--repair', repairPath,
+      '--parent-sha', logicalSha256(parentProposal),
+      '--report-sha', logicalSha256(validationReport),
+    ];
+
+    if (phase === 'post') {
+      const childPath = path.join(dir, 'child.json');
+      fs.writeFileSync(childPath, JSON.stringify(result.childProposal, null, 2));
+      args.push(
+        '--child', childPath,
+        '--repair-sha', result.repairSha256,
+        '--parent-candidate-sha', result.parentCandidateSha256
+      );
+    }
+
+    const proc = spawnSync(pythonExecutable, args, {
+      cwd: root,
+      encoding: 'utf8',
+    });
+
+    if (proc.status !== 0) {
+      fail(
+        phase === 'pre' ? 'REPAIR_CONTRACT_PRECONDITION_FAILED' : 'REPAIR_CONTRACT_POSTCONDITION_FAILED',
+        'E5.1 ' + phase + ' contract gate failed',
+        { status: proc.status, stdout: proc.stdout, stderr: proc.stderr }
+      );
+    }
+
+    return JSON.parse(proc.stdout.trim());
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
 
 export class Map001RepairGateError extends Error {
   constructor(code, message, details = null) {
@@ -65,7 +140,7 @@ function parentAndKey(doc, pointer) {
 }
 
 function deepEqual(a, b) {
-  return JSON.stringify(a) === JSON.stringify(b);
+  return isDeepStrictEqual(a, b);
 }
 
 function pointerWithin(pointer, scope) {
@@ -99,7 +174,6 @@ function validateOperationAuthorization(operation, findingsById) {
     fail('FINDING_REFS_REQUIRED', 'Every repair operation must cite at least one finding');
   }
 
-  let authorized = false;
   for (const findingId of operation.findingRefs) {
     const finding = findingsById.get(findingId);
     if (!finding) {
@@ -108,16 +182,15 @@ function validateOperationAuthorization(operation, findingsById) {
     if (finding.disposition !== 'AUTO_REPAIR') {
       fail('FINDING_NOT_AUTO_REPAIR', 'Repair may cite only AUTO_REPAIR findings', { findingId });
     }
-    if ((finding.targetPaths ?? []).some((scope) => pointerWithin(operation.targetPath, scope))) {
-      authorized = true;
+    const withinThisFinding = (finding.targetPaths ?? [])
+      .some((scope) => pointerWithin(operation.targetPath, scope));
+    if (!withinThisFinding) {
+      fail(
+        'REPAIR_TARGET_OUTSIDE_FINDING_SCOPE',
+        'Repair target must be within the declared scope of every cited finding',
+        { targetPath: operation.targetPath, findingId }
+      );
     }
-  }
-
-  if (!authorized) {
-    fail('REPAIR_TARGET_OUTSIDE_FINDING_SCOPE', 'Repair target is outside all cited finding scopes', {
-      targetPath: operation.targetPath,
-      findingRefs: operation.findingRefs,
-    });
   }
 }
 
@@ -294,5 +367,51 @@ export function validateAndApplyMap001Repair({
     parentCandidateSha256: parentCandidateSha,
     childCandidateSha256: logicalSha256(childCandidate),
     childProposal,
+  };
+}
+
+
+export function executeMap001RepairGate({
+  parentProposal,
+  validationReport,
+  repair,
+  childProposalId,
+  root,
+  pythonExecutable = 'python',
+}) {
+  if (typeof root !== 'string' || root.length === 0) {
+    fail('ROOT_REQUIRED', 'repository root is required for executable E5.1 contract validation');
+  }
+
+  const contractPrecheck = runContractGate({
+    phase: 'pre',
+    parentProposal,
+    validationReport,
+    repair,
+    root,
+    pythonExecutable,
+  });
+
+  const result = validateAndApplyMap001Repair({
+    parentProposal,
+    validationReport,
+    repair,
+    childProposalId,
+  });
+
+  const contractPostcheck = runContractGate({
+    phase: 'post',
+    parentProposal,
+    validationReport,
+    repair,
+    result,
+    root,
+    pythonExecutable,
+  });
+
+  return {
+    ...result,
+    contractPrecheck,
+    contractPostcheck,
   };
 }
