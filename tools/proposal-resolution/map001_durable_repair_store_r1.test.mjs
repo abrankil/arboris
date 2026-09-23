@@ -478,7 +478,10 @@ test('corrupt next snapshot fails closed and preserves recovery evidence', { ski
       }),
       Map001DurableStoreCrash
     );
-    fs.writeFileSync(f.runPath + '.next.json', '{"corrupt":true}\n');
+    const corruptNextPath = f.runPath + '.next.json';
+    const corruptNext = JSON.parse(fs.readFileSync(corruptNextPath, 'utf8'));
+    corruptNext.candidateHistory.at(-1).candidateSha256 = '0'.repeat(64);
+    fs.writeFileSync(corruptNextPath, JSON.stringify(corruptNext, null, 2) + '\n');
 
     assert.throws(
       () => recoverMap001RepairStore({
