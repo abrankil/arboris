@@ -1,0 +1,597 @@
+{
+  "experimentId": "H16-EXP-001",
+  "characterId": "CH-003",
+  "manifestVersion": "1.0.0",
+  "status": "FROZEN",
+  "createdAt": "2026-09-23",
+  "sourceDataset": {
+    "path": "data/botanical/photos.json",
+    "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+    "gitBlobSha1": "09277072c8b643452beb98d389a0c7e48d52bffa",
+    "semantic": "expanded_registry_snapshot"
+  },
+  "provenance": {
+    "splitSource": "data/experiments/h16-exp-001/split.json@hito16-character-observer-contract",
+    "historicalFinding": "Commit 6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0 is the expanded 93-photo registry snapshot that added PH-046..PH-093. Benchmark V1 intentionally selects and freezes the historical PH-001..PH-045 subset from that registry; sourceDataset is not claimed to be a pre-expansion dataset.",
+    "gateContract": "ARBORIS_H16_GATE_B_CONTRACT_R2"
+  },
+  "partitions": {
+    "development": [
+      "PH-001",
+      "PH-002",
+      "PH-003",
+      "PH-004",
+      "PH-005",
+      "PH-006",
+      "PH-007",
+      "PH-008",
+      "PH-009",
+      "PH-010",
+      "PH-011",
+      "PH-012",
+      "PH-013",
+      "PH-014",
+      "PH-015",
+      "PH-016",
+      "PH-017",
+      "PH-018",
+      "PH-019",
+      "PH-020",
+      "PH-021",
+      "PH-022",
+      "PH-023",
+      "PH-024",
+      "PH-025",
+      "PH-026",
+      "PH-030",
+      "PH-031",
+      "PH-032",
+      "PH-033"
+    ],
+    "holdout": [
+      "PH-027",
+      "PH-028",
+      "PH-034",
+      "PH-035",
+      "PH-036",
+      "PH-037",
+      "PH-038",
+      "PH-039",
+      "PH-040",
+      "PH-041",
+      "PH-042",
+      "PH-043",
+      "PH-044",
+      "PH-045"
+    ],
+    "excluded": [
+      "PH-029"
+    ]
+  },
+  "excludedPhotos": {
+    "PH-029": {
+      "reason": "possible_duplicate",
+      "duplicateOf": "PH-028",
+      "source": "historical H16 split"
+    }
+  },
+  "photos": [
+    {
+      "photoId": "PH-001",
+      "individualId": "CA001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-001_cryptocarya_alba/CA001/SP-001_CA001_hojas_01.jpg",
+        "gitBlobSha1": "b39f6501956c11720694b50835a059a9149aa63d"
+      }
+    },
+    {
+      "photoId": "PH-002",
+      "individualId": "CA001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-001_cryptocarya_alba/CA001/SP-001_CA001_hojas_02.jpg",
+        "gitBlobSha1": "6643402d53c4b6e7efb8ebb0b8f056a3698fae43"
+      }
+    },
+    {
+      "photoId": "PH-003",
+      "individualId": "CA001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-001_cryptocarya_alba/CA001/SP-001_CA001_ramilla_apical_01.jpg",
+        "gitBlobSha1": "e4f556db8560c28a916d595f0f84eadf8780ac83"
+      }
+    },
+    {
+      "photoId": "PH-004",
+      "individualId": "LC001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_hojas_01.jpg",
+        "gitBlobSha1": "33a36842279b35ca31a3838e03ff7ac51c608802"
+      }
+    },
+    {
+      "photoId": "PH-005",
+      "individualId": "LC001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_hojas_02.jpg",
+        "gitBlobSha1": "766f7513676e70e4d95145b6eed4d34219d308b8"
+      }
+    },
+    {
+      "photoId": "PH-006",
+      "individualId": "LC001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_ramilla_01.jpg",
+        "gitBlobSha1": "7f58275eca14436146c1957cbaf147e1b987fd23"
+      }
+    },
+    {
+      "photoId": "PH-007",
+      "individualId": "LC001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_estructuras_reproductivas_01.jpg",
+        "gitBlobSha1": "2ea279666f4e16aec148b4552ef1e003164ec4ee"
+      }
+    },
+    {
+      "photoId": "PH-008",
+      "individualId": "LC001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC001/SP-002_LC001_estructuras_reproductivas_02.jpg",
+        "gitBlobSha1": "5966ad2d5708836c948d60c410c36f879799301d"
+      }
+    },
+    {
+      "photoId": "PH-009",
+      "individualId": "LC002",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC002/SP-002_LC002_hojas_01.jpg",
+        "gitBlobSha1": "55b9e5fead3cf69cc9eed5691b5104b9cc6ff1bc"
+      }
+    },
+    {
+      "photoId": "PH-010",
+      "individualId": "KO001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_hojas_01.jpg",
+        "gitBlobSha1": "89121c87e79a38542240f546394baefce31b0f96"
+      }
+    },
+    {
+      "photoId": "PH-011",
+      "individualId": "KO001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_fruto_01.jpg",
+        "gitBlobSha1": "098ec563aadbbfa52223f6db0760941a062084ec"
+      }
+    },
+    {
+      "photoId": "PH-012",
+      "individualId": "KO001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_fruto_02.jpg",
+        "gitBlobSha1": "5499e9446000526ec02be4b26671f21f91e76fbf"
+      }
+    },
+    {
+      "photoId": "PH-013",
+      "individualId": "KO001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-003_kageneckia_oblonga/KO001/SP-003_KO001_hojas_fruto_01.jpg",
+        "gitBlobSha1": "559647ee9ab4f0912bafc2fdba3f163647af779d"
+      }
+    },
+    {
+      "photoId": "PH-014",
+      "individualId": "KO002",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-003_kageneckia_oblonga/KO002/SP-003_KO002_hojas_01.jpg",
+        "gitBlobSha1": "753bf986f9d0c75a9fc0a780480526bc07a600eb"
+      }
+    },
+    {
+      "photoId": "PH-015",
+      "individualId": "PM001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_ramilla_hojas_01.jpg",
+        "gitBlobSha1": "f31a716cab5af317a857ddc02675a8a64103bb8a"
+      }
+    },
+    {
+      "photoId": "PH-016",
+      "individualId": "PM001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_ramilla_hojas_02.jpg",
+        "gitBlobSha1": "bf4ecf456766bd280f011b00e88010c04a74cf13"
+      }
+    },
+    {
+      "photoId": "PH-017",
+      "individualId": "PM001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_capitulo_inmaduro_01.jpg",
+        "gitBlobSha1": "fca1b2b502c67184d57389f49f664a99852e7c1f"
+      }
+    },
+    {
+      "photoId": "PH-018",
+      "individualId": "PM001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-004_podanthus_mitiqui/PM001/SP-004_PM001_capitulo_amarillo_01.jpg",
+        "gitBlobSha1": "3117df05d2d809a3988da376c6fe6222ec38cbe4"
+      }
+    },
+    {
+      "photoId": "PH-019",
+      "individualId": "CO001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_inflorescencia_masculina_01.jpg",
+        "gitBlobSha1": "66394a079e87acbe517e4670dce028ecc7bfeb10"
+      }
+    },
+    {
+      "photoId": "PH-020",
+      "individualId": "CO001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_inflorescencia_masculina_02.jpg",
+        "gitBlobSha1": "9257804e08d4ae770f9c009d390026579c968ce4"
+      }
+    },
+    {
+      "photoId": "PH-021",
+      "individualId": "CO001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_hojas_01.jpg",
+        "gitBlobSha1": "2bd3a1b16f0adefd54b04840a064af5a9f8da4b9"
+      }
+    },
+    {
+      "photoId": "PH-022",
+      "individualId": "CO001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_hojas_02.jpg",
+        "gitBlobSha1": "8bf2a4c974d76c1d3a782538d2e61042425ec216"
+      }
+    },
+    {
+      "photoId": "PH-023",
+      "individualId": "CO001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-005_colliguaja_odorifera/CO001/SP-005_CO001_inflorescencia_fruto_01.jpg",
+        "gitBlobSha1": "acdce95afc66272b1646fdbb6b9a1d626a5d4867"
+      }
+    },
+    {
+      "photoId": "PH-024",
+      "individualId": "QS001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-006_quillaja_saponaria/QS001/SP-006_QS001_hojas_01.jpg",
+        "gitBlobSha1": "144caad86651a99cf28f6e217d13d59e910e9959"
+      }
+    },
+    {
+      "photoId": "PH-025",
+      "individualId": "QS001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-006_quillaja_saponaria/QS001/SP-006_QS001_hojas_02.jpg",
+        "gitBlobSha1": "a2b1f4ec78a6e9c04a4689e90d77da57a13bf362"
+      }
+    },
+    {
+      "photoId": "PH-026",
+      "individualId": "QS001",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-006_quillaja_saponaria/QS001/SP-006_QS001_ramilla_01.jpg",
+        "gitBlobSha1": "5ee4f04e91fc8196a84480ffd68b62a9dbe28d6e"
+      }
+    },
+    {
+      "photoId": "PH-027",
+      "individualId": "CA002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-001_cryptocarya_alba/CA002/SP-001_CA002_hojas_01.jpg",
+        "gitBlobSha1": "c25a6fc8d82bf7b87f5bc1b3371422bb1dd09e29"
+      }
+    },
+    {
+      "photoId": "PH-028",
+      "individualId": "LC003",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC003/SP-002_LC003_hojas_01.jpg",
+        "gitBlobSha1": "49e6fa2887e6a3407a2110d509f5a740ee2cfe19"
+      }
+    },
+    {
+      "photoId": "PH-029",
+      "individualId": "LC003",
+      "partition": "excluded",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC003/SP-002_LC003_hojas_02.jpg",
+        "gitBlobSha1": "49e6fa2887e6a3407a2110d509f5a740ee2cfe19"
+      }
+    },
+    {
+      "photoId": "PH-030",
+      "individualId": "LC004",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_hojas_01.jpg",
+        "gitBlobSha1": "45a5158ec07953567b1cd0c0661a0faf1758085d"
+      }
+    },
+    {
+      "photoId": "PH-031",
+      "individualId": "LC004",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_hojas_02.jpg",
+        "gitBlobSha1": "fd8f4311ccc8dd6324efa0b3f8e450ce4fa2abac"
+      }
+    },
+    {
+      "photoId": "PH-032",
+      "individualId": "LC004",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_hojas_03.jpg",
+        "gitBlobSha1": "21891579b2aba2337126b4abc428a817bc90df90"
+      }
+    },
+    {
+      "photoId": "PH-033",
+      "individualId": "LC004",
+      "partition": "development",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-002_lithraea_caustica/LC004/SP-002_LC004_ramilla_01.jpg",
+        "gitBlobSha1": "f0730ad1bdbff07f5f767449b80c17435608ffc4"
+      }
+    },
+    {
+      "photoId": "PH-034",
+      "individualId": "KO003",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-003_kageneckia_oblonga/KO003/SP-003_KO003_hojas_01.jpg",
+        "gitBlobSha1": "8c0ede23bf4748664f0e77c55b3c1b36bc5d2fae"
+      }
+    },
+    {
+      "photoId": "PH-035",
+      "individualId": "KO003",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-003_kageneckia_oblonga/KO003/SP-003_KO003_hojas_02.jpg",
+        "gitBlobSha1": "ab921773918a62d0b3b66de3c2cb3d20178e20a0"
+      }
+    },
+    {
+      "photoId": "PH-036",
+      "individualId": "PM002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_hojas_01.jpg",
+        "gitBlobSha1": "fe4970dbae9cc50054b1f94055cefc986ba288d5"
+      }
+    },
+    {
+      "photoId": "PH-037",
+      "individualId": "PM002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_capitulo_01.jpg",
+        "gitBlobSha1": "cb0e1372522fa42f8bf84fcc365057e5c1a252ea"
+      }
+    },
+    {
+      "photoId": "PH-038",
+      "individualId": "PM002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_capitulo_02.jpg",
+        "gitBlobSha1": "99a90ef0de47b32227e94a2009e7727f15015054"
+      }
+    },
+    {
+      "photoId": "PH-039",
+      "individualId": "PM002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-004_podanthus_mitiqui/PM002/SP-004_PM002_ramilla_capitulo_01.jpg",
+        "gitBlobSha1": "11e5f21273a6e400383996d2cc9780c006094356"
+      }
+    },
+    {
+      "photoId": "PH-040",
+      "individualId": "CO002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-005_colliguaja_odorifera/CO002/SP-005_CO002_hojas_01.jpg",
+        "gitBlobSha1": "db507772d96353084436083626ba2d8719e63cba"
+      }
+    },
+    {
+      "photoId": "PH-041",
+      "individualId": "CO002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-005_colliguaja_odorifera/CO002/SP-005_CO002_ramilla_hojas_01.jpg",
+        "gitBlobSha1": "8b1345791759b18edb30f7b0188b0f90431976cc"
+      }
+    },
+    {
+      "photoId": "PH-042",
+      "individualId": "QS002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_hojas_01.jpg",
+        "gitBlobSha1": "4d53304c270bd8dd0807c6ab33925fe47d6d682f"
+      }
+    },
+    {
+      "photoId": "PH-043",
+      "individualId": "QS002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_hojas_02.jpg",
+        "gitBlobSha1": "aa4889b18c818af801aa438891989f45c3fdc419"
+      }
+    },
+    {
+      "photoId": "PH-044",
+      "individualId": "QS002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_hojas_03.jpg",
+        "gitBlobSha1": "5501321ab2d974c658ae5d95992b5361dba99b90"
+      }
+    },
+    {
+      "photoId": "PH-045",
+      "individualId": "QS002",
+      "partition": "holdout",
+      "assetIdentity": {
+        "kind": "git_commit_path",
+        "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
+        "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_ramilla_hojas_01.jpg",
+        "gitBlobSha1": "f906bacbc84865658d912d5c50e11564375b9b9e"
+      }
+    }
+  ],
+  "benchmarkPopulation": {
+    "semantic": "historical_pre_expansion_subset",
+    "frozenPhotoIds": "PH-001..PH-045 explicit membership in partitions/photos",
+    "postExpansionPhotos": "PH-046..PH-093 explicitly outside manifest V1",
+    "selectionAuthority": "explicit manifest membership; never dynamic individual expansion"
+  },
+  "validationState": "VALIDATED_WITH_ASC",
+  "validation": {
+    "asc": "PASS",
+    "blockers": 0,
+    "ciRun": 235,
+    "auditProtocolRun": 166,
+    "canonicalTests": "PASS",
+    "assetIdentityVerification": "45/45 git commit+path references independently resolved and bound to gitBlobSha1",
+    "audit": {
+      "auditoria": "PASS",
+      "inconsistencias": "PASS",
+      "vaciosOmisiones": "PASS",
+      "redundancias": "PASS"
+    },
+    "note": "Manifest validation freezes benchmark composition and asset identity only; it does not imply Gate B PASS or H16 closure."
+  }
+}
