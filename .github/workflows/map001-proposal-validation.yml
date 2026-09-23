@@ -54,3 +54,6 @@ jobs:
 
       - name: Run State R4 + semantic contract R2 validation
         run: python tools/proposal-resolution/validate_run_state_r4.py
+
+      - name: E4.2 deterministic run-state reducer tests
+        run: node --test tools/proposal-resolution/map001_run_state_reducer_r1.test.mjs
