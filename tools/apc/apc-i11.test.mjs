@@ -535,15 +535,26 @@ test('I11 explicit unknown candidate species fails through canonical ACE validat
 
 test('T-I11-R4-01 OPEN contradiction suspends only the target character and ACE continues with other dimensions', () => {
   const speciesId = dataset.species[0].speciesId;
-  const specs = compatibleSpecs(speciesId, 3);
-  const conflictCharacter = specs[0].characterId;
+  const conflictCharacter = 'CH-003';
   const allowed = dataset.charactersById.get(conflictCharacter).allowedStates;
-  assert.ok(allowed.length >= 2, 'test setup requires a character with at least two allowed states');
+  assert.ok(allowed.length >= 2, 'test setup requires CH-003 to expose at least two allowed states');
+  const otherSpecs = [];
+  for (const character of dataset.characters) {
+    if (character.characterId === conflictCharacter) continue;
+    const relation = getRelation(dataset, speciesId, character.characterId);
+    if (!relation?.expectedStates?.length) continue;
+    otherSpecs.push({
+      characterId: character.characterId,
+      observedState: relation.expectedStates[0],
+    });
+    if (otherSpecs.length === 2) break;
+  }
+  assert.equal(otherSpecs.length, 2, 'test setup requires two additional computable relations');
   const evs = [
     evidence({ evidenceId: 'EV-C1', characterId: conflictCharacter, observedState: allowed[0] }),
     evidence({ evidenceId: 'EV-C2', characterId: conflictCharacter, observedState: allowed[1] }),
-    evidence({ evidenceId: 'EV-OTHER-1', ...specs[1] }),
-    evidence({ evidenceId: 'EV-OTHER-2', ...specs[2] }),
+    evidence({ evidenceId: 'EV-OTHER-1', ...otherSpecs[0] }),
+    evidence({ evidenceId: 'EV-OTHER-2', ...otherSpecs[1] }),
   ];
   const contradictions = [{
     contradictionId: 'CON-R4-01',
@@ -565,7 +576,7 @@ test('T-I11-R4-01 OPEN contradiction suspends only the target character and ACE 
   });
   assert.deepEqual(
     result.handoffEvidence.map(item => item.characterId),
-    [specs[1].characterId, specs[2].characterId].sort(),
+    [otherSpecs[0].characterId, otherSpecs[1].characterId].sort(),
   );
   assert.equal(result.aceAssessment.status, 'supported');
 });
