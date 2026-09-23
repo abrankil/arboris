@@ -2,9 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -20,12 +18,12 @@ import {
 
 import {
   Map001RepairGateError,
+  executeMap001RepairGate,
   validateAndApplyMap001Repair,
 } from './map001_repair_gate_r1.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
-const CONTRACT_GATE = path.join(ROOT, 'tools/proposal-resolution/validate_e5_repair_contracts.py');
 const VALIDATOR_PATH = 'tools/map-navigation/materialize_walkable_envelope_001.mjs';
 
 function rawSha256(relPath) {
@@ -134,42 +132,6 @@ function makeRepair(parent, report, operationOverrides = {}) {
   };
 }
 
-function assertContractGate(parent, report, repair, result) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'map001-e5-1-'));
-  try {
-    const files = {
-      parent: path.join(dir, 'parent.json'),
-      report: path.join(dir, 'report.json'),
-      repair: path.join(dir, 'repair.json'),
-      child: path.join(dir, 'child.json'),
-    };
-    fs.writeFileSync(files.parent, JSON.stringify(parent, null, 2));
-    fs.writeFileSync(files.report, JSON.stringify(report, null, 2));
-    fs.writeFileSync(files.repair, JSON.stringify(repair, null, 2));
-    fs.writeFileSync(files.child, JSON.stringify(result.childProposal, null, 2));
-
-    const proc = spawnSync('python', [
-      CONTRACT_GATE,
-      '--parent', files.parent,
-      '--report', files.report,
-      '--repair', files.repair,
-      '--child', files.child,
-      '--parent-sha', result.parentProposalSha256,
-      '--report-sha', result.validationReportSha256,
-      '--repair-sha', result.repairSha256,
-      '--parent-candidate-sha', result.parentCandidateSha256,
-    ], { cwd: ROOT, encoding: 'utf8' });
-
-    assert.equal(
-      proc.status,
-      0,
-      'E5.1 contract gate failed\nstdout:\n' + proc.stdout + '\nstderr:\n' + proc.stderr
-    );
-  } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
-}
-
 async function makeFixableFixture() {
   const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
   const candidate = buildMap001ValidationView(authorityReport);
@@ -189,11 +151,12 @@ test('AUTO_REPAIR finding -> deterministic child proposal -> full revalidation P
   const { parent, report } = await makeFixableFixture();
   const repair = makeRepair(parent, report);
 
-  const result = validateAndApplyMap001Repair({
+  const result = executeMap001RepairGate({
     parentProposal: parent,
     validationReport: report,
     repair,
     childProposalId: 'MAP001-PROP-0002',
+    root: ROOT,
   });
 
   assert.equal(result.childProposal.control.iteration, 2);
@@ -206,7 +169,8 @@ test('AUTO_REPAIR finding -> deterministic child proposal -> full revalidation P
     result.childProposal.intent.candidate.derivedRaster.walkableCellCount,
     report.findings[0].expected
   );
-  assertContractGate(parent, report, repair, result);
+  assert.equal(result.contractPrecheck.status, 'PASS');
+  assert.equal(result.contractPostcheck.status, 'PASS');
 
   const childReport = await validateMap001Proposal({
     proposal: result.childProposal,
@@ -460,4 +424,154 @@ test('JSON Pointer rejects invalid tilde escapes and leading-zero array indices'
     }),
     (error) => error.code === 'ARRAY_INDEX_INVALID'
   );
+});
+
+
+test('every cited finding must authorize the repair target', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const extraFinding = {
+    ...structuredClone(report.findings[0]),
+    findingId: 'FND-999',
+    code: 'MAP001.AUTO_REPAIR.UNRELATED',
+    targetPaths: ['/semantics/worldBearing'],
+  };
+  const reportWithTwo = {
+    ...structuredClone(report),
+    findings: [structuredClone(report.findings[0]), extraFinding],
+  };
+  const repair = makeRepair(parent, reportWithTwo);
+  repair.patch.operations[0].findingRefs = [
+    reportWithTwo.findings[0].findingId,
+    reportWithTwo.findings[1].findingId,
+  ];
+
+  assert.throws(
+    () => validateAndApplyMap001Repair({
+      parentProposal: parent,
+      validationReport: reportWithTwo,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'REPAIR_TARGET_OUTSIDE_FINDING_SCOPE'
+  );
+});
+
+test('expectedBefore object equality is independent of object key order', () => {
+  const parent = {
+    schemaVersion: '0.2',
+    proposalId: 'MAP001-PROP-0001',
+    proposalType: 'MAP001_LOCAL_NAVIGATION_DERIVED',
+    control: {
+      owner: 'RESOLVER',
+      runId: 'MAP001-RUN-0001',
+      iteration: 1,
+      lineage: { parentProposal: null, originatingRepair: null },
+      baseline: {
+        authorityId: 'MAP-001-WALKABLE-ENVELOPE-AUTHORITY-001',
+        authorityPath: DEFAULT_AUTHORITY_PATH,
+        authorityManifestSha256: 'a'.repeat(64),
+        sourceCandidate: {
+          id: 'MAP-001-WALKABLE-ENVELOPE-CANDIDATE-001',
+          path: 'data/maps/map-001-walkable-envelope-candidate-001.json',
+          sha256: 'b'.repeat(64),
+        },
+      },
+      subject: {
+        mode: 'CREATE_DERIVED',
+        artifactRole: 'NON_AUTHORITATIVE_DERIVED',
+        artifactId: 'ORDER',
+        artifactPath: 'build/proposal-resolution/order.json',
+        baseSha256: null,
+      },
+    },
+    intent: {
+      objective: 'Object equality order test',
+      changes: [{
+        changeId: 'CHG-001',
+        operation: 'add',
+        targetPath: '/obj',
+        after: { a: 1, b: 2 },
+        rationale: 'fixture',
+      }],
+      candidate: { obj: { a: 1, b: 2 } },
+    },
+  };
+  const report = {
+    schemaVersion: '0.1',
+    reportId: 'MAP001-VAL-0001',
+    reportType: 'MAP001_LOCAL_NAVIGATION_VALIDATION',
+    control: {
+      owner: 'RESOLVER',
+      runId: parent.control.runId,
+      proposalBinding: {
+        proposalId: parent.proposalId,
+        sha256: logicalSha256(parent),
+        iteration: 1,
+      },
+      authorityBinding: {
+        authorityId: parent.control.baseline.authorityId,
+        authorityManifestSha256: parent.control.baseline.authorityManifestSha256,
+        sourceCandidate: {
+          id: parent.control.baseline.sourceCandidate.id,
+          sha256: parent.control.baseline.sourceCandidate.sha256,
+        },
+      },
+      validatorBinding,
+    },
+    status: 'REJECT_FIXABLE',
+    findings: [{
+      findingId: 'FND-001',
+      disposition: 'AUTO_REPAIR',
+      code: 'TEST.OBJECT_ORDER',
+      message: 'test',
+      sourceRefs: [DEFAULT_AUTHORITY_PATH],
+      targetPaths: ['/obj'],
+      repairDirective: { minimalChangeRequired: true },
+    }],
+  };
+  const repair = {
+    schemaVersion: '0.1',
+    repairId: 'MAP001-REPAIR-0001',
+    repairType: 'MAP001_LOCAL_NAVIGATION_AUTO_REPAIR',
+    control: {
+      owner: 'RESOLVER',
+      runId: parent.control.runId,
+      parentProposal: {
+        proposalId: parent.proposalId,
+        sha256: logicalSha256(parent),
+        iteration: 1,
+      },
+      validationBasis: {
+        reportId: report.reportId,
+        sha256: logicalSha256(report),
+        status: 'REJECT_FIXABLE',
+      },
+      patchPolicy: {
+        pathScope: 'PARENT_PROPOSAL_INTENT_CANDIDATE',
+        authorityMode: 'CONFORM_TO_EXISTING_AUTHORITY',
+        mutationClass: 'AUTO_REPAIR_ONLY',
+      },
+    },
+    patch: {
+      operations: [{
+        editId: 'EDIT-001',
+        operation: 'replace',
+        targetPath: '/obj',
+        findingRefs: ['FND-001'],
+        expectedBefore: { b: 2, a: 1 },
+        after: { a: 1, b: 3 },
+        rationale: 'same object semantics, different key insertion order',
+      }],
+    },
+  };
+
+  const result = validateAndApplyMap001Repair({
+    parentProposal: parent,
+    validationReport: report,
+    repair,
+    childProposalId: 'MAP001-PROP-0002',
+  });
+
+  assert.deepEqual(result.childProposal.intent.candidate.obj, { a: 1, b: 3 });
 });
