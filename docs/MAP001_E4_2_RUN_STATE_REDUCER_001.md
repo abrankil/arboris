@@ -187,7 +187,17 @@ permanece preservado por construcción.
 
 ## 10. Pruebas
 
-Archivo:
+La primera ejecución de la suite E4.2 pasó funcionalmente, pero una auditoría posterior detectó que los fixtures de `run-state` y `validation-report` no estaban siendo validados todavía contra Run State R4 y Validation Report R1 reales. Eso podía permitir que una transición correcta se probara sobre un fixture estructuralmente inválido.
+
+Se corrigió antes del cierre de E4.2 mediante:
+
+```text
+tools/proposal-resolution/validate_e4_reducer_contracts.py
+```
+
+La suite ahora valida, para cada caso, tanto los artefactos de entrada como el `state` resultante embebido nuevamente en Run State R4. Los reports usados por las pruebas contienen el control-plane obligatorio de Validation Report R1 y los findings compatibles con cada status.
+
+Archivo funcional:
 
 ```text
 tools/proposal-resolution/map001_run_state_reducer_r1.test.mjs
@@ -243,13 +253,17 @@ No corresponde modificar `tools/asc/compile_asc.mjs`.
 
 El reducer implementa directamente la precedencia y reglas congeladas en E4.1 sin introducir estados nuevos ni duplicar autoridad MAP-001.
 
-Las comprobaciones de estructura interna y binding de validation-reports fallan cerrado antes de interpretar estados de dominio.
+La auditoría detectó una brecha de prueba, no una falla del reducer: los fixtures iniciales no eran contract-validated contra R4/R1. La brecha fue corregida haciendo que cada prueba funcional pase además por los schemas reales antes de aceptar el resultado.
+
+Las comprobaciones de estructura interna y binding de validation-reports continúan fallando cerrado antes de interpretar estados de dominio.
 
 ## 13. INCONSISTENCIAS
 
-No se detecta una inconsistencia conceptual nueva en la traducción de R4/R2 a reducer.
+No se detecta una inconsistencia conceptual nueva en la traducción de R4/R2 al reducer.
 
-La validez de ejecución queda pendiente de los checks externos del PR.
+Se detectó y corrigió una inconsistencia metodológica en la evidencia de prueba: tests funcionales PASS no bastaban para demostrar que los fixtures cumplían los contratos reales. La nueva capa contractual elimina esa ambigüedad.
+
+La validez final de ejecución queda pendiente de los checks externos sobre el head corregido.
 
 ## 14. VACÍOS / OMISIONES
 
