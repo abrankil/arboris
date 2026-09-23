@@ -32,6 +32,7 @@ const OPERATIONAL_DEPENDENCY_PATHS = [
   ['E5_1_REPAIR_GATE', 'tools/proposal-resolution/map001_repair_gate_r1.mjs'],
   ['E5_2_TRANSACTION_CANDIDATE', 'tools/proposal-resolution/map001_repair_transaction_candidate_r1.mjs'],
   ['E5_3_DURABLE_STORE', 'tools/proposal-resolution/map001_durable_repair_store_r1.mjs'],
+  ['RUN_SCHEMA_GATE', RUN_SCHEMA_GATE],
 ];
 
 function fail(code, message, details = null) {
@@ -83,7 +84,7 @@ function ensureSupportedPlatform(platform = process.platform) {
   if (platform !== 'linux') {
     fail(
       'UNSUPPORTED_PLATFORM',
-      'E5.3 durable guarantees are currently demonstrated only on Linux',
+      'E5.3 execution is currently guarded to Linux; durable evidence is limited to the CI-tested Ubuntu/Linux environment and does not certify every Linux filesystem',
       { platform }
     );
   }
@@ -267,15 +268,35 @@ function unlinkIfExists(filePath) {
 }
 
 function validateBindingShape(binding, label) {
+  if (!binding || binding.schemaVersion !== '0.1') {
+    fail(
+      'RECOVERY_METADATA_VERSION_UNSUPPORTED',
+      label + ' schemaVersion must equal 0.1',
+      { observedSchemaVersion: binding?.schemaVersion ?? null }
+    );
+  }
   if (
-    !binding
-    || typeof binding.transactionId !== 'string'
+    typeof binding.transactionId !== 'string'
     || binding.transactionId.length === 0
     || typeof binding.runId !== 'string'
+    || binding.runId.length === 0
     || !/^[0-9a-f]{64}$/.test(binding.beforeSha256 ?? '')
     || !/^[0-9a-f]{64}$/.test(binding.afterSha256 ?? '')
   ) {
     fail('RECOVERY_BINDING_INVALID', label + ' binding is invalid');
+  }
+}
+
+function assertRecoveryRunId(binding, run, label) {
+  if (binding.runId !== run?.runId) {
+    fail(
+      'RECOVERY_RUN_ID_MISMATCH',
+      label + ' runId does not match durable run',
+      {
+        bindingRunId: binding.runId,
+        visibleRunId: run?.runId ?? null,
+      }
+    );
   }
 }
 
@@ -560,6 +581,7 @@ export function recoverMap001RepairStore({
   verifyOperationalDependencies(root, lock.operationalDependencies ?? []);
 
   const visible = readJson(paths.runPath, 'durable run');
+  assertRecoveryRunId(lock, visible, 'lock');
   const visibleSha256 = logicalSha256(visible);
   const visibleClass = visibleSha256 === lock.beforeSha256
     ? 'before'
@@ -582,6 +604,7 @@ export function recoverMap001RepairStore({
 
   const journal = readJson(paths.journalPath, 'journal');
   validateBindingShape(journal, 'journal');
+  assertRecoveryRunId(journal, visible, 'journal');
   if (
     journal.phase !== 'PREPARED'
     || !isDeepStrictEqual(coreBinding(lock), coreBinding(journal))
@@ -595,6 +618,7 @@ export function recoverMap001RepairStore({
   let next = null;
   if (hasNext) {
     next = readJson(paths.nextPath, 'next snapshot');
+    assertRecoveryRunId(journal, next, 'next snapshot');
     if (logicalSha256(next) !== journal.afterSha256) {
       fail('RECOVERY_NEXT_HASH_MISMATCH', 'next snapshot does not match journal after hash');
     }
@@ -615,6 +639,7 @@ export function recoverMap001RepairStore({
     fs.renameSync(paths.nextPath, paths.runPath);
     fsyncDirectory(paths.dirPath);
     const after = readJson(paths.runPath, 'recovered after run');
+    assertRecoveryRunId(journal, after, 'recovered after run');
     if (logicalSha256(after) !== journal.afterSha256) {
       fail('RECOVERY_POST_REPLACE_HASH_MISMATCH', 'recovered visible run hash mismatch');
     }
