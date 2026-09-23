@@ -2,7 +2,7 @@
   "experimentId": "H16-EXP-001",
   "characterId": "CH-003",
   "manifestVersion": "1.0.0",
-  "status": "FROZEN_CANDIDATE",
+  "status": "FROZEN",
   "createdAt": "2026-09-23",
   "sourceDataset": {
     "path": "data/botanical/photos.json",
@@ -525,5 +525,13 @@
         "path": "species/SP-006_quillaja_saponaria/QS002/SP-006_QS002_ramilla_hojas_01.jpg"
       }
     }
-  ]
+  ],
+  "validation": {
+    "asc": "PASS",
+    "blockers": 0,
+    "ciRun": 230,
+    "auditProtocolRun": 161,
+    "canonicalTests": "PASS",
+    "note": "Manifest validation freezes composition only; it does not imply Gate B PASS or H16 closure."
+  }
 }
