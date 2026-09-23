@@ -27,8 +27,11 @@ export async function validateH16BenchmarkManifest({
   if (!manifest.sourceDataset?.gitBlobSha1 || !/^[0-9a-f]{40}$/.test(manifest.sourceDataset.gitBlobSha1)) errors.push('sourceDataset.gitBlobSha1 must be a Git blob SHA');
   if (manifest.sourceDataset?.semantic !== 'expanded_registry_snapshot') errors.push('sourceDataset.semantic must describe the expanded registry snapshot');
   if (manifest.benchmarkPopulation?.semantic !== 'historical_pre_expansion_subset') errors.push('benchmarkPopulation.semantic must describe the frozen historical subset');
-  if (manifest.status !== 'CANDIDATE') errors.push('manifest status must remain CANDIDATE until final ASC validation');
-  if (manifest.validationState !== 'PENDING_FINAL_ASC_VALIDATION') errors.push('validationState must remain PENDING_FINAL_ASC_VALIDATION before freeze');
+  const candidateState = manifest.status === 'CANDIDATE' && manifest.validationState === 'PENDING_FINAL_ASC_VALIDATION';
+  const frozenState = manifest.status === 'FROZEN' && manifest.validationState === 'VALIDATED_WITH_ASC';
+  if (!candidateState && !frozenState) {
+    errors.push('manifest status/validationState pair must be CANDIDATE/PENDING_FINAL_ASC_VALIDATION or FROZEN/VALIDATED_WITH_ASC');
+  }
 
   const entries = Array.isArray(manifest.photos) ? manifest.photos : [];
   const seen = new Set();
