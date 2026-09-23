@@ -1,0 +1,6 @@
+Convertir el paquete recibido en una ficha compacta de referencia.
+Conservar todos los claims suministrados y toda la información epistemológica explícitamente disponible.
+No añadir claims materiales.
+No resolver incertidumbres.
+No autoasignar PASS, PARTIAL, FAIL, VALIDATED ni APPROVED.
+No usar conocimiento externo para elevar la autoridad de un claim.
