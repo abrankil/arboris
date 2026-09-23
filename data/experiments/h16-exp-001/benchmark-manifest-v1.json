@@ -2,7 +2,7 @@
   "experimentId": "H16-EXP-001",
   "characterId": "CH-003",
   "manifestVersion": "1.0.0",
-  "status": "CANDIDATE",
+  "status": "FROZEN",
   "createdAt": "2026-09-23",
   "sourceDataset": {
     "path": "data/botanical/photos.json",
@@ -578,5 +578,20 @@
     "postExpansionPhotos": "PH-046..PH-093 explicitly outside manifest V1",
     "selectionAuthority": "explicit manifest membership; never dynamic individual expansion"
   },
-  "validationState": "PENDING_FINAL_ASC_VALIDATION"
+  "validationState": "VALIDATED_WITH_ASC",
+  "validation": {
+    "asc": "PASS",
+    "blockers": 0,
+    "ciRun": 235,
+    "auditProtocolRun": 166,
+    "canonicalTests": "PASS",
+    "assetIdentityVerification": "45/45 git commit+path references independently resolved and bound to gitBlobSha1",
+    "audit": {
+      "auditoria": "PASS",
+      "inconsistencias": "PASS",
+      "vaciosOmisiones": "PASS",
+      "redundancias": "PASS"
+    },
+    "note": "Manifest validation freezes benchmark composition and asset identity only; it does not imply Gate B PASS or H16 closure."
+  }
 }
