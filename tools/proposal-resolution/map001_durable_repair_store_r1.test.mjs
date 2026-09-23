@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -626,3 +627,234 @@ test('E5.3 self provenance drift binding fails closed during recovery', { skip: 
     cleanup(f.dir);
   }
 });
+
+
+test('RUN_SCHEMA_GATE is pinned as an exact operational dependency', { skip: !linux }, async () => {
+  const f = await fixture();
+  try {
+    assert.throws(
+      () => commitMap001RepairSnapshot({
+        runPath: f.runPath,
+        expectedBeforeSha256: logicalSha256(f.run),
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+        transactionId: 'TXN-SCHEMA-GATE',
+        crashAt: 'C1',
+      }),
+      Map001DurableStoreCrash
+    );
+
+    const lockPath = f.runPath + '.lock';
+    const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+    const gate = lock.operationalDependencies.find(
+      (item) => item.dependencyId === 'RUN_SCHEMA_GATE'
+    );
+    assert.ok(gate);
+    assert.equal(
+      gate.path,
+      'tools/proposal-resolution/validate_e4_reducer_contracts.py'
+    );
+
+    gate.sha256 = '0'.repeat(64);
+    fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n');
+
+    assert.throws(
+      () => recoverMap001RepairStore({
+        runPath: f.runPath,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+      }),
+      (error) => error instanceof Map001DurableStoreError
+        && error.code === 'OPERATIONAL_DEPENDENCY_DRIFT'
+    );
+  } finally {
+    cleanup(f.dir);
+  }
+});
+
+test('recovery rejects lock runId that does not match visible run', { skip: !linux }, async () => {
+  const f = await fixture();
+  try {
+    assert.throws(
+      () => commitMap001RepairSnapshot({
+        runPath: f.runPath,
+        expectedBeforeSha256: logicalSha256(f.run),
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+        transactionId: 'TXN-RUNID-LOCK',
+        crashAt: 'C1',
+      }),
+      Map001DurableStoreCrash
+    );
+
+    const lockPath = f.runPath + '.lock';
+    const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+    lock.runId = 'MAP001-RUN-9999';
+    fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n');
+
+    assert.throws(
+      () => recoverMap001RepairStore({
+        runPath: f.runPath,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+      }),
+      (error) => error instanceof Map001DurableStoreError
+        && error.code === 'RECOVERY_RUN_ID_MISMATCH'
+    );
+  } finally {
+    cleanup(f.dir);
+  }
+});
+
+test('recovery rejects journal runId that does not match visible run', { skip: !linux }, async () => {
+  const f = await fixture();
+  try {
+    assert.throws(
+      () => commitMap001RepairSnapshot({
+        runPath: f.runPath,
+        expectedBeforeSha256: logicalSha256(f.run),
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+        transactionId: 'TXN-RUNID-JOURNAL',
+        crashAt: 'C2',
+      }),
+      Map001DurableStoreCrash
+    );
+
+    const journalPath = f.runPath + '.txn.json';
+    const journal = JSON.parse(fs.readFileSync(journalPath, 'utf8'));
+    journal.runId = 'MAP001-RUN-9999';
+    fs.writeFileSync(journalPath, JSON.stringify(journal, null, 2) + '\n');
+
+    assert.throws(
+      () => recoverMap001RepairStore({
+        runPath: f.runPath,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+      }),
+      (error) => error instanceof Map001DurableStoreError
+        && error.code === 'RECOVERY_RUN_ID_MISMATCH'
+    );
+  } finally {
+    cleanup(f.dir);
+  }
+});
+
+for (const target of ['lock', 'journal']) {
+  test('recovery rejects unsupported ' + target + ' metadata version', { skip: !linux }, async () => {
+    const f = await fixture();
+    try {
+      assert.throws(
+        () => commitMap001RepairSnapshot({
+          runPath: f.runPath,
+          expectedBeforeSha256: logicalSha256(f.run),
+          parentProposal: f.parentProposal,
+          validationReport: f.validationReport,
+          repair: f.repair,
+          childProposalId: f.childProposalId,
+          validationReportsById: f.validationReportsById,
+          root: ROOT,
+          transactionId: 'TXN-VERSION-' + target,
+          crashAt: target === 'lock' ? 'C1' : 'C2',
+        }),
+        Map001DurableStoreCrash
+      );
+
+      const metadataPath = target === 'lock'
+        ? f.runPath + '.lock'
+        : f.runPath + '.txn.json';
+      const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+      metadata.schemaVersion = '9.9';
+      fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2) + '\n');
+
+      assert.throws(
+        () => recoverMap001RepairStore({
+          runPath: f.runPath,
+          validationReportsById: f.validationReportsById,
+          root: ROOT,
+        }),
+        (error) => error instanceof Map001DurableStoreError
+          && error.code === 'RECOVERY_METADATA_VERSION_UNSUPPORTED'
+      );
+    } finally {
+      cleanup(f.dir);
+    }
+  });
+}
+
+for (const point of ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8']) {
+  test(point + ' survives real process restart and recovers expected durable side', { skip: !linux }, async () => {
+    const f = await fixture();
+    try {
+      const workerPath = path.join(HERE, 'map001_durable_repair_store_r1.worker.mjs');
+      const commitPayloadPath = path.join(f.dir, 'commit-payload.json');
+      const recoverPayloadPath = path.join(f.dir, 'recover-payload.json');
+
+      fs.writeFileSync(commitPayloadPath, JSON.stringify({
+        runPath: f.runPath,
+        expectedBeforeSha256: logicalSha256(f.run),
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: f.repair,
+        childProposalId: f.childProposalId,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+        transactionId: 'TXN-PROC-' + point,
+        crashAt: point,
+      }));
+
+      const writer = spawnSync(process.execPath, [workerPath, 'commit', commitPayloadPath], {
+        cwd: ROOT,
+        encoding: 'utf8',
+      });
+      assert.equal(writer.status, 90, writer.stderr);
+      assert.match(writer.stderr, new RegExp('SIMULATED_CRASH:' + point));
+
+      fs.writeFileSync(recoverPayloadPath, JSON.stringify({
+        runPath: f.runPath,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+      }));
+
+      const restarter = spawnSync(process.execPath, [workerPath, 'recover', recoverPayloadPath], {
+        cwd: ROOT,
+        encoding: 'utf8',
+      });
+      assert.equal(restarter.status, 0, restarter.stderr);
+
+      const recovered = JSON.parse(restarter.stdout.trim());
+      const expectedStatus = ['C1', 'C2'].includes(point)
+        ? 'RECOVERED_BEFORE'
+        : 'RECOVERED_AFTER';
+      const expectedHash = ['C1', 'C2'].includes(point)
+        ? logicalSha256(f.run)
+        : logicalSha256(f.proposed);
+
+      assert.equal(recovered.recoveryStatus, expectedStatus);
+      assert.equal(recovered.visibleSha256, expectedHash);
+
+      const visible = JSON.parse(fs.readFileSync(f.runPath, 'utf8'));
+      assert.equal(logicalSha256(visible), expectedHash);
+      if (expectedStatus === 'RECOVERED_AFTER') {
+        assert.notEqual(visible.iterations.at(-2).repair, null);
+        assert.equal(visible.iterations.at(-1).validationReport, null);
+      } else {
+        assert.equal(visible.iterations.at(-1).repair, null);
+      }
+    } finally {
+      cleanup(f.dir);
+    }
+  });
+}
