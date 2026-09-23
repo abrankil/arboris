@@ -1,7 +1,7 @@
 # Árboris — APC I12 Single-Screen UI Contract
 
 **ID:** `ARBORIS_APC_I12_UI_CONTRACT_R10`  
-**Estado:** CANDIDATE FOR REVALIDATION WITH ASC.  
+**Estado:** VALIDATED WITH ASC / FROZEN.  
 **Ámbito:** Hito 16 / APC I12.  
 **Base canónica:** `main@035ff6edefd16df86eff5bc549efe7d41eae153e`.  
 **Prerequisito:** I1–I11 R4 integrados en `main`.  
@@ -871,3 +871,30 @@ R10 todavía no congela detalles puramente visuales como layout exacto, estilos,
 ### REDUNDANCIAS
 
 Los estados de revisión de fotografía definidos en §15 son derivados de UI y no deben persistirse como una segunda taxonomía canónica. I12 debe reutilizar validadores y estructuras APC existentes en lugar de replicarlas. ACTIVE_REVIEW_TARGET, disponibilidad local del asset, relink, working snapshot, estado efímero de formulario y `SERIALIZABLE WORKING SNAPSHOT` no constituyen nuevas fuentes de verdad ni estados APC persistidos. La deduplicación se deriva consultando `session.photoEvidence[]` por fingerprint; no requiere un índice canónico persistido adicional. Pending y contradictions se actualizan en sus arrays canónicos, sin caches UI persistidos paralelos. La confirmación no introduce estados intermedios como CONFIRMING/PENDING_CONFIRMATION; DRAFT y CONFIRMED siguen siendo los únicos lifecycle canónicos. Una primera confirmación puede comenzar directamente en CONFIRMED revision 1 si no existía evidencia persistida; las transiciones posteriores se expresan mediante I6 y nunca heredan confirmation a contenido nuevo sin una nueva acción humana.
+
+
+## 24. VALIDACIÓN FINAL ASC R10
+
+Revalidación ejecutada sobre la extracción limpia I12 basada en `main@035ff6edefd16df86eff5bc549efe7d41eae153e`, posterior a I11 R4.
+
+Resultado:
+
+```text
+AUDITORÍA             PASS
+INCONSISTENCIAS       PASS
+VACÍOS / OMISIONES    PASS
+REDUNDANCIAS          PASS
+BLOCKERS              0
+```
+
+Verificación ejecutable:
+
+- CI #208 → PASS;
+- canonical tests / `npm test` → PASS;
+- APC I1–I11 R4 + I12 → PASS dentro del gate canónico;
+- ACE y character observers → PASS dentro del gate canónico;
+- Audit Protocol Check #140 → PASS;
+- `RUN_I11_VERIFICATION` entrega a I11 R4 el mismo `areStatesIncompatible` del contexto writer;
+- la rama histórica `h16/apc-i12-ui` no se integra como unidad acumulada.
+
+R10 queda congelado con esta semántica. Cambios posteriores en write model, confirmación, revisión, contradicciones, export o binding con I11 requieren nueva versión contractual y regresión dirigida.
