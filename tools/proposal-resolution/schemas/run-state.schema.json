@@ -1,1 +1,850 @@
-{"$schema":"http://json-schema.org/draft-07/schema#","$id":"arboris:proposal-resolution:map001:run-state:r3","title":"Árboris MAP-001 Proposal Resolution Run State R3","description":"R3 corrige dos necesidades descubiertas por E2.5: cycle detection usa hashes del estado candidate y no hashes del artefacto proposal; además la corrida fija una allowlist de artefactos derivados y el contrato semántico E2.5 dentro del contract-set.","type":"object","additionalProperties":false,"required":["schemaVersion","runId","runType","control","state","iterations","seenCandidateHashes"],"properties":{"schemaVersion":{"type":"string","const":"0.3"},"runId":{"type":"string","pattern":"^MAP001-RUN-[0-9]{4,}$"},"runType":{"type":"string","const":"MAP001_LOCAL_NAVIGATION_PROPOSAL_RESOLUTION"},"control":{"type":"object","description":"Baseline y política fijados al iniciar la corrida. No son superficie de escritura del agente.","additionalProperties":false,"required":["owner","scope","baseline","validatorBinding","resolverBinding","contractSet","policy"],"properties":{"owner":{"type":"string","const":"RESOLVER"},"scope":{"type":"string","const":"MAP001_LOCAL_NAVIGATION"},"baseline":{"$ref":"#/definitions/authorityBaseline"},"validatorBinding":{"$ref":"#/definitions/validatorBinding"},"policy":{"type":"object","description":"Política del orquestador para la corrida. Los valores numéricos se fijan externamente al crear la corrida; R1 no impone un número canónico.","additionalProperties":false,"required":["maxIterations","stallRepeatThreshold","repeatProposalHashAction","regressionAction","artifactWritePolicy"],"properties":{"maxIterations":{"type":"integer","minimum":1},"stallRepeatThreshold":{"type":"integer","minimum":2},"repeatProposalHashAction":{"type":"string","const":"CYCLE_DETECTED"},"regressionAction":{"type":"string","const":"REGRESSION"},"artifactWritePolicy":{"type":"object","additionalProperties":false,"required":["allowedRoots","createCollisionPolicy"],"properties":{"allowedRoots":{"type":"array","minItems":1,"uniqueItems":true,"items":{"$ref":"#/definitions/repoRelativePath"}},"createCollisionPolicy":{"type":"string","const":"FAIL_IF_EXISTS"}}}}},"resolverBinding":{"$ref":"#/definitions/resolverBinding"},"contractSet":{"$ref":"#/definitions/contractSet"}}},"state":{"$ref":"#/definitions/runState"},"iterations":{"type":"array","minItems":1,"items":{"$ref":"#/definitions/iterationRecord"}},"seenCandidateHashes":{"type":"array","description":"Hashes lógicos canónicos de proposal.intent.candidate para cada estado de iteración ya comprometido. Se usan para cycle detection. Deben coincidir exactamente con los candidateStateHash de la historia.","minItems":1,"uniqueItems":true,"items":{"$ref":"#/definitions/sha256"}}},"definitions":{"sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},"authorityBaseline":{"type":"object","description":"Autoridad de navegación fijada al comienzo de la corrida; referencia de control, no autoridad duplicada.","additionalProperties":false,"required":["authorityId","authorityPath","authorityManifestSha256","sourceCandidate"],"properties":{"authorityId":{"type":"string","pattern":"^MAP-001-WALKABLE-ENVELOPE-AUTHORITY-[0-9]{3}$"},"authorityPath":{"type":"string","pattern":"^data/baselines/map001-walkable-envelope-authority-[0-9]{3}\\.json$"},"authorityManifestSha256":{"$ref":"#/definitions/sha256"},"sourceCandidate":{"type":"object","additionalProperties":false,"required":["id","path","sha256"],"properties":{"id":{"type":"string","pattern":"^MAP-001-WALKABLE-ENVELOPE-CANDIDATE-[0-9]{3}$"},"path":{"type":"string","pattern":"^data/maps/map-001-walkable-envelope-candidate-[0-9]{3}\\.json$"},"sha256":{"$ref":"#/definitions/sha256"}}}}},"validatorBinding":{"type":"object","description":"Validador esperado durante toda la corrida; cada validation-report deberá coincidir con este binding.","additionalProperties":false,"required":["validatorId","scope","implementationPath","implementationSha256"],"properties":{"validatorId":{"type":"string","pattern":"^[A-Z0-9][A-Z0-9._-]{2,}$"},"scope":{"type":"string","const":"MAP001_LOCAL_NAVIGATION"},"implementationPath":{"type":"string","pattern":"^tools/(?!.*(?:^|/)\\.\\.(?:/|$)).+\\.mjs$"},"implementationSha256":{"$ref":"#/definitions/sha256"}}},"proposalBinding":{"type":"object","additionalProperties":false,"required":["proposalId","sha256"],"properties":{"proposalId":{"type":"string","pattern":"^MAP001-PROP-[0-9]{4,}$"},"sha256":{"$ref":"#/definitions/sha256"}}},"validationBinding":{"type":"object","additionalProperties":false,"required":["reportId","sha256","status"],"properties":{"reportId":{"type":"string","pattern":"^MAP001-VAL-[0-9]{4,}$"},"sha256":{"$ref":"#/definitions/sha256"},"status":{"type":"string","enum":["PASS","REJECT_FIXABLE","OPEN_BLOCKER","AUTHORITY_BLOCKER"]}}},"repairBinding":{"type":"object","additionalProperties":false,"required":["repairId","sha256"],"properties":{"repairId":{"type":"string","pattern":"^MAP001-REPAIR-[0-9]{4,}$"},"sha256":{"$ref":"#/definitions/sha256"}}},"iterationRecord":{"type":"object","description":"Una iteración contiene exactamente una propuesta y, cuando ya ocurrió, su reporte. Una reparación pertenece a la misma iteración que produjo REJECT_FIXABLE y da origen a la propuesta siguiente.","additionalProperties":false,"required":["iteration","proposal","validationReport","repair"],"properties":{"iteration":{"type":"integer","minimum":1},"proposal":{"$ref":"#/definitions/proposalBinding"},"validationReport":{"oneOf":[{"$ref":"#/definitions/validationBinding"},{"type":"null"}]},"repair":{"oneOf":[{"$ref":"#/definitions/repairBinding"},{"type":"null"}]}},"allOf":[{"if":{"properties":{"validationReport":{"type":"null"}}},"then":{"properties":{"repair":{"type":"null"}}}},{"if":{"properties":{"validationReport":{"type":"object","properties":{"status":{"enum":["PASS","OPEN_BLOCKER","AUTHORITY_BLOCKER"]}},"required":["status"]}}},"then":{"properties":{"repair":{"type":"null"}}}}]},"artifactRef":{"type":"object","additionalProperties":false,"required":["id","sha256"],"properties":{"id":{"type":"string","minLength":1},"sha256":{"$ref":"#/definitions/sha256"}}},"cycleEvidence":{"type":"object","additionalProperties":false,"required":["kind","repeatedCandidateSha256","firstSeenIteration"],"properties":{"kind":{"type":"string","const":"CYCLE_DETECTED"},"firstSeenIteration":{"type":"integer","minimum":1},"repeatedCandidateSha256":{"$ref":"#/definitions/sha256"}}},"stalledEvidence":{"type":"object","additionalProperties":false,"required":["kind","findingSetFingerprint","repeatCount"],"properties":{"kind":{"type":"string","const":"STALLED"},"findingSetFingerprint":{"$ref":"#/definitions/sha256"},"repeatCount":{"type":"integer","minimum":2}}},"regressionEvidence":{"type":"object","additionalProperties":false,"required":["kind","previousValidation","currentValidation"],"properties":{"kind":{"type":"string","const":"REGRESSION"},"previousValidation":{"$ref":"#/definitions/artifactRef"},"currentValidation":{"$ref":"#/definitions/artifactRef"}}},"authorityChangedEvidence":{"type":"object","additionalProperties":false,"required":["kind","component","expectedSha256","observedSha256"],"properties":{"kind":{"type":"string","const":"AUTHORITY_CHANGED"},"component":{"type":"string","enum":["AUTHORITY_MANIFEST","SOURCE_CANDIDATE"]},"expectedSha256":{"$ref":"#/definitions/sha256"},"observedSha256":{"$ref":"#/definitions/sha256"}}},"maxIterationsEvidence":{"type":"object","additionalProperties":false,"required":["kind","limit"],"properties":{"kind":{"type":"string","const":"MAX_ITERATIONS"},"limit":{"type":"integer","minimum":1}}},"systemErrorEvidence":{"type":"object","additionalProperties":false,"required":["kind","code","message"],"properties":{"kind":{"type":"string","const":"SYSTEM_ERROR"},"code":{"type":"string","pattern":"^[A-Z0-9][A-Z0-9._-]{2,}$"},"message":{"type":"string","minLength":1},"component":{"type":"string","enum":["VALIDATOR_IMPLEMENTATION","RESOLVER_IMPLEMENTATION","CONTRACT_PROPOSAL","CONTRACT_REPAIR","CONTRACT_VALIDATION_REPORT","CONTRACT_RUN_STATE","CONTRACT_SEMANTIC"]},"expectedSha256":{"$ref":"#/definitions/sha256"},"observedSha256":{"$ref":"#/definitions/sha256"}},"allOf":[{"if":{"properties":{"code":{"const":"PROVENANCE_MISMATCH"}},"required":["code"]},"then":{"required":["component","expectedSha256","observedSha256"]}}]},"runState":{"type":"object","additionalProperties":false,"required":["status","currentIteration"],"properties":{"status":{"type":"string","enum":["READY_TO_VALIDATE","READY_TO_REPAIR","DOMAIN_PASS","OPEN_BLOCKED","AUTHORITY_BLOCKED","AUTHORITY_CHANGED","STALLED","CYCLE_DETECTED","REGRESSION","MAX_ITERATIONS","SYSTEM_ERROR"]},"currentIteration":{"type":"integer","minimum":1},"evidence":{"oneOf":[{"$ref":"#/definitions/cycleEvidence"},{"$ref":"#/definitions/stalledEvidence"},{"$ref":"#/definitions/regressionEvidence"},{"$ref":"#/definitions/authorityChangedEvidence"},{"$ref":"#/definitions/maxIterationsEvidence"},{"$ref":"#/definitions/systemErrorEvidence"}]}},"allOf":[{"if":{"properties":{"status":{"enum":["READY_TO_VALIDATE","READY_TO_REPAIR","DOMAIN_PASS","OPEN_BLOCKED","AUTHORITY_BLOCKED"]}}},"then":{"not":{"required":["evidence"]}}},{"if":{"properties":{"status":{"const":"CYCLE_DETECTED"}}},"then":{"required":["evidence"],"properties":{"evidence":{"$ref":"#/definitions/cycleEvidence"}}}},{"if":{"properties":{"status":{"const":"STALLED"}}},"then":{"required":["evidence"],"properties":{"evidence":{"$ref":"#/definitions/stalledEvidence"}}}},{"if":{"properties":{"status":{"const":"REGRESSION"}}},"then":{"required":["evidence"],"properties":{"evidence":{"$ref":"#/definitions/regressionEvidence"}}}},{"if":{"properties":{"status":{"const":"AUTHORITY_CHANGED"}}},"then":{"required":["evidence"],"properties":{"evidence":{"$ref":"#/definitions/authorityChangedEvidence"}}}},{"if":{"properties":{"status":{"const":"MAX_ITERATIONS"}}},"then":{"required":["evidence"],"properties":{"evidence":{"$ref":"#/definitions/maxIterationsEvidence"}}}},{"if":{"properties":{"status":{"const":"SYSTEM_ERROR"}}},"then":{"required":["evidence"],"properties":{"evidence":{"$ref":"#/definitions/systemErrorEvidence"}}}}]},"repoRelativePath":{"type":"string","minLength":1,"pattern":"^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$","description":"Ruta POSIX repo-relative canónica: separador '/', sin absoluto, drive letter, backslash, segmentos vacíos ni segmentos '.'/'..'."},"resolverBinding":{"type":"object","description":"Identidad de la implementación del resolver que gobierna la corrida. El hash debe calcularse desde bytes reales antes de iniciar o reanudar la corrida.","additionalProperties":false,"required":["resolverId","implementationPath","implementationSha256"],"properties":{"resolverId":{"type":"string","pattern":"^[A-Z0-9][A-Z0-9._-]{2,}$"},"implementationPath":{"allOf":[{"$ref":"#/definitions/repoRelativePath"},{"pattern":"^tools/.+\\.mjs$"}]},"implementationSha256":{"$ref":"#/definitions/sha256"}}},"schemaBinding":{"type":"object","additionalProperties":false,"required":["schemaId","path","sha256"],"properties":{"schemaId":{"type":"string","minLength":1},"path":{"$ref":"#/definitions/repoRelativePath"},"sha256":{"$ref":"#/definitions/sha256"}}},"contractSet":{"type":"object","description":"Conjunto exacto de contratos estructurales que gobierna la corrida. Es trazabilidad de ejecución; no reemplaza la autoridad de dominio.","additionalProperties":false,"required":["proposal","repair","validationReport","runState","semanticContract"],"properties":{"proposal":{"$ref":"#/definitions/schemaBinding"},"repair":{"$ref":"#/definitions/schemaBinding"},"validationReport":{"$ref":"#/definitions/schemaBinding"},"runState":{"$ref":"#/definitions/schemaBinding"},"semanticContract":{"$ref":"#/definitions/schemaBinding"}}}}}
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "arboris:proposal-resolution:map001:run-state:r4",
+  "title": "Árboris MAP-001 Proposal Resolution Run State R4",
+  "description": "R4 corrige la semántica de cycle detection y congela la superficie estructural requerida por E4: la política usa candidate-state hash, el historial de candidates admite repeticiones por iteración y la atomicidad repair→child proposal se verifica semánticamente.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "runType",
+    "control",
+    "state",
+    "iterations",
+    "candidateHistory"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.4"
+    },
+    "runId": {
+      "type": "string",
+      "pattern": "^MAP001-RUN-[0-9]{4,}$"
+    },
+    "runType": {
+      "type": "string",
+      "const": "MAP001_LOCAL_NAVIGATION_PROPOSAL_RESOLUTION"
+    },
+    "control": {
+      "type": "object",
+      "description": "Baseline y política fijados al iniciar la corrida. No son superficie de escritura del agente.",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "scope",
+        "baseline",
+        "validatorBinding",
+        "resolverBinding",
+        "contractSet",
+        "policy"
+      ],
+      "properties": {
+        "owner": {
+          "type": "string",
+          "const": "RESOLVER"
+        },
+        "scope": {
+          "type": "string",
+          "const": "MAP001_LOCAL_NAVIGATION"
+        },
+        "baseline": {
+          "$ref": "#/definitions/authorityBaseline"
+        },
+        "validatorBinding": {
+          "$ref": "#/definitions/validatorBinding"
+        },
+        "policy": {
+          "type": "object",
+          "description": "Política del orquestador fijada al crear la corrida. Cycle detection se define sobre candidate-state hash; la precedencia global de estados vive en el contrato semántico.",
+          "additionalProperties": false,
+          "required": [
+            "maxIterations",
+            "stallRepeatThreshold",
+            "repeatCandidateHashAction",
+            "regressionAction",
+            "artifactWritePolicy"
+          ],
+          "properties": {
+            "maxIterations": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "stallRepeatThreshold": {
+              "type": "integer",
+              "minimum": 2
+            },
+            "regressionAction": {
+              "type": "string",
+              "const": "REGRESSION"
+            },
+            "artifactWritePolicy": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "allowedRoots",
+                "createCollisionPolicy"
+              ],
+              "properties": {
+                "allowedRoots": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "$ref": "#/definitions/repoRelativePath"
+                  }
+                },
+                "createCollisionPolicy": {
+                  "type": "string",
+                  "const": "FAIL_IF_EXISTS"
+                }
+              }
+            },
+            "repeatCandidateHashAction": {
+              "type": "string",
+              "const": "CYCLE_DETECTED",
+              "description": "Acción terminal cuando el candidate-state actual repite un candidateSha256 observado en una iteración anterior."
+            }
+          }
+        },
+        "resolverBinding": {
+          "$ref": "#/definitions/resolverBinding"
+        },
+        "contractSet": {
+          "$ref": "#/definitions/contractSet"
+        }
+      }
+    },
+    "state": {
+      "$ref": "#/definitions/runState"
+    },
+    "iterations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/iterationRecord"
+      }
+    },
+    "candidateHistory": {
+      "type": "array",
+      "description": "Historial ordenado de candidate-state comprometidos, exactamente uno por propuesta persistida. Los candidateSha256 pueden repetirse; una repetición frente a una iteración anterior habilita CYCLE_DETECTED. La correspondencia exacta con iterations/proposals se verifica semánticamente.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/candidateHistoryRecord"
+      }
+    }
+  },
+  "definitions": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "authorityBaseline": {
+      "type": "object",
+      "description": "Autoridad de navegación fijada al comienzo de la corrida; referencia de control, no autoridad duplicada.",
+      "additionalProperties": false,
+      "required": [
+        "authorityId",
+        "authorityPath",
+        "authorityManifestSha256",
+        "sourceCandidate"
+      ],
+      "properties": {
+        "authorityId": {
+          "type": "string",
+          "pattern": "^MAP-001-WALKABLE-ENVELOPE-AUTHORITY-[0-9]{3}$"
+        },
+        "authorityPath": {
+          "type": "string",
+          "pattern": "^data/baselines/map001-walkable-envelope-authority-[0-9]{3}\\.json$"
+        },
+        "authorityManifestSha256": {
+          "$ref": "#/definitions/sha256"
+        },
+        "sourceCandidate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^MAP-001-WALKABLE-ENVELOPE-CANDIDATE-[0-9]{3}$"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^data/maps/map-001-walkable-envelope-candidate-[0-9]{3}\\.json$"
+            },
+            "sha256": {
+              "$ref": "#/definitions/sha256"
+            }
+          }
+        }
+      }
+    },
+    "validatorBinding": {
+      "type": "object",
+      "description": "Validador esperado durante toda la corrida; cada validation-report deberá coincidir con este binding.",
+      "additionalProperties": false,
+      "required": [
+        "validatorId",
+        "scope",
+        "implementationPath",
+        "implementationSha256"
+      ],
+      "properties": {
+        "validatorId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9._-]{2,}$"
+        },
+        "scope": {
+          "type": "string",
+          "const": "MAP001_LOCAL_NAVIGATION"
+        },
+        "implementationPath": {
+          "type": "string",
+          "pattern": "^tools/(?!.*(?:^|/)\\.\\.(?:/|$)).+\\.mjs$"
+        },
+        "implementationSha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    },
+    "proposalBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposalId",
+        "sha256"
+      ],
+      "properties": {
+        "proposalId": {
+          "type": "string",
+          "pattern": "^MAP001-PROP-[0-9]{4,}$"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    },
+    "validationBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reportId",
+        "sha256",
+        "status"
+      ],
+      "properties": {
+        "reportId": {
+          "type": "string",
+          "pattern": "^MAP001-VAL-[0-9]{4,}$"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REJECT_FIXABLE",
+            "OPEN_BLOCKER",
+            "AUTHORITY_BLOCKER"
+          ]
+        }
+      }
+    },
+    "repairBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repairId",
+        "sha256"
+      ],
+      "properties": {
+        "repairId": {
+          "type": "string",
+          "pattern": "^MAP001-REPAIR-[0-9]{4,}$"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    },
+    "iterationRecord": {
+      "type": "object",
+      "description": "Una iteración contiene exactamente una propuesta y, cuando ya ocurrió, su reporte. Si existe repair, debe pertenecer a REJECT_FIXABLE y el commit durable del repair junto con el child proposal siguiente es atómico; esa relación cruzada se verifica semánticamente.",
+      "additionalProperties": false,
+      "required": [
+        "iteration",
+        "proposal",
+        "validationReport",
+        "repair"
+      ],
+      "properties": {
+        "iteration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "proposal": {
+          "$ref": "#/definitions/proposalBinding"
+        },
+        "validationReport": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/validationBinding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repair": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/repairBinding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "validationReport": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "repair": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "validationReport": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "PASS",
+                      "OPEN_BLOCKER",
+                      "AUTHORITY_BLOCKER"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "repair": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "artifactRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sha256"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    },
+    "cycleEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "repeatedCandidateSha256",
+        "firstSeenIteration"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "CYCLE_DETECTED"
+        },
+        "firstSeenIteration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repeatedCandidateSha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      },
+      "description": "Evidencia de una repetición del candidate-state actual. firstSeenIteration debe señalar la primera iteración anterior con el mismo hash; se verifica semánticamente."
+    },
+    "stalledEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "findingSetFingerprint",
+        "repeatCount"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "STALLED"
+        },
+        "findingSetFingerprint": {
+          "$ref": "#/definitions/sha256"
+        },
+        "repeatCount": {
+          "type": "integer",
+          "minimum": 2
+        }
+      },
+      "description": "Evidencia de estancamiento. repeatCount debe ser el conteo consecutivo máximo real del fingerprint al momento de la detección, no solo un valor >= threshold; se verifica semánticamente."
+    },
+    "regressionEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "previousValidation",
+        "currentValidation"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "REGRESSION"
+        },
+        "previousValidation": {
+          "$ref": "#/definitions/artifactRef"
+        },
+        "currentValidation": {
+          "$ref": "#/definitions/artifactRef"
+        }
+      }
+    },
+    "authorityChangedEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "component",
+        "expectedSha256",
+        "observedSha256"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "AUTHORITY_CHANGED"
+        },
+        "component": {
+          "type": "string",
+          "enum": [
+            "AUTHORITY_MANIFEST",
+            "SOURCE_CANDIDATE"
+          ]
+        },
+        "expectedSha256": {
+          "$ref": "#/definitions/sha256"
+        },
+        "observedSha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    },
+    "maxIterationsEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "limit"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "MAX_ITERATIONS"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "systemErrorEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "SYSTEM_ERROR"
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9._-]{2,}$"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "component": {
+          "type": "string",
+          "enum": [
+            "VALIDATOR_IMPLEMENTATION",
+            "RESOLVER_IMPLEMENTATION",
+            "CONTRACT_PROPOSAL",
+            "CONTRACT_REPAIR",
+            "CONTRACT_VALIDATION_REPORT",
+            "CONTRACT_RUN_STATE",
+            "CONTRACT_SEMANTIC"
+          ]
+        },
+        "expectedSha256": {
+          "$ref": "#/definitions/sha256"
+        },
+        "observedSha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "code": {
+                "const": "PROVENANCE_MISMATCH"
+              }
+            },
+            "required": [
+              "code"
+            ]
+          },
+          "then": {
+            "required": [
+              "component",
+              "expectedSha256",
+              "observedSha256"
+            ]
+          }
+        }
+      ]
+    },
+    "runState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "currentIteration"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "READY_TO_VALIDATE",
+            "READY_TO_REPAIR",
+            "DOMAIN_PASS",
+            "OPEN_BLOCKED",
+            "AUTHORITY_BLOCKED",
+            "AUTHORITY_CHANGED",
+            "STALLED",
+            "CYCLE_DETECTED",
+            "REGRESSION",
+            "MAX_ITERATIONS",
+            "SYSTEM_ERROR"
+          ]
+        },
+        "currentIteration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "evidence": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/cycleEvidence"
+            },
+            {
+              "$ref": "#/definitions/stalledEvidence"
+            },
+            {
+              "$ref": "#/definitions/regressionEvidence"
+            },
+            {
+              "$ref": "#/definitions/authorityChangedEvidence"
+            },
+            {
+              "$ref": "#/definitions/maxIterationsEvidence"
+            },
+            {
+              "$ref": "#/definitions/systemErrorEvidence"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "READY_TO_VALIDATE",
+                  "READY_TO_REPAIR",
+                  "DOMAIN_PASS",
+                  "OPEN_BLOCKED",
+                  "AUTHORITY_BLOCKED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "evidence"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "CYCLE_DETECTED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "evidence"
+            ],
+            "properties": {
+              "evidence": {
+                "$ref": "#/definitions/cycleEvidence"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "STALLED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "evidence"
+            ],
+            "properties": {
+              "evidence": {
+                "$ref": "#/definitions/stalledEvidence"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "REGRESSION"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "evidence"
+            ],
+            "properties": {
+              "evidence": {
+                "$ref": "#/definitions/regressionEvidence"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "AUTHORITY_CHANGED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "evidence"
+            ],
+            "properties": {
+              "evidence": {
+                "$ref": "#/definitions/authorityChangedEvidence"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "MAX_ITERATIONS"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "evidence"
+            ],
+            "properties": {
+              "evidence": {
+                "$ref": "#/definitions/maxIterationsEvidence"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "SYSTEM_ERROR"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "evidence"
+            ],
+            "properties": {
+              "evidence": {
+                "$ref": "#/definitions/systemErrorEvidence"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "repoRelativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$",
+      "description": "Ruta POSIX repo-relative canónica: separador '/', sin absoluto, drive letter, backslash, segmentos vacíos ni segmentos '.'/'..'."
+    },
+    "resolverBinding": {
+      "type": "object",
+      "description": "Identidad de la implementación del resolver que gobierna la corrida. El hash debe calcularse desde bytes reales antes de iniciar o reanudar la corrida.",
+      "additionalProperties": false,
+      "required": [
+        "resolverId",
+        "implementationPath",
+        "implementationSha256"
+      ],
+      "properties": {
+        "resolverId": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9._-]{2,}$"
+        },
+        "implementationPath": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/repoRelativePath"
+            },
+            {
+              "pattern": "^tools/.+\\.mjs$"
+            }
+          ]
+        },
+        "implementationSha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    },
+    "schemaBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaId",
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "schemaId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "$ref": "#/definitions/repoRelativePath"
+        },
+        "sha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    },
+    "contractSet": {
+      "type": "object",
+      "description": "Conjunto exacto de contratos estructurales que gobierna la corrida. Es trazabilidad de ejecución; no reemplaza la autoridad de dominio.",
+      "additionalProperties": false,
+      "required": [
+        "proposal",
+        "repair",
+        "validationReport",
+        "runState",
+        "semanticContract"
+      ],
+      "properties": {
+        "proposal": {
+          "$ref": "#/definitions/schemaBinding"
+        },
+        "repair": {
+          "$ref": "#/definitions/schemaBinding"
+        },
+        "validationReport": {
+          "$ref": "#/definitions/schemaBinding"
+        },
+        "runState": {
+          "$ref": "#/definitions/schemaBinding"
+        },
+        "semanticContract": {
+          "$ref": "#/definitions/schemaBinding"
+        }
+      }
+    },
+    "candidateHistoryRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iteration",
+        "candidateSha256"
+      ],
+      "properties": {
+        "iteration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "candidateSha256": {
+          "$ref": "#/definitions/sha256"
+        }
+      }
+    }
+  }
+}
