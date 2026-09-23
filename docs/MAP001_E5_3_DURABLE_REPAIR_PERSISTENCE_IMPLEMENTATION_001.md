@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** implementación ejecutable de E5.3  
-**Estado:** `TECHNICAL_REVALIDATION_PENDING`  
+**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
 **Baseline:** `main@281e251315065d8765d4f8bc3f561d3f49fb707b`  
 **Diseño:** `docs/MAP001_E5_3_DURABLE_REPAIR_PERSISTENCE_DESIGN_001.md`  
 **Frontera:** repair agent fuera de alcance.
@@ -282,3 +282,59 @@ human approval
 ```
 
 Repair agent permanece bloqueado hasta ese cierre.
+
+
+## 16. Evidencia de revalidación final del candidato corregido
+
+Head funcional/documental revalidado antes de este registro:
+
+```text
+c2b30179e84fe8f0e03406d6500e22efff930fb6
+```
+
+Evidencia externa:
+
+```text
+MAP-001 Proposal Validation Gate #70  PASS
+  - E4.2 regression                   PASS
+  - E4.3 regression                   PASS
+  - E5.1 regression                   PASS
+  - E5.2 regression                   PASS
+  - E5.3 durable store/recovery       PASS
+CI #319                              PASS
+Audit Protocol Check #258            PASS
+```
+
+La suite E5.3 del head corregido demostró en Ubuntu:
+
+```text
+durable commit + restart equivalence
+C1/C2 → RECOVERED_BEFORE
+C3..C8 → RECOVERED_AFTER
+CAS stale → reject
+second writer → reject
+corrupt next → fail closed
+orphan metadata → fail closed
+forged repair → fresh E5.2 rejection
+dependency path substitution → fail closed
+E5.3 self-provenance drift → fail closed
+```
+
+Auditoría post-corrección:
+
+```text
+P1 arbitrary AFTER snapshot             RESOLVED
+P2 dependency path substitution         RESOLVED
+P3 E5.3 self-provenance gap             RESOLVED
+nuevas inconsistencias bloqueantes      NONE FOUND
+```
+
+Resultado técnico:
+
+```text
+E5.3
+TECHNICAL_PASS
+HUMAN_APPROVAL_PENDING
+```
+
+No se declara `CLOSED / PASS`, no se mergea y no se conecta repair agent hasta aprobación humana explícita y revalidación del commit documental final.
