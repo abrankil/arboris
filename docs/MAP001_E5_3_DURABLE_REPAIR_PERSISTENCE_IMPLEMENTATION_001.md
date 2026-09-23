@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** implementación ejecutable de E5.3  
-**Estado:** `TECHNICAL_PASS / HUMAN_APPROVAL_PENDING`  
+**Estado:** `CORRECTION_R3 / REVALIDATION_PENDING`  
 **Baseline:** `main@281e251315065d8765d4f8bc3f561d3f49fb707b`  
 **Diseño:** `docs/MAP001_E5_3_DURABLE_REPAIR_PERSISTENCE_DESIGN_001.md`  
 **Frontera:** repair agent fuera de alcance.
@@ -27,15 +27,15 @@ recoverMap001RepairStore
 
 ## 2. Plataforma demostrada
 
-La primera implementación falla cerrada fuera de:
+La implementación mantiene un guard operativo de plataforma:
 
 ```text
-Linux
+process.platform === "linux"
 ```
 
-No se afirma soporte durable equivalente para Windows o macOS.
+Esto **no** significa que todos los filesystems o configuraciones Linux estén certificados. La evidencia durable de E5.3 corresponde al entorno Ubuntu/Linux ejercitado por el runner de CI y al comportamiento observado allí. Otros filesystems/configuraciones Linux permanecen `OPEN`; Windows y macOS continúan fuera del alcance demostrado.
 
-En Linux usa:
+En el entorno Ubuntu/Linux probado usa:
 
 ```text
 exclusive-create lock
@@ -85,6 +85,8 @@ repair+child delta exacta
 after state schema/semantic válida
 E5.1 operational dependency hash
 E5.2 operational dependency hash
+E5.3 operational dependency hash
+Run State schema gate path + raw hash
 ```
 
 La capa durable no genera repair ni child.
@@ -157,13 +159,15 @@ operational path substitution fail-closed
 E5.3 self-provenance drift fail-closed
 ```
 
-## 8. Pin operativo E5.1/E5.2/E5.3
+## 8. Pin operativo E5.1/E5.2/E5.3 + schema gate
 
 La transacción fija los bytes de:
 
 ```text
 tools/proposal-resolution/map001_repair_gate_r1.mjs
 tools/proposal-resolution/map001_repair_transaction_candidate_r1.mjs
+tools/proposal-resolution/map001_durable_repair_store_r1.mjs
+tools/proposal-resolution/validate_e4_reducer_contracts.py
 ```
 
 en lock y journal.
@@ -214,7 +218,7 @@ La implementación sigue el diseño R2 y conserva una sola snapshot visible. Los
 
 La validación se repite inmediatamente antes del commit para reducir TOCTOU. El AFTER se vuelve a validar después del rename.
 
-El soporte inicial se limita deliberadamente a Linux para no afirmar semánticas de fsync/rename no demostradas en otras plataformas.
+El guard de ejecución inicial se limita deliberadamente a Linux. La garantía documentada se restringe al entorno Ubuntu/Linux realmente probado; no se extrapola a todos los filesystems Linux ni a otras plataformas.
 
 ## 11. INCONSISTENCIAS
 
@@ -338,3 +342,64 @@ HUMAN_APPROVAL_PENDING
 ```
 
 No se declara `CLOSED / PASS`, no se mergea y no se conecta repair agent hasta aprobación humana explícita y revalidación del commit documental final.
+
+
+## 17. Corrección R3 — revisión P4-P8 validada
+
+La revisión posterior al head verde `b1651024f3208f07bf0cf8c9a478e59ed1bb19bf` fue validada con apoyo de ASC v0.1 en modo `compile-only`, preservando los OPEN y sin convertir ASC en autoridad de desarrollo.
+
+TEST ID de revisión:
+
+```text
+MAP001-E5.3-P4-P8-CORRECTION-R3-ASC-001
+```
+
+Restricciones compiladas para la corrección:
+
+```text
+P4 schema gate debe quedar en provenance exacta
+P5 metadata runId debe coincidir con durable runId
+P6 metadata schemaVersion desconocida debe fallar cerrado
+P7 evidencia Ubuntu/Linux no autoriza generalización a todos los filesystems Linux
+P8 restart debe ocurrir en un segundo proceso
+```
+
+DO NOT INFER:
+
+```text
+gates verdes == recovery probado
+Linux == todos los filesystems Linux
+metadata bien formada == metadata de esta corrida
+fault injection en mismo proceso == restart entre procesos
+```
+
+Correcciones R3 implementadas:
+
+```text
+P4 → RUN_SCHEMA_GATE agregado a operationalDependencies con id + path + raw SHA-256
+P5 → lock/journal/next recovery exige runId == visible runId
+P6 → lock/journal recovery exige schemaVersion == "0.1"
+P7 → documentación y mensaje operativo restringidos al entorno Ubuntu/Linux probado
+P8 → worker de proceso separado + matriz C1-C8 writer/restart en procesos distintos
+```
+
+Artefacto de prueba adicional:
+
+```text
+tools/proposal-resolution/map001_durable_repair_store_r1.worker.mjs
+```
+
+Estado R3 antes de evidencia externa:
+
+```text
+P4 IMPLEMENTED
+P5 IMPLEMENTED
+P6 IMPLEMENTED
+P7 DOCUMENTED
+P8 IMPLEMENTED
+REVALIDATION EXTERNAL PENDING
+```
+
+No se reutilizan los PASS anteriores como cierre de R3. El head resultante debe ejecutar nuevamente CI, MAP-001 Proposal Validation Gate y Audit Protocol Check, seguido de auditoría adversarial post-R3.
+
+Repair agent permanece fuera de alcance.
