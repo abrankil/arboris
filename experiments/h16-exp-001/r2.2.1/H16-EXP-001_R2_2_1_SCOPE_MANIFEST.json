@@ -1,0 +1,39 @@
+{
+  "artifact_id": "H16-EXP-001",
+  "version": "R2.2.1",
+  "package_type": "SCOPE_FREEZE_PACKAGE",
+  "status": "VALIDATED_FROZEN_SCOPE",
+  "validation_result": "PASS",
+  "blockers": 0,
+  "freeze_date": "2026-09-22",
+  "revalidated_main": "035ff6edefd16df86eff5bc549efe7d41eae153e",
+  "dependency_order": ["CONTRACT", "FREEZE", "MANIFEST"],
+  "artifacts": {
+    "contract": {
+      "path": "experiments/h16-exp-001/r2.2.1/H16-EXP-001_R2_2_1_SCOPE_CONTRACT.md",
+      "git_blob_sha": "813b6c14dd0501276747c62bbacf01dea8c374d5",
+      "sha256": "d5e1a3fbad876e7c53093368cddc3f8f144d21fafce7889ba758a3217782ab0c",
+      "byte_length": 24281,
+      "validated_source_commit": "14dc2a61715b6c4cbe87600f85534bb88ea954eb"
+    },
+    "freeze": {
+      "path": "experiments/h16-exp-001/r2.2.1/H16-EXP-001_R2_2_1_SCOPE_FREEZE.md",
+      "git_blob_sha": "42145f4de20e9c1ee9e2d5d8f2edbc22d958bfbd",
+      "sha256": "416d47ad549e532397837954fb440fd0f150092fdce750b7d89d22ddd5085dbd",
+      "byte_length": 2829,
+      "validated_source_commit": "ff22225698b6e05a84dbd89134e3a499b1d8feea"
+    }
+  },
+  "manifest_identity_rule": "This manifest records CONTRACT + FREEZE identities and does not contain or depend on its own hash.",
+  "open_decisions": [
+    "OPEN-01 repeated / contradictory evidence semantics",
+    "OPEN-02 photo membership in multiple observations",
+    "OPEN-03 view-specific character applicability"
+  ],
+  "asc_change_required": false,
+  "ace_change_required": false,
+  "hito15_change_required": false,
+  "botanical_canon_change_required": false,
+  "hito16_complete": false,
+  "next_gate": "AUDIT_COMPLETE_SCOPE_PACKAGE_AND_OPEN_PR"
+}
