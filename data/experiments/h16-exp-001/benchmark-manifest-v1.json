@@ -2,16 +2,17 @@
   "experimentId": "H16-EXP-001",
   "characterId": "CH-003",
   "manifestVersion": "1.0.0",
-  "status": "FROZEN",
+  "status": "CANDIDATE",
   "createdAt": "2026-09-23",
   "sourceDataset": {
     "path": "data/botanical/photos.json",
     "commit": "6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0",
-    "gitBlobSha1": "09277072c8b643452beb98d389a0c7e48d52bffa"
+    "gitBlobSha1": "09277072c8b643452beb98d389a0c7e48d52bffa",
+    "semantic": "expanded_registry_snapshot"
   },
   "provenance": {
     "splitSource": "data/experiments/h16-exp-001/split.json@hito16-character-observer-contract",
-    "historicalFinding": "Commit 6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0 added PH-046..PH-093. This manifest freezes the pre-expansion PH-001..PH-045 benchmark population.",
+    "historicalFinding": "Commit 6b5b75b65dd3d218bac16f20a924c7fbe61d8ed0 is the expanded 93-photo registry snapshot that added PH-046..PH-093. Benchmark V1 intentionally selects and freezes the historical PH-001..PH-045 subset from that registry; sourceDataset is not claimed to be a pre-expansion dataset.",
     "gateContract": "ARBORIS_H16_GATE_B_CONTRACT_R2"
   },
   "partitions": {
@@ -526,12 +527,11 @@
       }
     }
   ],
-  "validation": {
-    "asc": "PASS",
-    "blockers": 0,
-    "ciRun": 230,
-    "auditProtocolRun": 161,
-    "canonicalTests": "PASS",
-    "note": "Manifest validation freezes composition only; it does not imply Gate B PASS or H16 closure."
-  }
+  "benchmarkPopulation": {
+    "semantic": "historical_pre_expansion_subset",
+    "frozenPhotoIds": "PH-001..PH-045 explicit membership in partitions/photos",
+    "postExpansionPhotos": "PH-046..PH-093 explicitly outside manifest V1",
+    "selectionAuthority": "explicit manifest membership; never dynamic individual expansion"
+  },
+  "validationState": "PENDING_FINAL_ASC_VALIDATION"
 }
