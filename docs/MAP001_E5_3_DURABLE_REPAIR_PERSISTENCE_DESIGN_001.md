@@ -106,6 +106,23 @@ Un writer que haya leído una versión anterior no puede sobrescribir una versi�
 
 El lock no reemplaza CAS; CAS no reemplaza el lock.
 
+El lock debe contener un binding mínimo al intento de transacción (por ejemplo `transactionId`, `runId`, `beforeSha256`, `afterSha256`) y escribirse/flusharse antes de preparar el journal.
+
+Un crash puede dejar un lock residual. Por eso se distinguen dos entrypoints:
+
+```text
+commit()
+→ si existe lock: CONCURRENT_WRITER / RECOVERY_REQUIRED
+→ nunca elimina un lock ajeno
+
+recover()
+→ se ejecuta al inicio bajo propiedad exclusiva del proceso sobre ese run-store
+→ usa lock + journal + hashes visibles para demostrar que el lock es residual de la transacción recuperada
+→ solo entonces puede limpiar el lock
+```
+
+E5.3 no debe usar timeouts o edad del archivo como única evidencia para declarar un lock “stale”.
+
 ## 5. Journal
 
 El journal registra como mínimo:
@@ -132,27 +149,28 @@ Secuencia requerida:
 
 ```text
 1. acquire exclusive writer lock
-2. read durable run
-3. CAS: durable hash == expectedBeforeSha256
-4. validate durable run + proposed snapshot
-5. write <run>.txn.json phase PREPARED
-6. flush journal file
-7. write complete proposed snapshot to <run>.next.json
-8. flush next file
-9. atomically replace visible <run>.json with complete next snapshot
-10. flush containing directory when supported by the target filesystem
-11. verify visible run hash == afterSha256
-12. remove transaction journal
-13. remove residual next file if present
-14. flush directory metadata when supported
-15. release lock
+2. flush lock binding
+3. read durable run
+4. CAS: durable hash == expectedBeforeSha256
+5. validate durable run + proposed snapshot
+6. write <run>.txn.json phase PREPARED
+7. flush journal file
+8. write complete proposed snapshot to <run>.next.json
+9. flush next file
+10. atomically replace visible <run>.json with complete next snapshot
+11. flush containing directory when supported by the target filesystem
+12. verify visible run hash == afterSha256
+13. remove transaction journal
+14. remove residual next file if present
+15. flush directory metadata when supported
+16. release lock
 ```
 
 La snapshot nunca se actualiza por edición parcial del JSON visible.
 
 ## 7. Recovery
 
-Al abrir/reanudar un run, E5.3 debe ejecutar recovery antes de aceptar nuevas escrituras.
+Al abrir/reanudar un run, E5.3 debe ejecutar recovery antes de aceptar nuevas escrituras. Recovery se ejecuta bajo propiedad exclusiva de arranque del run-store; no compite con un `commit()` activo. Si esa precondición operativa no puede garantizarse, debe fallar cerrado en lugar de retirar un lock.
 
 ### Caso A — no existe journal
 
@@ -207,13 +225,14 @@ Recovery no inventa el estado correcto.
 Se requiere fault injection determinista al menos en:
 
 ```text
-C1 después de crear lock
+C1 después de crear y flushar lock
 C2 después de fsync journal PREPARED
 C3 después de fsync next snapshot
 C4 inmediatamente antes del replace visible
 C5 inmediatamente después del replace visible
 C6 después de verificar afterSha256 y antes de cleanup
 C7 durante cleanup de journal/next
+C8 después de cleanup durable y antes de retirar lock
 ```
 
 Para cada crash point, reiniciar el store y demostrar uno de dos resultados válidos:
@@ -340,6 +359,7 @@ fault injection
 tests de restart
 tests de CAS
 tests de concurrent writer
+tests de stale-lock recovery sin timeout inferido
 pin operativo E5.1/E5.2
 CI gate E5.3
 evidencia de plataforma/filesystem soportado
