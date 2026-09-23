@@ -31,7 +31,7 @@ def assert_repo_source_refs_exist(report):
                 raise AssertionError(f"repo-local sourceRef does not exist: {ref}")
 
 
-def assert_run_proposal_binding(run, proposal):
+def assert_run_proposal_binding(run, proposal, proposal_sha=None, candidate_sha=None):
     if proposal["control"]["runId"] != run["runId"]:
         raise AssertionError("proposal runId does not match run-state")
     if proposal["control"]["iteration"] != run["state"]["currentIteration"]:
@@ -44,10 +44,14 @@ def assert_run_proposal_binding(run, proposal):
         raise AssertionError("latest run iteration does not match proposal iteration")
     if latest["proposal"]["proposalId"] != proposal["proposalId"]:
         raise AssertionError("latest run proposalId does not match proposal")
+    if proposal_sha is not None and latest["proposal"]["sha256"] != proposal_sha:
+        raise AssertionError("latest run proposal sha256 does not match logical proposal hash")
 
     history = run["candidateHistory"][-1]
     if history["iteration"] != proposal["control"]["iteration"]:
         raise AssertionError("latest candidateHistory iteration does not match proposal iteration")
+    if candidate_sha is not None and history["candidateSha256"] != candidate_sha:
+        raise AssertionError("latest candidateHistory sha256 does not match logical candidate hash")
 
     artifact_path = proposal["control"]["subject"]["artifactPath"]
     roots = run["control"]["policy"]["artifactWritePolicy"]["allowedRoots"]
@@ -55,7 +59,7 @@ def assert_run_proposal_binding(run, proposal):
         raise AssertionError("proposal artifactPath is outside run-state allowedRoots")
 
 
-def assert_report_bindings(run, proposal, report):
+def assert_report_bindings(run, proposal, report, report_sha=None):
     control = report["control"]
     if control["runId"] != run["runId"]:
         raise AssertionError("validation-report runId does not match run-state")
@@ -79,6 +83,8 @@ def assert_report_bindings(run, proposal, report):
         raise AssertionError("post-validation run-state must bind the validation-report")
     if latest["reportId"] != report["reportId"] or latest["status"] != report["status"]:
         raise AssertionError("run-state validation binding does not match validation-report")
+    if report_sha is not None and latest["sha256"] != report_sha:
+        raise AssertionError("run-state validation binding sha256 does not match logical report hash")
 
 
 def main():
@@ -87,6 +93,9 @@ def main():
     parser.add_argument("--run", required=True)
     parser.add_argument("--proposal", required=True)
     parser.add_argument("--report")
+    parser.add_argument("--proposal-sha")
+    parser.add_argument("--candidate-sha")
+    parser.add_argument("--report-sha")
     args = parser.parse_args()
 
     run = load(args.run)
@@ -99,7 +108,12 @@ def main():
         "proposal R2",
     )
     validate_sem_prop_004(proposal)
-    assert_run_proposal_binding(run, proposal)
+    assert_run_proposal_binding(
+        run,
+        proposal,
+        proposal_sha=args.proposal_sha,
+        candidate_sha=args.candidate_sha,
+    )
 
     checked = {
         "runStateSchema": "R4",
@@ -114,7 +128,7 @@ def main():
         validate_schema(report, REPORT_SCHEMA, "validation-report R1")
         validate_status_derivation(report)
         assert_repo_source_refs_exist(report)
-        assert_report_bindings(run, proposal, report)
+        assert_report_bindings(run, proposal, report, report_sha=args.report_sha)
         checked["validationReportSchema"] = "R1"
         checked["sourceRefs"] = "EXIST"
 
