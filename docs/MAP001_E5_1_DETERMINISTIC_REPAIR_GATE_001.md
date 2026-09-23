@@ -2,9 +2,10 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E5.1 — aceptación, aplicación y materialización determinista de repairs MAP-001  
-**Estado:** `REVISED_CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
+**Estado:** `CLOSED / PASS`  
 **Baseline:** `main@5dc3bf9b79d2f03ef160c97697aa0b437ed15d7d`  
-**Precondición:** E4.3 cerrado; Run State R5 + Semantic Contract R3 vigentes; Repair R1 ya definido.
+**Precondición:** E4.3 cerrado; Run State R5 + Semantic Contract R3 vigentes; Repair R1 ya definido.  
+**Aprobación humana de E5.1:** recibida el 2026-09-23.
 
 ## 1. Objetivo
 
@@ -255,3 +256,36 @@ domain validator
 ASC permanece fuera de esta decisión.
 
 La pertenencia del report a una corrida persistida y la unicidad global de IDs requieren el contexto del run-state y quedan declaradas como pendientes para E5.2/E5.3; E5.1 no las infiere.
+
+
+## 13. Cierre E5.1
+
+Head validado antes del cierre:
+
+```text
+f3f709054a8ad0369a99fb10002dfec450bc1389
+```
+
+Evidencia externa:
+
+```text
+Audit Protocol Check                 PASS
+CI                                   PASS
+MAP-001 Proposal Validation Gate     PASS
+Run State R5 + Semantic Contract R3  PASS
+E4.2 regression                      PASS
+E4.3 regression                      PASS
+E5.1 deterministic repair gate       PASS
+```
+
+La aprobación humana explícita fue recibida después de estas validaciones.
+
+Resultado:
+
+```text
+E5.1
+PASS
+CLOSED
+```
+
+Este cierre no implementa repair agent, persistencia atómica, append al run-state, loop automático ni autorización hacia ASC.
