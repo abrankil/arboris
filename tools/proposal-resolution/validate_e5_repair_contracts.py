@@ -28,27 +28,27 @@ def validate(instance, schema_path, label):
         raise AssertionError(f"{label} schema violation at {where}: {error.message}")
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--parent", required=True)
-    parser.add_argument("--report", required=True)
-    parser.add_argument("--repair", required=True)
-    parser.add_argument("--child", required=True)
-    parser.add_argument("--parent-sha", required=True)
-    parser.add_argument("--report-sha", required=True)
-    parser.add_argument("--repair-sha", required=True)
-    parser.add_argument("--parent-candidate-sha", required=True)
-    args = parser.parse_args()
+def validate_report_status(report):
+    dispositions = [finding["disposition"] for finding in report["findings"]]
+    if "AUTHORITY_BLOCKER" in dispositions:
+        expected = "AUTHORITY_BLOCKER"
+    elif "OPEN_BLOCKER" in dispositions:
+        expected = "OPEN_BLOCKER"
+    elif dispositions:
+        expected = "REJECT_FIXABLE"
+    else:
+        expected = "PASS"
+    if report["status"] != expected:
+        raise AssertionError(
+            f"validation-report status mismatch: expected {expected}, got {report['status']}"
+        )
 
-    parent = load(args.parent)
-    report = load(args.report)
-    repair = load(args.repair)
-    child = load(args.child)
 
+def validate_pre(parent, report, repair, args):
     validate(parent, PROPOSAL_SCHEMA, "parent proposal R2")
     validate(report, REPORT_SCHEMA, "validation-report R1")
     validate(repair, REPAIR_SCHEMA, "repair R1")
-    validate(child, PROPOSAL_SCHEMA, "child proposal R2")
+    validate_report_status(report)
 
     if report["status"] != "REJECT_FIXABLE":
         raise AssertionError("repair basis must be REJECT_FIXABLE")
@@ -60,6 +60,8 @@ def main():
         raise AssertionError("report does not bind parent logical hash")
     if binding["iteration"] != parent["control"]["iteration"]:
         raise AssertionError("report does not bind parent iteration")
+    if report["control"]["runId"] != parent["control"]["runId"]:
+        raise AssertionError("report runId does not bind parent runId")
 
     control = repair["control"]
     if control["runId"] != parent["control"]["runId"]:
@@ -76,6 +78,10 @@ def main():
         "status": "REJECT_FIXABLE",
     }:
         raise AssertionError("repair validationBasis binding mismatch")
+
+
+def validate_post(parent, repair, child, args):
+    validate(child, PROPOSAL_SCHEMA, "child proposal R2")
 
     child_control = child["control"]
     if child_control["runId"] != parent["control"]["runId"]:
@@ -106,14 +112,47 @@ def main():
     if subject["baseSha256"] != args.parent_candidate_sha:
         raise AssertionError("child baseSha256 must match parent candidate logical hash")
 
-    print(json.dumps({
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--phase", choices=["pre", "post"], required=True)
+    parser.add_argument("--parent", required=True)
+    parser.add_argument("--report", required=True)
+    parser.add_argument("--repair", required=True)
+    parser.add_argument("--child")
+    parser.add_argument("--parent-sha", required=True)
+    parser.add_argument("--report-sha", required=True)
+    parser.add_argument("--repair-sha")
+    parser.add_argument("--parent-candidate-sha")
+    args = parser.parse_args()
+
+    parent = load(args.parent)
+    report = load(args.report)
+    repair = load(args.repair)
+
+    validate_pre(parent, report, repair, args)
+
+    checked = {
         "status": "PASS",
+        "phase": args.phase,
         "parentProposalSchema": "R2",
         "validationReportSchema": "R1",
         "repairSchema": "R1",
-        "childProposalSchema": "R2",
-        "lineage": "BOUND",
-    }))
+        "reportStatus": "REDERIVED",
+        "parentReportRepairBindings": "BOUND",
+    }
+
+    if args.phase == "post":
+        if not args.child or not args.repair_sha or not args.parent_candidate_sha:
+            raise AssertionError(
+                "post phase requires --child, --repair-sha and --parent-candidate-sha"
+            )
+        child = load(args.child)
+        validate_post(parent, repair, child, args)
+        checked["childProposalSchema"] = "R2"
+        checked["childLineage"] = "BOUND"
+
+    print(json.dumps(checked))
 
 
 if __name__ == "__main__":
