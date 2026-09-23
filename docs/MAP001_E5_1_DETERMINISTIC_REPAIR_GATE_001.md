@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-09-23  
 **Ámbito:** E5.1 — aceptación, aplicación y materialización determinista de repairs MAP-001  
-**Estado:** `CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
+**Estado:** `REVISED_CANDIDATE / EXTERNAL_VALIDATION_PENDING`  
 **Baseline:** `main@5dc3bf9b79d2f03ef160c97697aa0b437ed15d7d`  
 **Precondición:** E4.3 cerrado; Run State R5 + Semantic Contract R3 vigentes; Repair R1 ya definido.
 
@@ -19,7 +19,7 @@ REJECT_FIXABLE
 → full domain revalidation
 ```
 
-E5.1 no genera el repair. Solo determina si un repair recibido es admisible y, si lo es, lo aplica de forma determinista.
+E5.1 no genera el repair. Solo determina si un repair recibido es admisible y, si lo es, lo aplica de forma determinista. La entrada ejecutable es `executeMap001RepairGate`; el aplicador bajo nivel queda sujeto al pre/post contract gate cuando se usa en el flujo real.
 
 ## 2. Implementación
 
@@ -67,6 +67,20 @@ parent proposal id + logical hash + iteration
 validation report id + logical hash + REJECT_FIXABLE
 ```
 
+Antes de aplicar el patch, el gate ejecutable verifica además:
+
+```text
+Proposal R2 schema
+Validation Report R1 schema
+Repair R1 schema
+validation-report status rederivado
+report authorityBinding == parent baseline
+authority manifest raw SHA
+source candidate raw SHA
+validator implementation raw SHA
+repo-local finding sourceRefs existentes
+```
+
 El child proposal generado enlaza exactamente:
 
 ```text
@@ -93,8 +107,10 @@ root replacement                  PROHIBITED
 duplicate target                  PROHIBITED
 overlapping targets               PROHIBITED
 unknown findingRef                PROHIBITED
-non-AUTO_REPAIR findingRef        PROHIBITED
+non-AUTO_REPAIR findingRef        PROHIBIDO
+cada finding citado debe autorizar el target
 target outside finding scope      PROHIBITED
+duplicate editId                   PROHIBITED
 expectedBefore mismatch           PROHIBITED
 replace no-op                     PROHIBITED
 array add                         only index == length or /-
@@ -125,7 +141,7 @@ lineage.parentProposal = exact parent binding
 lineage.originatingRepair = exact repair binding
 ```
 
-`intent.changes` se materializa determinísticamente desde las operaciones del repair.
+`intent.changes` se materializa determinísticamente desde las operaciones del repair. El post-gate independiente verifica que los changes correspondan exactamente al repair y que, reaplicados sobre el parent candidate, reconstruyan el child candidate.
 
 El child queda pendiente de validación de dominio completa.
 
@@ -151,14 +167,36 @@ La suite cubre:
 
 ```text
 target fuera del finding scope
+cada finding citado debe autorizar el target
 basis no REJECT_FIXABLE
 expectedBefore mismatch
+object equality independiente de key order
+duplicate editId
 overlapping targets
 JSON Pointer escape inválido
 array index con leading zero
+Repair R1 estructuralmente inválido
+authorityBinding drift
+validator hash drift
+child proposalId reutilizado
 ```
 
 ## 9. AUDITORÍA
+
+La primera ejecución externa pasó, pero la revisión estricta posterior encontró brechas que ese PASS funcional no cubría:
+
+```text
+A1  contract validation solo estaba ejercida desde el test, no como frontera ejecutable
+A2  target scope aceptaba que solo uno de varios findingRefs autorizara la edición
+A3  expectedBefore usaba JSON.stringify y podía depender del orden de claves
+A4  report authority/validator/source provenance no se revalidaba en E5.1
+A5  editId duplicado no se rechazaba semánticamente
+A6  child proposalId podía reutilizar el id del parent
+A7  inputs JS no estaban normalizados explícitamente a artefactos JSON
+A8  post-gate no reconstruía de forma independiente el child desde declared changes
+```
+
+Todos estos puntos fueron corregidos antes de considerar cierre.
 
 E5.1 separa explícitamente dos responsabilidades:
 
@@ -174,6 +212,8 @@ La aceptación no depende de que el agente afirme que su patch es correcto.
 
 ## 10. INCONSISTENCIAS
 
+La revisión detectó una inconsistencia entre la regla semántica `repairFindingRefs` y la implementación inicial: el contrato exige autorización por cada finding citado, mientras el código inicial aceptaba autorización por cualquiera de ellos. Se corrigió para exigir que todos los findingRefs citados autoricen el target.
+
 No se detectó una necesidad de cambiar autoridad MAP-001 ni ASC.
 
 Semantic Contract R3 ya declara `SEM-REP-001..006`; E5.1 materializa una parte ejecutable de esas invariantes sin promover todavía Semantic R3 fuera de `R3_CANDIDATE`.
@@ -186,6 +226,8 @@ E5.1 todavía no implementa:
 repair agent
 agent output parsing
 agent capability sandbox
+prueba de pertenencia del validation-report al run-state persistido
+unicidad global de proposalId/repairId dentro de la corrida
 atomic durable commit repair + child
 run-state append del child
 automatic loop
@@ -211,3 +253,5 @@ domain validator
 ```
 
 ASC permanece fuera de esta decisión.
+
+La pertenencia del report a una corrida persistida y la unicidad global de IDs requieren el contexto del run-state y quedan declaradas como pendientes para E5.2/E5.3; E5.1 no las infiere.
