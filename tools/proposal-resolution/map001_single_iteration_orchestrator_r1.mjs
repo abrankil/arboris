@@ -302,6 +302,64 @@ function withState(run, state) {
   return updated;
 }
 
+function systemErrorState(currentIteration, code, message, component = null) {
+  return {
+    status: 'SYSTEM_ERROR',
+    currentIteration,
+    evidence: {
+      kind: 'SYSTEM_ERROR',
+      code,
+      message,
+      ...(component ? { component } : {}),
+    },
+  };
+}
+
+function contractGateFailureState(error, currentIteration) {
+  return systemErrorState(
+    currentIteration,
+    error?.code ?? 'CONTRACT_GATE_FAILED',
+    error?.message ?? 'Contract gate failed.',
+    'CONTRACT_SEMANTIC'
+  );
+}
+
+function executionFailureState(error, currentIteration) {
+  if (
+    error?.code === 'AUTHORITY_PROVENANCE_MISMATCH'
+    || error?.code === 'SOURCE_CANDIDATE_PROVENANCE_MISMATCH'
+  ) {
+    const component = error.code === 'AUTHORITY_PROVENANCE_MISMATCH'
+      ? 'AUTHORITY_MANIFEST'
+      : 'SOURCE_CANDIDATE';
+    const expectedSha256 = error?.details?.expected;
+    const observedSha256 = error?.details?.observed;
+    if (
+      typeof expectedSha256 === 'string'
+      && typeof observedSha256 === 'string'
+      && /^[0-9a-f]{64}$/.test(expectedSha256)
+      && /^[0-9a-f]{64}$/.test(observedSha256)
+    ) {
+      return {
+        status: 'AUTHORITY_CHANGED',
+        currentIteration,
+        evidence: {
+          kind: 'AUTHORITY_CHANGED',
+          component,
+          expectedSha256,
+          observedSha256,
+        },
+      };
+    }
+  }
+
+  return systemErrorState(
+    currentIteration,
+    error?.code ?? 'EXECUTION_ERROR',
+    error?.message ?? 'Resolver execution failed.'
+  );
+}
+
 export async function executeMap001ValidationIteration({
   run,
   proposal,
@@ -310,7 +368,23 @@ export async function executeMap001ValidationIteration({
   previousValidationReportsById = {},
   pythonExecutable = 'python',
 }) {
-  const integrity = verifyMap001ExecutionPins({ run, root });
+  const currentIteration = run?.state?.currentIteration ?? run?.iterations?.at(-1)?.iteration ?? 1;
+
+  let integrity;
+  try {
+    integrity = verifyMap001ExecutionPins({ run, root });
+  } catch (error) {
+    const state = executionFailureState(error, currentIteration);
+    return {
+      executedValidation: false,
+      validationReport: null,
+      state,
+      run: withState(run, state),
+      contractPrecheck: null,
+      contractPostcheck: null,
+    };
+  }
+
   const preState = reduceMap001RunState({
     run,
     validationReportsById: previousValidationReportsById,
@@ -328,20 +402,46 @@ export async function executeMap001ValidationIteration({
     };
   }
 
-  const contractPrecheck = runContractGate({
-    phase: 'pre',
-    run,
-    proposal,
-    root,
-    pythonExecutable,
-  });
+  let contractPrecheck;
+  try {
+    contractPrecheck = runContractGate({
+      phase: 'pre',
+      run,
+      proposal,
+      root,
+      pythonExecutable,
+    });
+  } catch (error) {
+    const state = contractGateFailureState(error, currentIteration);
+    return {
+      executedValidation: false,
+      validationReport: null,
+      state,
+      run: withState(run, state),
+      contractPrecheck: null,
+      contractPostcheck: null,
+    };
+  }
 
-  const validationReport = await validateMap001Proposal({
-    proposal,
-    reportId,
-    validatorBinding: run.control.validatorBinding,
-    root,
-  });
+  let validationReport;
+  try {
+    validationReport = await validateMap001Proposal({
+      proposal,
+      reportId,
+      validatorBinding: run.control.validatorBinding,
+      root,
+    });
+  } catch (error) {
+    const state = executionFailureState(error, currentIteration);
+    return {
+      executedValidation: false,
+      validationReport: null,
+      state,
+      run: withState(run, state),
+      contractPrecheck,
+      contractPostcheck: null,
+    };
+  }
 
   let updatedRun = bindReport(run, validationReport);
   const validationReportsById = {
@@ -349,20 +449,34 @@ export async function executeMap001ValidationIteration({
     [validationReport.reportId]: validationReport,
   };
 
-  const state = reduceMap001RunState({
+  let state = reduceMap001RunState({
     run: updatedRun,
     validationReportsById,
   });
   updatedRun = withState(updatedRun, state);
 
-  const contractPostcheck = runContractGate({
-    phase: 'post',
-    run: updatedRun,
-    proposal,
-    report: validationReport,
-    root,
-    pythonExecutable,
-  });
+  let contractPostcheck;
+  try {
+    contractPostcheck = runContractGate({
+      phase: 'post',
+      run: updatedRun,
+      proposal,
+      report: validationReport,
+      root,
+      pythonExecutable,
+    });
+  } catch (error) {
+    state = contractGateFailureState(error, currentIteration);
+    updatedRun = withState(updatedRun, state);
+    return {
+      executedValidation: true,
+      validationReport,
+      state,
+      run: updatedRun,
+      contractPrecheck,
+      contractPostcheck: null,
+    };
+  }
 
   return {
     executedValidation: true,
