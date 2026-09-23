@@ -1,7 +1,7 @@
 {
   "experimentId": "ASC-R5-CLAIM-PROVENANCE-CONTRAST-001",
   "designVersion": "3",
-  "status": "FROZEN_DESIGN_CANDIDATE_NOT_EXECUTED",
+  "status": "FROZEN_DESIGN_VALIDATED_NOT_EXECUTED",
   "source": {
     "path": "experiments/asc-r5-claim-provenance/R5_SOURCE_001.svg",
     "sha256": "f73dd125a91a17d0034752ecfd8edacdbc44e47394273ad1c1fa9e636a39bd87"
@@ -19,6 +19,14 @@
     "path": "experiments/asc-r5-claim-provenance/R5_PACKAGE_B_001.txt",
     "role": "TREATMENT",
     "sha256": "074eefc132945eea1c7475ca148b436fcc02947429e66f4ef07f6d78661e10c9"
+  },
+  "auditRubric": {
+    "path": "experiments/asc-r5-claim-provenance/R5_BLIND_AUDIT_RUBRIC_001.md",
+    "sha256": "1809f5bf77464d3a48cdbd6d6e534ee8cc1d6b9ae3eba07495654141b187d209"
+  },
+  "visibilityProtocol": {
+    "path": "experiments/asc-r5-claim-provenance/R5_EXECUTION_VISIBILITY_PROTOCOL_001.md",
+    "sha256": "fdc81f9fd8042ef04becc6e21f9b6a892372e7c546afe3dc10a4685f52cf27b4"
   },
   "producerVisible": [
     "source",
@@ -56,8 +64,6 @@
     "C4",
     "C5"
   ],
-  "auditRubric": "experiments/asc-r5-claim-provenance/R5_BLIND_AUDIT_RUBRIC_001.md",
-  "visibilityProtocol": "experiments/asc-r5-claim-provenance/R5_EXECUTION_VISIBILITY_PROTOCOL_001.md",
   "normativeEffect": "NONE",
   "ascV01Change": false,
   "generalization": "OPEN"
