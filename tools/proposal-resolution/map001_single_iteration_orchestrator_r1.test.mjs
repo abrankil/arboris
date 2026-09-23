@@ -302,38 +302,42 @@ test('contract-set raw hash mismatch stops before domain validation -> SYSTEM_ER
   assert.equal(result.state.evidence.component, 'CONTRACT_PROPOSAL');
 });
 
-test('candidateHistory must bind exact logical candidate hash before domain validation', async () => {
+test('candidateHistory wrong logical hash -> SYSTEM_ERROR before domain validation', async () => {
   const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
   const proposal = makeProposal(buildMap001ValidationView(authorityReport));
   const run = makeRun(proposal);
   run.candidateHistory[0].candidateSha256 = '0'.repeat(64);
 
-  await assert.rejects(
-    executeMap001ValidationIteration({
-      run,
-      proposal,
-      reportId: 'MAP001-VAL-0008',
-      root: ROOT,
-    }),
-    (error) => error?.code === 'CONTRACT_PRECONDITION_FAILED'
-  );
+  const result = await executeMap001ValidationIteration({
+    run,
+    proposal,
+    reportId: 'MAP001-VAL-0008',
+    root: ROOT,
+  });
+
+  assert.equal(result.executedValidation, false);
+  assert.equal(result.state.status, 'SYSTEM_ERROR');
+  assert.equal(result.state.evidence.component, 'CONTRACT_SEMANTIC');
+  assert.equal(result.validationReport, null);
 });
 
-test('proposal artifact path outside resolver allowlist fails contract precondition', async () => {
+test('proposal artifact path outside resolver allowlist -> SYSTEM_ERROR before domain validation', async () => {
   const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
   const proposal = makeProposal(buildMap001ValidationView(authorityReport));
   proposal.control.subject.artifactPath = 'build/other/map001-nav-validation-view-001.json';
   const run = makeRun(proposal);
 
-  await assert.rejects(
-    executeMap001ValidationIteration({
-      run,
-      proposal,
-      reportId: 'MAP001-VAL-0009',
-      root: ROOT,
-    }),
-    (error) => error?.code === 'CONTRACT_PRECONDITION_FAILED'
-  );
+  const result = await executeMap001ValidationIteration({
+    run,
+    proposal,
+    reportId: 'MAP001-VAL-0009',
+    root: ROOT,
+  });
+
+  assert.equal(result.executedValidation, false);
+  assert.equal(result.state.status, 'SYSTEM_ERROR');
+  assert.equal(result.state.evidence.component, 'CONTRACT_SEMANTIC');
+  assert.equal(result.validationReport, null);
 });
 
 
@@ -371,4 +375,42 @@ test('resolver dependency set must match semantic contract exactly', async () =>
   assert.equal(result.executedValidation, false);
   assert.equal(result.state.status, 'SYSTEM_ERROR');
   assert.equal(result.state.evidence.code, 'RESOLVER_DEPENDENCY_SET_MISMATCH');
+});
+
+
+test('missing resolver dependency file -> SYSTEM_ERROR before domain validation', async () => {
+  const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
+  const proposal = makeProposal(buildMap001ValidationView(authorityReport));
+  const run = makeRun(proposal);
+  run.control.resolverBinding.dependencies[0].path =
+    'tools/proposal-resolution/does-not-exist.mjs';
+
+  const result = await executeMap001ValidationIteration({
+    run,
+    proposal,
+    reportId: 'MAP001-VAL-0012',
+    root: ROOT,
+  });
+
+  assert.equal(result.executedValidation, false);
+  assert.equal(result.state.status, 'SYSTEM_ERROR');
+  assert.equal(result.validationReport, null);
+});
+
+test('resolver dependency path escaping repository -> SYSTEM_ERROR before domain validation', async () => {
+  const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
+  const proposal = makeProposal(buildMap001ValidationView(authorityReport));
+  const run = makeRun(proposal);
+  run.control.resolverBinding.dependencies[0].path = '../outside.mjs';
+
+  const result = await executeMap001ValidationIteration({
+    run,
+    proposal,
+    reportId: 'MAP001-VAL-0013',
+    root: ROOT,
+  });
+
+  assert.equal(result.executedValidation, false);
+  assert.equal(result.state.status, 'SYSTEM_ERROR');
+  assert.equal(result.validationReport, null);
 });
