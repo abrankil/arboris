@@ -60,3 +60,6 @@ jobs:
 
       - name: E4.3 real single-iteration orchestrator tests
         run: node --test tools/proposal-resolution/map001_single_iteration_orchestrator_r1.test.mjs
+
+      - name: E5.1 deterministic repair gate tests
+        run: node --test tools/proposal-resolution/map001_repair_gate_r1.test.mjs
