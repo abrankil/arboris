@@ -25,12 +25,19 @@ const ROOT = path.resolve(HERE, '../..');
 const VALIDATOR_PATH = 'tools/map-navigation/materialize_walkable_envelope_001.mjs';
 const RESOLVER_PATH = 'tools/proposal-resolution/map001_single_iteration_orchestrator_r1.mjs';
 
+const RESOLVER_DEPENDENCIES = [
+  ['VALIDATION_ADAPTER', 'tools/proposal-resolution/map001_validation_adapter_r1.mjs'],
+  ['RUN_STATE_REDUCER', 'tools/proposal-resolution/map001_run_state_reducer_r1.mjs'],
+  ['ITERATION_CONTRACT_GATE', 'tools/proposal-resolution/validate_e4_3_iteration_contracts.py'],
+  ['E3_CONTRACT_GATE', 'tools/proposal-resolution/validate_e3_contracts.py'],
+];
+
 const CONTRACT_PATHS = {
   proposal: ['arboris:proposal-resolution:map001:proposal:r2', 'tools/proposal-resolution/schemas/proposal.schema.json'],
   repair: ['arboris:proposal-resolution:map001:repair:r1', 'tools/proposal-resolution/schemas/repair.schema.json'],
   validationReport: ['arboris:proposal-resolution:map001:validation-report:r1', 'tools/proposal-resolution/schemas/validation-report.schema.json'],
-  runState: ['arboris:proposal-resolution:map001:run-state:r4', 'tools/proposal-resolution/schemas/run-state.schema.json'],
-  semanticContract: ['MAP001-CROSS-CONTRACT-SEMANTICS-002', 'tools/proposal-resolution/contracts/cross-contract.semantic.json'],
+  runState: ['arboris:proposal-resolution:map001:run-state:r5', 'tools/proposal-resolution/schemas/run-state.schema.json'],
+  semanticContract: ['MAP001-CROSS-CONTRACT-SEMANTICS-003', 'tools/proposal-resolution/contracts/cross-contract.semantic.json'],
 };
 
 function rawSha256(relPath) {
@@ -120,7 +127,7 @@ function makeProposal(candidate) {
 
 function makeRun(proposal) {
   return {
-    schemaVersion: '0.4',
+    schemaVersion: '0.5',
     runId: proposal.control.runId,
     runType: 'MAP001_LOCAL_NAVIGATION_PROPOSAL_RESOLUTION',
     control: {
@@ -132,6 +139,11 @@ function makeRun(proposal) {
         resolverId: 'MAP001.SINGLE.ITERATION.ORCHESTRATOR.R1',
         implementationPath: RESOLVER_PATH,
         implementationSha256: rawSha256(RESOLVER_PATH),
+        dependencies: RESOLVER_DEPENDENCIES.map(([dependencyId, relPath]) => ({
+          dependencyId,
+          path: relPath,
+          sha256: rawSha256(relPath),
+        })),
       },
       contractSet: contractSet(),
       policy: {
@@ -322,4 +334,41 @@ test('proposal artifact path outside resolver allowlist fails contract precondit
     }),
     (error) => error?.code === 'CONTRACT_PRECONDITION_FAILED'
   );
+});
+
+
+test('resolver dependency pin mismatch stops before domain validation -> SYSTEM_ERROR', async () => {
+  const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
+  const proposal = makeProposal(buildMap001ValidationView(authorityReport));
+  const run = makeRun(proposal);
+  run.control.resolverBinding.dependencies[0].sha256 = '0'.repeat(64);
+
+  const result = await executeMap001ValidationIteration({
+    run,
+    proposal,
+    reportId: 'MAP001-VAL-0010',
+    root: ROOT,
+  });
+
+  assert.equal(result.executedValidation, false);
+  assert.equal(result.state.status, 'SYSTEM_ERROR');
+  assert.equal(result.state.evidence.component, 'RESOLVER_IMPLEMENTATION');
+});
+
+test('resolver dependency set must match semantic contract exactly', async () => {
+  const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
+  const proposal = makeProposal(buildMap001ValidationView(authorityReport));
+  const run = makeRun(proposal);
+  run.control.resolverBinding.dependencies = run.control.resolverBinding.dependencies.slice(0, -1);
+
+  const result = await executeMap001ValidationIteration({
+    run,
+    proposal,
+    reportId: 'MAP001-VAL-0011',
+    root: ROOT,
+  });
+
+  assert.equal(result.executedValidation, false);
+  assert.equal(result.state.status, 'SYSTEM_ERROR');
+  assert.equal(result.state.evidence.code, 'RESOLVER_DEPENDENCY_SET_MISMATCH');
 });
