@@ -201,54 +201,24 @@ test('repair target outside cited finding scope is rejected', async () => {
   );
 });
 
-test('repair cannot cite a non-AUTO_REPAIR finding', async () => {
-  const { report: authorityReport } = materializeWalkableEnvelopeAuthority(ROOT);
-  const candidate = buildMap001ValidationView(authorityReport);
-  candidate.semantics.worldBearing = 'north';
-  const parent = makeParent(candidate);
-  const report = await validateMap001Proposal({
-    proposal: parent,
-    reportId: 'MAP001-VAL-0003',
-    validatorBinding,
-    root: ROOT,
-  });
-  assert.equal(report.status, 'OPEN_BLOCKER');
-
-  const repair = {
-    ...makeRepair(parent, {
-      ...report,
-      status: 'REJECT_FIXABLE',
-      findings: [{
-        ...report.findings[0],
-        disposition: 'AUTO_REPAIR',
-      }],
-    }),
-    control: {
-      ...makeRepair(parent, {
-        ...report,
-        status: 'REJECT_FIXABLE',
-        findings: [{
-          ...report.findings[0],
-          disposition: 'AUTO_REPAIR',
-        }],
-      }).control,
-      validationBasis: {
-        reportId: report.reportId,
-        sha256: logicalSha256(report),
-        status: 'REJECT_FIXABLE',
-      },
-    },
+test('low-level gate rejects a cited non-AUTO_REPAIR finding defensively', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const invalidReport = structuredClone(report);
+  invalidReport.findings[0] = {
+    ...invalidReport.findings[0],
+    disposition: 'OPEN_BLOCKER',
   };
+  const repair = makeRepair(parent, invalidReport);
 
   assert.throws(
     () => validateAndApplyMap001Repair({
       parentProposal: parent,
-      validationReport: report,
+      validationReport: invalidReport,
       repair,
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'REPAIR_BASIS_NOT_FIXABLE'
+      && error.code === 'FINDING_NOT_AUTO_REPAIR'
   );
 });
 
@@ -646,5 +616,31 @@ test('child proposal id cannot reuse parent proposal id', async () => {
     }),
     (error) => error instanceof Map001RepairGateError
       && error.code === 'CHILD_PROPOSAL_ID_REUSED'
+  );
+});
+
+
+test('duplicate editId values are rejected', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const repair = makeRepair(parent, report);
+  repair.patch.operations.push({
+    editId: 'EDIT-001',
+    operation: 'replace',
+    targetPath: '/derivedRaster/walkableCells',
+    findingRefs: [report.findings[0].findingId],
+    expectedBefore: parent.intent.candidate.derivedRaster.walkableCells,
+    after: parent.intent.candidate.derivedRaster.walkableCells,
+    rationale: 'duplicate edit id fixture',
+  });
+
+  assert.throws(
+    () => validateAndApplyMap001Repair({
+      parentProposal: parent,
+      validationReport: report,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'DUPLICATE_EDIT_ID'
   );
 });
