@@ -70,3 +70,6 @@ jobs:
 
       - name: E5.3 durable repair store + recovery tests
         run: node --test tools/proposal-resolution/map001_durable_repair_store_r1.test.mjs
+
+      - name: R17 I1 observability handoff directed + adversarial tests
+        run: node --test tools/proposal-resolution/map001_repair_agent_observability_handoff_r1.test.mjs
