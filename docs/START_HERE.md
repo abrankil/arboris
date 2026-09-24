@@ -52,7 +52,9 @@ Mantener `OPEN` lo que aún no tenga evidencia o decisión suficiente.
 6. `docs/ARCHITECTURE.md` para límites entre datos, evidencia, motor e IA
 7. `tools/canonical-identification/` si la tarea toca el motor
 
-No cargar las seis fichas de `data/species/` para comparaciones: usar `species.json`, `characters.json` y `species_characters.json`.
+No cargar las seis fichas de `data/species/` para comparaciones: usar `species.json`, `characters.json`, `species_characters.json` y, cuando la pregunta sea ecológica, `species_ecology.json`.
+
+Para consultas ecológicas puntuales, preferir `python tools/botanical-data/query_botanical.py ecology SP-xxx`. La ecología de especie no equivale al contexto observado de una `Observation` y no participa automáticamente en ACE.
 
 ### Producto / estado general
 
