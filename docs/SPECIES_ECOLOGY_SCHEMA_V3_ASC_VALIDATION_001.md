@@ -394,3 +394,49 @@ ASC VALIDATION: PARTIAL / BLOCKED ON SOURCE MIGRATION
 ```
 
 Este addendum no reescribe el registro histórico de la auditoría inicial; documenta las correcciones posteriores.
+
+## 18. Addendum — candidato XLSX materializado y ensayo exportable
+
+Posteriormente se recibió una copia materializable del Master y se ejecutó la migración de esquema con `artifact_tool`.
+
+Resultado:
+
+```text
+XLSX SCHEMA MIGRATION CANDIDATE: PASS
+DV_EQUIVALENCE IN CANDIDATE: PASS
+EMPTY ECOLOGY DATASET: PASS
+FORMULA ERROR SCAN: PASS
+SHA-256: b0d893c1d274f20648034cc04845a074d0fd7ec34b497540f9a2796ccdc8c1dc
+```
+
+Se realizó un ensayo local de exportación y construcción de vistas:
+
+```text
+9 canonical JSON: materializables
+species_ecology.json: []
+6 species-card.v3: materializables
+ecology arrays: []
+```
+
+Los archivos derivados del ensayo no fueron tratados como canon ni incorporados manualmente al repositorio.
+
+Reclasificación:
+
+```text
+SOURCE XLSX DESIGN COHERENCE: PASS ON MATERIALIZED CANDIDATE
+DERIVATION REHEARSAL: PASS
+REPOSITORY MASTER_BINDING: OPEN
+EXECUTED REPOSITORY TEST EVIDENCE: OPEN
+MERGE READINESS: FAIL
+```
+
+El bloqueo restante es operacional: el conector de repositorio disponible puede escribir archivos UTF-8 y Git blobs desde contenido base64, pero no dispone de una transferencia segura directa desde el archivo binario local ya generado. No se reserializará el XLSX manualmente ni se sustituirá por otro formato para eludir ese límite.
+
+Estado ASC:
+
+```text
+IMPLEMENTATION + XLSX CANDIDATE: READY FOR BINARY BINDING
+REPOSITORY BINARY BINDING: OPEN
+MERGE: BLOCKED
+DATA POPULATION: BLOCKED
+```
