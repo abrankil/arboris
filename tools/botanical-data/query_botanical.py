@@ -27,6 +27,7 @@ CANONICAL_FILES = (
     "glossary.json",
     "photos.json",
     "model_errors.json",
+    "species_ecology.json",
 )
 
 
@@ -72,6 +73,10 @@ class CanonicalStore:
     @property
     def model_errors(self) -> list[dict[str, Any]]:
         return self.read("model_errors.json")
+
+    @property
+    def species_ecology(self) -> list[dict[str, Any]]:
+        return self.read("species_ecology.json")
 
     @property
     def species_by_id(self) -> dict[str, dict[str, Any]]:
@@ -178,6 +183,7 @@ def command_stats(store: CanonicalStore) -> dict[str, Any]:
             "sources": len(store.sources),
             "photos": len(store.photos),
             "model_errors": len(store.model_errors),
+            "species_ecology": len(store.species_ecology),
         },
         "canonical_json_bytes": sum(file_sizes.values()),
         "file_bytes": file_sizes,
@@ -292,6 +298,16 @@ def command_errors(store: CanonicalStore, species_id: str | None) -> list[dict[s
     return rows
 
 
+def command_ecology(store: CanonicalStore, species_id: str | None) -> list[dict[str, Any]]:
+    rows = store.species_ecology
+    if species_id is not None:
+        canonical_id = normalize_species_id(species_id)
+        if canonical_id not in store.species_by_id:
+            fail(f"unknown species_id: {canonical_id}")
+        rows = [row for row in rows if row.get("species_id") == canonical_id]
+    return rows
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Read compact slices of Árboris canonical botanical data."
@@ -340,6 +356,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     errors_parser.add_argument("species_id", nargs="?")
 
+    ecology_parser = subparsers.add_parser(
+        "ecology", help="list canonical species ecology facts, optionally filtered by species"
+    )
+    ecology_parser.add_argument("species_id", nargs="?")
+
     return parser
 
 
@@ -369,6 +390,8 @@ def main() -> None:
         result = command_photos(store, args.species_id)
     elif args.command == "errors":
         result = command_errors(store, args.species_id)
+    elif args.command == "ecology":
+        result = command_ecology(store, args.species_id)
     else:
         fail(f"unsupported command: {args.command}")
 
