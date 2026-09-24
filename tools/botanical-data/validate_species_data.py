@@ -19,6 +19,7 @@ CANONICAL_FILES = {
     "photos": "photos.json",
     "glossary": "glossary.json",
     "model_errors": "model_errors.json",
+    "species_ecology": "species_ecology.json",
 }
 
 
@@ -117,6 +118,7 @@ def main():
     photos = canonical["photos"]
     glossary = canonical["glossary"]
     model_errors = canonical["model_errors"]
+    species_ecology = canonical["species_ecology"]
 
     if not isinstance(metadata, dict):
         errors.append("metadata.json debe ser un objeto.")
@@ -129,6 +131,7 @@ def main():
         "photos",
         "glossary",
         "model_errors",
+        "species_ecology",
     ):
         if not isinstance(canonical[key], list):
             errors.append(
@@ -209,7 +212,7 @@ def main():
         compare_exact(
             f"{filename}/view_schema",
             card.get("view_schema"),
-            "arboris.species-card.v2",
+            "arboris.species-card.v3",
             errors,
         )
         compare_exact(
@@ -310,6 +313,38 @@ def main():
             expected_model_errors,
             errors,
         )
+
+        expected_ecology = [
+            record
+            for record in species_ecology
+            if (
+                record.get("species_id") == species_id
+                and record.get("estado") == "activo"
+            )
+        ]
+        compare_exact(
+            f"{filename}/ecology",
+            card.get("ecology"),
+            expected_ecology,
+            errors,
+        )
+
+        for fact in expected_ecology:
+            source_ids = fact.get("fuente_ids") or []
+            if not isinstance(source_ids, list):
+                errors.append(
+                    f"{species_id}/{fact.get('ecology_fact_id')}: "
+                    "fuente_ids no es array."
+                )
+                continue
+            for source_id in source_ids:
+                if source_id not in source_by_id:
+                    errors.append(
+                        f"{species_id}/{fact.get('ecology_fact_id')}: "
+                        f"fuente inexistente {source_id}"
+                    )
+                else:
+                    used_source_ids.add(source_id)
 
         expected_glossary = [
             record for record in glossary
