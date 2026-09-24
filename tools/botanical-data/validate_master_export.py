@@ -46,6 +46,17 @@ ALLOWED_CHARACTER_STATUS = {
     "pendiente_revision",
 }
 
+UDEC_DISTRIBUTION_CODES = (
+    "AYP", "TAR", "ANT", "ATA", "COQ", "VAL", "RME", "LBO", "MAU",
+    "NUB", "BIO", "ARA", "LRI", "LLA", "AIS", "MAG", "IPA", "JFE", "IDE",
+)
+UDEC_DISTRIBUTION_CODE_SET = set(UDEC_DISTRIBUTION_CODES)
+ALLOWED_MONTH_CODES = {
+    f"{month:02d}"
+    for month in range(1, 13)
+}
+ECOLOGY_ID_RE = re.compile(r"^ECO-\d{4}$")
+
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -512,6 +523,253 @@ def validate_controlled_vocabulary_records(
                 )
 
 
+def normalize_fact_text(value):
+    text = clean_text(value)
+    if text is None:
+        return None
+    return " ".join(text.casefold().split())
+
+
+def ecology_semantic_signature(row):
+    dimension = row.get("dimension")
+    sid = row.get("species_id")
+    scope_type = row.get("alcance_tipo")
+    scope_value = normalize_fact_text(row.get("alcance_valor"))
+    codes = row.get("valor_codificado") or []
+
+    if dimension == "distribucion_geografica":
+        normalized_codes = tuple(
+            code
+            for code in UDEC_DISTRIBUTION_CODES
+            if code in set(codes)
+        )
+        return (sid, dimension, normalized_codes, scope_type, scope_value)
+
+    if dimension == "rango_altitudinal":
+        return (
+            sid,
+            dimension,
+            row.get("valor_min"),
+            row.get("valor_max"),
+            row.get("unidad"),
+            scope_type,
+            scope_value,
+        )
+
+    if dimension in {"fenologia_floracion", "fenologia_fructificacion"}:
+        if codes:
+            return (
+                sid,
+                dimension,
+                tuple(sorted(set(codes))),
+                scope_type,
+                scope_value,
+            )
+        return (
+            sid,
+            dimension,
+            normalize_fact_text(row.get("valor_texto")),
+            scope_type,
+            scope_value,
+        )
+
+    if dimension == "habitat":
+        return (
+            sid,
+            dimension,
+            normalize_fact_text(row.get("valor_texto")),
+            scope_type,
+            scope_value,
+        )
+
+    return (
+        sid,
+        dimension,
+        normalize_fact_text(row.get("valor_texto")),
+        tuple(sorted(set(codes))),
+        row.get("valor_min"),
+        row.get("valor_max"),
+        row.get("unidad"),
+        scope_type,
+        scope_value,
+    )
+
+
+def validate_species_ecology(
+    records,
+    *,
+    species_id_set,
+    source_id_set,
+    errors,
+    warnings,
+):
+    ecology_ids = []
+    active_by_key = defaultdict(list)
+    semantic_seen = {}
+
+    for index, row in enumerate(records, start=1):
+        if not isinstance(row, dict):
+            errors.append(
+                f"species_ecology registro {index}: esperaba objeto."
+            )
+            continue
+
+        eid = row.get("ecology_fact_id")
+        sid = row.get("species_id")
+        dimension = row.get("dimension")
+        codes = row.get("valor_codificado")
+        source_ids = row.get("fuente_ids")
+        status = row.get("estado")
+        scope_type = row.get("alcance_tipo")
+        scope_value = row.get("alcance_valor")
+
+        ecology_ids.append(eid)
+
+        if not isinstance(eid, str) or not ECOLOGY_ID_RE.fullmatch(eid):
+            errors.append(
+                f"species_ecology registro {index}: ecology_fact_id inválido {eid!r}."
+            )
+
+        if sid not in species_id_set:
+            errors.append(f"{eid}: species_id inexistente {sid!r}.")
+
+        if not isinstance(source_ids, list) or not source_ids:
+            errors.append(f"{eid}: fuente_ids debe ser un array no vacío.")
+        else:
+            for duplicate in find_duplicates(source_ids):
+                errors.append(f"{eid}: fuente_id duplicada {duplicate!r}.")
+            for source_id in source_ids:
+                if source_id not in source_id_set:
+                    errors.append(
+                        f"{eid}: fuente_id inexistente {source_id!r}."
+                    )
+
+        if not isinstance(codes, list):
+            errors.append(f"{eid}: valor_codificado debe ser array.")
+            codes = []
+
+        if (scope_type is None) != (scope_value is None):
+            errors.append(
+                f"{eid}: alcance_tipo y alcance_valor deben estar ambos definidos o ambos null."
+            )
+
+        has_payload = any(
+            [
+                clean_text(row.get("valor_texto")) is not None,
+                bool(codes),
+                row.get("valor_min") is not None,
+                row.get("valor_max") is not None,
+            ]
+        )
+        if not has_payload:
+            errors.append(f"{eid}: el hecho ecológico no tiene payload.")
+
+        if dimension == "rango_altitudinal":
+            minimum = row.get("valor_min")
+            maximum = row.get("valor_max")
+            if minimum is None and maximum is None:
+                errors.append(f"{eid}: rango_altitudinal requiere al menos un límite.")
+            if minimum is not None and maximum is not None and minimum > maximum:
+                errors.append(f"{eid}: valor_min no puede superar valor_max.")
+            if row.get("unidad") != "m":
+                errors.append(f"{eid}: rango_altitudinal requiere unidad='m'.")
+            if codes:
+                errors.append(f"{eid}: rango_altitudinal no usa valor_codificado.")
+
+        elif dimension in {"fenologia_floracion", "fenologia_fructificacion"}:
+            if row.get("valor_min") is not None or row.get("valor_max") is not None:
+                errors.append(f"{eid}: fenología no usa rango numérico.")
+            if row.get("unidad") is not None:
+                errors.append(f"{eid}: fenología no usa unidad.")
+            for code in codes:
+                if code not in ALLOWED_MONTH_CODES:
+                    errors.append(f"{eid}: mes inválido {code!r}.")
+            for duplicate in find_duplicates(codes):
+                errors.append(f"{eid}: mes duplicado {duplicate!r}.")
+
+        elif dimension == "distribucion_geografica":
+            if row.get("valor_min") is not None or row.get("valor_max") is not None:
+                errors.append(f"{eid}: distribución no usa rango numérico.")
+            if row.get("unidad") is not None:
+                errors.append(f"{eid}: distribución no usa unidad.")
+            if status == "activo" and not codes:
+                errors.append(
+                    f"{eid}: distribución activa requiere valor_codificado."
+                )
+            for code in codes:
+                if code not in UDEC_DISTRIBUTION_CODE_SET:
+                    errors.append(
+                        f"{eid}: código de distribución UdeC inválido {code!r}."
+                    )
+
+        elif dimension == "habitat":
+            if clean_text(row.get("valor_texto")) is None:
+                errors.append(f"{eid}: habitat requiere valor_texto.")
+            if codes:
+                errors.append(f"{eid}: habitat no usa valor_codificado en R2.")
+            if row.get("valor_min") is not None or row.get("valor_max") is not None:
+                errors.append(f"{eid}: habitat no usa rango numérico.")
+            if row.get("unidad") is not None:
+                errors.append(f"{eid}: habitat no usa unidad.")
+
+        signature = ecology_semantic_signature(row)
+        if status in {"activo", "pendiente_revision"}:
+            previous = semantic_seen.get(signature)
+            if previous is not None:
+                errors.append(
+                    f"ECOLOGY_DUPLICATE_FACT: {previous} y {eid} representan el mismo hecho."
+                )
+            else:
+                semantic_seen[signature] = eid
+
+        if status == "activo" and dimension in {
+            "rango_altitudinal",
+            "distribucion_geografica",
+        }:
+            active_by_key[
+                (sid, dimension, scope_type, normalize_fact_text(scope_value))
+            ].append((eid, signature))
+
+    for value in find_duplicates(v for v in ecology_ids if v):
+        errors.append(f"ecology_fact_id duplicado: {value}")
+
+    for (sid, dimension, scope_type, scope_value), rows in active_by_key.items():
+        signatures = {signature for _, signature in rows}
+        if len(signatures) > 1:
+            ids = ", ".join(eid for eid, _ in rows)
+            errors.append(
+                "ECOLOGY_UNRESOLVED_MULTIPLE_FACTS: "
+                f"{sid}/{dimension}/{scope_type}/{scope_value}: {ids}."
+            )
+
+    phenology_by_key = defaultdict(list)
+    for row in records:
+        if not isinstance(row, dict):
+            continue
+        if row.get("estado") != "activo":
+            continue
+        if row.get("dimension") not in {
+            "fenologia_floracion",
+            "fenologia_fructificacion",
+        }:
+            continue
+        key = (
+            row.get("species_id"),
+            row.get("dimension"),
+            row.get("alcance_tipo"),
+            normalize_fact_text(row.get("alcance_valor")),
+        )
+        phenology_by_key[key].append(row)
+
+    for key, rows in phenology_by_key.items():
+        signatures = {ecology_semantic_signature(row) for row in rows}
+        if len(signatures) > 1:
+            warnings.append(
+                "ECOLOGY_MULTIPLE_PHENOLOGY_FACTS: "
+                f"{key[0]}/{key[1]}/{key[2]}/{key[3]}."
+            )
+
+
 def first_difference(expected, actual):
     if len(expected) != len(actual):
         return f"cantidad de registros: Master={len(expected)}, JSON={len(actual)}"
@@ -735,10 +993,17 @@ def main():
         characters = datasets.get("characters", [])
         species_characters = datasets.get("species_characters", [])
         sources = datasets.get("sources", [])
+        species_ecology = datasets.get("species_ecology", [])
 
         validate_controlled_vocabulary_records(
             species_characters,
             sheet_name="Especie_Caracter",
+            spec=controlled_vocabulary_spec,
+            errors=errors,
+        )
+        validate_controlled_vocabulary_records(
+            species_ecology,
+            sheet_name="Ecologia_Especie",
             spec=controlled_vocabulary_spec,
             errors=errors,
         )
@@ -769,6 +1034,15 @@ def main():
 
         species_id_set = {value for value in species_ids if value}
         source_id_set = {value for value in source_ids if value}
+
+        validate_species_ecology(
+            species_ecology,
+            species_id_set=species_id_set,
+            source_id_set=source_id_set,
+            errors=errors,
+            warnings=warnings,
+        )
+
         character_by_id = {
             row.get("caracter_id"): row
             for row in characters
@@ -951,7 +1225,16 @@ def main():
         print(f"Fuentes:              {len(sources)}")
         print(f"Términos glosario:    {len(glossary)}")
         print(f"Fotos:                {len(photos)}")
+        ecology_status_counts = Counter(
+            row.get("estado")
+            for row in species_ecology
+            if isinstance(row, dict)
+        )
         print(f"Errores de modelo:    {len(model_errors)}")
+        print(f"Hechos ecológicos:    {len(species_ecology)}")
+        print(f"  activos:            {ecology_status_counts.get('activo', 0)}")
+        print(f"  pendientes:         {ecology_status_counts.get('pendiente_revision', 0)}")
+        print(f"  retirados:          {ecology_status_counts.get('retirado', 0)}")
         print(f"SHA-256 Master:       {expected_sha}")
 
         print("\nCobertura por especie:")
