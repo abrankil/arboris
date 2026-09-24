@@ -19,12 +19,15 @@ import {
 import {
   Map001RepairGateError,
   executeMap001RepairGate,
-  validateAndApplyMap001Repair,
 } from './map001_repair_gate_r1.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
 const VALIDATOR_PATH = 'tools/map-navigation/materialize_walkable_envelope_001.mjs';
+
+function runRepairGate(args) {
+  return executeMap001RepairGate({ ...args, root: ROOT });
+}
 
 function rawSha256(relPath) {
   return crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, relPath))).digest('hex');
@@ -190,7 +193,7 @@ test('repair target outside cited finding scope is rejected', async () => {
   });
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
@@ -211,7 +214,7 @@ test('low-level gate rejects a cited non-AUTO_REPAIR finding defensively', async
   const repair = makeRepair(parent, invalidReport);
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: invalidReport,
       repair,
@@ -229,7 +232,7 @@ test('repair expectedBefore mismatch is rejected', async () => {
   });
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
@@ -254,7 +257,7 @@ test('overlapping repair targets are rejected', async () => {
   });
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
@@ -376,7 +379,7 @@ test('JSON Pointer rejects invalid tilde escapes and leading-zero array indices'
   });
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair: make('/arr/~2'),
@@ -386,7 +389,7 @@ test('JSON Pointer rejects invalid tilde escapes and leading-zero array indices'
   );
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair: make('/arr/01'),
@@ -416,7 +419,7 @@ test('every cited finding must authorize the repair target', async () => {
   ];
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: reportWithTwo,
       repair,
@@ -536,7 +539,7 @@ test('expectedBefore object equality is independent of object key order', () => 
     },
   };
 
-  const result = validateAndApplyMap001Repair({
+  const result = runRepairGate({
     parentProposal: parent,
     validationReport: report,
     repair,
@@ -608,7 +611,7 @@ test('child proposal id cannot reuse parent proposal id', async () => {
   const repair = makeRepair(parent, report);
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
@@ -634,7 +637,7 @@ test('duplicate editId values are rejected', async () => {
   });
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
