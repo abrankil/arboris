@@ -190,6 +190,7 @@ def validate_repair_semantics(report, repair):
                 raise AssertionError("repair target paths must not overlap")
 
     for operation in operations:
+        decode_pointer(operation["targetPath"])
         for finding_id in operation["findingRefs"]:
             finding = finding_by_id.get(finding_id)
             if finding is None:
