@@ -143,7 +143,7 @@ Reglas:
 - ecología de especie no se copia automáticamente a `Observation`;
 - `species_ecology.json` no alimenta ACE sin un gate específico posterior.
 
-## 9. Estados botánicos vs estados de observación
+## 8. Estados botánicos vs estados de observación
 
 Debe distinguirse estrictamente entre estados botánicos y estados operativos.
 
