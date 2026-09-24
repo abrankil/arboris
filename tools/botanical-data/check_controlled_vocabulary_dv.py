@@ -25,6 +25,7 @@ DEFAULT_MASTER = (
 
 RECORD_KEYS = {
     "Especie_Caracter": ("species_id", "caracter_id"),
+    "Ecologia_Especie": ("ecology_fact_id",),
 }
 
 FORBIDDEN_LIST_DV_FIELDS = {
