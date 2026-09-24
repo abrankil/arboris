@@ -1,8 +1,8 @@
 {
   "master_name": "Base_botanica_Pokedex_flora_Master",
   "master_version": "2.0.0",
-  "schema_version": "2.0.0",
-  "updated_at": "2026-09-16",
+  "schema_version": "3.0.0",
+  "updated_at": "2026-09-23",
   "source_of_truth": "xlsx",
   "multi_state_separator": "|",
   "null_semantics": "sin_dato",
@@ -11,7 +11,9 @@
   "excluded_status": "retirado|pendiente_revision",
   "export_integrity": "SHA-256",
   "controlled_vocabulary_spec_id": "arboris-controlled-vocabularies",
-  "controlled_vocabulary_spec_version": "1.0.0",
+  "controlled_vocabulary_spec_version": "2.0.0",
+  "controlled_vocabulary_contract_id": "ASC-MASTER2-CONTROLLED-VOCABULARY-CONTRACT",
+  "controlled_vocabulary_contract_version": "2.0.0",
   "source_file": "Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx",
-  "source_sha256": "52cc20777698f1f92d3455e30abac0be4925aa4f9a2b2195a048d871fc75a319"
+  "source_sha256": "b0d893c1d274f20648034cc04845a074d0fd7ec34b497540f9a2796ccdc8c1dc"
 }

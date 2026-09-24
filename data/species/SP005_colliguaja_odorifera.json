@@ -1,11 +1,11 @@
 {
-  "view_schema": "arboris.species-card.v2",
+  "view_schema": "arboris.species-card.v3",
   "generated_from": {
     "master_name": "Base_botanica_Pokedex_flora_Master",
     "master_version": "2.0.0",
-    "schema_version": "2.0.0",
+    "schema_version": "3.0.0",
     "source_file": "Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx",
-    "source_sha256": "52cc20777698f1f92d3455e30abac0be4925aa4f9a2b2195a048d871fc75a319",
+    "source_sha256": "b0d893c1d274f20648034cc04845a074d0fd7ec34b497540f9a2796ccdc8c1dc",
     "source_of_truth": "xlsx"
   },
   "species": {
@@ -719,6 +719,7 @@
       "computable": false
     }
   ],
+  "ecology": [],
   "photos": [
     {
       "photo_id": "PH-019",
