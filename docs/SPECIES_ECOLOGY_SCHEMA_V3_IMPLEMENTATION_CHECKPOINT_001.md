@@ -26,7 +26,6 @@ Se implementaron en la rama:
 - validación específica de `SpeciesEcologyFact`;
 - vocabulario UdeC de áreas de distribución;
 - control de IDs, FKs, multifuente, payload, meses, altitud, scope, duplicados semánticos y multiplicidad activa;
-- `species_ecology.json` vacío;
 - routing `query_botanical.py ecology [species_id]`;
 - conteo del noveno JSON en `stats`;
 - tests de routing;
@@ -34,9 +33,20 @@ Se implementaron en la rama:
 - `build_species_data.py` preparado para `species-card.v3`;
 - `validate_species_data.py` preparado para `species-card.v3`;
 - `verify:botanical` ampliado;
-- routing y documentación principal actualizados a nueve JSON.
+- routing y documentación principal preparados para nueve JSON en el estado integrado.
 
-## 3. Auditoría adicional realizada
+## 3. Correcciones posteriores al checkpoint inicial
+
+Después de la primera validación ASC:
+
+- se consolidó `docs/SPECIES_ECOLOGY_SCHEMA_V3_FINAL_CONTRACT.md` dentro de esta rama;
+- se eliminó el placeholder manual `data/botanical/species_ecology.json`;
+- se restauró el invariante `Master → export → derived JSON`;
+- se incorporaron al contrato final los invariantes `MASTER_BINDING`, `DV_EQUIVALENCE`, `DERIVED_ONLY` y `EXECUTION_REQUIRED_FOR_CLOSURE`.
+
+La trazabilidad del contrato de implementación queda cerrada en la rama.
+
+## 4. Auditoría adicional realizada
 
 La cobertura de tests fue ampliada para incluir:
 
@@ -48,7 +58,7 @@ La cobertura de tests fue ampliada para incluir:
 
 La rama se encuentra por delante de `main` y no arrastra la rama de investigación.
 
-## 4. Bloqueo actual
+## 5. Bloqueo actual
 
 La fuente editorial canónica sigue siendo:
 
@@ -62,7 +72,7 @@ La sesión puede leer el binario desde GitHub como contenido base64 para inspecc
 
 Por política de herramientas, la modificación del XLSX debe realizarse mediante `artifact_tool`. No se sustituirá por edición ZIP/XML, `openpyxl`, LibreOffice ni una reimplementación manual.
 
-## 5. Cambios pendientes en el XLSX
+## 6. Cambios pendientes en el XLSX
 
 Cuando el archivo sea materializable:
 
@@ -82,7 +92,7 @@ Cuando el archivo sea materializable:
    - `updated_at = fecha real de ejecución`;
 7. preservar hoja ecológica sin hechos reales en esta fase.
 
-## 6. Derivados pendientes
+## 7. Derivados pendientes
 
 Después del XLSX:
 
@@ -103,7 +113,7 @@ build_species_data.py
 
 No deben editarse manualmente esos derivados para simular el resultado.
 
-## 7. Tests pendientes de ejecución
+## 8. Tests pendientes de ejecución
 
 Sólo después de coherencia fuente/derivados:
 
@@ -116,13 +126,13 @@ npm test
 
 y auditoría final del diff, incluido el XLSX.
 
-## 8. AUDITORÍA
+## 9. AUDITORÍA
 
 La implementación textual/código avanzó hasta el límite seguro permitido por la autoridad del Master.
 
 Continuar modificando derivados sin modificar primero el XLSX convertiría temporalmente la rama en una representación no reproducible y no debe considerarse cierre.
 
-## 9. INCONSISTENCIAS
+## 10. INCONSISTENCIAS
 
 Existe una inconsistencia **transitoria de rama de trabajo**, esperada y no consolidable:
 
@@ -134,7 +144,7 @@ canonical XLSX still encodes schema 2
 
 Por tanto ningún gate de integración puede pasar todavía.
 
-## 10. VACÍOS / OMISIONES
+## 11. VACÍOS / OMISIONES
 
 Falta:
 
@@ -145,19 +155,21 @@ Falta:
 - auditoría integrada;
 - decisión de merge.
 
-## 11. REDUNDANCIAS
+## 12. REDUNDANCIAS
 
 No se debe crear un XLSX paralelo como nueva fuente de verdad.
 
 Una copia temporal sólo puede utilizarse para editar/verificar y luego reemplazar el archivo canónico de la rama.
 
-## 12. Gate
+## 13. Gate
 
 ```text
 SAFE NON-XLSX IMPLEMENTATION: PASS
+FINAL IMPLEMENTATION CONTRACT: PASS
+DERIVATION PURITY AT BRANCH LEVEL: PASS
 XLSX SOURCE MIGRATION: BLOCKED
 DERIVED REGENERATION: BLOCKED BY SOURCE MIGRATION
-TEST EXECUTION: NOT YET MEANINGFUL
+EXECUTED TEST EVIDENCE: OPEN
 MERGE: BLOCKED
 NEXT REQUIRED INPUT: MATERIALIZABLE CANONICAL XLSX
 ```
