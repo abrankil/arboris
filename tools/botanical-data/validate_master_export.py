@@ -840,6 +840,10 @@ def main():
                 controlled_vocabulary_spec["specification_id"],
             "controlled_vocabulary_spec_version":
                 controlled_vocabulary_spec["specification_version"],
+            "controlled_vocabulary_contract_id":
+                controlled_vocabulary_spec["contract_id"],
+            "controlled_vocabulary_contract_version":
+                controlled_vocabulary_spec["contract_version"],
         }
 
         for binding_key, expected_value in (
