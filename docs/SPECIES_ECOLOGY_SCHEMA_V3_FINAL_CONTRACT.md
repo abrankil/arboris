@@ -441,7 +441,94 @@ Debe verificarse:
 12. multiplicidad activa bloqueante;
 13. ausencia de dato no tratada como ausencia biológica.
 
-## 23. Gate de integración
+## 23. Invariantes de cierre heredados
+
+La migración adopta explícitamente cuatro invariantes ya consolidados en otros frentes de Árboris.
+
+### 23.1 MASTER_BINDING
+
+Toda versión declarada debe quedar ligada al Master que realmente produce los derivados.
+
+Debe poder reconstruirse:
+
+```text
+Master XLSX
+→ metadata bindings
+→ export contract
+→ derived JSON
+→ species views
+```
+
+Una versión declarada sin correspondencia material con el XLSX no cierra el gate.
+
+### 23.2 DV_EQUIVALENCE
+
+Para los campos gobernados de `Ecologia_Especie`:
+
+```text
+dimension
+estado
+alcance_tipo
+unidad
+```
+
+la Data Validation del XLSX debe coincidir exactamente con `config/botanical/controlled_vocabularies.json`.
+
+No basta con que los valores sean “parecidos” o que el validador Python los acepte.
+
+La equivalencia debe comprobar:
+
+- tokens;
+- orden cuando sea contractual;
+- nulabilidad / `allow_blank`;
+- aplicación efectiva de la DV en la hoja.
+
+### 23.3 DERIVED_ONLY
+
+Los siguientes artefactos son derivados y no deben mantenerse manualmente:
+
+```text
+data/botanical/species_ecology.json
+data/species/*.json
+```
+
+Regla:
+
+```text
+SOURCE CHANGE
+→ BUILD
+→ DERIVATIVES
+```
+
+No:
+
+```text
+manual derivative
+→ assumed canonical state
+```
+
+### 23.4 EXECUTION_REQUIRED_FOR_CLOSURE
+
+Una revisión estática exitosa no equivale a cierre.
+
+Para considerar implementada la migración deben existir resultados ejecutados de:
+
+```text
+npm run build:botanical
+npm run verify:botanical
+npm run verify:data-access
+npm test
+```
+
+y una auditoría del diff integrado.
+
+```text
+STATIC PASS
+≠
+IMPLEMENTATION PASS
+```
+
+## 24. Gate de integración
 
 No puede integrarse mientras no sean simultáneamente coherentes:
 
@@ -459,7 +546,7 @@ docs
 tests
 ```
 
-## 24. Secuencia autorizada
+## 25. Secuencia autorizada
 
 ```text
 1. migrar XLSX
@@ -474,7 +561,7 @@ tests
 10. abrir gate independiente de DATA POPULATION
 ```
 
-## 25. Prohibiciones de esta fase
+## 26. Prohibiciones de esta fase
 
 No:
 
@@ -489,7 +576,7 @@ No:
 - crear SQLite ecológico;
 - introducir `Ipotocaticac` o `Itrofill` como entidades técnicas.
 
-## 26. Estado del contrato
+## 27. Estado del contrato
 
 ```text
 FINAL IMPLEMENTATION CONTRACT: CONSOLIDATED
