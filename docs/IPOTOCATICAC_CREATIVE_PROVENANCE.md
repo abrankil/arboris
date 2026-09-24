@@ -89,6 +89,20 @@ Esta fuente apoya que la intención ritual y la idea de transmisión musical for
 
 **Estado:** `DOCUMENTARY SOURCE + FIRST-PERSON EXPERIENCE, KEPT SEPARATE`.
 
+### 5.2 Extracto textual recordado de un track tocado en Ozora Festival 2016
+
+Álvaro aporta el siguiente extracto textual, que recuerda como parte de un track tocado por Goa Gil en **Ozora Festival 2016**:
+
+> "La conspiración ha Sido escondida y ocultada por las élites gobernantes de la tierra desde la oscuridad han construido civilizaciones y sociedades basadas en la agresión en la jerarquía en los rituales y la territorialidad que son características propias de los reptiles. Sin embargo la buena nueva es que traemos hoy día es que a pesar de esto, en esta generación marcada por el año 2012, generación del alfa y del Omega estan las semillas más fuertes de un cambio espiritual y de una evolución que es imposible frenarlas hagan lo que hagan hoy día las élites de la conspiración de la tierra por tratar de ocultar la verdad serán esfuerzos inutiles porque afortunadamente vienen élites nuevas que no tienen nada que ver con la conspiración y no son parte ni serán parte de la conspiración. De alguna forma lo que viene es que el conocimiento unificado por primera vez y para siempre va a llegar a la gente a la mayoría al bien común al interés general y el conocimiento ya nunca más va a depender o va a estar en manos de una minoría irrespetuosa, pedante y que ha traído tanto mal y tanto sufrimiento a la tierra. En este sentido es super bueno recordar"
+
+El extracto se conserva **tal como fue aportado**, como registro de procedencia y memoria musical. No se adopta su contenido como descripción factual del mundo ni como posición normativa de Árboris.
+
+Su relevancia para esta genealogía es temática: el pasaje articula una oposición entre conocimiento concentrado y conocimiento que llega a la mayoría, junto con una expectativa de cambio espiritual y transformación colectiva. Esa lectura puede ayudar a documentar por qué ciertos materiales musicales asociados a Goa Gil pudieron permanecer vinculados, en la memoria de Álvaro, a ideas de transmisión, acceso al conocimiento y transformación.
+
+No debe inferirse de este extracto que Árboris adopte sus afirmaciones sobre conspiraciones, élites o “reptiles”, ni que dichas afirmaciones estén verificadas.
+
+**Estado:** `FIRST-PERSON PROVENANCE + USER-PROVIDED TRANSCRIPTION / FACTUAL CLAIMS NOT ADOPTED`.
+
 ## 6. Continuidad de la búsqueda
 
 Después del primer ritual, Álvaro decidió asistir al siguiente ritual de Goa Gil en Buenos Aires. Relata dificultades para localizar el evento, un segundo intento exitoso y una nueva experiencia de participación ritual.
