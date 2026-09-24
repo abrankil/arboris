@@ -38,6 +38,7 @@ python tools/botanical-data/query_botanical.py species SP-001
 python tools/botanical-data/query_botanical.py character CH-003
 python tools/botanical-data/query_botanical.py relation SP-001 CH-003
 python tools/botanical-data/query_botanical.py compare CH-003
+python tools/botanical-data/query_botanical.py ecology SP-006
 ```
 
 The CLI reads the canonical JSON directly and returns only the requested slice. It does not persist data or create a second source of truth.
@@ -56,6 +57,7 @@ Use `--pretty` for human-readable output; compact JSON is the default to reduce 
 | Check source/provenance | `botanical/sources.json` | matching species relation |
 | Check photo metadata | `botanical/photos.json` | actual image only if needed |
 | Check known model mistakes | `botanical/model_errors.json` | relevant photo/species record |
+| Check documented species ecology | `botanical/species_ecology.json` | `sources.json`; observation context only if comparing general vs observed |
 | Check terms | `botanical/glossary.json` | — |
 | Check visual character design | matching record in `characters/` | approved asset |
 | Correct botanical knowledge | Master XLSX | regenerate + validate |
@@ -77,6 +79,8 @@ Use `--pretty` for human-readable output; compact JSON is the default to reduce 
 `botanical/photos.json` — photo metadata and links to evidence records.
 
 `botanical/model_errors.json` — documented model errors retained for traceability.
+
+`botanical/species_ecology.json` — sourced ecological facts about species, kept separate from the context of any concrete observation and from ACE character contexts.
 
 ## Efficient query strategy
 
@@ -102,7 +106,7 @@ Join on IDs.
 
 ### One-species reasoning
 
-Use the matching joined view in `species/`. It already collects identity, character definitions, relations, sources, photo metadata, glossary context and relevant model errors.
+Use the matching joined view in `species/`. It collects identity, character definitions, relations, active species ecology, sources, photo metadata, glossary context and relevant model errors.
 
 For a narrow relation, prefer the CLI instead of the full joined view.
 
