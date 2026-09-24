@@ -50,9 +50,10 @@ data/botanical/sources.json
 data/botanical/glossary.json
 data/botanical/photos.json
 data/botanical/model_errors.json
+data/botanical/species_ecology.json
 ```
 
-Estos ocho archivos son derivados reproducibles de Master Botánico 2.0. No corregirlos manualmente. Las correcciones botánicas correspondientes deben realizarse en el Master y luego regenerarse.
+Estos nueve archivos son derivados reproducibles de Master Botánico 2.0. No corregirlos manualmente. Las correcciones botánicas correspondientes deben realizarse en el Master y luego regenerarse.
 
 ACE consume además una capa canónica complementaria:
 
@@ -61,7 +62,7 @@ data/botanical/character_variability.json
 data/botanical/contexts.json
 ```
 
-Estos archivos no son exportaciones de Master Botánico 2.0 y no forman parte de los ocho JSON reproducibles derivados del Master. No deben tratarse como si fueran datos regenerables desde él.
+Estos archivos no son exportaciones de Master Botánico 2.0 y no forman parte de los nueve JSON reproducibles derivados del Master. No deben tratarse como si fueran datos regenerables desde él.
 
 Toda incorporación o corrección en esta capa complementaria debe conservar procedencia explícita y pasar la validación correspondiente de ACE. No usarla para introducir conocimiento botánico sin fuente ni para corregir indirectamente información gobernada por Master Botánico 2.0.
 
@@ -80,6 +81,7 @@ python tools/botanical-data/query_botanical.py species SP-001
 python tools/botanical-data/query_botanical.py character CH-003
 python tools/botanical-data/query_botanical.py relation SP-001 CH-003
 python tools/botanical-data/query_botanical.py compare CH-003
+python tools/botanical-data/query_botanical.py ecology SP-001
 ```
 
 Regla de contexto: una pregunta puntual debe producir una lectura puntual. No abrir las seis fichas `data/species/*.json` para una comparación transversal si las tablas normalizadas bastan.
