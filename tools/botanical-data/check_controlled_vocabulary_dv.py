@@ -194,6 +194,7 @@ def check_workbook(
             )
 
         rows = record_rows(ws, RECORD_KEYS[sheet_name])
+        probe_rows = rows or [2]
         column = headers[field_name]
 
         try:
@@ -203,7 +204,7 @@ def check_workbook(
                 f"Cannot resolve governed field {scoped_name!r}: {exc}"
             ) from exc
 
-        for row_number in rows:
+        for row_number in probe_rows:
             applicable = [
                 dv
                 for dv in ws.data_validations.dataValidation
