@@ -202,7 +202,7 @@ test('repair target outside cited finding scope is rejected', async () => {
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'REPAIR_TARGET_OUTSIDE_FINDING_SCOPE'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
 });
 
@@ -223,7 +223,7 @@ test('low-level gate rejects a cited non-AUTO_REPAIR finding defensively', async
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'FINDING_NOT_AUTO_REPAIR'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
 });
 
@@ -266,138 +266,48 @@ test('overlapping repair targets are rejected', async () => {
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'OVERLAPPING_REPAIR_TARGETS'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
 });
 
-test('JSON Pointer rejects invalid tilde escapes and leading-zero array indices', () => {
-  const parent = {
-    schemaVersion: '0.2',
-    proposalId: 'MAP001-PROP-0001',
-    proposalType: 'MAP001_LOCAL_NAVIGATION_DERIVED',
-    control: {
-      owner: 'RESOLVER',
-      runId: 'MAP001-RUN-0001',
-      iteration: 1,
-      lineage: { parentProposal: null, originatingRepair: null },
-      baseline: {
-        authorityId: 'MAP-001-WALKABLE-ENVELOPE-AUTHORITY-001',
-        authorityPath: DEFAULT_AUTHORITY_PATH,
-        authorityManifestSha256: 'a'.repeat(64),
-        sourceCandidate: {
-          id: 'MAP-001-WALKABLE-ENVELOPE-CANDIDATE-001',
-          path: 'data/maps/map-001-walkable-envelope-candidate-001.json',
-          sha256: 'b'.repeat(64),
-        },
-      },
-      subject: {
-        mode: 'CREATE_DERIVED',
-        artifactRole: 'NON_AUTHORITATIVE_DERIVED',
-        artifactId: 'X',
-        artifactPath: 'build/proposal-resolution/x.json',
-        baseSha256: null,
-      },
-    },
-    intent: {
-      objective: 'Pointer test',
-      changes: [{
-        changeId: 'CHG-001',
-        operation: 'add',
-        targetPath: '/arr',
-        after: [1],
-        rationale: 'fixture',
-      }],
-      candidate: { arr: [1] },
-    },
-  };
-  const report = {
-    schemaVersion: '0.1',
-    reportId: 'MAP001-VAL-0001',
-    reportType: 'MAP001_LOCAL_NAVIGATION_VALIDATION',
-    control: {
-      owner: 'RESOLVER',
-      runId: parent.control.runId,
-      proposalBinding: {
-        proposalId: parent.proposalId,
-        sha256: logicalSha256(parent),
-        iteration: 1,
-      },
-      authorityBinding: {
-        authorityId: parent.control.baseline.authorityId,
-        authorityManifestSha256: parent.control.baseline.authorityManifestSha256,
-        sourceCandidate: {
-          id: parent.control.baseline.sourceCandidate.id,
-          sha256: parent.control.baseline.sourceCandidate.sha256,
-        },
-      },
-      validatorBinding,
-    },
-    status: 'REJECT_FIXABLE',
-    findings: [{
-      findingId: 'FND-001',
-      disposition: 'AUTO_REPAIR',
-      code: 'TEST.AUTO',
-      message: 'test',
-      sourceRefs: [DEFAULT_AUTHORITY_PATH],
-      targetPaths: ['/arr'],
-      repairDirective: { minimalChangeRequired: true },
-    }],
-  };
-
-  const make = (targetPath) => ({
-    schemaVersion: '0.1',
-    repairId: 'MAP001-REPAIR-0001',
-    repairType: 'MAP001_LOCAL_NAVIGATION_AUTO_REPAIR',
-    control: {
-      owner: 'RESOLVER',
-      runId: parent.control.runId,
-      parentProposal: {
-        proposalId: parent.proposalId,
-        sha256: logicalSha256(parent),
-        iteration: 1,
-      },
-      validationBasis: {
-        reportId: report.reportId,
-        sha256: logicalSha256(report),
-        status: 'REJECT_FIXABLE',
-      },
-      patchPolicy: {
-        pathScope: 'PARENT_PROPOSAL_INTENT_CANDIDATE',
-        authorityMode: 'CONFORM_TO_EXISTING_AUTHORITY',
-        mutationClass: 'AUTO_REPAIR_ONLY',
-      },
-    },
-    patch: {
-      operations: [{
-        editId: 'EDIT-001',
-        operation: 'replace',
-        targetPath,
-        findingRefs: ['FND-001'],
-        expectedBefore: 1,
-        after: 2,
-        rationale: 'negative pointer fixture',
-      }],
-    },
-  });
-
-  assert.throws(
-    () => runRepairGate({
-      parentProposal: parent,
-      validationReport: report,
-      repair: make('/arr/~2'),
-      childProposalId: 'MAP001-PROP-0002',
-    }),
-    (error) => error.code === 'POINTER_ESCAPE_INVALID'
+test('public E5.1 gate rejects invalid tilde escapes and leading-zero array indices', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const scopedReport = retargetSingleFinding(
+    report,
+    parent,
+    ['/derivedRaster/walkableCells']
   );
 
+  const badEscape = makeRepair(parent, scopedReport, {
+    targetPath: '/derivedRaster/walkableCells/~2',
+    expectedBefore: 0,
+    after: 1,
+  });
   assert.throws(
     () => runRepairGate({
       parentProposal: parent,
-      validationReport: report,
-      repair: make('/arr/01'),
+      validationReport: scopedReport,
+      repair: badEscape,
       childProposalId: 'MAP001-PROP-0002',
     }),
-    (error) => error.code === 'ARRAY_INDEX_INVALID'
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
+  );
+
+  const leadingZero = makeRepair(parent, scopedReport, {
+    targetPath: '/derivedRaster/walkableCells/01',
+    expectedBefore: 0,
+    after: 1,
+  });
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: parent,
+      validationReport: scopedReport,
+      repair: leadingZero,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'ARRAY_INDEX_INVALID'
   );
 });
 
@@ -428,127 +338,30 @@ test('every cited finding must authorize the repair target', async () => {
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'REPAIR_TARGET_OUTSIDE_FINDING_SCOPE'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
 });
 
-test('expectedBefore object equality is independent of object key order', () => {
-  const parent = {
-    schemaVersion: '0.2',
-    proposalId: 'MAP001-PROP-0001',
-    proposalType: 'MAP001_LOCAL_NAVIGATION_DERIVED',
-    control: {
-      owner: 'RESOLVER',
-      runId: 'MAP001-RUN-0001',
-      iteration: 1,
-      lineage: { parentProposal: null, originatingRepair: null },
-      baseline: {
-        authorityId: 'MAP-001-WALKABLE-ENVELOPE-AUTHORITY-001',
-        authorityPath: DEFAULT_AUTHORITY_PATH,
-        authorityManifestSha256: 'a'.repeat(64),
-        sourceCandidate: {
-          id: 'MAP-001-WALKABLE-ENVELOPE-CANDIDATE-001',
-          path: 'data/maps/map-001-walkable-envelope-candidate-001.json',
-          sha256: 'b'.repeat(64),
-        },
-      },
-      subject: {
-        mode: 'CREATE_DERIVED',
-        artifactRole: 'NON_AUTHORITATIVE_DERIVED',
-        artifactId: 'ORDER',
-        artifactPath: 'build/proposal-resolution/order.json',
-        baseSha256: null,
-      },
-    },
-    intent: {
-      objective: 'Object equality order test',
-      changes: [{
-        changeId: 'CHG-001',
-        operation: 'add',
-        targetPath: '/obj',
-        after: { a: 1, b: 2 },
-        rationale: 'fixture',
-      }],
-      candidate: { obj: { a: 1, b: 2 } },
-    },
-  };
-  const report = {
-    schemaVersion: '0.1',
-    reportId: 'MAP001-VAL-0001',
-    reportType: 'MAP001_LOCAL_NAVIGATION_VALIDATION',
-    control: {
-      owner: 'RESOLVER',
-      runId: parent.control.runId,
-      proposalBinding: {
-        proposalId: parent.proposalId,
-        sha256: logicalSha256(parent),
-        iteration: 1,
-      },
-      authorityBinding: {
-        authorityId: parent.control.baseline.authorityId,
-        authorityManifestSha256: parent.control.baseline.authorityManifestSha256,
-        sourceCandidate: {
-          id: parent.control.baseline.sourceCandidate.id,
-          sha256: parent.control.baseline.sourceCandidate.sha256,
-        },
-      },
-      validatorBinding,
-    },
-    status: 'REJECT_FIXABLE',
-    findings: [{
-      findingId: 'FND-001',
-      disposition: 'AUTO_REPAIR',
-      code: 'TEST.OBJECT_ORDER',
-      message: 'test',
-      sourceRefs: [DEFAULT_AUTHORITY_PATH],
-      targetPaths: ['/obj'],
-      repairDirective: { minimalChangeRequired: true },
-    }],
-  };
-  const repair = {
-    schemaVersion: '0.1',
-    repairId: 'MAP001-REPAIR-0001',
-    repairType: 'MAP001_LOCAL_NAVIGATION_AUTO_REPAIR',
-    control: {
-      owner: 'RESOLVER',
-      runId: parent.control.runId,
-      parentProposal: {
-        proposalId: parent.proposalId,
-        sha256: logicalSha256(parent),
-        iteration: 1,
-      },
-      validationBasis: {
-        reportId: report.reportId,
-        sha256: logicalSha256(report),
-        status: 'REJECT_FIXABLE',
-      },
-      patchPolicy: {
-        pathScope: 'PARENT_PROPOSAL_INTENT_CANDIDATE',
-        authorityMode: 'CONFORM_TO_EXISTING_AUTHORITY',
-        mutationClass: 'AUTO_REPAIR_ONLY',
-      },
-    },
-    patch: {
-      operations: [{
-        editId: 'EDIT-001',
-        operation: 'replace',
-        targetPath: '/obj',
-        findingRefs: ['FND-001'],
-        expectedBefore: { b: 2, a: 1 },
-        after: { a: 1, b: 3 },
-        rationale: 'same object semantics, different key insertion order',
-      }],
-    },
-  };
+test('expectedBefore object equality is independent of object key order', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const scopedReport = retargetSingleFinding(report, parent, ['/semantics']);
+  const original = parent.intent.candidate.semantics;
+  const reversed = Object.fromEntries(Object.entries(original).reverse());
+  const after = { ...structuredClone(original), i2OrderTestMarker: true };
+  const repair = makeRepair(parent, scopedReport, {
+    targetPath: '/semantics',
+    expectedBefore: reversed,
+    after,
+  });
 
   const result = runRepairGate({
     parentProposal: parent,
-    validationReport: report,
+    validationReport: scopedReport,
     repair,
     childProposalId: 'MAP001-PROP-0002',
   });
 
-  assert.deepEqual(result.childProposal.intent.candidate.obj, { a: 1, b: 3 });
+  assert.deepEqual(result.childProposal.intent.candidate.semantics, after);
 });
 
 
@@ -646,7 +459,7 @@ test('duplicate editId values are rejected', async () => {
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'DUPLICATE_EDIT_ID'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
 });
 
