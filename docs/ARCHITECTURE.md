@@ -35,7 +35,7 @@ La fuente editorial y científica principal del piloto es:
 data/source/Base_botanica_Pokedex_flora_Master_2.0_FINAL.xlsx
 ```
 
-El Master Botánico 2.0 se exporta a ocho JSON canónicos:
+El Master Botánico 2.0 se exporta a nueve JSON canónicos:
 
 ```text
 data/botanical/metadata.json
@@ -46,9 +46,10 @@ data/botanical/sources.json
 data/botanical/glossary.json
 data/botanical/photos.json
 data/botanical/model_errors.json
+data/botanical/species_ecology.json
 ```
 
-Estos ocho archivos son derivados reproducibles, no fuentes editoriales paralelas.
+Estos nueve archivos son derivados reproducibles, no fuentes editoriales paralelas.
 
 Las fichas de `data/species/` también son derivadas y existen como vistas completas por especie para consumo humano, IA, interfaz y dirección de arte.
 
@@ -68,7 +69,7 @@ Master Botánico 2.0
         ↓
 export_master.py
         ↓
-8 JSON canónicos
+9 JSON canónicos
         ↓
 validate_master_export.py
         ↓
@@ -94,6 +95,8 @@ Estado del Master 2.0:
 Los caracteres retirados se conservan por trazabilidad, pero no participan en identificación computable.
 
 La capa de variabilidad y contextos es complementaria al Master y no reemplaza sus relaciones canónicas.
+
+`species_ecology.json` es una exportación canónica del Master y representa conocimiento ecológico general por especie con procedencia explícita. Permanece separada del contexto observado de una `Observation` y no participa automáticamente en ACE.
 
 ## 5. Modelo conceptual compartido
 
