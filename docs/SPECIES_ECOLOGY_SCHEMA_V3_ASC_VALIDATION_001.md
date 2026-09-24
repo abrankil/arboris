@@ -348,3 +348,49 @@ Hasta entonces, el estado correcto no es “validated”, sino:
 ```text
 IMPLEMENTATION CANDIDATE — BLOCKED ON SOURCE MIGRATION
 ```
+
+## 17. Addendum posterior a correcciones ASC
+
+Después de esta auditoría se ejecutaron dos correcciones materiales:
+
+1. se consolidó `docs/SPECIES_ECOLOGY_SCHEMA_V3_FINAL_CONTRACT.md` en la rama de implementación;
+2. se eliminó el placeholder manual `data/botanical/species_ecology.json`.
+
+Además, el contrato final incorporó explícitamente:
+
+```text
+MASTER_BINDING
+DV_EQUIVALENCE
+DERIVED_ONLY
+EXECUTION_REQUIRED_FOR_CLOSURE
+```
+
+Reclasificación de hallazgos:
+
+```text
+F1 — derivado manual antes de la fuente:
+RESOLVED
+
+F4 — trazabilidad del contrato final:
+RESOLVED
+
+F2 — documentación adelantada respecto del XLSX:
+OPEN / TRANSITIONAL MERGE BLOCKER
+
+F3 — ejecución no demostrada:
+OPEN
+```
+
+Estado actualizado:
+
+```text
+CONTRACT TRACEABILITY: PASS
+DERIVATION PURITY AT BRANCH LEVEL: PASS
+SOURCE XLSX COHERENCE: FAIL — EXPECTED UNTIL MIGRATION
+EXECUTED TEST EVIDENCE: OPEN
+MERGE READINESS: FAIL
+
+ASC VALIDATION: PARTIAL / BLOCKED ON SOURCE MIGRATION
+```
+
+Este addendum no reescribe el registro histórico de la auditoría inicial; documenta las correcciones posteriores.
