@@ -31,6 +31,8 @@ class QueryBotanicalTests(unittest.TestCase):
         self.assertEqual(result["master_version"], "2.0.0")
         self.assertEqual(result["counts"]["species"], 6)
         self.assertEqual(result["counts"]["species_characters"], 89)
+        self.assertEqual(result["counts"]["species_ecology"], 0)
+        self.assertIn("species_ecology.json", result["file_bytes"])
         self.assertGreater(result["canonical_json_bytes"], 0)
 
     def test_legacy_species_id_is_normalized_for_read_only_queries(self) -> None:
@@ -48,6 +50,26 @@ class QueryBotanicalTests(unittest.TestCase):
         result, _ = run_query("compare", "CH-003", "SP-001", "SP-002")
         self.assertEqual(result["character"]["caracter_id"], "CH-003")
         self.assertEqual(len(result["rows"]), 2)
+
+    def test_ecology_query_supports_empty_dataset_and_species_filter(self) -> None:
+        result, _ = run_query("ecology")
+        self.assertEqual(result, [])
+
+        result, _ = run_query("ecology", "SP-001")
+        self.assertEqual(result, [])
+
+    def test_ecology_query_rejects_unknown_species(self) -> None:
+        completed = subprocess.run(
+            [sys.executable, str(QUERY_TOOL), "ecology", "SP-999"],
+            cwd=REPO_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        self.assertNotEqual(completed.returncode, 0)
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["error"], "unknown species_id: SP-999")
 
     def test_pretty_flag_is_accepted_after_subcommand(self) -> None:
         result, raw = run_query("stats", "--pretty")
