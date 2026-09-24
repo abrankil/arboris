@@ -18,7 +18,7 @@ La única fuente editorial y científica de verdad del piloto es:
 
 El Master Botánico 2.0 contiene el conocimiento científico estructurado del piloto.
 
-Los ocho JSON de `data/botanical/` son derivados reproducibles:
+Los nueve JSON de `data/botanical/` son derivados reproducibles:
 
 ```text
 metadata.json
@@ -29,6 +29,7 @@ sources.json
 glossary.json
 photos.json
 model_errors.json
+species_ecology.json
 ```
 
 Las seis fichas de `data/species/` también son derivadas y se generan desde esos JSON. No deben editarse manualmente como una segunda fuente de verdad.
@@ -111,7 +112,38 @@ Una relación puede contener uno o varios estados esperados y metadatos de varia
 
 Una relación inexistente o un valor vacío significa conocimiento no documentado, no ausencia botánica.
 
-## 7. Estados botánicos vs estados de observación
+## 7. SpeciesEcologyFact
+
+`SpeciesEcologyFact` representa conocimiento ecológico general documentado para una especie.
+
+No describe las condiciones de una observación concreta.
+
+Conceptualmente:
+
+```text
+Species
++ EcologyDimension
++ NormalizedPayload
++ Scope
++ Source(s)
+→ SpeciesEcologyFact
+```
+
+La capa canónica se deriva del Master como:
+
+```text
+data/botanical/species_ecology.json
+```
+
+Reglas:
+
+- todo hecho ecológico conserva procedencia mediante `fuente_ids`;
+- ausencia de fila significa conocimiento no documentado, no ausencia biológica;
+- sólo hechos `activo` son elegibles para fichas de consumo;
+- ecología de especie no se copia automáticamente a `Observation`;
+- `species_ecology.json` no alimenta ACE sin un gate específico posterior.
+
+## 9. Estados botánicos vs estados de observación
 
 Debe distinguirse estrictamente entre estados botánicos y estados operativos.
 
@@ -133,7 +165,7 @@ Reglas:
 - `No puedo observarlo` ≠ carácter ausente;
 - `no aplica` describe aplicabilidad, no un estado morfológico.
 
-## 8. Individual
+## 9. Individual
 
 `Individual` representa un organismo físico concreto. Permite registrar variación intraespecífica y reobservaciones.
 
@@ -141,7 +173,7 @@ Un individuo puede acumular múltiples observaciones en fechas, fenologías y co
 
 El modelo debe admitir observaciones cuyo individuo sea desconocido.
 
-## 9. Observation
+## 10. Observation
 
 `Observation` representa un encuentro concreto con un organismo real en un lugar y momento determinados.
 
@@ -149,7 +181,7 @@ Puede relacionarse con fecha/hora, ubicación, individuo, contexto territorial, 
 
 Los datos desconocidos deben permanecer desconocidos.
 
-## 10. Evidence
+## 11. Evidence
 
 `Evidence` representa una pieza de información utilizada para describir una observación o evaluar una hipótesis.
 
@@ -165,7 +197,7 @@ Puede provenir de:
 
 La procedencia debe conservarse.
 
-## 11. PhotographicEvidence
+## 12. PhotographicEvidence
 
 Una fotografía es evidencia primaria y debe preservarse aunque cambien sus interpretaciones derivadas.
 
@@ -173,7 +205,7 @@ Una misma foto puede aportar evidencia para varios caracteres.
 
 Una predicción automática nunca reemplaza la fotografía que la originó.
 
-## 12. CharacterEvidence
+## 13. CharacterEvidence
 
 `CharacterEvidence` afirma que, para una observación concreta, un carácter presenta uno o varios estados observados.
 
@@ -189,7 +221,7 @@ Evidence: IMG001
 
 Debe poder conservar método, evidencia de origen, incertidumbre, calidad, fecha y validación posterior.
 
-## 13. Candidate
+## 14. Candidate
 
 `Candidate` representa una especie considerada plausible durante una sesión de identificación.
 
@@ -197,7 +229,7 @@ Un candidato no es una identificación.
 
 BioCLIP puede ordenar candidatos, pero sus scores no constituyen evidencia botánica ni probabilidad taxonómica por sí mismos.
 
-## 14. IdentificationSession
+## 15. IdentificationSession
 
 `IdentificationSession` representa el proceso de inferencia para una observación.
 
@@ -215,7 +247,7 @@ Puede contener:
 
 La sesión debe ser reconstruible a partir de evidencia y eventos, sin depender de estados botánicos hardcodeados en el motor.
 
-## 15. Motor de identificación
+## 16. Motor de identificación
 
 El motor debe consumir directamente los JSON canónicos del Master 2.0.
 
@@ -239,7 +271,7 @@ Compatibilidad básica:
 - expected y observed conocidos con intersección → compatible;
 - expected y observed conocidos y disjuntos → incompatibilidad explícita.
 
-## 16. AdaptiveQuestion
+## 17. AdaptiveQuestion
 
 `AdaptiveQuestion` es una forma de solicitar evidencia, no conocimiento botánico independiente.
 
@@ -259,7 +291,7 @@ forma de obtenerlo
 
 La clave adaptativa debe preguntar solo cuando la información no pueda recuperarse con suficiente confianza de evidencia ya existente.
 
-## 17. VisualModelObservation
+## 18. VisualModelObservation
 
 Un modelo visual puede producir `CharacterEvidence` restringida a un carácter solicitado.
 
@@ -279,7 +311,7 @@ NO_OBSERVABLE
 
 El modelo no modifica la ficha científica de la especie.
 
-## 18. Identification
+## 19. Identification
 
 `Identification` representa una hipótesis revisable sobre la identidad de una observación.
 
@@ -287,7 +319,7 @@ Puede permanecer suficientemente respaldada, probable, tentativa o no resuelta.
 
 Una observación puede acumular varias hipótesis a lo largo del tiempo. La corrección de una identificación no debe destruir su historia.
 
-## 19. Discovery, Collection y GameCharacter
+## 20. Discovery, Collection y GameCharacter
 
 La capa lúdica permanece separada del conocimiento científico.
 
@@ -309,7 +341,7 @@ GameCharacter
 
 Los datos de juego no deben modificar la ficha científica.
 
-## 20. Variación intraespecífica
+## 21. Variación intraespecífica
 
 La variación es un requisito de primera clase.
 
@@ -317,7 +349,7 @@ El modelo debe permitir múltiples estados esperados por especie, múltiples ind
 
 No debe existir una única apariencia “típica” obligatoria por especie.
 
-## 21. Datos fuente y datos derivados
+## 22. Datos fuente y datos derivados
 
 Datos fuente incluyen observaciones reales, fotografías originales, respuestas humanas, ubicación registrada, evidencia y validaciones.
 
@@ -332,7 +364,7 @@ Datos derivados incluyen:
 
 Los derivados deben poder regenerarse o auditarse desde su fuente.
 
-## 22. Persistencia y offline-first
+## 23. Persistencia y offline-first
 
 Árboris es offline-first.
 
@@ -340,7 +372,7 @@ La persistencia móvil prevista utiliza SQLite mediante `expo-sqlite`.
 
 El esquema físico definitivo debe derivarse de este modelo de dominio y del flujo end-to-end validado, no al revés.
 
-## 23. Versionado y procedencia
+## 24. Versionado y procedencia
 
 Debe poder saberse qué versión produjo una inferencia relevante.
 
@@ -357,7 +389,7 @@ identification_logic_version
 
 El Master 2.0 incluye metadata y SHA-256 de integridad para sus derivados canónicos.
 
-## 24. Privacidad y ubicación
+## 25. Privacidad y ubicación
 
 Las observaciones pueden contener información geográfica sensible.
 
@@ -365,7 +397,7 @@ El modelo futuro deberá distinguir ubicación necesaria para funcionamiento, ub
 
 No debe asumirse que todas las coordenadas serán públicas.
 
-## 25. Decisiones abiertas
+## 26. Decisiones abiertas
 
 Permanecen abiertos, entre otros:
 
