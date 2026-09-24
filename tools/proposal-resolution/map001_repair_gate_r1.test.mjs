@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -646,4 +648,218 @@ test('duplicate editId values are rejected', async () => {
     (error) => error instanceof Map001RepairGateError
       && error.code === 'DUPLICATE_EDIT_ID'
   );
+});
+
+
+function ownProtoJson(value = { polluted: true }) {
+  return JSON.parse(JSON.stringify({ value })).value && JSON.parse(
+    '{"__proto__":' + JSON.stringify(value) + '}'
+  );
+}
+
+function retargetSingleFinding(report, parent, targetPaths) {
+  const next = structuredClone(report);
+  next.control.proposalBinding.sha256 = logicalSha256(parent);
+  next.findings[0].targetPaths = targetPaths;
+  return next;
+}
+
+test('E5.1 module exposes only the normalized executable repair entrypoint', async () => {
+  const module = await import('./map001_repair_gate_r1.mjs');
+  assert.equal(typeof module.executeMap001RepairGate, 'function');
+  assert.equal(Object.hasOwn(module, 'validateAndApplyMap001Repair'), false);
+});
+
+test('decoded __proto__ repair target fails closed without prototype mutation', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const scopedReport = retargetSingleFinding(report, parent, ['/__proto__']);
+  const repair = makeRepair(parent, scopedReport, {
+    operation: 'add',
+    targetPath: '/__proto__',
+    after: { polluted: true },
+  });
+  delete repair.patch.operations[0].expectedBefore;
+
+  assert.equal({}.polluted, undefined);
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: parent,
+      validationReport: scopedReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'PROTOTYPE_SENSITIVE_POINTER_TOKEN'
+  );
+  assert.equal({}.polluted, undefined);
+});
+
+test('nested decoded __proto__ repair target fails closed', async () => {
+  const { parent, report } = await makeFixableFixture();
+  parent.intent.candidate.obj = {};
+  const scopedReport = retargetSingleFinding(report, parent, ['/obj']);
+  const repair = makeRepair(parent, scopedReport, {
+    operation: 'add',
+    targetPath: '/obj/__proto__',
+    after: { polluted: true },
+  });
+  delete repair.patch.operations[0].expectedBefore;
+
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: parent,
+      validationReport: scopedReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'PROTOTYPE_SENSITIVE_POINTER_TOKEN'
+  );
+  assert.equal({}.polluted, undefined);
+});
+
+test('normalized repair content with own __proto__ key fails before legacy hash acceptance', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const repair = makeRepair(parent, report);
+  repair.patch.operations[0].after = ownProtoJson();
+
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: parent,
+      validationReport: report,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+  assert.equal({}.polluted, undefined);
+});
+
+test('normalized parent and report content with own __proto__ key fail closed', async () => {
+  const fixtureA = await makeFixableFixture();
+  Object.defineProperty(fixtureA.parent.intent.candidate, '__proto__', {
+    value: { polluted: true },
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+  const reportA = retargetSingleFinding(
+    fixtureA.report,
+    fixtureA.parent,
+    fixtureA.report.findings[0].targetPaths
+  );
+  const repairA = makeRepair(fixtureA.parent, reportA);
+
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureA.parent,
+      validationReport: reportA,
+      repair: repairA,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+
+  const fixtureB = await makeFixableFixture();
+  Object.defineProperty(fixtureB.report.findings[0], '__proto__', {
+    value: { polluted: true },
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+  const repairB = makeRepair(fixtureB.parent, fixtureB.report);
+
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureB.parent,
+      validationReport: fixtureB.report,
+      repair: repairB,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+  assert.equal({}.polluted, undefined);
+});
+
+test('ordinary constructor and prototype keys are not rejected by name alone', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const scopedReport = retargetSingleFinding(report, parent, ['/constructor', '/prototype']);
+  const repair = makeRepair(parent, scopedReport, {
+    operation: 'add',
+    targetPath: '/constructor',
+    after: 'ordinary-data',
+  });
+  delete repair.patch.operations[0].expectedBefore;
+  repair.patch.operations.push({
+    editId: 'EDIT-002',
+    operation: 'add',
+    targetPath: '/prototype',
+    findingRefs: [scopedReport.findings[0].findingId],
+    after: 'ordinary-data-2',
+    rationale: 'Ordinary JSON key must not be blocked by nominal blacklist.',
+  });
+
+  const result = runRepairGate({
+    parentProposal: parent,
+    validationReport: scopedReport,
+    repair,
+    childProposalId: 'MAP001-PROP-0002',
+  });
+
+  assert.equal(result.childProposal.intent.candidate.constructor, 'ordinary-data');
+  assert.equal(result.childProposal.intent.candidate.prototype, 'ordinary-data-2');
+  const descriptor = Object.getOwnPropertyDescriptor(
+    result.childProposal.intent.candidate,
+    'constructor'
+  );
+  assert.deepEqual(
+    {
+      enumerable: descriptor.enumerable,
+      writable: descriptor.writable,
+      configurable: descriptor.configurable,
+    },
+    { enumerable: true, writable: true, configurable: true }
+  );
+});
+
+test('Python E5.1 contract checker rejects own __proto__ key in parsed JSON', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const repair = makeRepair(parent, report);
+  Object.defineProperty(repair, '__proto__', {
+    value: { polluted: true },
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'map001-i2-python-'));
+  try {
+    const parentPath = path.join(dir, 'parent.json');
+    const reportPath = path.join(dir, 'report.json');
+    const repairPath = path.join(dir, 'repair.json');
+    fs.writeFileSync(parentPath, JSON.stringify(parent));
+    fs.writeFileSync(reportPath, JSON.stringify(report));
+    fs.writeFileSync(repairPath, JSON.stringify(repair));
+
+    const proc = spawnSync('python', [
+      path.join(ROOT, 'tools/proposal-resolution/validate_e5_repair_contracts.py'),
+      '--phase', 'pre',
+      '--parent', parentPath,
+      '--report', reportPath,
+      '--repair', repairPath,
+      '--parent-sha', logicalSha256(parent),
+      '--report-sha', logicalSha256(report),
+    ], {
+      cwd: ROOT,
+      encoding: 'utf8',
+    });
+
+    assert.notEqual(proc.status, 0);
+    assert.match(proc.stderr, /LEGACY_HASH_UNSAFE_JSON_KEY/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
