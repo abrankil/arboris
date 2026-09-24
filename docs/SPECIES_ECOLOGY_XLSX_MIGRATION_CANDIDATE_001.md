@@ -169,3 +169,60 @@ DERIVED REGENERATION: BLOCKED UNTIL BINARY INTEGRATION
 MERGE: BLOCKED
 DATA POPULATION: BLOCKED
 ```
+
+## 9. Addendum — checksum y ensayo de derivación local
+
+El candidato exportado y reimportado tiene:
+
+```text
+SHA-256 = b0d893c1d274f20648034cc04845a074d0fd7ec34b497540f9a2796ccdc8c1dc
+```
+
+Se ejecutó además un ensayo local de derivación **sin integrar resultados al repositorio**.
+
+Usando exclusivamente el contenido del candidato XLSX como fuente se obtuvo:
+
+```text
+metadata.json
+species.json
+characters.json
+species_characters.json
+sources.json
+glossary.json
+photos.json
+model_errors.json
+species_ecology.json
+```
+
+Resultado específico de la nueva capa:
+
+```text
+species_ecology.json = []
+```
+
+También se materializaron localmente seis vistas:
+
+```text
+arboris.species-card.v3
+ecology = []
+```
+
+para las seis especies del piloto.
+
+Este ensayo demuestra que el contrato del candidato es exportable en la forma prevista, pero **no sustituye** la ejecución del pipeline real del repositorio.
+
+Los derivados del ensayo no se incorporan manualmente a la rama, preservando:
+
+```text
+DERIVED_ONLY
+```
+
+Gate actualizado:
+
+```text
+XLSX CANDIDATE CHECKSUM: KNOWN
+LOCAL EXPORT REHEARSAL: PASS
+LOCAL SPECIES-CARD V3 REHEARSAL: PASS
+REPOSITORY BINARY INTEGRATION: OPEN
+REPOSITORY PIPELINE EXECUTION: OPEN
+```
