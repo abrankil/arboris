@@ -1,6 +1,6 @@
 # data/botanical — JSON botánicos canónicos derivados
 
-Este directorio contiene los **ocho JSON canónicos generados desde Master Botánico 2.0**.
+Este directorio contiene los **nueve JSON canónicos generados desde Master Botánico 2.0**.
 
 Archivos vigentes:
 
@@ -12,6 +12,7 @@ Archivos vigentes:
 - `glossary.json`
 - `photos.json`
 - `model_errors.json`
+- `species_ecology.json`
 
 Estos archivos son derivados reproducibles de:
 
@@ -38,7 +39,8 @@ No son fuente vigente, no participan en el motor canónico y no deben usarse par
 - vacío / `null` = sin dato, no ausencia;
 - `no sé`, `no observable` y `no aplica` describen observación/aplicabilidad, no estados botánicos de especie;
 - solo los caracteres cuyo `estado_piloto` coincide con `metadata.computable_status` participan como computables;
-- los caracteres retirados o pendientes pueden conservarse para trazabilidad sin participar en el motor.
+- los caracteres retirados o pendientes pueden conservarse para trazabilidad sin participar en el motor;
+- `species_ecology.json` contiene hechos ecológicos generales de especie; no describe una observación concreta y no participa automáticamente en ACE.
 
 Validación:
 
@@ -52,7 +54,7 @@ Ver `docs/START_HERE.md` para la jerarquía completa de autoridad.
 
 ## Capa complementaria del motor de identificación
 
-Además de los ocho JSON derivados del Master Botánico 2.0, el motor canónico puede consumir:
+Además de los nueve JSON derivados del Master Botánico 2.0, el motor canónico puede consumir:
 
 - `character_variability.json`
 - `contexts.json`
