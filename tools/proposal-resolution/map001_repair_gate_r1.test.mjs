@@ -465,9 +465,7 @@ test('duplicate editId values are rejected', async () => {
 
 
 function ownProtoJson(value = { polluted: true }) {
-  return JSON.parse(JSON.stringify({ value })).value && JSON.parse(
-    '{"__proto__":' + JSON.stringify(value) + '}'
-  );
+  return JSON.parse('{"__proto__":' + JSON.stringify(value) + '}');
 }
 
 function retargetSingleFinding(report, parent, targetPaths) {
@@ -597,9 +595,66 @@ test('normalized parent and report content with own __proto__ key fail closed', 
   assert.equal({}.polluted, undefined);
 });
 
+test('unsafe __proto__ key is rejected in expectedBefore, arrays, and multi-operation repairs', async () => {
+  const fixtureA = await makeFixableFixture();
+  const repairA = makeRepair(fixtureA.parent, fixtureA.report);
+  repairA.patch.operations[0].expectedBefore = ownProtoJson();
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureA.parent,
+      validationReport: fixtureA.report,
+      repair: repairA,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+
+  const fixtureB = await makeFixableFixture();
+  const repairB = makeRepair(fixtureB.parent, fixtureB.report);
+  repairB.patch.operations[0].after = [ownProtoJson()];
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureB.parent,
+      validationReport: fixtureB.report,
+      repair: repairB,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+
+  const fixtureC = await makeFixableFixture();
+  const repairC = makeRepair(fixtureC.parent, fixtureC.report);
+  repairC.patch.operations.push({
+    editId: 'EDIT-002',
+    operation: 'add',
+    targetPath: '/not-authorized-but-never-reached',
+    findingRefs: [fixtureC.report.findings[0].findingId],
+    after: ownProtoJson(),
+    rationale: 'Adversarial second operation contains unsafe legacy-hash key.',
+  });
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureC.parent,
+      validationReport: fixtureC.report,
+      repair: repairC,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+
+  assert.equal({}.polluted, undefined);
+});
+
 test('ordinary constructor and prototype keys are not rejected by name alone', async () => {
   const { parent, report } = await makeFixableFixture();
-  const scopedReport = retargetSingleFinding(report, parent, ['/constructor', '/prototype']);
+  const scopedReport = retargetSingleFinding(
+    report,
+    parent,
+    ['/constructor', '/prototype', '/__proto___']
+  );
   const repair = makeRepair(parent, scopedReport, {
     operation: 'add',
     targetPath: '/constructor',
@@ -614,6 +669,14 @@ test('ordinary constructor and prototype keys are not rejected by name alone', a
     after: 'ordinary-data-2',
     rationale: 'Ordinary JSON key must not be blocked by nominal blacklist.',
   });
+  repair.patch.operations.push({
+    editId: 'EDIT-003',
+    operation: 'add',
+    targetPath: '/__proto___',
+    findingRefs: [scopedReport.findings[0].findingId],
+    after: 'nearby-safe-key',
+    rationale: 'Nearby key must not be blocked by exact __proto__ policy.',
+  });
 
   const result = runRepairGate({
     parentProposal: parent,
@@ -624,6 +687,7 @@ test('ordinary constructor and prototype keys are not rejected by name alone', a
 
   assert.equal(result.childProposal.intent.candidate.constructor, 'ordinary-data');
   assert.equal(result.childProposal.intent.candidate.prototype, 'ordinary-data-2');
+  assert.equal(result.childProposal.intent.candidate.__proto___, 'nearby-safe-key');
   const descriptor = Object.getOwnPropertyDescriptor(
     result.childProposal.intent.candidate,
     'constructor'
