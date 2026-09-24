@@ -1,11 +1,15 @@
 ﻿{
   "specification_id": "arboris-controlled-vocabularies",
-  "specification_version": "1.0.0",
+  "specification_version": "2.0.0",
   "contract_id": "ASC-MASTER2-CONTROLLED-VOCABULARY-CONTRACT",
-  "contract_version": "1.0.0",
+  "contract_version": "2.0.0",
   "scope": [
     "Especie_Caracter.variabilidad",
-    "Especie_Caracter.interaction_safety"
+    "Especie_Caracter.interaction_safety",
+    "Ecologia_Especie.dimension",
+    "Ecologia_Especie.estado",
+    "Ecologia_Especie.alcance_tipo",
+    "Ecologia_Especie.unidad"
   ],
   "fields": {
     "Especie_Caracter.variabilidad": {
@@ -23,6 +27,38 @@
         "precaucion",
         "evaluar_antes",
         "no_provocar"
+      ]
+    },
+    "Ecologia_Especie.dimension": {
+      "nullable": false,
+      "allowed_values": [
+        "distribucion_geografica",
+        "rango_altitudinal",
+        "habitat",
+        "fenologia_floracion",
+        "fenologia_fructificacion"
+      ]
+    },
+    "Ecologia_Especie.estado": {
+      "nullable": false,
+      "allowed_values": [
+        "activo",
+        "pendiente_revision",
+        "retirado"
+      ]
+    },
+    "Ecologia_Especie.alcance_tipo": {
+      "nullable": true,
+      "allowed_values": [
+        "geografico",
+        "poblacional",
+        "condicional"
+      ]
+    },
+    "Ecologia_Especie.unidad": {
+      "nullable": true,
+      "allowed_values": [
+        "m"
       ]
     }
   }
