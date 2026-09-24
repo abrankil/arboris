@@ -19,6 +19,7 @@ REQUIRED_FILES = {
     "photos": "photos.json",
     "glossary": "glossary.json",
     "model_errors": "model_errors.json",
+    "species_ecology": "species_ecology.json",
 }
 
 
@@ -82,6 +83,7 @@ def load_canonical_data():
         "photos",
         "glossary",
         "model_errors",
+        "species_ecology",
     ):
         if not isinstance(data[key], list):
             raise SpeciesBuildError(
@@ -122,6 +124,7 @@ def build_species_view(
     photos,
     glossary,
     model_errors,
+    species_ecology,
 ):
     species_id = species_record["species_id"]
     computable_status = metadata["computable_status"]
@@ -195,6 +198,30 @@ def build_species_view(
         if record.get("species_id_real") == species_id
     ]
 
+    species_ecology_facts = [
+        record
+        for record in species_ecology
+        if (
+            record.get("species_id") == species_id
+            and record.get("estado") == "activo"
+        )
+    ]
+
+    for fact in species_ecology_facts:
+        source_ids = fact.get("fuente_ids") or []
+        if not isinstance(source_ids, list):
+            raise SpeciesBuildError(
+                f"{species_id}/{fact.get('ecology_fact_id')}: "
+                "fuente_ids debe ser array."
+            )
+        for source_id in source_ids:
+            if source_id not in source_by_id:
+                raise SpeciesBuildError(
+                    f"{species_id}/{fact.get('ecology_fact_id')}: "
+                    f"fuente inexistente {source_id}"
+                )
+            used_source_ids.add(source_id)
+
     glossary_terms = [
         record
         for record in glossary
@@ -218,7 +245,7 @@ def build_species_view(
     ]
 
     return {
-        "view_schema": "arboris.species-card.v2",
+        "view_schema": "arboris.species-card.v3",
         "generated_from": {
             "master_name": metadata.get("master_name"),
             "master_version": metadata.get("master_version"),
@@ -229,6 +256,7 @@ def build_species_view(
         },
         "species": species_record,
         "botanical_characters": botanical_characters,
+        "ecology": species_ecology_facts,
         "photos": species_photos,
         "sources": relevant_sources,
         "glossary": glossary_terms,
@@ -250,6 +278,7 @@ def main():
     photos = data["photos"]
     glossary = data["glossary"]
     model_errors = data["model_errors"]
+    species_ecology = data["species_ecology"]
 
     character_by_id = index_unique(
         characters,
@@ -292,6 +321,7 @@ def main():
             photos=photos,
             glossary=glossary,
             model_errors=model_errors,
+            species_ecology=species_ecology,
         )
 
         write_json(output_path, payload)
