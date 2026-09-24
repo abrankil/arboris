@@ -20,7 +20,7 @@ python tools/botanical-data/validate_species_data.py
 
 Archivos vigentes del pipeline:
 
-- `export_master.py` — exporta Master 2.0 a los 8 JSON canónicos de `data/botanical/`.
+- `export_master.py` — exporta Master 2.0 a los 9 JSON canónicos de `data/botanical/`.
 - `validate_master_export.py` — valida estructura, conteos, referencias, estados y SHA del export.
 - `validate_species_ids.py` — valida IDs canónicos `SP-001...SP-006` y compatibilidad histórica `SP001...SP006`.
 - `build_species_data.py` — genera las 6 fichas completas de `data/species/` desde los JSON canónicos.
@@ -40,6 +40,7 @@ python tools/botanical-data/query_botanical.py relation SP-001 CH-003 --with-sou
 python tools/botanical-data/query_botanical.py compare CH-003 SP-001 SP-002 SP-006 --pretty
 python tools/botanical-data/query_botanical.py photos SP-001
 python tools/botanical-data/query_botanical.py errors SP-002
+python tools/botanical-data/query_botanical.py ecology SP-006
 ```
 
 El JSON compacto es la salida predeterminada para reducir contexto. `--pretty` cambia solo el formato de presentación.
@@ -82,6 +83,8 @@ El prototipo materializa estados esperados en `species_character_states` y prueb
 - errores de modelo por especie real.
 
 El esquema físico definitivo de SQLite sigue `OPEN`.
+
+`species_ecology.json` no se materializa en el prototipo SQLite schema v1. Su incorporación futura requiere un gate específico de necesidad y rendimiento.
 
 ## Benchmark JSON vs SQLite
 
