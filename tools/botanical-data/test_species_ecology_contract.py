@@ -31,9 +31,17 @@ class SpeciesEcologyContractTests(unittest.TestCase):
         cls.species_ids = {"SP-001", "SP-004", "SP-005", "SP-006"}
         cls.source_ids = {"F-010", "F-013", "F-014", "F-016", "F-019"}
 
-    def validate(self, records):
+    def validate(self, records, *, controlled_vocabulary=False):
         errors = []
         warnings = []
+        if controlled_vocabulary:
+            spec = self.validator.load_spec()
+            self.validator.validate_controlled_vocabulary_records(
+                records,
+                sheet_name="Ecologia_Especie",
+                spec=spec,
+                errors=errors,
+            )
         self.validator.validate_species_ecology(
             records,
             species_id_set=self.species_ids,
@@ -78,6 +86,44 @@ class SpeciesEcologyContractTests(unittest.TestCase):
             self.base_fact(species_id="SP-999"),
         ])
         self.assertTrue(any("species_id inexistente" in error for error in errors))
+
+    def test_duplicate_ecology_fact_id_is_rejected(self):
+        first = self.base_fact(ecology_fact_id="ECO-0001")
+        second = self.base_fact(
+            ecology_fact_id="ECO-0001",
+            valor_texto="noviembre a enero",
+            valor_codificado=["11", "12", "01"],
+            fuente_ids=["F-014"],
+        )
+        errors, _ = self.validate([first, second])
+        self.assertTrue(any("ecology_fact_id duplicado" in error for error in errors))
+
+    def test_invalid_dimension_is_rejected_by_controlled_vocabulary(self):
+        errors, _ = self.validate(
+            [self.base_fact(dimension="ecologia_inventada")],
+            controlled_vocabulary=True,
+        )
+        self.assertTrue(any("dimension" in error and "valor no permitido" in error for error in errors))
+
+    def test_invalid_status_is_rejected_by_controlled_vocabulary(self):
+        errors, _ = self.validate(
+            [self.base_fact(estado="publicado")],
+            controlled_vocabulary=True,
+        )
+        self.assertTrue(any("estado" in error and "valor no permitido" in error for error in errors))
+
+    def test_invalid_scope_type_is_rejected_by_controlled_vocabulary(self):
+        errors, _ = self.validate(
+            [
+                self.base_fact(
+                    alcance_tipo="ecosistema",
+                    alcance_valor="matorral",
+                )
+            ],
+            controlled_vocabulary=True,
+        )
+        self.assertTrue(any("alcance_tipo" in error and "valor no permitido" in error for error in errors))
+
 
     def test_empty_source_ids_is_rejected(self):
         errors, _ = self.validate([
