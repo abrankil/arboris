@@ -136,6 +136,10 @@ Para localizar o ejecutar un prompt oficial del proyecto, resolver primero `prom
 
 Para compilar prompts de escenas, blockouts o prototipos generativos, leer primero `docs/ARBORIS_SCENE_COMPILER.md` y después solo las autoridades de dominio necesarias. ASC compila restricciones y contratos; no sustituye evidencia, canon, navegación, renderer ni autoridad artística.
 
+Si la tarea requiere workflow ASC end-to-end, preparación upstream de contratos, auditoría/corrección/validación del workflow o de resultados, ejecución externa con revisión posterior, integración de decisiones ASC al repo, o aseguramiento avanzado (`negative harness`, `smoke`, `blind / isolated reproduction`, `freeze`, provenance/manifests/evidence packages, reproducibilidad o scoring), leer además `docs/ASC_WORKFLOW_GUIDE.md`.
+
+No abrir `ASC_WORKFLOW_GUIDE.md` por defecto para una compilación simple de un contrato ya preparado y autorizado.
+
 Para desarrollar o ejecutar el compilador ASC v0.1, leer después `docs/ASC_V0_1_EXECUTABLE_SPEC.md` y `tools/asc/README.md`. La implementación v0.1 es `compile-only`: valida la forma de un contrato preparado y genera texto determinista; no decide autoridad/evidencia ni ejecuta modelos generativos.
 
 Nunca usar un resultado generativo para cerrar por sí mismo una decisión `OPEN` ni como corroboración botánica o territorial.
