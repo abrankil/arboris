@@ -570,3 +570,22 @@ test('execution pin drift prevents repair transaction candidate', async () => {
       && error.code === 'RUN_NOT_READY_TO_REPAIR'
   );
 });
+
+
+test('unsafe __proto__ repair content is rejected by E5.1 before transaction candidate acceptance', async () => {
+  const fixture = await makeReadyToRepairFixture();
+  const repair = makeRepair(fixture.parentProposal, fixture.validationReport);
+  repair.patch.operations[0].after = JSON.parse('{"__proto__":{"polluted":true}}');
+
+  assert.equal({}.polluted, undefined);
+  assert.throws(
+    () => buildMap001RepairTransactionCandidate({
+      ...fixture,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+      root: ROOT,
+    }),
+    (error) => error?.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+  assert.equal({}.polluted, undefined);
+});

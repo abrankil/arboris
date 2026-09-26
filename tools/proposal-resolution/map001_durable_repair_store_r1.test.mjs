@@ -861,3 +861,36 @@ for (const point of ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8']) {
     }
   });
 }
+
+
+test('unsafe __proto__ repair cannot reach durable persistence metadata', { skip: !linux }, async () => {
+  const f = await fixture();
+  try {
+    const unsafeRepair = structuredClone(f.repair);
+    unsafeRepair.patch.operations[0].after = JSON.parse('{"__proto__":{"polluted":true}}');
+
+    assert.equal({}.polluted, undefined);
+    assert.throws(
+      () => commitMap001RepairSnapshot({
+        runPath: f.runPath,
+        expectedBeforeSha256: logicalSha256(f.run),
+        parentProposal: f.parentProposal,
+        validationReport: f.validationReport,
+        repair: unsafeRepair,
+        childProposalId: f.childProposalId,
+        validationReportsById: f.validationReportsById,
+        root: ROOT,
+        transactionId: 'TXN-I2-UNSAFE-PROTO',
+      }),
+      (error) => error instanceof Map001DurableStoreError
+        && error.code === 'E5_2_REVALIDATION_FAILED'
+    );
+
+    assert.equal(fs.existsSync(f.runPath + '.lock'), false);
+    assert.equal(fs.existsSync(f.runPath + '.txn.json'), false);
+    assert.equal(fs.existsSync(f.runPath + '.next.json'), false);
+    assert.equal({}.polluted, undefined);
+  } finally {
+    cleanup(f.dir);
+  }
+});

@@ -62,6 +62,20 @@ function runContractGate({
     });
 
     if (proc.status !== 0) {
+      if (proc.stderr?.includes('PROTOTYPE_SENSITIVE_POINTER_TOKEN')) {
+        fail(
+          'PROTOTYPE_SENSITIVE_POINTER_TOKEN',
+          'E5.1 contract gate rejected a prototype-sensitive decoded pointer token',
+          { status: proc.status, stdout: proc.stdout, stderr: proc.stderr }
+        );
+      }
+      if (proc.stderr?.includes('LEGACY_HASH_UNSAFE_JSON_KEY')) {
+        fail(
+          'LEGACY_HASH_UNSAFE_JSON_KEY',
+          'E5.1 contract gate rejected an unsafe normalized JSON key',
+          { status: proc.status, stdout: proc.stdout, stderr: proc.stderr }
+        );
+      }
       fail(
         phase === 'pre' ? 'REPAIR_CONTRACT_PRECONDITION_FAILED' : 'REPAIR_CONTRACT_POSTCONDITION_FAILED',
         'E5.1 ' + phase + ' contract gate failed',
@@ -88,6 +102,36 @@ function fail(code, message, details = null) {
   throw new Map001RepairGateError(code, message, details);
 }
 
+function assertNoLegacyHashUnsafeJsonKey(value, label, jsonPath = '$') {
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      assertNoLegacyHashUnsafeJsonKey(value[index], label, jsonPath + '[' + index + ']');
+    }
+    return;
+  }
+  if (!value || typeof value !== 'object') return;
+
+  for (const key of Object.keys(value)) {
+    if (key === '__proto__') {
+      fail(
+        'LEGACY_HASH_UNSAFE_JSON_KEY',
+        'normalized E5.1 JSON contains a key unsafe for the legacy hash boundary',
+        { label, path: jsonPath, key }
+      );
+    }
+    assertNoLegacyHashUnsafeJsonKey(value[key], label, jsonPath + '/' + key);
+  }
+}
+
+function defineOwnDataProperty(parent, key, value) {
+  Object.defineProperty(parent, key, {
+    value: structuredClone(value),
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+}
+
 function decodePointer(pointer) {
   if (typeof pointer !== 'string' || !pointer.startsWith('/') || pointer === '/') {
     fail('POINTER_INVALID', 'repair targetPath must be a non-root JSON Pointer');
@@ -103,7 +147,15 @@ function decodePointer(pointer) {
         i += 1;
       }
     }
-    return raw.replaceAll('~1', '/').replaceAll('~0', '~');
+    const decoded = raw.replaceAll('~1', '/').replaceAll('~0', '~');
+    if (decoded === '__proto__') {
+      fail(
+        'PROTOTYPE_SENSITIVE_POINTER_TOKEN',
+        'repair targetPath contains a prototype-sensitive decoded token',
+        { pointer, token: decoded }
+      );
+    }
+    return decoded;
   });
 }
 
@@ -228,7 +280,7 @@ function applyOperation(candidate, operation) {
     if (Object.hasOwn(parent, key)) {
       fail('ADD_TARGET_EXISTS', 'add target already exists', { targetPath: operation.targetPath });
     }
-    parent[key] = structuredClone(operation.after);
+    defineOwnDataProperty(parent, key, operation.after);
     return;
   }
 
@@ -271,7 +323,7 @@ function applyOperation(candidate, operation) {
       if (deepEqual(operation.expectedBefore, operation.after)) {
         fail('REPLACE_NOOP', 'replace after must differ from expectedBefore', { targetPath: operation.targetPath });
       }
-      parent[key] = structuredClone(operation.after);
+      defineOwnDataProperty(parent, key, operation.after);
     }
     return;
   }
@@ -290,7 +342,7 @@ function childChangesFromOperations(operations) {
   }));
 }
 
-export function validateAndApplyMap001Repair({
+function validateAndApplyMap001RepairInternal({
   parentProposal,
   validationReport,
   repair,
@@ -336,6 +388,7 @@ export function validateAndApplyMap001Repair({
 
   const childCandidate = structuredClone(parentProposal.intent.candidate);
   for (const operation of operations) applyOperation(childCandidate, operation);
+  assertNoLegacyHashUnsafeJsonKey(childCandidate, 'childCandidate');
 
   const repairSha = logicalSha256(repair);
   const parentCandidateSha = logicalSha256(parentProposal.intent.candidate);
@@ -376,6 +429,8 @@ export function validateAndApplyMap001Repair({
     },
   };
 
+  assertNoLegacyHashUnsafeJsonKey(childProposal, 'childProposal');
+
   return {
     repairSha256: repairSha,
     parentProposalSha256: parentSha,
@@ -410,6 +465,10 @@ export function executeMap001RepairGate({
     fail('NON_JSON_INPUT', 'E5.1 inputs must be JSON-serializable artifacts', { message: error.message });
   }
 
+  assertNoLegacyHashUnsafeJsonKey(normalizedParent, 'normalizedParent');
+  assertNoLegacyHashUnsafeJsonKey(normalizedReport, 'normalizedReport');
+  assertNoLegacyHashUnsafeJsonKey(normalizedRepair, 'normalizedRepair');
+
   const contractPrecheck = runContractGate({
     phase: 'pre',
     parentProposal: normalizedParent,
@@ -419,7 +478,7 @@ export function executeMap001RepairGate({
     pythonExecutable,
   });
 
-  const result = validateAndApplyMap001Repair({
+  const result = validateAndApplyMap001RepairInternal({
     parentProposal: normalizedParent,
     validationReport: normalizedReport,
     repair: normalizedRepair,

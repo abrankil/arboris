@@ -31,6 +31,26 @@ def validate(instance, schema_path, label):
         raise AssertionError(f"{label} schema violation at {where}: {error.message}")
 
 
+def assert_no_legacy_hash_unsafe_json_key(value, label, json_path="$"):
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            assert_no_legacy_hash_unsafe_json_key(
+                item, label, f"{json_path}[{index}]"
+            )
+        return
+    if not isinstance(value, dict):
+        return
+
+    for key, item in value.items():
+        if key == "__proto__":
+            raise AssertionError(
+                f"LEGACY_HASH_UNSAFE_JSON_KEY: {label} contains __proto__ at {json_path}"
+            )
+        assert_no_legacy_hash_unsafe_json_key(
+            item, label, f"{json_path}/{key}"
+        )
+
+
 def validate_report_status(report):
     dispositions = [finding["disposition"] for finding in report["findings"]]
     if "AUTHORITY_BLOCKER" in dispositions:
@@ -63,7 +83,12 @@ def decode_pointer(pointer):
                 index += 2
                 continue
             index += 1
-        tokens.append(raw.replace("~1", "/").replace("~0", "~"))
+        decoded = raw.replace("~1", "/").replace("~0", "~")
+        if decoded == "__proto__":
+            raise AssertionError(
+                f"PROTOTYPE_SENSITIVE_POINTER_TOKEN: {pointer!r}"
+            )
+        tokens.append(decoded)
     return tokens
 
 
@@ -165,6 +190,7 @@ def validate_repair_semantics(report, repair):
                 raise AssertionError("repair target paths must not overlap")
 
     for operation in operations:
+        decode_pointer(operation["targetPath"])
         for finding_id in operation["findingRefs"]:
             finding = finding_by_id.get(finding_id)
             if finding is None:
@@ -351,6 +377,10 @@ def main():
     report = load(args.report)
     repair = load(args.repair)
 
+    assert_no_legacy_hash_unsafe_json_key(parent, "parent")
+    assert_no_legacy_hash_unsafe_json_key(report, "report")
+    assert_no_legacy_hash_unsafe_json_key(repair, "repair")
+
     validate_pre(parent, report, repair, args)
 
     checked = {
@@ -370,6 +400,7 @@ def main():
                 "post phase requires --child, --repair-sha and --parent-candidate-sha"
             )
         child = load(args.child)
+        assert_no_legacy_hash_unsafe_json_key(child, "child")
         validate_post(parent, repair, child, args)
         checked["childProposalSchema"] = "R2"
         checked["childLineage"] = "BOUND"

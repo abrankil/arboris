@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -19,12 +21,15 @@ import {
 import {
   Map001RepairGateError,
   executeMap001RepairGate,
-  validateAndApplyMap001Repair,
 } from './map001_repair_gate_r1.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '../..');
 const VALIDATOR_PATH = 'tools/map-navigation/materialize_walkable_envelope_001.mjs';
+
+function runRepairGate(args) {
+  return executeMap001RepairGate({ ...args, root: ROOT });
+}
 
 function rawSha256(relPath) {
   return crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, relPath))).digest('hex');
@@ -190,14 +195,14 @@ test('repair target outside cited finding scope is rejected', async () => {
   });
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'REPAIR_TARGET_OUTSIDE_FINDING_SCOPE'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
 });
 
@@ -211,14 +216,14 @@ test('low-level gate rejects a cited non-AUTO_REPAIR finding defensively', async
   const repair = makeRepair(parent, invalidReport);
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: invalidReport,
       repair,
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'FINDING_NOT_AUTO_REPAIR'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
 });
 
@@ -229,7 +234,7 @@ test('repair expectedBefore mismatch is rejected', async () => {
   });
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
@@ -254,145 +259,55 @@ test('overlapping repair targets are rejected', async () => {
   });
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'OVERLAPPING_REPAIR_TARGETS'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
 });
 
-test('JSON Pointer rejects invalid tilde escapes and leading-zero array indices', () => {
-  const parent = {
-    schemaVersion: '0.2',
-    proposalId: 'MAP001-PROP-0001',
-    proposalType: 'MAP001_LOCAL_NAVIGATION_DERIVED',
-    control: {
-      owner: 'RESOLVER',
-      runId: 'MAP001-RUN-0001',
-      iteration: 1,
-      lineage: { parentProposal: null, originatingRepair: null },
-      baseline: {
-        authorityId: 'MAP-001-WALKABLE-ENVELOPE-AUTHORITY-001',
-        authorityPath: DEFAULT_AUTHORITY_PATH,
-        authorityManifestSha256: 'a'.repeat(64),
-        sourceCandidate: {
-          id: 'MAP-001-WALKABLE-ENVELOPE-CANDIDATE-001',
-          path: 'data/maps/map-001-walkable-envelope-candidate-001.json',
-          sha256: 'b'.repeat(64),
-        },
-      },
-      subject: {
-        mode: 'CREATE_DERIVED',
-        artifactRole: 'NON_AUTHORITATIVE_DERIVED',
-        artifactId: 'X',
-        artifactPath: 'build/proposal-resolution/x.json',
-        baseSha256: null,
-      },
-    },
-    intent: {
-      objective: 'Pointer test',
-      changes: [{
-        changeId: 'CHG-001',
-        operation: 'add',
-        targetPath: '/arr',
-        after: [1],
-        rationale: 'fixture',
-      }],
-      candidate: { arr: [1] },
-    },
-  };
-  const report = {
-    schemaVersion: '0.1',
-    reportId: 'MAP001-VAL-0001',
-    reportType: 'MAP001_LOCAL_NAVIGATION_VALIDATION',
-    control: {
-      owner: 'RESOLVER',
-      runId: parent.control.runId,
-      proposalBinding: {
-        proposalId: parent.proposalId,
-        sha256: logicalSha256(parent),
-        iteration: 1,
-      },
-      authorityBinding: {
-        authorityId: parent.control.baseline.authorityId,
-        authorityManifestSha256: parent.control.baseline.authorityManifestSha256,
-        sourceCandidate: {
-          id: parent.control.baseline.sourceCandidate.id,
-          sha256: parent.control.baseline.sourceCandidate.sha256,
-        },
-      },
-      validatorBinding,
-    },
-    status: 'REJECT_FIXABLE',
-    findings: [{
-      findingId: 'FND-001',
-      disposition: 'AUTO_REPAIR',
-      code: 'TEST.AUTO',
-      message: 'test',
-      sourceRefs: [DEFAULT_AUTHORITY_PATH],
-      targetPaths: ['/arr'],
-      repairDirective: { minimalChangeRequired: true },
-    }],
-  };
-
-  const make = (targetPath) => ({
-    schemaVersion: '0.1',
-    repairId: 'MAP001-REPAIR-0001',
-    repairType: 'MAP001_LOCAL_NAVIGATION_AUTO_REPAIR',
-    control: {
-      owner: 'RESOLVER',
-      runId: parent.control.runId,
-      parentProposal: {
-        proposalId: parent.proposalId,
-        sha256: logicalSha256(parent),
-        iteration: 1,
-      },
-      validationBasis: {
-        reportId: report.reportId,
-        sha256: logicalSha256(report),
-        status: 'REJECT_FIXABLE',
-      },
-      patchPolicy: {
-        pathScope: 'PARENT_PROPOSAL_INTENT_CANDIDATE',
-        authorityMode: 'CONFORM_TO_EXISTING_AUTHORITY',
-        mutationClass: 'AUTO_REPAIR_ONLY',
-      },
-    },
-    patch: {
-      operations: [{
-        editId: 'EDIT-001',
-        operation: 'replace',
-        targetPath,
-        findingRefs: ['FND-001'],
-        expectedBefore: 1,
-        after: 2,
-        rationale: 'negative pointer fixture',
-      }],
-    },
-  });
-
-  assert.throws(
-    () => validateAndApplyMap001Repair({
-      parentProposal: parent,
-      validationReport: report,
-      repair: make('/arr/~2'),
-      childProposalId: 'MAP001-PROP-0002',
-    }),
-    (error) => error.code === 'POINTER_ESCAPE_INVALID'
+test('public E5.1 gate rejects invalid tilde escapes and leading-zero array indices', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const scopedReport = retargetSingleFinding(
+    report,
+    parent,
+    ['/derivedRaster/walkableCells']
   );
 
+  const badEscape = makeRepair(parent, scopedReport, {
+    targetPath: '/derivedRaster/walkableCells/~2',
+    expectedBefore: 0,
+    after: 1,
+  });
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
-      validationReport: report,
-      repair: make('/arr/01'),
+      validationReport: scopedReport,
+      repair: badEscape,
       childProposalId: 'MAP001-PROP-0002',
     }),
-    (error) => error.code === 'ARRAY_INDEX_INVALID'
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
+  );
+
+  const leadingZero = makeRepair(parent, scopedReport, {
+    targetPath: '/derivedRaster/walkableCells/01',
+    expectedBefore: 0,
+    after: 1,
+  });
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: parent,
+      validationReport: scopedReport,
+      repair: leadingZero,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'ARRAY_INDEX_INVALID'
   );
 });
 
@@ -416,134 +331,37 @@ test('every cited finding must authorize the repair target', async () => {
   ];
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: reportWithTwo,
       repair,
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'REPAIR_TARGET_OUTSIDE_FINDING_SCOPE'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
 });
 
-test('expectedBefore object equality is independent of object key order', () => {
-  const parent = {
-    schemaVersion: '0.2',
-    proposalId: 'MAP001-PROP-0001',
-    proposalType: 'MAP001_LOCAL_NAVIGATION_DERIVED',
-    control: {
-      owner: 'RESOLVER',
-      runId: 'MAP001-RUN-0001',
-      iteration: 1,
-      lineage: { parentProposal: null, originatingRepair: null },
-      baseline: {
-        authorityId: 'MAP-001-WALKABLE-ENVELOPE-AUTHORITY-001',
-        authorityPath: DEFAULT_AUTHORITY_PATH,
-        authorityManifestSha256: 'a'.repeat(64),
-        sourceCandidate: {
-          id: 'MAP-001-WALKABLE-ENVELOPE-CANDIDATE-001',
-          path: 'data/maps/map-001-walkable-envelope-candidate-001.json',
-          sha256: 'b'.repeat(64),
-        },
-      },
-      subject: {
-        mode: 'CREATE_DERIVED',
-        artifactRole: 'NON_AUTHORITATIVE_DERIVED',
-        artifactId: 'ORDER',
-        artifactPath: 'build/proposal-resolution/order.json',
-        baseSha256: null,
-      },
-    },
-    intent: {
-      objective: 'Object equality order test',
-      changes: [{
-        changeId: 'CHG-001',
-        operation: 'add',
-        targetPath: '/obj',
-        after: { a: 1, b: 2 },
-        rationale: 'fixture',
-      }],
-      candidate: { obj: { a: 1, b: 2 } },
-    },
-  };
-  const report = {
-    schemaVersion: '0.1',
-    reportId: 'MAP001-VAL-0001',
-    reportType: 'MAP001_LOCAL_NAVIGATION_VALIDATION',
-    control: {
-      owner: 'RESOLVER',
-      runId: parent.control.runId,
-      proposalBinding: {
-        proposalId: parent.proposalId,
-        sha256: logicalSha256(parent),
-        iteration: 1,
-      },
-      authorityBinding: {
-        authorityId: parent.control.baseline.authorityId,
-        authorityManifestSha256: parent.control.baseline.authorityManifestSha256,
-        sourceCandidate: {
-          id: parent.control.baseline.sourceCandidate.id,
-          sha256: parent.control.baseline.sourceCandidate.sha256,
-        },
-      },
-      validatorBinding,
-    },
-    status: 'REJECT_FIXABLE',
-    findings: [{
-      findingId: 'FND-001',
-      disposition: 'AUTO_REPAIR',
-      code: 'TEST.OBJECT_ORDER',
-      message: 'test',
-      sourceRefs: [DEFAULT_AUTHORITY_PATH],
-      targetPaths: ['/obj'],
-      repairDirective: { minimalChangeRequired: true },
-    }],
-  };
-  const repair = {
-    schemaVersion: '0.1',
-    repairId: 'MAP001-REPAIR-0001',
-    repairType: 'MAP001_LOCAL_NAVIGATION_AUTO_REPAIR',
-    control: {
-      owner: 'RESOLVER',
-      runId: parent.control.runId,
-      parentProposal: {
-        proposalId: parent.proposalId,
-        sha256: logicalSha256(parent),
-        iteration: 1,
-      },
-      validationBasis: {
-        reportId: report.reportId,
-        sha256: logicalSha256(report),
-        status: 'REJECT_FIXABLE',
-      },
-      patchPolicy: {
-        pathScope: 'PARENT_PROPOSAL_INTENT_CANDIDATE',
-        authorityMode: 'CONFORM_TO_EXISTING_AUTHORITY',
-        mutationClass: 'AUTO_REPAIR_ONLY',
-      },
-    },
-    patch: {
-      operations: [{
-        editId: 'EDIT-001',
-        operation: 'replace',
-        targetPath: '/obj',
-        findingRefs: ['FND-001'],
-        expectedBefore: { b: 2, a: 1 },
-        after: { a: 1, b: 3 },
-        rationale: 'same object semantics, different key insertion order',
-      }],
-    },
-  };
+test('expectedBefore object equality is independent of object key order', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const scopedReport = retargetSingleFinding(report, parent, ['/semantics']);
+  const original = parent.intent.candidate.semantics;
+  const reversed = Object.fromEntries(Object.entries(original).reverse());
+  const after = { ...structuredClone(original), i2OrderTestMarker: true };
+  const repair = makeRepair(parent, scopedReport, {
+    targetPath: '/semantics',
+    expectedBefore: reversed,
+    after,
+  });
 
-  const result = validateAndApplyMap001Repair({
+  const result = runRepairGate({
     parentProposal: parent,
-    validationReport: report,
+    validationReport: scopedReport,
     repair,
     childProposalId: 'MAP001-PROP-0002',
   });
 
-  assert.deepEqual(result.childProposal.intent.candidate.obj, { a: 1, b: 3 });
+  assert.deepEqual(result.childProposal.intent.candidate.semantics, after);
 });
 
 
@@ -608,7 +426,7 @@ test('child proposal id cannot reuse parent proposal id', async () => {
   const repair = makeRepair(parent, report);
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
@@ -634,13 +452,291 @@ test('duplicate editId values are rejected', async () => {
   });
 
   assert.throws(
-    () => validateAndApplyMap001Repair({
+    () => runRepairGate({
       parentProposal: parent,
       validationReport: report,
       repair,
       childProposalId: 'MAP001-PROP-0002',
     }),
     (error) => error instanceof Map001RepairGateError
-      && error.code === 'DUPLICATE_EDIT_ID'
+      && error.code === 'REPAIR_CONTRACT_PRECONDITION_FAILED'
   );
+});
+
+
+function ownProtoJson(value = { polluted: true }) {
+  return JSON.parse('{"__proto__":' + JSON.stringify(value) + '}');
+}
+
+function retargetSingleFinding(report, parent, targetPaths) {
+  const next = structuredClone(report);
+  next.control.proposalBinding.sha256 = logicalSha256(parent);
+  next.findings[0].targetPaths = targetPaths;
+  return next;
+}
+
+test('E5.1 module exposes only the normalized executable repair entrypoint', async () => {
+  const module = await import('./map001_repair_gate_r1.mjs');
+  assert.equal(typeof module.executeMap001RepairGate, 'function');
+  assert.equal(Object.hasOwn(module, 'validateAndApplyMap001Repair'), false);
+});
+
+test('decoded __proto__ repair target fails closed without prototype mutation', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const scopedReport = retargetSingleFinding(report, parent, ['/__proto__']);
+  const repair = makeRepair(parent, scopedReport, {
+    operation: 'add',
+    targetPath: '/__proto__',
+    after: { polluted: true },
+  });
+  delete repair.patch.operations[0].expectedBefore;
+
+  assert.equal({}.polluted, undefined);
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: parent,
+      validationReport: scopedReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'PROTOTYPE_SENSITIVE_POINTER_TOKEN'
+  );
+  assert.equal({}.polluted, undefined);
+});
+
+test('nested decoded __proto__ repair target fails closed', async () => {
+  const { parent, report } = await makeFixableFixture();
+  parent.intent.candidate.obj = {};
+  const scopedReport = retargetSingleFinding(report, parent, ['/obj']);
+  const repair = makeRepair(parent, scopedReport, {
+    operation: 'add',
+    targetPath: '/obj/__proto__',
+    after: { polluted: true },
+  });
+  delete repair.patch.operations[0].expectedBefore;
+
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: parent,
+      validationReport: scopedReport,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'PROTOTYPE_SENSITIVE_POINTER_TOKEN'
+  );
+  assert.equal({}.polluted, undefined);
+});
+
+test('normalized repair content with own __proto__ key fails before legacy hash acceptance', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const repair = makeRepair(parent, report);
+  repair.patch.operations[0].after = ownProtoJson();
+
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: parent,
+      validationReport: report,
+      repair,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+  assert.equal({}.polluted, undefined);
+});
+
+test('normalized parent and report content with own __proto__ key fail closed', async () => {
+  const fixtureA = await makeFixableFixture();
+  Object.defineProperty(fixtureA.parent.intent.candidate, '__proto__', {
+    value: { polluted: true },
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+  const reportA = retargetSingleFinding(
+    fixtureA.report,
+    fixtureA.parent,
+    fixtureA.report.findings[0].targetPaths
+  );
+  const repairA = makeRepair(fixtureA.parent, reportA);
+
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureA.parent,
+      validationReport: reportA,
+      repair: repairA,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+
+  const fixtureB = await makeFixableFixture();
+  Object.defineProperty(fixtureB.report.findings[0], '__proto__', {
+    value: { polluted: true },
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+  const repairB = makeRepair(fixtureB.parent, fixtureB.report);
+
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureB.parent,
+      validationReport: fixtureB.report,
+      repair: repairB,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+  assert.equal({}.polluted, undefined);
+});
+
+test('unsafe __proto__ key is rejected in expectedBefore, arrays, and multi-operation repairs', async () => {
+  const fixtureA = await makeFixableFixture();
+  const repairA = makeRepair(fixtureA.parent, fixtureA.report);
+  repairA.patch.operations[0].expectedBefore = ownProtoJson();
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureA.parent,
+      validationReport: fixtureA.report,
+      repair: repairA,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+
+  const fixtureB = await makeFixableFixture();
+  const repairB = makeRepair(fixtureB.parent, fixtureB.report);
+  repairB.patch.operations[0].after = [ownProtoJson()];
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureB.parent,
+      validationReport: fixtureB.report,
+      repair: repairB,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+
+  const fixtureC = await makeFixableFixture();
+  const repairC = makeRepair(fixtureC.parent, fixtureC.report);
+  repairC.patch.operations.push({
+    editId: 'EDIT-002',
+    operation: 'add',
+    targetPath: '/not-authorized-but-never-reached',
+    findingRefs: [fixtureC.report.findings[0].findingId],
+    after: ownProtoJson(),
+    rationale: 'Adversarial second operation contains unsafe legacy-hash key.',
+  });
+  assert.throws(
+    () => runRepairGate({
+      parentProposal: fixtureC.parent,
+      validationReport: fixtureC.report,
+      repair: repairC,
+      childProposalId: 'MAP001-PROP-0002',
+    }),
+    (error) => error instanceof Map001RepairGateError
+      && error.code === 'LEGACY_HASH_UNSAFE_JSON_KEY'
+  );
+
+  assert.equal({}.polluted, undefined);
+});
+
+test('ordinary constructor and prototype keys are not rejected by name alone', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const scopedReport = retargetSingleFinding(
+    report,
+    parent,
+    ['/constructor', '/prototype', '/__proto___']
+  );
+  const repair = makeRepair(parent, scopedReport, {
+    operation: 'add',
+    targetPath: '/constructor',
+    after: 'ordinary-data',
+  });
+  delete repair.patch.operations[0].expectedBefore;
+  repair.patch.operations.push({
+    editId: 'EDIT-002',
+    operation: 'add',
+    targetPath: '/prototype',
+    findingRefs: [scopedReport.findings[0].findingId],
+    after: 'ordinary-data-2',
+    rationale: 'Ordinary JSON key must not be blocked by nominal blacklist.',
+  });
+  repair.patch.operations.push({
+    editId: 'EDIT-003',
+    operation: 'add',
+    targetPath: '/__proto___',
+    findingRefs: [scopedReport.findings[0].findingId],
+    after: 'nearby-safe-key',
+    rationale: 'Nearby key must not be blocked by exact __proto__ policy.',
+  });
+
+  const result = runRepairGate({
+    parentProposal: parent,
+    validationReport: scopedReport,
+    repair,
+    childProposalId: 'MAP001-PROP-0002',
+  });
+
+  assert.equal(result.childProposal.intent.candidate.constructor, 'ordinary-data');
+  assert.equal(result.childProposal.intent.candidate.prototype, 'ordinary-data-2');
+  assert.equal(result.childProposal.intent.candidate.__proto___, 'nearby-safe-key');
+  const descriptor = Object.getOwnPropertyDescriptor(
+    result.childProposal.intent.candidate,
+    'constructor'
+  );
+  assert.deepEqual(
+    {
+      enumerable: descriptor.enumerable,
+      writable: descriptor.writable,
+      configurable: descriptor.configurable,
+    },
+    { enumerable: true, writable: true, configurable: true }
+  );
+});
+
+test('Python E5.1 contract checker rejects own __proto__ key in parsed JSON', async () => {
+  const { parent, report } = await makeFixableFixture();
+  const repair = makeRepair(parent, report);
+  Object.defineProperty(repair, '__proto__', {
+    value: { polluted: true },
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'map001-i2-python-'));
+  try {
+    const parentPath = path.join(dir, 'parent.json');
+    const reportPath = path.join(dir, 'report.json');
+    const repairPath = path.join(dir, 'repair.json');
+    fs.writeFileSync(parentPath, JSON.stringify(parent));
+    fs.writeFileSync(reportPath, JSON.stringify(report));
+    fs.writeFileSync(repairPath, JSON.stringify(repair));
+
+    const proc = spawnSync('python', [
+      path.join(ROOT, 'tools/proposal-resolution/validate_e5_repair_contracts.py'),
+      '--phase', 'pre',
+      '--parent', parentPath,
+      '--report', reportPath,
+      '--repair', repairPath,
+      '--parent-sha', logicalSha256(parent),
+      '--report-sha', logicalSha256(report),
+    ], {
+      cwd: ROOT,
+      encoding: 'utf8',
+    });
+
+    assert.notEqual(proc.status, 0);
+    assert.match(proc.stderr, /LEGACY_HASH_UNSAFE_JSON_KEY/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
